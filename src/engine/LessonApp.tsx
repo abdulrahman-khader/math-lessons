@@ -8,7 +8,7 @@ import type { Lesson, SectionKey, SlideDef } from './types';
 import { Home } from './components/Home';
 import { Pen } from './components/Pen';
 import { RemotePanel } from './components/RemotePanel';
-import { deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
+import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
 import { TIMER_OFF, TimerWidget, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
 import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTeacher, IconTimer, IconWheel } from './components/icons';
@@ -225,6 +225,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       const info = slideApis.current[cur]?.info() ?? { shown: 0, total: 0 };
       const sl = slides[cur];
       const state: RemoteState = {
+        v: BUILD,
         lesson: `${lesson.meta.shortTitle} ${lesson.meta.code}`,
         cur,
         total: slides.length,

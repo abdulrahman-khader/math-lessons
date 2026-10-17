@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+/** رقم البناء: يقارن به الجوال والآيباد نسختيهما في التحكم من الجوال */
+const BUILD = String(Date.now());
 
 /** خطوط Fontsource تضم woff2 وwoff احتياطيًا؛ كل المتصفحات المستهدفة تقرأ woff2، فنحذف woff ليصغر الملف المضمَّن */
 const woff2Only = {
@@ -26,6 +28,7 @@ export function lessonConfig(lessonDir, outDir) {
     root,
     configFile: false,
     plugins: [woff2Only, react(), viteSingleFile()],
+    define: { __BUILD__: JSON.stringify(BUILD) },
     resolve: {
       alias: {
         '@engine': path.join(root, 'src/engine'),

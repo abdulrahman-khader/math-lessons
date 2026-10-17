@@ -10,10 +10,12 @@ const KEY = 'remote:channel';
 const ON_KEY = 'remote:on';
 /** رابط الدروس المنشور: يُستعمل في رمز QR حين يُفتح الدرس من ملف محفوظ لا من الموقع */
 export const PUBLIC_BASE = 'https://abdulrahman-khader.github.io/math-lessons/';
+/** نسخة هذا الملف. GitHub Pages يسمح للمتصفح بإبقاء نسخة قديمة ١٠ دقائق، فيتحقق الجهازان من تطابق نسختيهما */
+export const BUILD = __BUILD__;
 
 /** أمر من الجوال إلى الآيباد */
 export type RemoteCmd =
-  | { c: 'hello' }
+  | { c: 'hello'; v?: string }
   | { c: 'next' } // يُظهر الخطوة التالية، وإن لم تبقَ خطوات ينتقل إلى الشريحة التالية
   | { c: 'prev' }
   | { c: 'goto'; i: number }
@@ -57,6 +59,8 @@ export interface RemoteChart {
 
 /** حالة الآيباد كما يعرضها الجوال */
 export interface RemoteState {
+  /** نسخة الآيباد */
+  v?: string;
   lesson: string;
   cur: number;
   total: number;
@@ -118,8 +122,9 @@ export const setRemoteEnabled = (on: boolean) => {
 
 /** الرابط الذي يفتحه الجوال بعد مسح الرمز */
 export function remoteUrl(channel: string, lessonId: string) {
-  const here = /^https?:$/.test(location.protocol) ? location.href.split('#')[0] : `${PUBLIC_BASE}${lessonId}.html`;
-  return `${here}#remote=${channel}`;
+  // ?v= يجبر الجوال على تحميل النسخة الحالية لا نسخة محفوظة
+  const here = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : `${PUBLIC_BASE}${lessonId}.html`;
+  return `${here}?v=${BUILD}#remote=${channel}`;
 }
 
 /** قناة الجوال من الرابط، إن كان هذا جهاز التحكم */

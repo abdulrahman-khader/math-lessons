@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { clock, duration, num } from './digits';
 import { PRESETS } from './components/Timer';
-import { remoteLink, type RemoteCmd, type RemoteState } from './remote';
+import { BUILD, remoteLink, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
 
@@ -48,16 +48,35 @@ export function RemoteApp({ channel }: { channel: string }) {
   const [waiting, setWaiting] = useState(false);
   const linkRef = useRef<ReturnType<typeof remoteLink> | null>(null);
   const gotState = useRef(false);
+  /** الآيباد يعرض نسخة أقدم من الجوال */
+  const [ipadOld, setIpadOld] = useState(false);
+  const [phoneOld, setPhoneOld] = useState(false);
 
   useEffect(() => {
     document.title = 'التحكم بالدرس';
     document.body.classList.add('remote-body');
     const link = remoteLink(
       channel,
-      (s) => {
+      (raw) => {
         gotState.current = true;
         setWaiting(false);
-        setSt(s);
+        const v = raw.v ?? '0';
+        if (Number(v) > Number(BUILD)) {
+          // الجوال أقدم: يعيد التحميل مرة واحدة بالنسخة الجديدة متجاوزًا ما حفظه المتصفح
+          const key = `remote:reload:${v}`;
+          let tried = false;
+          try {
+            tried = sessionStorage.getItem(key) === '1';
+            sessionStorage.setItem(key, '1');
+          } catch {
+            /* تجاهل */
+          }
+          if (!tried) return location.replace(`${location.origin}${location.pathname}?v=${v}#remote=${channel}`);
+          setPhoneOld(true);
+        }
+        setIpadOld(Number(v) < Number(BUILD));
+        // حالة من نسخة أقدم قد تنقصها حقول: قيم افتراضية بدل أن تتعطل الشاشة
+        setSt({ ...raw, mcqs: raw.mcqs ?? [], chart: raw.chart ?? null, timer: raw.timer ?? { show: false, run: false, left: 0 } });
         setStAt(Date.now());
       },
       setOnline,
@@ -70,7 +89,7 @@ export function RemoteApp({ channel }: { channel: string }) {
   useEffect(() => {
     if (!online) return;
     gotState.current = false;
-    const hello = () => linkRef.current?.send({ c: 'hello' });
+    const hello = () => linkRef.current?.send({ c: 'hello', v: BUILD });
     hello();
     const wait = setTimeout(() => !gotState.current && setWaiting(true), 4000);
     const iv = setInterval(() => !gotState.current && hello(), 5000);
@@ -103,6 +122,9 @@ export function RemoteApp({ channel }: { channel: string }) {
         <b>{st?.lesson ?? 'التحكم بالدرس'}</b>
         <span className={'dot' + (online && st ? ' ok' : '')}>{status}</span>
       </header>
+
+      {ipadOld && <p className="rwarn">الدرس على الآيباد نسخة قديمة: أغلق صفحة الدرس على الآيباد وافتحها من جديد لتظهر كل الأزرار.</p>}
+      {phoneOld && <p className="rwarn">هذه الصفحة نسخة قديمة: أغلقها وامسح الرمز من جديد.</p>}
 
       {st && (
         <>

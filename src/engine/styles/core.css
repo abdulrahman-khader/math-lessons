@@ -373,3 +373,4 @@ body.remote-body { background: var(--bg); height: auto; min-height: 100%; }
 .rclock.end { color: var(--hl); }
 .rpresets { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); gap: .4rem; }
 .rpresets .rbtn { min-height: 2.8rem; font-size: .95rem; padding: .2rem; }
+.rwarn { margin: 0; background: var(--warn-t); border: 2px solid var(--warn); color: #5a2203; border-radius: .7rem; padding: .6rem .8rem; font-weight: 800; line-height: 1.7; }

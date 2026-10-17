@@ -455,6 +455,13 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   document.addEventListener('visibilitychange', wake);
   window.addEventListener('online', wake);
   window.addEventListener('pageshow', wake);
+  /* عند إغلاق الصفحة أو إعادة تحميلها: يُحرَّر معرّف الآيباد في PeerJS فورًا.
+   * بدون هذا قد يبقى محجوزًا للصفحة المغلقة حتى دقيقة، فلا تستطيع الصفحة الجديدة أخذه ولا يجدها الجوال */
+  const leave = () => {
+    conn?.close();
+    peer?.destroy();
+  };
+  window.addEventListener('pagehide', leave);
 
   /* نبض الجوال كل ٣ ثوانٍ: قناة لا ترد ٨ ثوانٍ تُعدّ ميتة، فتُغلق ويُعاد الاتصال فورًا */
   const beat = setInterval(() => {
@@ -498,6 +505,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
       document.removeEventListener('visibilitychange', wake);
       window.removeEventListener('online', wake);
       window.removeEventListener('pageshow', wake);
+      window.removeEventListener('pagehide', leave);
       stopRelay();
       conn?.close();
       peer?.destroy();

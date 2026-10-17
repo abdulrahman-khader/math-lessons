@@ -24,6 +24,7 @@ lessons/g4/ch3/3-4-line-graphs/
   lesson.tsx           defineLesson({ meta, sectionDesc, slides })
   charts.ts            defineChart(...) data, validated when the lesson loads
 tests/lesson.spec.ts   runs against every dist/*.html
+tests/remote.spec.ts   phone remote end to end (iPad + phone contexts) over tests/relay.ts
 ```
 
 ## Writing a lesson
@@ -47,6 +48,10 @@ tests/lesson.spec.ts   runs against every dist/*.html
 - **Canvas text** sets `ctx.direction = 'rtl'` explicitly (see Wheel).
 - **Keyboard**: ← next, → previous. Directional icons (`IconPrevRtl`/`IconNextRtl`) are drawn for RTL.
 - **New libraries**: before adding one, check whether it renders text, assumes LTR for layout, keyboard or animation, or formats numbers. If it does any of these and can't be configured, wrap it or build the piece ourselves.
+
+## Phone remote
+
+`src/engine/remote.ts`: the phone and iPad talk over a direct WebRTC data channel; ntfy.sh is only used for the handshake (about 2 messages) and as a fallback. Anonymous ntfy.sh allows **250 messages per day per IP**, and the teacher's devices may share this machine's IP, so never test against ntfy.sh in loops. Tests point `localStorage['remote:relay']` at the local relay in `tests/relay.ts`.
 
 ## Done means
 

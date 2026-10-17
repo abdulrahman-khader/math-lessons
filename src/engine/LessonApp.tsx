@@ -50,6 +50,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [remoteOn, setRemoteOn] = useState(remoteEnabled);
   const [channel, setChannel] = useState(() => deviceChannel());
   const [online, setOnline] = useState(false);
+  /** قناة مباشرة مع الجوال مفتوحة (بلا حد للرسائل) */
+  const [direct, setDirect] = useState(false);
+  const [limited, setLimited] = useState(false);
   const [phoneSeen, setPhoneSeen] = useState(false);
   const [wheelResult, setWheelResult] = useState('');
   const [spinReq, setSpinReq] = useState(0);
@@ -203,12 +206,21 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
 
   useEffect(() => {
     if (!remoteOn) return;
-    const link = hostLink(channel, (c) => onCmdRef.current(c), setOnline);
+    const link = hostLink(
+      channel,
+      (c) => onCmdRef.current(c),
+      (s) => {
+        setOnline(s.relay || s.direct);
+        setDirect(s.direct);
+        setLimited(s.limited);
+      },
+    );
     linkRef.current = link;
     return () => {
       link.stop();
       linkRef.current = null;
       setOnline(false);
+      setDirect(false);
       setPhoneSeen(false);
     };
   }, [remoteOn, channel]);
@@ -248,9 +260,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       const size = () => new Blob([JSON.stringify({ state })]).size;
       while (size() > 3800 && state.notes.length > 40) state.notes = state.notes.slice(0, Math.floor(state.notes.length * 0.7)) + '…';
       linkRef.current?.send(state);
-    }, 250);
+      // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
+    }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.teacher, wheelOpen, wheelResult, slides, sections, lesson]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.teacher, wheelOpen, wheelResult, slides, sections, lesson]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -479,6 +492,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             onClose={() => setRemotePanel(false)}
             enabled={remoteOn}
             online={online}
+            direct={direct}
+            limited={limited}
             phoneSeen={phoneSeen}
             url={remoteUrl(channel, lesson.meta.id)}
             onEnable={enableRemote}

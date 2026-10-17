@@ -26,6 +26,10 @@ interface Props {
   enabled: boolean;
   /** الاتصال بخادم الرسائل قائم */
   online: boolean;
+  /** اتصال مباشر مع الجوال */
+  direct: boolean;
+  /** خادم الربط رفض النشر لانتهاء الحصة اليومية */
+  limited: boolean;
   /** وصلت رسالة من الجوال مؤخرًا */
   phoneSeen: boolean;
   url: string;
@@ -34,9 +38,9 @@ interface Props {
 }
 
 /** نافذة ربط الجوال بالآيباد */
-export function RemotePanel({ open, onClose, enabled, online, phoneSeen, url, onEnable, onNewCode }: Props) {
+export function RemotePanel({ open, onClose, enabled, online, direct, limited, phoneSeen, url, onEnable, onNewCode }: Props) {
   if (!open) return null;
-  const status = !enabled ? 'التحكم من الجوال متوقف' : !online ? 'جارٍ الاتصال… تأكد من الإنترنت' : phoneSeen ? 'الجوال متصل ✓' : 'جاهز: امسح الرمز بكاميرا الجوال';
+  const status = !enabled ? 'التحكم من الجوال متوقف' : !online ? 'جارٍ الاتصال… تأكد من الإنترنت' : direct ? 'الجوال متصل مباشرة ✓' : phoneSeen ? 'الجوال متصل عبر الخادم' : 'جاهز: امسح الرمز بكاميرا الجوال';
   return (
     <div className="modal show" role="dialog" aria-label="التحكم من الجوال" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="mbox rpanel">
@@ -44,10 +48,11 @@ export function RemotePanel({ open, onClose, enabled, online, phoneSeen, url, on
         <div className="wside">
           <h3>التحكم من الجوال</h3>
           <p className={'rstat' + (enabled && online ? (phoneSeen ? ' ok' : ' wait') : '')}>{status}</p>
+          {limited && !direct && <p className="rstat bad">خادم الربط وصل حدّه اليومي على هذه الشبكة. جرّب شبكة إنترنت أخرى للجوال أو الآيباد، أو حاول غدًا.</p>}
           <ol>
             <li>افتح كاميرا الجوال وامسح الرمز.</li>
             <li>افتح الرابط: يظهر على الجوال أزرار التالي والسابق والعجلة والنقاط، وملاحظات المعلم.</li>
-            <li>يحتاج الآيباد والجوال إلى الإنترنت.</li>
+            <li>يحتاج الآيباد والجوال إلى الإنترنت، والأفضل أن يكونا على شبكة الواي فاي نفسها.</li>
           </ol>
           {enabled ? (
             <>

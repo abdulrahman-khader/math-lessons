@@ -1,11 +1,21 @@
 /*
  * التحكم بالدرس من الجوال.
- * الآيباد والجوال لا يتصلان مباشرة: يتبادلان رسائل صغيرة عبر خدمة ntfy.sh العامة (HTTPS فقط، فتمر من شبكات المدارس).
- * لكل آيباد «قناة» عشوائية سرية محفوظة في المتصفح: الجوال يرسل الأوامر إلى <قناة>-c، والآيباد يرسل حالته إلى <قناة>-s.
- * الرسائل لا تُخزَّن على الخادم (cache=no)، ولا تحمل إلا رقم الشريحة وعنوانها والملاحظات والنقاط.
+ * الجوال والآيباد يتصلان مباشرة (WebRTC DataChannel)، فلا حدّ لعدد الرسائل.
+ * خدمة ntfy.sh العامة لا تُستعمل إلا للتعارف (رسالتان لكل اتصال)، وبديلًا إن تعذّر الاتصال المباشر:
+ * ntfy.sh المجانية تسمح بـ٢٥٠ رسالة يوميًا لكل شبكة، فلا تكفي وحدها لحصة كاملة.
+ * لكل آيباد «قناة» عشوائية سرية محفوظة في المتصفح: ما يصل الآيباد على <قناة>-c، وما يصل الجوال على <قناة>-s.
+ * رسائل الخادم لا تُخزَّن عليه (cache=no)، ولا تحمل إلا رقم الشريحة وعنوانها والملاحظات والنقاط.
  */
 
-const RELAY = 'https://ntfy.sh/';
+/** خادم الرسائل؛ تغيّره الاختبارات إلى خادم محلي عبر localStorage لئلا تستهلك حصة ntfy.sh */
+const RELAY = (() => {
+  try {
+    return localStorage.getItem('remote:relay') || 'https://ntfy.sh/';
+  } catch {
+    return 'https://ntfy.sh/';
+  }
+})();
+const ICE: RTCConfiguration = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }] };
 const KEY = 'remote:channel';
 const ON_KEY = 'remote:on';
 /** رابط الدروس المنشور: يُستعمل في رمز QR حين يُفتح الدرس من ملف محفوظ لا من الموقع */
@@ -81,7 +91,22 @@ export interface RemoteState {
   timer: { show: boolean; run: boolean; left: number };
 }
 
-type Envelope = { cmd: RemoteCmd } | { state: RemoteState };
+/** وصف اتصال WebRTC يُتبادل عبر الخادم */
+interface Sig {
+  kind: 'offer' | 'answer';
+  sdp: string;
+  /** رقم المحاولة، ليتجاهل الجوال ردًّا على محاولة قديمة */
+  id: string;
+}
+type Envelope = { cmd: RemoteCmd } | { state: RemoteState } | { sig: Sig };
+
+/** حالة الاتصال: direct = قناة مباشرة مفتوحة، relay = الخادم متصل (للتعارف أو بديلًا) */
+export interface LinkStatus {
+  direct: boolean;
+  relay: boolean;
+  /** خادم الرسائل رفض النشر: انتهت الحصة اليومية لهذه الشبكة */
+  limited: boolean;
+}
 
 function storage(): Storage | null {
   try {
@@ -133,11 +158,12 @@ export function channelFromHash(): string | null {
   return m ? m[1] : null;
 }
 
+/** ينشر رسالة ويعيد رمز HTTP (٠ إن تعذّر الاتصال) */
 function publish(topic: string, body: Envelope) {
   // text/plain: طلب بسيط بلا preflight
   return fetch(`${RELAY}${topic}?cache=no&firebase=no`, { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'text/plain' } }).then(
-    (r) => r.ok,
-    () => false,
+    (r) => r.status,
+    () => 0,
   );
 }
 
@@ -157,14 +183,158 @@ function subscribe(topic: string, onMsg: (e: Envelope) => void, onOpen: (open: b
   return () => es.close();
 }
 
+/** ينتظر جمع عناوين الاتصال كلها (أو مهلة قصيرة) لنرسل الوصف في رسالة واحدة */
+function gathered(pc: RTCPeerConnection, ms = 2500) {
+  return new Promise<void>((done) => {
+    if (pc.iceGatheringState === 'complete') return done();
+    const t = setTimeout(done, ms);
+    pc.addEventListener('icegatheringstatechange', () => {
+      if (pc.iceGatheringState === 'complete') {
+        clearTimeout(t);
+        done();
+      }
+    });
+  });
+}
+
+/**
+ * طرف اتصال: الجوال يبدأ (offer)، والآيباد يجيب (answer).
+ * send يرسل عبر القناة المباشرة إن كانت مفتوحة، وإلا عبر الخادم.
+ */
+function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope) => void, onStatus: (s: LinkStatus) => void) {
+  const inbox = `${channel}-${role === 'host' ? 'c' : 's'}`;
+  const outbox = `${channel}-${role === 'host' ? 's' : 'c'}`;
+  const status: LinkStatus = { direct: false, relay: false, limited: false };
+  const report = () => onStatus({ ...status });
+  const post = (e: Envelope) =>
+    publish(outbox, e).then((code) => {
+      const limited = code === 429;
+      if (limited !== status.limited) {
+        status.limited = limited;
+        report();
+      }
+      return code >= 200 && code < 300;
+    });
+  let pc: RTCPeerConnection | null = null;
+  let dc: RTCDataChannel | null = null;
+  let attempt = '';
+  let retry: ReturnType<typeof setTimeout> | undefined;
+  let backoff = 15000;
+  let stopped = false;
+
+  const closePc = () => {
+    const old = pc;
+    pc = null;
+    dc = null;
+    try {
+      old?.close();
+    } catch {
+      /* تجاهل */
+    }
+  };
+  const useChannel = (ch: RTCDataChannel) => {
+    dc = ch;
+    ch.onopen = () => {
+      status.direct = true;
+      backoff = 15000;
+      report();
+    };
+    ch.onclose = () => {
+      if (dc !== ch) return;
+      status.direct = false;
+      report();
+      if (role === 'phone') schedule(3000);
+    };
+    ch.onmessage = (ev) => {
+      try {
+        onData(JSON.parse(ev.data));
+      } catch {
+        /* تجاهل */
+      }
+    };
+  };
+
+  /* الجوال: محاولة اتصال مباشر. إن لم تُفتح القناة خلال ١٠ ثوانٍ يُعاد بمهلة متزايدة؛ كل محاولة رسالة واحدة على الخادم */
+  const schedule = (ms: number) => {
+    clearTimeout(retry);
+    retry = setTimeout(() => void offer().catch(() => {}), ms);
+  };
+  const offer = async () => {
+    if (stopped || !status.relay || typeof RTCPeerConnection === 'undefined') return;
+    closePc();
+    const id = Math.random().toString(36).slice(2);
+    attempt = id;
+    const c = new RTCPeerConnection(ICE);
+    pc = c;
+    useChannel(c.createDataChannel('remote', { ordered: true }));
+    await c.setLocalDescription(await c.createOffer());
+    await gathered(c);
+    if (pc !== c || stopped) return;
+    post({ sig: { kind: 'offer', sdp: c.localDescription!.sdp, id } });
+    retry = setTimeout(() => {
+      if (!status.direct && pc === c) {
+        backoff = Math.min(backoff * 2, 300000);
+        schedule(backoff);
+      }
+    }, 10000);
+  };
+
+  /* الآيباد: يجيب كل عرض جديد، ويستبدل أي اتصال سابق */
+  const answer = async (sig: Sig) => {
+    closePc();
+    const c = new RTCPeerConnection(ICE);
+    pc = c;
+    c.ondatachannel = (e) => {
+      if (pc === c) useChannel(e.channel);
+    };
+    await c.setRemoteDescription({ type: 'offer', sdp: sig.sdp });
+    await c.setLocalDescription(await c.createAnswer());
+    await gathered(c);
+    if (pc !== c || stopped) return;
+    post({ sig: { kind: 'answer', sdp: c.localDescription!.sdp, id: sig.id } });
+  };
+
+  const stopRelay = subscribe(
+    inbox,
+    (e) => {
+      if (!('sig' in e)) return onData(e);
+      if (role === 'host' && e.sig.kind === 'offer') answer(e.sig).catch(() => {});
+      else if (role === 'phone' && e.sig.kind === 'answer' && e.sig.id === attempt && pc) pc.setRemoteDescription({ type: 'answer', sdp: e.sig.sdp }).catch(() => {});
+    },
+    (open) => {
+      const first = open && !status.relay;
+      status.relay = open;
+      report();
+      if (first && role === 'phone' && !status.direct) schedule(0);
+    },
+  );
+
+  return {
+    send: (e: Envelope) => {
+      if (dc?.readyState === 'open') {
+        dc.send(JSON.stringify(e));
+        return Promise.resolve(true);
+      }
+      return post(e);
+    },
+    direct: () => status.direct,
+    stop: () => {
+      stopped = true;
+      clearTimeout(retry);
+      stopRelay();
+      closePc();
+    },
+  };
+}
+
 /** جانب الآيباد: يستقبل الأوامر ويرسل الحالة */
-export function hostLink(channel: string, onCmd: (c: RemoteCmd) => void, onOpen: (open: boolean) => void) {
-  const stop = subscribe(`${channel}-c`, (e) => 'cmd' in e && onCmd(e.cmd), onOpen);
-  return { stop, send: (state: RemoteState) => publish(`${channel}-s`, { state }) };
+export function hostLink(channel: string, onCmd: (c: RemoteCmd) => void, onStatus: (s: LinkStatus) => void) {
+  const l = makeLink('host', channel, (e) => 'cmd' in e && onCmd(e.cmd), onStatus);
+  return { stop: l.stop, direct: l.direct, send: (state: RemoteState) => l.send({ state }) };
 }
 
 /** جانب الجوال: يرسل الأوامر ويستقبل الحالة */
-export function remoteLink(channel: string, onState: (s: RemoteState) => void, onOpen: (open: boolean) => void) {
-  const stop = subscribe(`${channel}-s`, (e) => 'state' in e && onState(e.state), onOpen);
-  return { stop, send: (cmd: RemoteCmd) => publish(`${channel}-c`, { cmd }) };
+export function remoteLink(channel: string, onState: (s: RemoteState) => void, onStatus: (s: LinkStatus) => void) {
+  const l = makeLink('phone', channel, (e) => 'state' in e && onState(e.state), onStatus);
+  return { stop: l.stop, direct: l.direct, send: (cmd: RemoteCmd) => l.send({ cmd }) };
 }

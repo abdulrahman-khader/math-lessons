@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { clock, duration, num } from './digits';
 import { PRESETS } from './components/Timer';
-import { BUILD, remoteLink, type RemoteCmd, type RemoteState } from './remote';
+import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
 
@@ -44,7 +44,8 @@ export function RemoteApp({ channel }: { channel: string }) {
   const [st, setSt] = useState<RemoteState | null>(null);
   /** وقت وصول آخر حالة، ليعدّ المؤقت منه */
   const [stAt, setStAt] = useState(0);
-  const [online, setOnline] = useState(false);
+  const [link, setLink] = useState<LinkStatus>({ direct: false, relay: false, limited: false });
+  const online = link.direct || link.relay;
   const [waiting, setWaiting] = useState(false);
   const linkRef = useRef<ReturnType<typeof remoteLink> | null>(null);
   const gotState = useRef(false);
@@ -79,28 +80,41 @@ export function RemoteApp({ channel }: { channel: string }) {
         setSt({ ...raw, mcqs: raw.mcqs ?? [], chart: raw.chart ?? null, timer: raw.timer ?? { show: false, run: false, left: 0 } });
         setStAt(Date.now());
       },
-      setOnline,
+      setLink,
     );
     linkRef.current = link;
     return () => link.stop();
   }, [channel]);
 
-  /* «مرحبًا» عند الاتصال وكل بضع ثوانٍ حتى يرد الآيباد، وعند العودة إلى الصفحة */
+  /*
+   * «مرحبًا» ليرسل الآيباد حالته. عبر القناة المباشرة فورًا ومجانًا.
+   * إن تعذّر الاتصال المباشر: عبر الخادم بعد ١٢ ثانية ثم كل ٣٠ ثانية فقط، حفاظًا على حصة الرسائل اليومية.
+   */
   useEffect(() => {
-    if (!online) return;
-    gotState.current = false;
+    if (!link.direct && !link.relay) return;
     const hello = () => linkRef.current?.send({ c: 'hello', v: BUILD });
-    hello();
-    const wait = setTimeout(() => !gotState.current && setWaiting(true), 4000);
-    const iv = setInterval(() => !gotState.current && hello(), 5000);
-    const vis = () => document.visibilityState === 'visible' && hello();
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let iv: ReturnType<typeof setInterval> | undefined;
+    if (link.direct) {
+      gotState.current = false;
+      hello();
+    } else {
+      timers.push(
+        setTimeout(() => {
+          if (!gotState.current) hello();
+          iv = setInterval(() => !gotState.current && hello(), 30000);
+        }, 12000),
+      );
+    }
+    timers.push(setTimeout(() => !gotState.current && setWaiting(true), link.direct ? 4000 : 16000));
+    const vis = () => document.visibilityState === 'visible' && link.direct && hello();
     document.addEventListener('visibilitychange', vis);
     return () => {
-      clearTimeout(wait);
+      timers.forEach(clearTimeout);
       clearInterval(iv);
       document.removeEventListener('visibilitychange', vis);
     };
-  }, [online]);
+  }, [link.direct, link.relay]);
 
   /* إبقاء شاشة الجوال مضاءة أثناء الحصة، حيث يدعمه المتصفح */
   const wake = useRef(false);
@@ -114,7 +128,7 @@ export function RemoteApp({ channel }: { channel: string }) {
 
   const [shown, total] = st?.steps ?? [0, 0];
   const moreSteps = shown < total;
-  const status = !online ? 'جارٍ الاتصال…' : !st ? (waiting ? 'افتح الدرس على الآيباد واضغط «الجوال» ثم «تشغيل»' : 'جارٍ البحث عن الآيباد…') : 'متصل بالآيباد';
+  const status = !online ? 'جارٍ الاتصال…' : !st ? (waiting ? 'افتح الدرس على الآيباد واضغط «الجوال» ثم «تشغيل»' : 'جارٍ البحث عن الآيباد…') : link.direct ? 'متصل مباشرة بالآيباد' : 'متصل عبر الخادم (أبطأ، وله حد يومي)';
 
   return (
     <div className="remote">
@@ -123,6 +137,9 @@ export function RemoteApp({ channel }: { channel: string }) {
         <span className={'dot' + (online && st ? ' ok' : '')}>{status}</span>
       </header>
 
+      {link.limited && !link.direct && (
+        <p className="rwarn">خادم الربط وصل حدّه اليومي على هذه الشبكة. جرّب أن يتصل الجوال بإنترنت الجوال (لا الواي فاي)، أو حاول غدًا.</p>
+      )}
       {ipadOld && <p className="rwarn">الدرس على الآيباد نسخة قديمة: أغلق صفحة الدرس على الآيباد وافتحها من جديد لتظهر كل الأزرار.</p>}
       {phoneOld && <p className="rwarn">هذه الصفحة نسخة قديمة: أغلقها وامسح الرمز من جديد.</p>}
 

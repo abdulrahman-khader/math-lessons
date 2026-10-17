@@ -1,0 +1,30 @@
+{
+  "name": "math-lessons",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint:css": "node scripts/check-css.mjs",
+    "shots": "node scripts/shots.mjs",
+    "test": "npm run typecheck && npm run lint:css && npm run build && playwright test"
+  },
+  "dependencies": {
+    "@fontsource/baloo-bhaijaan-2": "^5.3.0",
+    "@fontsource/tajawal": "^5.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.48",
+    "@types/node": "^22.20.5",
+    "@types/react": "18.3",
+    "@types/react-dom": "18.3",
+    "@vitejs/plugin-react": "4.3",
+    "typescript": "5.6",
+    "vite": "5.4",
+    "vite-plugin-singlefile": "2.0"
+  }
+}

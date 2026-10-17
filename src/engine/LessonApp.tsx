@@ -161,6 +161,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'back':
         if (!api?.unreveal()) goto(cur - 1);
         break;
+      case 'slide':
+        goto(cur + (c.d > 0 ? 1 : -1));
+        break;
       case 'goto':
         goto(c.i);
         break;

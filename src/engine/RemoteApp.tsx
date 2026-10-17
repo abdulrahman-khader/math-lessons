@@ -189,9 +189,6 @@ export function RemoteApp({ channel }: { channel: string }) {
           <section className="rcard now">
             <div className="rrow">
               <span className="rsec">{st.sec}</span>
-              <span className="pg">
-                {num(st.cur + 1)} / {num(st.total)}
-              </span>
             </div>
             <h1>{st.title || '—'}</h1>
           </section>
@@ -226,6 +223,24 @@ export function RemoteApp({ channel }: { channel: string }) {
             </button>
           </div>
           <p className="rhintnav">{moreSteps ? 'السهم الأيسر يُظهر الخطوة التالية' : 'السهم الأيسر ينتقل إلى الشريحة التالية'}</p>
+
+          {/* التنقل بين الشرائح مباشرة، دون المرور بالخطوات */}
+          <div className="rslides">
+            <button className="rbtn" aria-label="الشريحة السابقة" disabled={st.cur === 0} onClick={() => send({ c: 'slide', d: -1 })}>
+              <IconPrevRtl />
+              الشريحة السابقة
+            </button>
+            <span className="rcount">
+              <b>
+                {num(st.cur + 1)} / {num(st.total)}
+              </b>
+              <small>الشرائح</small>
+            </span>
+            <button className="rbtn" aria-label="الشريحة التالية" disabled={st.cur === st.total - 1} onClick={() => send({ c: 'slide', d: 1 })}>
+              الشريحة التالية
+              <IconNextRtl />
+            </button>
+          </div>
 
           {/* ملاحظات المعلم: لا تظهر على شاشة العرض، بل هنا فقط */}
           <section className="rcard notes">

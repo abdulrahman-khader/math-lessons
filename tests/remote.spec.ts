@@ -190,7 +190,7 @@ test('سهما الجوال: الخطوات أولًا ثم الشريحة ال�
   }
   expect(found).toBe(true);
   const slide = await activeIndex(ipad);
-  await expect(phone.locator('.rcount b')).toContainText('١ /');
+  await expect(phone.locator('.rnav .rcount b')).toContainText('١ /');
   // السهم الأيمن يُخفي الخطوة أولًا ويبقى في الشريحة
   await phone.locator('.rnav .prev').click();
   await expect(ipad.locator('section.slide.active .step.shown')).toHaveCount(0);
@@ -220,5 +220,24 @@ test('بعد إعادة فتح الدرس على الآيباد يعود الج�
   await expect(phone.locator('.rhead .dot')).toContainText('مباشرة', { timeout: 60000 });
   await phone.locator('.rnav .next').click();
   await expect.poll(() => activeIndex(ipad), { timeout: 15000 }).toBe('1');
+  expect(errors).toEqual([]);
+});
+
+test('زرّا الشرائح في الجوال يتجاوزان الخطوات', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  // أول شريحة فيها خطوات، ثم خطوة واحدة فقط منها
+  let found = false;
+  for (let k = 0; k < 12 && !found; k++) {
+    await phone.locator('.rnav .next').click();
+    await ipad.waitForTimeout(350);
+    found = (await ipad.locator('section.slide.active .step.shown').count()) > 0;
+  }
+  expect(found).toBe(true);
+  const at = Number(await activeIndex(ipad));
+  await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
+  await expect.poll(() => activeIndex(ipad)).toBe(String(at + 1));
+  await phone.locator('.rslides button[aria-label="الشريحة السابقة"]').click();
+  await phone.locator('.rslides button[aria-label="الشريحة السابقة"]').click();
+  await expect.poll(() => activeIndex(ipad)).toBe(String(at - 1));
   expect(errors).toEqual([]);
 });

@@ -30,7 +30,7 @@ tests/lesson.spec.ts   runs against every dist/*.html
 
 - Copy the closest existing lesson folder. Import everything from `'@engine'`.
 - Book questions use `<QuestionSlide source="تأكَّدْ · ص ٨٨" n={1} ... />`. Copy the question text **exactly** from the book, diacritics included. `meta.bookQuestions` must equal the number of questions in the book; a test checks that 1..N are all present, in order.
-- Solutions are `steps`. Each step can highlight parts of the chart with `hl` keys: `title`, `xaxis`, `yaxis`, `line`, `pts`, and per position `p{i}` (point/bar), `v{i}` (value badge), `x{i}` (x label), `g{i}` (vertical guide), `h{i}` (horizontal guide). Mark the answer `kind: 'ans'` and add one `kind: 'warn'` step for the most common mistake.
+- Solutions are `steps`. Each step can highlight parts of the chart with `hl` keys: `title`, `xaxis`, `yaxis`, `line`, `pts`, and per position `p{i}` (point/bar), `v{i}` (value badge), `x{i}` (x label), `g{i}` (vertical guide), `h{i}` (horizontal guide). Mark the answer `kind: 'ans'`. Do not add `kind: 'warn'` (common-mistake) steps; the teacher removed them.
 - `MCQ`: `answer` must be one of `options` verbatim. TypeScript rejects anything else.
 - Chart values come from the book or the teacher's guide. `defineChart` throws if a value is off the axis or label/value counts differ.
 - Verify every calculation by hand before writing it into a step.

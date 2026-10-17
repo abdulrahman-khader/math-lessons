@@ -91,6 +91,7 @@ export function ChartSvg({ spec: c, values, mode, ghost }: Props) {
   }
 
   const ghostY = Y((c.min + c.max) / 2);
+  const brkY = base - 30;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="cs" role="img" aria-label={c.title ?? 'تمثيل بالخطوط'}>
@@ -104,9 +105,17 @@ export function ChartSvg({ spec: c, values, mode, ghost }: Props) {
           {num(v)}
         </text>
       ))}
-      {c.brk && <path className="brk" d={`M${m.l - 10} ${base - 2} l10 -6 l-10 -6 l10 -6`} />}
       <line className={'ax' + on('xaxis')} x1={m.l} x2={m.l + pw} y1={base} y2={base} />
-      <line className={'ax' + on('yaxis')} x1={m.l} x2={m.l} y1={m.t} y2={base} />
+      {c.brk ? (
+        <>
+          {/* كسر المحور: سهمان متداخلان بدل الصفر، والمحور مقطوع خلفهما */}
+          <line className={'ax' + on('yaxis')} x1={m.l} x2={m.l} y1={m.t} y2={brkY - 10} />
+          <line className={'ax' + on('yaxis')} x1={m.l} x2={m.l} y1={brkY + 18} y2={base} />
+          <path className="brk" d={`M${m.l - 12} ${brkY + 4} L${m.l} ${brkY - 6} L${m.l + 12} ${brkY + 4} M${m.l - 12} ${brkY + 14} L${m.l} ${brkY + 4} L${m.l + 12} ${brkY + 14}`} />
+        </>
+      ) : (
+        <line className={'ax' + on('yaxis')} x1={m.l} x2={m.l} y1={m.t} y2={base} />
+      )}
       {c.labels.map((L, i) => (
         <text key={`xl${i}`} className={'xl' + on(`x${i}`) + on('xaxis')} x={X(i)} y={base + 30} textAnchor="middle" style={{ fontSize: c.xfs ?? 21 }}>
           {L}

@@ -107,7 +107,7 @@ mark { background: #ffe066; color: inherit; padding: 0 .15em; border-radius: .15
 .cs .bar.on { fill: var(--hl); }
 .cs .ghost { fill: #fff; stroke: var(--qs); stroke-width: 3; stroke-dasharray: 6 5; }
 .cs .gtext { font-size: 18px; fill: var(--qs); font-weight: 800; }
-.cs .brk { fill: none; stroke: var(--ink); stroke-width: 3; }
+.cs .brk { fill: none; stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
 
 /* ===== الأزرار الكبيرة ===== */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .35em; min-height: 2.05em; padding: .15em .8em; border-radius: .45em; border: 3px solid var(--ink); background: var(--paper); font-size: .72em; font-weight: 800; cursor: pointer; line-height: 1.2; touch-action: manipulation; }

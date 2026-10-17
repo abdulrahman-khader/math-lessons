@@ -15,67 +15,119 @@ export interface CubePart {
   color: string;
 }
 
+/** شكل كل عنصر في الصف: مكعبات متصلة كما في الكتاب، أو أشياء من القصة */
+export type ItemShape = 'cube' | 'spoon' | 'juice';
+
 interface TrainProps {
   /** الأجزاء من اليمين إلى اليسار: الجزء الأول هو العدد الأول في جملة الجمع */
   parts: CubePart[];
-  /** طول ضلع المكعب بوحدات الرسم */
+  shape?: ItemShape;
+  /** عرض العنصر الواحد بوحدات الرسم */
   size?: number;
-  /** الجزء المأخوذ (للطرح)؛ يتقدّم على stages */
-  removed?: number | null;
   /**
-   * أي جزء يُؤخذ في كل مرحلة من مراحل الحل: المرحلة k تبدأ عند ظهور خطوة فيها hl ‹g{k}›.
-   * تُعتمد أعلى مرحلة ظاهرة (الخطوات تتراكم)، فالمثال [0، 1] يأخذ الأول ثم يعيده ويأخذ الثاني.
+   * رقم الصف في الشريحة، لتتحكم به خطوات الحل دون أن تختلط صفوف عدة:
+   * خطوة فيها hl ‹p{k}› تضمّ الجزأين (الجمع)، و‹v{k}› تأخذ take[0]، و‹x{k}› تأخذ take[1].
+   * الخطوات تتراكم، فتُعتمد آخر مرحلة: x قبل v.
    */
-  stages?: number[];
-  /** عدد مكعبات كل جزء تحته */
+  k?: number;
+  take?: [number, number?];
+  /** يتقدّمان على الخطوات (للمستكشف): الجزآن مضمومان، والجزء المأخوذ */
+  joined?: boolean;
+  removed?: number | null;
+  /** عدد عناصر كل جزء تحته */
   counts?: boolean;
   label?: string;
 }
 
-/** صف مكعبات متصلة بألوان الأجزاء، يُؤخذ منه جزء ليمثّل الطرح. */
-export function CubeTrain({ parts, size = 46, removed, stages, counts = true, label }: TrainProps) {
-  const { activeHl } = useSlide();
-  let stage = 0;
-  activeHl.forEach((k) => {
-    const m = /^g(\d+)$/.exec(k);
-    if (m) stage = Math.max(stage, +m[1]);
-  });
-  const gone = removed !== undefined ? removed : stage > 0 && stages ? (stages[stage - 1] ?? null) : null;
+const SHAPE_H: Record<ItemShape, number> = { cube: 1, spoon: 1.9, juice: 1.45 };
+const SHAPE_W: Record<ItemShape, number> = { cube: 1, spoon: 0.92, juice: 1.08 };
 
-  const gap = size * 0.5;
+function Item({ shape, x, s, color }: { shape: ItemShape; x: number; s: number; color: string }) {
+  const h = s * SHAPE_H[shape];
+  if (shape === 'spoon')
+    return (
+      <g>
+        <ellipse cx={x + s / 2} cy={h * 0.2} rx={s * 0.3} ry={h * 0.18} fill={color} stroke="#0005" strokeWidth={2} />
+        <ellipse cx={x + s / 2 - s * 0.06} cy={h * 0.16} rx={s * 0.1} ry={h * 0.07} fill="#fff6" />
+        <rect x={x + s / 2 - s * 0.075} y={h * 0.36} width={s * 0.15} height={h * 0.6} rx={s * 0.07} fill={color} stroke="#0005" strokeWidth={2} />
+      </g>
+    );
+  if (shape === 'juice')
+    return (
+      <g>
+        <line x1={x + s * 0.62} y1={h * 0.02} x2={x + s * 0.55} y2={h * 0.2} stroke="#0007" strokeWidth={3} strokeLinecap="round" />
+        <rect x={x + s * 0.14} y={h * 0.18} width={s * 0.72} height={h * 0.8} rx={s * 0.08} fill={color} stroke="#0005" strokeWidth={2} />
+        <rect x={x + s * 0.22} y={h * 0.45} width={s * 0.56} height={h * 0.26} rx={s * 0.05} fill="#fffd" />
+      </g>
+    );
+  return (
+    <g>
+      <rect x={x + 1.5} y={0} width={s - 3} height={s - 3} rx={s * 0.12} fill={color} stroke="#0004" strokeWidth={2} />
+      <circle cx={x + s / 2 - 1.5} cy={s / 2 - 1.5} r={s * 0.17} fill="none" stroke="#0003" strokeWidth={2.5} />
+    </g>
+  );
+}
+
+/**
+ * صف من العناصر بألوان الأجزاء. الجمع: يقترب الجزآن حتى يتلاصقا ويظهر المجموع فوقهما.
+ * الطرح: يُؤخذ جزء فينزل ويبهت، ويبقى الآخر.
+ */
+export function CubeTrain({ parts, shape = 'cube', size = 46, k = 0, take = [0, 1], joined, removed, counts = true, label }: TrainProps) {
+  const { activeHl } = useSlide();
+  const stage = activeHl.has(`x${k}`) ? 2 : activeHl.has(`v${k}`) ? 1 : 0;
+  const gone = removed !== undefined ? removed : stage === 2 ? (take[1] ?? null) : stage === 1 ? take[0] : null;
+  const together = joined ?? (stage > 0 || activeHl.has(`p${k}`));
+
+  const unit = size * SHAPE_W[shape];
+  // العناصر غير المكعبات بينها فراغ صغير
+  const step = shape === 'cube' ? unit : unit * 1.08;
+  const ih = size * SHAPE_H[shape];
   const pad = 8;
+  const top = counts ? size * 1.3 : pad; // مساحة المجموع فوق الصف
+  // الجزء المأخوذ ينزل قليلًا، ويبقى عدده داخل الرسم
+  const drop = Math.min(ih * 0.55, size * 0.45);
+  const apart = size * 0.9;
   const total = parts.reduce((s, p) => s + p.n, 0);
-  const W = total * size + (parts.length - 1) * gap + pad * 2;
-  const H = size * (counts ? 2.6 : 1.9) + pad;
-  // من اليمين: الجزء الأول عند الحافة اليمنى
-  let x = W - pad;
+  const wJoined = total * step;
+  const W = wJoined + (parts.length - 1) * apart + pad * 2;
+  const H = top + ih + size * (counts ? 1.4 : 0.7) + pad;
+  // من اليمين: الجزء الأول عند الحافة اليمنى. المضموم يتوسّط المساحة نفسها
+  const start = together ? W - pad - (W - pad * 2 - wJoined) / 2 : W - pad;
+  const gap = together ? 0 : apart;
+  let x = start;
   const shapes: ReactNode[] = [];
   const marks: ReactNode[] = [];
   parts.forEach((p, i) => {
-    const w = p.n * size;
+    const w = p.n * step;
     x -= w;
     const off = gone === i;
-    const y = pad + (off ? size * 0.7 : 0);
+    const dy = top + (off ? drop : 0);
     shapes.push(
-      <g key={i} className={'cpart' + (off ? ' off' : '')} style={{ transform: `translateY(${y}px)` }}>
-        {Array.from({ length: p.n }, (_, k) => (
-          <g key={k}>
-            <rect x={x + k * size + 1.5} y={0} width={size - 3} height={size - 3} rx={size * 0.12} fill={p.color} stroke="#0004" strokeWidth={2} />
-            <circle cx={x + k * size + size / 2 - 1.5} cy={size / 2 - 1.5} r={size * 0.17} fill="none" stroke="#0003" strokeWidth={2.5} />
-          </g>
+      <g key={i} className={'cpart' + (off ? ' off' : '')} style={{ transform: `translate(${x}px, ${dy}px)` }}>
+        {Array.from({ length: p.n }, (_, j) => (
+          <Item key={j} shape={shape} x={j * step} s={unit} color={p.color} />
         ))}
       </g>,
     );
     if (counts)
       marks.push(
-        <text key={i} x={x + w / 2} y={pad + size * (off ? 2.45 : 1.75)} textAnchor="middle" className={'ccount' + (off ? ' off' : '')}>
+        <text key={i} className={'ccount' + (off ? ' off' : '')} textAnchor="middle" style={{ transform: `translate(${x + w / 2}px, ${dy + ih + size * 0.9}px)` }}>
           {num(p.n)}
         </text>,
       );
     x -= gap;
   });
+  const left = start - wJoined;
   return (
-    <svg className="cubes" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label ?? `مكعبات: ${parts.map((p) => num(p.n)).join(' و')}`}>
+    <svg className="cubes" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label ?? `${num(parts[0]?.n ?? 0)} و${num(parts[1]?.n ?? 0)}`}>
+      {counts && (
+        <g className={'ctotal' + (together && gone === null ? ' on' : '')}>
+          <path d={`M${left + 4} ${top - 6} v-10 H${start - 4} v10`} fill="none" stroke="var(--ink)" strokeWidth={3} />
+          <text x={(left + start) / 2} y={top - 22} textAnchor="middle" style={{ fontSize: size * 0.72 }}>
+            {num(total)}
+          </text>
+        </g>
+      )}
       {shapes}
       {marks}
     </svg>
@@ -108,7 +160,7 @@ export function FactLine({ a, op, b, v, hl }: { a: number; op: '+' | '−'; b: n
 }
 
 /** جمع أو طرح رأسي كما في الكتاب: الإشارة يمين العدد الثاني، والآحاد تحت الآحاد */
-export function VSum({ a, op, b, v }: { a: number; op: '+' | '−'; b: number; v: number }) {
+export function VSum({ a, op, b, v, hl }: { a: number; op: '+' | '−'; b: number; v: number; hl?: readonly HlKey[] }) {
   return (
     <div className="vsum" aria-label={`${num(a)} ${op} ${num(b)}`}>
       <span />
@@ -118,7 +170,7 @@ export function VSum({ a, op, b, v }: { a: number; op: '+' | '−'; b: number; v
       <span className="vline" />
       <span />
       <span className="vn vans">
-        <Blank v={v} />
+        <Blank v={v} hl={hl} />
       </span>
     </div>
   );
@@ -136,7 +188,8 @@ type Pick = (typeof PICKS)[number];
 export function FactFamily({ start = [5, 4] as [number, number], max = 9 }: { start?: [number, number]; max?: number }) {
   const [a, setA] = useState(start[0]);
   const [b, setB] = useState(start[1]);
-  const [pick, setPick] = useState<Pick>('add1');
+  /** لا جملة مختارة في البداية: الجزآن منفصلان */
+  const [pick, setPick] = useState<Pick | null>(null);
   const c = a + b;
   const A = CUBE.green;
   const B = CUBE.yellow;
@@ -148,6 +201,7 @@ export function FactFamily({ start = [5, 4] as [number, number], max = 9 }: { st
     { k: 'sub2', eq: <>{num(c)} − {n(a, A)} = {n(b, B)}</>, take: 0 },
   ];
   const take = facts.find((f) => f.k === pick)?.take ?? null;
+  const joined = pick !== null;
 
   /* التحكم من الجوال: يسجّل المستكشف في شريحته، ويُبلغ عند كل تغيير */
   const slide = useSlide();
@@ -160,14 +214,14 @@ export function FactFamily({ start = [5, 4] as [number, number], max = 9 }: { st
         a: latest.current.a,
         b: latest.current.b,
         max: latest.current.max,
-        pick: PICKS.indexOf(latest.current.pick),
+        pick: latest.current.pick ? PICKS.indexOf(latest.current.pick) : -1,
         colors: [A, B],
         names: ['الخضراء', 'الصفراء'],
       }),
       set: (v) => {
         if (Number.isFinite(v.a)) setA(fit(v.a!));
         if (Number.isFinite(v.b)) setB(fit(v.b!));
-        if (Number.isFinite(v.pick) && PICKS[v.pick!]) setPick(PICKS[v.pick!]);
+        if (Number.isFinite(v.pick)) setPick(PICKS[v.pick!] ?? null);
       },
     });
     return () => slide.setFamily(null);
@@ -188,7 +242,7 @@ export function FactFamily({ start = [5, 4] as [number, number], max = 9 }: { st
   return (
     <div className="ffam">
       <div className="ffcubes">
-        <CubeTrain parts={[{ n: a, color: A }, { n: b, color: B }]} removed={take} size={44} />
+        <CubeTrain parts={[{ n: a, color: A }, { n: b, color: B }]} joined={joined} removed={take} size={44} />
         <div className="ffsteps">
           {stepper('الخضراء', A, a, setA)}
           {stepper('الصفراء', B, b, setB)}

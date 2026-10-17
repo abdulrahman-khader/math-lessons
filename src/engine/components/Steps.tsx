@@ -1,6 +1,7 @@
 import { useContext, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { GroupCtx, useEngine, useSlide } from '../context';
-import { duration } from '../digits';
+import { duration, num } from '../digits';
+import { IconNextRtl, IconPrevRtl } from './icons';
 import type { HlKey } from '../types';
 
 /**
@@ -40,29 +41,26 @@ export function Solution({ children }: { children: ReactNode }) {
   );
 }
 
-export function NextButton({ label = 'إظهار الخطوة التالية' }: { label?: string }) {
+/**
+ * سهما الخطوات: السابق يُخفي آخر خطوة، والتالي يُظهر الخطوة التالية، وبينهما العدّاد.
+ * يتعطل السابق قبل أول خطوة، والتالي بعد آخر خطوة. label وصفٌ للتالي (لقارئ الشاشة).
+ */
+export function NextButton({ label = 'الخطوة التالية' }: { label?: string }) {
   const slide = useSlide();
-  const ref = useRef<HTMLButtonElement>(null);
+  const { shownCount: n, stepTotal: total } = slide;
+  if (!total) return null;
   return (
-    <button
-      ref={ref}
-      className="btn step-btn"
-      data-next
-      onClick={() => {
-        if (!slide.reveal()) ref.current?.animate?.([{ transform: 'scale(1)' }, { transform: 'scale(.95)' }, { transform: 'scale(1)' }], { duration: 180 });
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
-export function HideButton({ label = 'إخفاء الحل' }: { label?: string }) {
-  const slide = useSlide();
-  return (
-    <button className="btn hide" onClick={slide.hideAll}>
-      {label}
-    </button>
+    <div className="stepnav" role="group" aria-label="خطوات الحل">
+      <button className="btn step-btn" aria-label="الخطوة السابقة" title="الخطوة السابقة" disabled={n === 0} onClick={() => slide.unreveal()}>
+        <IconPrevRtl />
+      </button>
+      <span className="stepcount" aria-live="polite">
+        {num(n)} / {num(total)}
+      </span>
+      <button className="btn step-btn" data-next aria-label={label} title={label} disabled={n >= total} onClick={() => slide.reveal()}>
+        <IconNextRtl />
+      </button>
+    </div>
   );
 }
 

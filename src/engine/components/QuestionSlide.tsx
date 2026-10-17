@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { num } from '../digits';
 import type { HlKey } from '../types';
 import { Cols, QCol, Tag, type Kind } from './Layout';
-import { Ctrls, HideButton, Hint, HintButton, NextButton, Solution, Step, ThinkPairShare, TimerButton } from './Steps';
+import { Ctrls, Hint, HintButton, NextButton, Solution, Step, ThinkPairShare, TimerButton } from './Steps';
 
 export interface StepDef {
   text: ReactNode;
@@ -57,7 +57,6 @@ export function QuestionSlide({ source, n, tags, intro, question, long, hint, ti
           <Ctrls>
             {hint && <HintButton />}
             <NextButton />
-            <HideButton />
             {time && <TimerButton sec={time} />}
           </Ctrls>
           {hint && <Hint>{hint}</Hint>}

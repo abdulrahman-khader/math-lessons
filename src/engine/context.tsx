@@ -57,6 +57,8 @@ export interface SlideApi {
   /** يُظهر الخطوة التالية بترتيب ظهورها في الصفحة. يعيد false إن لم يبقَ شيء. */
   reveal: () => boolean;
   hideAll: () => void;
+  /** يُخفي آخر خطوة ظاهرة. يعيد false إن لم تكن خطوة ظاهرة. */
+  unreveal: () => boolean;
   toggleHint: () => void;
   /** عدد الخطوات الظاهرة من مجموعها */
   info: () => { shown: number; total: number };
@@ -73,6 +75,9 @@ interface SlideState extends SlideApi {
   /** مفاتيح الإبراز للخطوات الظاهرة، يقرؤها كل رسم في الشريحة */
   activeHl: ReadonlySet<string>;
   hintOpen: boolean;
+  /** عدد الخطوات الظاهرة ومجموعها، لتعطيل أسهم الخطوات عند الطرفين */
+  shownCount: number;
+  stepTotal: number;
   setChart: (c: ChartCtrl | null) => void;
   setFamily: (c: FamilyCtrl | null) => void;
   registerMcq: (id: string, c: McqCtrl) => () => void;
@@ -98,11 +103,14 @@ export function SlideScope({ index, children }: { index: number; children: React
   const shownRef = useRef(shown);
   shownRef.current = shown;
   const [hintOpen, setHintOpen] = useState(false);
+  const [stepTotal, setStepTotal] = useState(0);
 
   const register = useCallback((id: string, meta: StepMeta) => {
     steps.current.set(id, meta);
+    setStepTotal(steps.current.size);
     return () => {
       steps.current.delete(id);
+      setStepTotal(steps.current.size);
     };
   }, []);
 
@@ -124,6 +132,14 @@ export function SlideScope({ index, children }: { index: number; children: React
   const hideAll = useCallback(() => {
     shownRef.current = [];
     setShown([]);
+  }, []);
+
+  const unreveal = useCallback(() => {
+    if (!shownRef.current.length) return false;
+    const next = shownRef.current.slice(0, -1);
+    shownRef.current = next;
+    setShown(next);
+    return true;
   }, []);
 
   const toggleHint = useCallback(() => setHintOpen((h) => !h), []);
@@ -156,9 +172,9 @@ export function SlideScope({ index, children }: { index: number; children: React
   );
 
   useEffect(() => {
-    engine.registerSlide(index, { reveal, hideAll, toggleHint, info, chart, family, mcqs });
+    engine.registerSlide(index, { reveal, hideAll, unreveal, toggleHint, info, chart, family, mcqs });
     return () => engine.registerSlide(index, null);
-  }, [engine, index, reveal, hideAll, toggleHint, info, chart, family, mcqs]);
+  }, [engine, index, reveal, hideAll, unreveal, toggleHint, info, chart, family, mcqs]);
 
   const { slideChanged } = engine;
   useEffect(() => slideChanged(), [shown, hintOpen, slideChanged]);
@@ -170,6 +186,9 @@ export function SlideScope({ index, children }: { index: number; children: React
     return {
       reveal,
       hideAll,
+      unreveal,
+      shownCount: shown.length,
+      stepTotal,
       register,
       isShown: (id) => shown.includes(id),
       isGroupOpen: (g) => groups.has(g),
@@ -185,7 +204,7 @@ export function SlideScope({ index, children }: { index: number; children: React
       registerMcq,
       touch: slideChanged,
     };
-  }, [shown, hintOpen, reveal, hideAll, register, toggleHint, info, chart, setChart, family, setFamily, mcqs, registerMcq, slideChanged]);
+  }, [shown, hintOpen, stepTotal, reveal, hideAll, unreveal, register, toggleHint, info, chart, setChart, family, setFamily, mcqs, registerMcq, slideChanged]);
 
   return <SlideCtx.Provider value={value}>{children}</SlideCtx.Provider>;
 }

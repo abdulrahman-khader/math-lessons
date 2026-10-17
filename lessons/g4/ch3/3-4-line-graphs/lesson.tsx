@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Card, Chart, Cols, Ctrls, DataTable, DragChart, Eq, GoHomeButton, HideButton, Hint, HintButton, IfTeams, MCQ, Mark, MindMap,
+  Card, Chart, Cols, Ctrls, DataTable, DragChart, Eq, GoHomeButton, Hint, HintButton, IfTeams, MCQ, Mark, MindMap,
   NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step, ThinkPairShare, TrendExplorer, Winner, defineLesson,
 } from '@engine';
 import * as C from './charts';
@@ -186,7 +186,7 @@ export default defineLesson({
             <QCol>
               <p className="qtext">يُوضِّحُ الرَّسمُ البيانيُّ دَرجاتِ الحَرارةِ مِن يَومِ السَّبتِ إلَى يَومِ الجُمعةِ في مَدينةِ الرِّياضِ. صِفْ كَيفَ تَغيَّرتْ دَرجاتُ الحَرارةِ خِلالَ هذَا الأُسبوعِ.</p>
               <ThinkPairShare />
-              <Ctrls><HintButton /><NextButton /><HideButton /></Ctrls>
+              <Ctrls><HintButton /><NextButton /></Ctrls>
               <Hint>تتبّع الخط بإصبعك من اليسار إلى اليمين: أين يصعد؟ أين يهبط؟</Hint>
               <Solution>
                 <Step hl={['p0', 'p1', 'p2', 'p3', 'h0', 'h2', 'v0', 'v2']}>ارتفعت من ٤٢ يوم السبت إلى ٤٤ يومي الاثنين والثلاثاء،</Step>
@@ -228,7 +228,7 @@ export default defineLesson({
           <SlideHead tag="القاعدة" kind="rule">أجزاء التمثيل بالخطوط</SlideHead>
           <Cols>
             <QCol>
-              <Ctrls><NextButton label="إظهار الجزء التالي" /><HideButton label="إعادة" /></Ctrls>
+              <Ctrls><NextButton label="إظهار الجزء التالي" /></Ctrls>
               <Step hl={['title']}><Card kind="rule"><b>١ العنوان:</b> عمّ يتحدث التمثيل؟</Card></Step>
               <Step hl={['xaxis']}><Card kind="rule"><b>٢ المحور الأفقي:</b> الزمن (الأيام).</Card></Step>
               <Step hl={['yaxis']}><Card kind="rule"><b>٣ المحور الرأسي:</b> القيم (درجة الحرارة).</Card></Step>
@@ -251,7 +251,7 @@ export default defineLesson({
           <Cols>
             <QCol>
               <p className="qtext"><b style={{ color: 'var(--ex)' }}>القياسُ:</b> مَا اليَومُ الَّذِي كَانتْ دَرجةُ الحَرارةِ فِيهِ الأقلَّ ارتفَاعًا؟ ومَا الأيَّامُ الَّتي كَانتْ دَرجةُ الحَرارةِ فيهَا الأكثرُ ارتفاعًا؟</p>
-              <Ctrls><NextButton /><HideButton /></Ctrls>
+              <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step hl={['p5']}>١ لمعرفة اليوم الأقل ارتفاعًا: أوجد أدنى نقطة على الرسم.</Step>
                 <Step hl={['g5', 'x5']}>٢ أتحرك للأسفل وأحدد اليوم المقابل لها.</Step>

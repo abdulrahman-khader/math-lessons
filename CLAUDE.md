@@ -51,7 +51,11 @@ tests/remote.spec.ts   phone remote end to end (iPad + phone contexts) over test
 
 ## Phone remote
 
-`src/engine/remote.ts`: the phone and iPad talk over a direct WebRTC data channel; ntfy.sh is only used for the handshake (about 2 messages) and as a fallback. Anonymous ntfy.sh allows **250 messages per day per IP**, and the teacher's devices may share this machine's IP, so never test against ntfy.sh in loops. Tests point `localStorage['remote:relay']` at the local relay in `tests/relay.ts`.
+`src/engine/remote.ts`: the phone connects to the iPad through PeerJS (public signaling server 0.peerjs.com, no daily quota; its default config includes TURN). The iPad's PeerJS id is `<channel>h`. ntfy.sh is only a fallback when PeerJS can't connect; anonymous ntfy.sh allows **250 messages per day per IP**, and the teacher's devices may share this machine's IP, so never test against ntfy.sh in loops.
+
+PeerJS is **not** bundled into lessons: `npm run build` copies `peerjs.min.js` into `dist/` and it's loaded on demand when the remote starts. Evaluating it starts WebRTC, which froze this Windows machine's browser for ~7 s and would delay every lesson load.
+
+Tests run hermetically: `tests/relay.ts` starts a local ntfy-compatible relay and a local PeerJS server, and pages get `localStorage['remote:relay']` / `['remote:peer']`. Debug log: `localStorage['remote:debug'] = '1'`.
 
 ## Done means
 

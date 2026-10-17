@@ -48,3 +48,23 @@ export async function startRelay({ quotaUsed = false } = {}) {
     },
   };
 }
+
+/** خادم PeerJS محلي للفحوص، بدل الخادم العام 0.peerjs.com */
+export async function startPeerServer() {
+  const { PeerServer } = await import('peer');
+  const net = await import('node:net');
+  // منفذ فارغ: نحجزه لحظة ثم نعطيه للخادم
+  const port = await new Promise<number>((res) => {
+    const s = net.createServer().listen(0, '127.0.0.1', () => {
+      const p = (s.address() as AddressInfo).port;
+      s.close(() => res(p));
+    });
+  });
+  const server = PeerServer({ port, path: '/', host: '127.0.0.1' } as Parameters<typeof PeerServer>[0]);
+  await new Promise((r) => setTimeout(r, 300));
+  return {
+    /** قيمة localStorage['remote:peer'] */
+    opts: JSON.stringify({ host: '127.0.0.1', port, path: '/', secure: false }),
+    close: () => new Promise<void>((r) => (server as unknown as { close: (cb: () => void) => void }).close?.(() => r()) ?? r()),
+  };
+}

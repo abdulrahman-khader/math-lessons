@@ -3,7 +3,7 @@
 // الاستعمال: npm run build            ← كل الدروس
 //            npm run build -- 3-4     ← الدروس التي يحتوي مسارها على 3-4
 import { build } from 'vite';
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { root, findLessons, pickLessons, outName, readMeta } from './lessons.mjs';
 import { lessonConfig } from '../vite.config.mjs';
@@ -24,6 +24,9 @@ for (const lesson of pickLessons(process.argv[2])) {
   console.log(`✓ ${lesson} → dist/${outName(lesson)} (${(statSync(out).size / 1024).toFixed(0)} KB)`);
 }
 rmSync(path.join(root, '.lesson-build'), { recursive: true, force: true });
+
+// PeerJS للتحكم من الجوال: ملف مستقل يُحمَّل عند الحاجة فقط (انظر src/engine/remote.ts)
+copyFileSync(path.join(root, 'node_modules', 'peerjs', 'dist', 'peerjs.min.js'), path.join(dist, 'peerjs.min.js'));
 
 
 /* ---------- فهرس الدروس: مجموعة لكل صف، بترتيب مجلدات lessons/ (g1، g2، …) ---------- */

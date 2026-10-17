@@ -1,30 +1,61 @@
 /*
  * التحكم بالدرس من الجوال.
- * الجوال والآيباد يتصلان مباشرة (WebRTC DataChannel)، فلا حدّ لعدد الرسائل.
- * خدمة ntfy.sh العامة لا تُستعمل إلا للتعارف (رسالتان لكل اتصال)، وبديلًا إن تعذّر الاتصال المباشر:
- * ntfy.sh المجانية تسمح بـ٢٥٠ رسالة يوميًا لكل شبكة، فلا تكفي وحدها لحصة كاملة.
- * لكل آيباد «قناة» عشوائية سرية محفوظة في المتصفح: ما يصل الآيباد على <قناة>-c، وما يصل الجوال على <قناة>-s.
- * رسائل الخادم لا تُخزَّن عليه (cache=no)، ولا تحمل إلا رقم الشريحة وعنوانها والملاحظات والنقاط.
+ * الجوال والآيباد يتصلان مباشرة (WebRTC) عبر PeerJS: خادمه العام المجاني يعرّف الجهازين ببعضهما بلا حدّ يومي،
+ * ثم تمر الأوامر من جهاز إلى جهاز. وإن تعذّر الاتصال المباشر في شبكة ما، يستعمل PeerJS خوادم تمرير (TURN).
+ * خدمة ntfy.sh احتياط أخير فقط: لا تُستعمل إلا إن لم يتصل PeerJS، ولها حدّ ٢٥٠ رسالة يوميًا لكل شبكة.
+ * لكل آيباد «قناة» عشوائية سرية محفوظة في المتصفح: معرّف الآيباد في PeerJS هو <قناة>h،
+ * وفي ntfy يصل الآيباد على <قناة>-c والجوال على <قناة>-s.
+ * الرسائل لا تحمل إلا رقم الشريحة وعنوانها والملاحظات والنقاط.
  */
+import type { DataConnection, Peer, PeerOptions } from 'peerjs';
 
-/** خادم الرسائل؛ تغيّره الاختبارات إلى خادم محلي عبر localStorage لئلا تستهلك حصة ntfy.sh */
-const RELAY = (() => {
+/**
+ * PeerJS ملف مستقل بجانب الدروس (dist/peerjs.min.js) يُحمَّل عند تشغيل التحكم من الجوال فقط:
+ * تشغيل شيفرته يبدأ WebRTC، وهذا يؤخر فتح الدرس ثوانيَ على بعض الأجهزة لو كان داخل ملف الدرس.
+ * التحكم يحتاج الإنترنت أصلًا، فإن لم يوجد الملف بجانب درس محفوظ يُحمَّل من الموقع.
+ */
+type PeerLib = { Peer: typeof Peer };
+let peerLib: Promise<PeerLib> | null = null;
+function loadPeer(): Promise<PeerLib> {
+  const w = window as unknown as { peerjs?: PeerLib };
+  if (w.peerjs) return Promise.resolve(w.peerjs);
+  if (peerLib) return peerLib;
+  const urls = [new URL('peerjs.min.js', location.href).href, `${PUBLIC_BASE}peerjs.min.js`];
+  const tryAt = (i: number): Promise<PeerLib> =>
+    new Promise<PeerLib>((res, rej) => {
+      const s = document.createElement('script');
+      s.src = urls[i];
+      s.onload = () => (w.peerjs ? res(w.peerjs) : rej(new Error('peerjs')));
+      s.onerror = () => rej(new Error('peerjs'));
+      document.head.appendChild(s);
+    }).catch((e) => (i + 1 < urls.length ? tryAt(i + 1) : Promise.reject(e)));
+  peerLib = tryAt(0).catch((e) => {
+    peerLib = null;
+    throw e;
+  });
+  return peerLib;
+}
+
+const local = (k: string) => {
   try {
-    return localStorage.getItem('remote:relay') || 'https://ntfy.sh/';
+    return localStorage.getItem(k);
   } catch {
-    return 'https://ntfy.sh/';
+    return null;
+  }
+};
+/** خادم ntfy الاحتياطي؛ تغيّره الاختبارات إلى خادم محلي */
+const RELAY = local('remote:relay') || 'https://ntfy.sh/';
+/** خادم PeerJS: العام افتراضيًا، والاختبارات تشغّل خادمًا محليًا (JSON بخيارات PeerJS) */
+const PEER_OPTS: PeerOptions = (() => {
+  try {
+    return JSON.parse(local('remote:peer') ?? '{}');
+  } catch {
+    return {};
   }
 })();
 /** سجل التشخيص: localStorage['remote:debug'] = '1' */
-const DEBUG = (() => {
-  try {
-    return localStorage.getItem('remote:debug') === '1';
-  } catch {
-    return false;
-  }
-})();
+const DEBUG = local('remote:debug') === '1';
 const log = (...a: unknown[]) => DEBUG && console.info('[remote]', ...a);
-const ICE: RTCConfiguration = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }] };
 const KEY = 'remote:channel';
 const ON_KEY = 'remote:on';
 /** رابط الدروس المنشور: يُستعمل في رمز QR حين يُفتح الدرس من ملف محفوظ لا من الموقع */
@@ -116,16 +147,9 @@ export interface RemoteState {
   timer: { show: boolean; run: boolean; left: number; view?: { s: number; ax: number; ay: number } };
 }
 
-/** وصف اتصال WebRTC يُتبادل عبر الخادم */
-interface Sig {
-  kind: 'offer' | 'answer';
-  sdp: string;
-  /** رقم المحاولة، ليتجاهل الجوال ردًّا على محاولة قديمة */
-  id: string;
-}
-type Envelope = { cmd: RemoteCmd } | { state: RemoteState } | { sig: Sig };
+type Envelope = { cmd: RemoteCmd } | { state: RemoteState };
 
-/** حالة الاتصال: direct = قناة مباشرة مفتوحة، relay = الخادم متصل (للتعارف أو بديلًا) */
+/** حالة الاتصال: direct = قناة PeerJS مفتوحة، relay = خادم ntfy الاحتياطي متصل */
 export interface LinkStatus {
   direct: boolean;
   relay: boolean;
@@ -195,8 +219,14 @@ function publish(topic: string, body: Envelope) {
 /** يستمع إلى قناة ويعيد دالة الإيقاف. EventSource يعيد الاتصال وحده إذا انقطعت الشبكة. */
 function subscribe(topic: string, onMsg: (e: Envelope) => void, onOpen: (open: boolean) => void) {
   const es = new EventSource(`${RELAY}${topic}/sse`);
-  es.onopen = () => onOpen(true);
-  es.onerror = () => onOpen(false);
+  es.onopen = () => {
+    log('relay open', topic);
+    onOpen(true);
+  };
+  es.onerror = () => {
+    log('relay error', topic, es.readyState);
+    onOpen(false);
+  };
   es.onmessage = (ev) => {
     try {
       const m = JSON.parse(ev.data);
@@ -209,32 +239,13 @@ function subscribe(topic: string, onMsg: (e: Envelope) => void, onOpen: (open: b
 }
 
 /**
- * ينتظر عناوين الاتصال قبل إرسال الوصف في رسالة واحدة: حتى يكتمل الجمع،
- * أو بعد نصف ثانية من ظهور أول عنوان، وبحد أقصى ١٠ ثوانٍ.
- * لا نرسل وصفًا بلا عناوين: بعض الأجهزة يتأخر فيها أول عنوان ثانيتين أو أكثر، فيفشل الاتصال.
- */
-function gathered(pc: RTCPeerConnection, grace = 500, max = 10000) {
-  return new Promise<void>((done) => {
-    const t0 = Date.now();
-    let firstAt = 0;
-    const tick = () => {
-      if (pc.iceGatheringState === 'complete') return done();
-      const has = /a=candidate/.test(pc.localDescription?.sdp ?? '');
-      if (has && !firstAt) firstAt = Date.now();
-      if ((firstAt && Date.now() - firstAt >= grace) || Date.now() - t0 >= max) return done();
-      setTimeout(tick, 100);
-    };
-    tick();
-  });
-}
-
-/**
- * طرف اتصال: الجوال يبدأ (offer)، والآيباد يجيب (answer).
- * send يرسل عبر القناة المباشرة إن كانت مفتوحة، وإلا عبر الخادم.
+ * طرف اتصال. الآيباد يسجّل في PeerJS بمعرّف ثابت من القناة، والجوال يتصل به.
+ * send يرسل عبر القناة المباشرة إن كانت مفتوحة، وإلا عبر ntfy الاحتياطي.
  */
 function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope) => void, onStatus: (s: LinkStatus) => void) {
   const inbox = `${channel}-${role === 'host' ? 'c' : 's'}`;
   const outbox = `${channel}-${role === 'host' ? 's' : 'c'}`;
+  const hostId = `${channel}h`;
   const status: LinkStatus = { direct: false, relay: false, limited: false };
   const report = () => onStatus({ ...status });
   const post = (e: Envelope) =>
@@ -246,115 +257,98 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
       }
       return code >= 200 && code < 300;
     });
-  let pc: RTCPeerConnection | null = null;
-  let dc: RTCDataChannel | null = null;
-  let attempt = '';
-  let retry: ReturnType<typeof setTimeout> | undefined;
-  /* إن لم تُفتح القناة: محاولة بعد ٢ ثم ٤ ثم ٨ ثوانٍ… حتى ٥ دقائق. كل محاولة رسالتان على الخادم */
-  const FIRST_RETRY = 2000;
-  let backoff = FIRST_RETRY;
+
   let stopped = false;
+  let peer: Peer | null = null;
+  let conn: DataConnection | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  /* إعادة المحاولة: ٢ ثم ٤ ثم ٨ ثوانٍ… حتى ٣٠ ثانية. لا رسائل على ntfy في هذا كله */
+  let backoff = 2000;
+  const later = (fn: () => void) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => !stopped && fn(), backoff);
+    backoff = Math.min(backoff * 2, 30000);
+  };
+  const setDirect = (v: boolean) => {
+    if (status.direct === v) return;
+    status.direct = v;
+    if (v) backoff = 2000;
+    report();
+  };
 
-  const watch = (c: RTCPeerConnection, tag: string) => {
-    const t0 = Date.now();
-    c.addEventListener('iceconnectionstatechange', () => log(role, tag, 'ice', c.iceConnectionState, Date.now() - t0, 'ms'));
-    c.addEventListener('connectionstatechange', () => log(role, tag, 'conn', c.connectionState, Date.now() - t0, 'ms'));
-  };
-  const closePc = () => {
-    const old = pc;
-    pc = null;
-    dc = null;
-    try {
-      old?.close();
-    } catch {
-      /* تجاهل */
-    }
-  };
-  const useChannel = (ch: RTCDataChannel) => {
-    dc = ch;
-    ch.onopen = () => {
-      status.direct = true;
-      backoff = FIRST_RETRY;
-      report();
+  /** قناة مفتوحة: تصبح هي قناة الإرسال، وتحل محل أي قناة سابقة */
+  const adopt = (c: DataConnection) => {
+    c.on('open', () => {
+      log(role, 'channel open');
+      if (conn && conn !== c) conn.close();
+      conn = c;
+      setDirect(true);
+    });
+    c.on('data', (d) => onData(d as Envelope));
+    const lost = () => {
+      if (conn !== c) return;
+      log(role, 'channel closed');
+      conn = null;
+      setDirect(false);
+      if (role === 'phone') later(dial);
     };
-    ch.onclose = () => {
-      if (dc !== ch) return;
-      status.direct = false;
-      report();
-      if (role === 'phone') schedule(3000);
-    };
-    ch.onmessage = (ev) => {
-      try {
-        onData(JSON.parse(ev.data));
-      } catch {
-        /* تجاهل */
+    c.on('close', lost);
+    c.on('error', lost);
+  };
+
+  /** الجوال: يتصل بالآيباد؛ إن لم تُفتح القناة خلال ١٠ ثوانٍ يعيد المحاولة */
+  const dial = () => {
+    if (!peer || peer.destroyed || peer.disconnected) return;
+    log('phone', 'dial', hostId);
+    const c = peer.connect(hostId, { reliable: true, serialization: 'json' });
+    adopt(c);
+    setTimeout(() => {
+      if (!c.open && !stopped && conn !== c) {
+        c.close();
+        later(dial);
       }
-    };
+    }, 10000);
   };
 
-  /* الجوال: محاولة اتصال مباشر. إن لم تُفتح القناة خلال ٨ ثوانٍ يُعاد بمهلة متزايدة */
-  const schedule = (ms: number) => {
-    clearTimeout(retry);
-    retry = setTimeout(() => void offer().catch(() => {}), ms);
+  const start = async () => {
+    peer?.destroy();
+    const { Peer } = await loadPeer();
+    if (stopped) return;
+    const p = role === 'host' ? new Peer(hostId, { ...PEER_OPTS, debug: 0 }) : new Peer({ ...PEER_OPTS, debug: 0 });
+    peer = p;
+    p.on('open', () => {
+      log(role, 'peer open');
+      if (role === 'phone') dial();
+    });
+    if (role === 'host') p.on('connection', adopt);
+    p.on('disconnected', () => {
+      // انقطع الاتصال بخادم التعارف فقط؛ القنوات المفتوحة تبقى
+      if (!stopped && !p.destroyed) later(() => p.reconnect());
+    });
+    p.on('error', (e) => {
+      log(role, 'peer error', e.type);
+      if (stopped) return;
+      // الآيباد لم يفتح بعد: يعيد الجوال الاتصال لاحقًا
+      if (e.type === 'peer-unavailable') return later(dial);
+      // المعرّف ما زال محجوزًا من صفحة سابقة لحظات، أو خطأ شبكة: بداية جديدة بعد قليل
+      later(() => void start());
+    });
   };
-  const offer = async () => {
-    if (stopped || !status.relay || typeof RTCPeerConnection === 'undefined') return;
-    closePc();
-    const id = Math.random().toString(36).slice(2);
-    attempt = id;
-    const c = new RTCPeerConnection(ICE);
-    pc = c;
-    watch(c, 'offer');
-    useChannel(c.createDataChannel('remote', { ordered: true }));
-    await c.setLocalDescription(await c.createOffer());
-    await gathered(c);
-    if (pc !== c || stopped) return;
-    log(role, 'send offer', (c.localDescription!.sdp.match(/a=candidate/g) ?? []).length, 'candidates');
-    post({ sig: { kind: 'offer', sdp: c.localDescription!.sdp, id } });
-    retry = setTimeout(() => {
-      if (!status.direct && pc === c) {
-        schedule(backoff);
-        backoff = Math.min(backoff * 2, 300000);
-      }
-    }, 8000);
-  };
-
-  /* الآيباد: يجيب كل عرض جديد، ويستبدل أي اتصال سابق */
-  const answer = async (sig: Sig) => {
-    closePc();
-    const c = new RTCPeerConnection(ICE);
-    pc = c;
-    watch(c, 'answer');
-    c.ondatachannel = (e) => {
-      if (pc === c) useChannel(e.channel);
-    };
-    await c.setRemoteDescription({ type: 'offer', sdp: sig.sdp });
-    await c.setLocalDescription(await c.createAnswer());
-    await gathered(c);
-    if (pc !== c || stopped) return;
-    log(role, 'send answer', (c.localDescription!.sdp.match(/a=candidate/g) ?? []).length, 'candidates');
-    post({ sig: { kind: 'answer', sdp: c.localDescription!.sdp, id: sig.id } });
-  };
+  if (typeof RTCPeerConnection !== 'undefined') void start().catch((e) => log(role, 'peer load failed', e));
 
   const stopRelay = subscribe(
     inbox,
-    (e) => {
-      if (!('sig' in e)) return onData(e);
-      if (role === 'host' && e.sig.kind === 'offer') answer(e.sig).catch(() => {});
-      else if (role === 'phone' && e.sig.kind === 'answer' && e.sig.id === attempt && pc) pc.setRemoteDescription({ type: 'answer', sdp: e.sig.sdp }).catch(() => {});
-    },
+    (e) => onData(e),
     (open) => {
-      const first = open && !status.relay;
       status.relay = open;
       report();
-      if (first && role === 'phone' && !status.direct) schedule(0);
     },
   );
 
   return {
     send: (e: Envelope) => {
-      if (dc?.readyState === 'open') {
-        dc.send(JSON.stringify(e));
+      if (conn?.open) {
+        conn.send(e);
         return Promise.resolve(true);
       }
       return post(e);
@@ -362,9 +356,10 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     direct: () => status.direct,
     stop: () => {
       stopped = true;
-      clearTimeout(retry);
+      clearTimeout(timer);
       stopRelay();
-      closePc();
+      conn?.close();
+      peer?.destroy();
     },
   };
 }

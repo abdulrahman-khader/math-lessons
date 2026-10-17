@@ -2,22 +2,40 @@ import { test, expect, devices, type Browser, type Page } from '@playwright/test
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { startRelay } from './relay';
+import { startPeerServer, startRelay } from './relay';
 
 // التحكم من الجوال من طرف إلى طرف: آيباد وجوال في سياقين منفصلين، وخادم رسائل محلي بدل ntfy.sh.
 const dist = path.resolve(process.cwd(), 'dist');
 const file = readdirSync(dist).find((f) => f.endsWith('.html') && f !== 'index.html')!;
 const href = pathToFileURL(path.join(dist, file)).href;
 
+/**
+ * أول تشغيل لـ WebRTC يجمّد المتصفح ثوانيَ على بعض الحواسيب (Windows بمحولات شبكة افتراضية كثيرة)،
+ * فتُمهَل الفحوص أكثر من المعتاد. على الآيباد والجوال لا يحدث هذا عادة.
+ */
+const READY = 25000;
+test.setTimeout(120000);
+
 let relay: Awaited<ReturnType<typeof startRelay>>;
+let peers: Awaited<ReturnType<typeof startPeerServer>>;
 test.beforeAll(async () => {
   relay = await startRelay();
+  peers = await startPeerServer();
 });
-test.afterAll(() => relay.close());
+test.afterAll(async () => {
+  await relay.close();
+  await peers.close();
+});
 
 async function device(browser: Browser, dev: string, url: string) {
   const ctx = await browser.newContext({ ...devices[dev] });
-  await ctx.addInitScript((r) => localStorage.setItem('remote:relay', r), relay.url);
+  await ctx.addInitScript(
+    ([r, p]) => {
+      localStorage.setItem('remote:relay', r);
+      localStorage.setItem('remote:peer', p);
+    },
+    [relay.url, peers.opts],
+  );
   const page = await ctx.newPage();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -29,7 +47,7 @@ async function pair(browser: Browser) {
   const ipad = await device(browser, 'iPad Pro 11', href);
   await ipad.page.locator('button[aria-label="التحكم من الجوال"]').click();
   await ipad.page.locator('.rpanel button', { hasText: 'تشغيل' }).click();
-  await expect(ipad.page.locator('.rstat')).toContainText('جاهز');
+  await expect(ipad.page.locator('.rstat')).toContainText('جاهز', { timeout: READY });
   const ch = await ipad.page.evaluate(() => localStorage.getItem('remote:channel'));
   const phone = await device(browser, 'iPhone 13', `${href}#remote=${ch}`);
   // على بعض الأجهزة يتأخر أول عنوان اتصال ثانيتين أو أكثر، ومع تشغيل الفحوص معًا يطول التعارف
@@ -41,12 +59,12 @@ async function pair(browser: Browser) {
 
 const activeIndex = (p: Page) => p.locator('section.slide.active').getAttribute('data-index');
 
-test('الجوال يتصل مباشرة ولا يستهلك خادم الرسائل بعد التعارف', async ({ browser }) => {
+test('الجوال يتصل مباشرة عبر PeerJS ولا يستهلك ntfy', async ({ browser }) => {
   const before = relay.posts.length;
   const { ipad, phone, errors } = await pair(browser);
   const afterHandshake = relay.posts.length;
-  // التعارف: عرض ورد، وقد يُرسل الجوال «مرحبًا» عبر الخادم إن تأخر الاتصال المباشر أكثر من ١٢ ثانية
-  expect(afterHandshake - before).toBeLessThanOrEqual(4);
+  // التعارف عبر PeerJS، فلا رسائل على ntfy (إلا «مرحبًا» احتياطية إن تأخر الاتصال أكثر من ١٢ ثانية)
+  expect(afterHandshake - before).toBeLessThanOrEqual(1);
 
   for (let k = 0; k < 6; k++) await phone.locator('.rnav .next').click();
   await expect.poll(() => activeIndex(ipad)).not.toBe('0');
@@ -85,17 +103,21 @@ test('إن تعذّر الاتصال المباشر يعمل التحكم عبر
   const ipad = await device(browser, 'iPad Pro 11', href);
   await ipad.page.locator('button[aria-label="التحكم من الجوال"]').click();
   await ipad.page.locator('.rpanel button', { hasText: 'تشغيل' }).click();
-  await expect(ipad.page.locator('.rstat')).toContainText('جاهز');
+  await expect(ipad.page.locator('.rstat')).toContainText('جاهز', { timeout: READY });
   const ch = await ipad.page.evaluate(() => localStorage.getItem('remote:channel'));
   // جوال على شبكة تحجب WebRTC
   const ctx = await browser.newContext({ ...devices['iPhone 13'] });
-  await ctx.addInitScript((r) => {
-    localStorage.setItem('remote:relay', r);
-    delete (window as { RTCPeerConnection?: unknown }).RTCPeerConnection;
-  }, relay.url);
+  await ctx.addInitScript(
+    ([r, p]) => {
+      localStorage.setItem('remote:relay', r);
+      localStorage.setItem('remote:peer', p);
+      delete (window as { RTCPeerConnection?: unknown }).RTCPeerConnection;
+    },
+    [relay.url, peers.opts],
+  );
   const phone = await ctx.newPage();
   await phone.goto(`${href}#remote=${ch}`);
-  await expect(phone.locator('.dot.ok')).toContainText('الخادم', { timeout: 25000 });
+  await expect(phone.locator('.dot.ok')).toContainText('الخادم', { timeout: 45000 });
   await phone.locator('.rnav .next').click();
   await expect.poll(() => activeIndex(ipad.page)).toBe('1');
 });
@@ -103,10 +125,16 @@ test('إن تعذّر الاتصال المباشر يعمل التحكم عبر
 test('حين يصل خادم الربط حدّه اليومي يظهر تنبيه واضح على الجوال', async ({ browser }) => {
   const full = await startRelay({ quotaUsed: true });
   const ctx = await browser.newContext({ ...devices['iPhone 13'] });
-  await ctx.addInitScript((r) => localStorage.setItem('remote:relay', r), full.url);
+  await ctx.addInitScript(
+    ([r, p]) => {
+      localStorage.setItem('remote:relay', r);
+      localStorage.setItem('remote:peer', p);
+    },
+    [full.url, peers.opts],
+  );
   const phone = await ctx.newPage();
   await phone.goto(`${href}#remote=mlrabcdefghijkmnpqrst`);
-  await expect(phone.locator('.rwarn')).toContainText('حدّه اليومي', { timeout: 15000 });
+  await expect(phone.locator('.rwarn')).toContainText('حدّه اليومي', { timeout: 45000 });
   await ctx.close();
   await full.close();
 });

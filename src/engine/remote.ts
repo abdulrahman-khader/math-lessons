@@ -147,7 +147,11 @@ export interface RemoteState {
   timer: { show: boolean; run: boolean; left: number; view?: { s: number; ax: number; ay: number } };
 }
 
-type Envelope = { cmd: RemoteCmd } | { state: RemoteState };
+/**
+ * رسائل الطرفين. أوامر الجوال مرقّمة (id): يؤكدها الآيباد (ack)، ويعيد الجوال إرسالها حتى يصله التأكيد،
+ * والآيباد يتجاهل المكرر. ping/pong نبض يكشف قناة ماتت دون أن تُغلق (يحدث في iOS بعد قفل الشاشة).
+ */
+type Envelope = { cmd: RemoteCmd; id?: number } | { state: RemoteState } | { ack: number } | { ping: number } | { pong: number };
 
 /** حالة الاتصال: direct = قناة PeerJS مفتوحة، relay = خادم ntfy الاحتياطي متصل */
 export interface LinkStatus {
@@ -155,6 +159,12 @@ export interface LinkStatus {
   relay: boolean;
   /** خادم الرسائل رفض النشر: انتهت الحصة اليومية لهذه الشبكة */
   limited: boolean;
+  /** أوامر أُرسلت ولم يؤكدها الآيباد بعد */
+  pending: number;
+  /** زمن الذهاب والإياب بالملّي ثانية، عبر القناة المباشرة */
+  rtt: number | null;
+  /** القناة مباشرة بين الجهازين، أو عبر خادم تمرير (TURN) */
+  via: 'p2p' | 'turn' | null;
 }
 
 function storage(): Storage | null {
@@ -246,7 +256,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   const inbox = `${channel}-${role === 'host' ? 'c' : 's'}`;
   const outbox = `${channel}-${role === 'host' ? 's' : 'c'}`;
   const hostId = `${channel}h`;
-  const status: LinkStatus = { direct: false, relay: false, limited: false };
+  const status: LinkStatus = { direct: false, relay: false, limited: false, pending: 0, rtt: null, via: null };
   const report = () => onStatus({ ...status });
   const post = (e: Envelope) =>
     publish(outbox, e).then((code) => {
@@ -262,29 +272,121 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   let peer: Peer | null = null;
   let conn: DataConnection | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
-  /* إعادة المحاولة: ٢ ثم ٤ ثم ٨ ثوانٍ… حتى ٣٠ ثانية. لا رسائل على ntfy في هذا كله */
+  /** آخر تغيّر في القناة المباشرة؛ بعد ١٥ ثانية بلا قناة يُستعمل ntfy */
+  let directSince = Date.now();
+  const relayMode = () => !status.direct && status.relay && !status.limited && Date.now() - directSince > 15000;
+
+  /* إعادة المحاولة: ٢ ثم ٤ ثم ٨ ثوانٍ… حتى ١٥ ثانية. لا رسائل على ntfy في هذا كله */
   let backoff = 2000;
   const later = (fn: () => void) => {
     clearTimeout(timer);
     timer = setTimeout(() => !stopped && fn(), backoff);
-    backoff = Math.min(backoff * 2, 30000);
+    backoff = Math.min(backoff * 2, 15000);
   };
   const setDirect = (v: boolean) => {
     if (status.direct === v) return;
     status.direct = v;
+    directSince = Date.now();
     if (v) backoff = 2000;
+    else {
+      status.rtt = null;
+      status.via = null;
+    }
     report();
   };
 
-  /** قناة مفتوحة: تصبح هي قناة الإرسال، وتحل محل أي قناة سابقة */
+  /** هل القناة عبر خادم تمرير؟ من إحصاءات الاتصال، لتُعرض على الجوال */
+  const checkRoute = async (c: DataConnection) => {
+    try {
+      const stats = await c.peerConnection.getStats();
+      let local = '';
+      stats.forEach((r) => {
+        if (r.type === 'candidate-pair' && r.nominated && r.state === 'succeeded') local = r.localCandidateId;
+      });
+      stats.forEach((r) => {
+        if (r.id === local) status.via = r.candidateType === 'relay' ? 'turn' : 'p2p';
+      });
+      report();
+    } catch {
+      /* غير مدعوم */
+    }
+  };
+
+  /* ---------- القناة المباشرة ---------- */
+  let lastPong = 0;
+  const raw = (e: Envelope) => {
+    if (conn?.open) {
+      try {
+        conn.send(e);
+        return true;
+      } catch {
+        /* تُعامل كقناة مغلقة */
+      }
+    }
+    return false;
+  };
+
+  /* ---------- الأوامر المؤكَّدة (الجوال) ---------- */
+  /* ترقيم يبدأ عشوائيًا لكل جلسة جوال: لا يختلط بأوامر جوال سابق، ولا يُنفَّذ أمر أُعيد بعد إعادة الاتصال مرتين */
+  let nextId = Math.floor(Math.random() * 1e9);
+  const queue = new Map<number, { e: Envelope; at: number; first: number; viaRelay: number }>();
+  const setPending = () => {
+    if (status.pending !== queue.size) {
+      status.pending = queue.size;
+      report();
+    }
+  };
+  /** يرسل ما لم يُؤكَّد: عبر القناة المباشرة كل ثانية ونصف، وعبر ntfy كل ٦ ثوانٍ فقط إن لم تكن قناة */
+  const flush = () => {
+    const now = Date.now();
+    queue.forEach((q, id) => {
+      // أمر قديم لم يصل: يُترك، فلا يُنفَّذ متأخرًا بعد أن تجاوزه المعلم
+      if (now - q.first > 20000) return void queue.delete(id);
+      if (q.at && now - q.at < 1500) return;
+      if (raw(q.e)) q.at = now;
+      else if (relayMode() && now - q.viaRelay > 6000) {
+        q.viaRelay = now;
+        q.at = now;
+        void post(q.e);
+      }
+    });
+    setPending();
+  };
+
+  /* الآيباد: الأوامر المنفذة مؤخرًا، لتجاهل المكرر */
+  const seen: number[] = [];
+  const receive = (e: Envelope) => {
+    if ('pong' in e) {
+      lastPong = Date.now();
+      status.rtt = Date.now() - e.pong;
+      return report();
+    }
+    if ('ping' in e) return void raw({ pong: e.ping });
+    if ('ack' in e) {
+      queue.delete(e.ack);
+      return setPending();
+    }
+    if ('cmd' in e && e.id !== undefined) {
+      const ack: Envelope = { ack: e.id };
+      if (!raw(ack)) void post(ack);
+      if (seen.includes(e.id)) return;
+      seen.push(e.id);
+      if (seen.length > 200) seen.shift();
+    }
+    onData(e);
+  };
+
   const adopt = (c: DataConnection) => {
     c.on('open', () => {
       log(role, 'channel open');
       if (conn && conn !== c) conn.close();
       conn = c;
+      lastPong = Date.now();
       setDirect(true);
+      void checkRoute(c);
+      flush();
     });
-    c.on('data', (d) => onData(d as Envelope));
+    c.on('data', (d) => receive(d as Envelope));
     const lost = () => {
       if (conn !== c) return;
       log(role, 'channel closed');
@@ -296,9 +398,10 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     c.on('error', lost);
   };
 
-  /** الجوال: يتصل بالآيباد؛ إن لم تُفتح القناة خلال ١٠ ثوانٍ يعيد المحاولة */
+  /* ---------- PeerJS ---------- */
   const dial = () => {
-    if (!peer || peer.destroyed || peer.disconnected) return;
+    if (!peer || peer.destroyed) return;
+    if (peer.disconnected) return void peer.reconnect();
     log('phone', 'dial', hostId);
     const c = peer.connect(hostId, { reliable: true, serialization: 'json' });
     adopt(c);
@@ -318,7 +421,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     peer = p;
     p.on('open', () => {
       log(role, 'peer open');
-      if (role === 'phone') dial();
+      if (role === 'phone' && !conn) dial();
     });
     if (role === 'host') p.on('connection', adopt);
     p.on('disconnected', () => {
@@ -336,9 +439,41 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   };
   if (typeof RTCPeerConnection !== 'undefined') void start().catch((e) => log(role, 'peer load failed', e));
 
+  /* ---------- العودة إلى الصفحة أو الشبكة: إعادة اتصال فورية بدل انتظار المهلة ---------- */
+  const wake = () => {
+    if (stopped || document.visibilityState !== 'visible') return;
+    backoff = 2000;
+    if (!peer || peer.destroyed) return void start().catch(() => {});
+    if (peer.disconnected) peer.reconnect();
+    if (role === 'phone') {
+      if (!conn?.open) {
+        clearTimeout(timer);
+        dial();
+      } else raw({ ping: Date.now() });
+    }
+  };
+  document.addEventListener('visibilitychange', wake);
+  window.addEventListener('online', wake);
+  window.addEventListener('pageshow', wake);
+
+  /* نبض الجوال كل ٣ ثوانٍ: قناة لا ترد ٨ ثوانٍ تُعدّ ميتة، فتُغلق ويُعاد الاتصال فورًا */
+  const beat = setInterval(() => {
+    if (role !== 'phone' || document.visibilityState !== 'visible' || !conn?.open) return;
+    if (Date.now() - lastPong > 8000) {
+      log('phone', 'no pong: redial');
+      const c = conn;
+      conn = null;
+      c.close();
+      setDirect(false);
+      backoff = 2000;
+      dial();
+    } else raw({ ping: Date.now() });
+  }, 3000);
+  const resend = setInterval(() => queue.size && flush(), 500);
+
   const stopRelay = subscribe(
     inbox,
-    (e) => onData(e),
+    (e) => receive(e),
     (open) => {
       status.relay = open;
       report();
@@ -346,17 +481,23 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   );
 
   return {
-    send: (e: Envelope) => {
-      if (conn?.open) {
-        conn.send(e);
-        return Promise.resolve(true);
-      }
-      return post(e);
+    /** أمر مؤكَّد (الجوال): يُعاد حتى يؤكده الآيباد */
+    sendReliable: (e: { cmd: RemoteCmd }) => {
+      const id = nextId++;
+      queue.set(id, { e: { ...e, id }, at: 0, first: Date.now(), viaRelay: 0 });
+      flush();
     },
+    /** رسالة عادية (حالة الآيباد): آخرها يكفي، فلا تأكيد */
+    send: (e: Envelope) => (raw(e) ? Promise.resolve(true) : post(e)),
     direct: () => status.direct,
     stop: () => {
       stopped = true;
       clearTimeout(timer);
+      clearInterval(beat);
+      clearInterval(resend);
+      document.removeEventListener('visibilitychange', wake);
+      window.removeEventListener('online', wake);
+      window.removeEventListener('pageshow', wake);
       stopRelay();
       conn?.close();
       peer?.destroy();
@@ -373,5 +514,5 @@ export function hostLink(channel: string, onCmd: (c: RemoteCmd) => void, onStatu
 /** جانب الجوال: يرسل الأوامر ويستقبل الحالة */
 export function remoteLink(channel: string, onState: (s: RemoteState) => void, onStatus: (s: LinkStatus) => void) {
   const l = makeLink('phone', channel, (e) => 'state' in e && onState(e.state), onStatus);
-  return { stop: l.stop, direct: l.direct, send: (cmd: RemoteCmd) => l.send({ cmd }) };
+  return { stop: l.stop, direct: l.direct, send: (cmd: RemoteCmd) => l.sendReliable({ cmd }) };
 }

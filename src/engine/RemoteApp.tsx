@@ -72,7 +72,7 @@ export function RemoteApp({ channel }: { channel: string }) {
   const [st, setSt] = useState<RemoteState | null>(null);
   /** وقت وصول آخر حالة، ليعدّ المؤقت منه */
   const [stAt, setStAt] = useState(0);
-  const [link, setLink] = useState<LinkStatus>({ direct: false, relay: false, limited: false });
+  const [link, setLink] = useState<LinkStatus>({ direct: false, relay: false, limited: false, pending: 0, rtt: null, via: null });
   const online = link.direct || link.relay;
   const [waiting, setWaiting] = useState(false);
   const linkRef = useRef<ReturnType<typeof remoteLink> | null>(null);
@@ -156,13 +156,26 @@ export function RemoteApp({ channel }: { channel: string }) {
 
   const [shown, total] = st?.steps ?? [0, 0];
   const moreSteps = shown < total;
-  const status = !online ? 'جارٍ الاتصال…' : !st ? (waiting ? 'افتح الدرس على الآيباد واضغط «الجوال» ثم «تشغيل»' : 'جارٍ البحث عن الآيباد…') : link.direct ? 'متصل مباشرة بالآيباد' : 'متصل عبر الخادم (أبطأ، وله حد يومي)';
+  // سرعة الاتصال وطريقه ظاهرة للمعلم، فيعرف إن كان البطء من الشبكة
+  const speed = link.rtt !== null ? ` · ${num(link.rtt)} م.ث` : '';
+  const route = link.via === 'turn' ? 'متصل عبر خادم وسيط' : 'متصل مباشرة بالآيباد';
+  const status = !online
+    ? 'جارٍ الاتصال…'
+    : !st
+      ? waiting
+        ? 'افتح الدرس على الآيباد واضغط «الجوال» ثم «تشغيل»'
+        : 'جارٍ البحث عن الآيباد…'
+      : link.direct
+        ? route + speed + (link.pending ? ' · يرسل…' : '')
+        : link.relay
+          ? 'متصل عبر الخادم الاحتياطي (أبطأ)' + (link.pending ? ' · يرسل…' : '')
+          : 'يعيد الاتصال بالآيباد…' + (link.pending ? ' (الضغطات محفوظة)' : '');
 
   return (
     <div className="remote">
       <header className="rhead">
         <b>{st?.lesson ?? 'التحكم بالدرس'}</b>
-        <span className={'dot' + (online && st ? ' ok' : '')}>{status}</span>
+        <span className={'dot' + (online && st && !link.pending ? ' ok' : '')}>{status}</span>
       </header>
 
       {link.limited && !link.direct && (

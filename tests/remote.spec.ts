@@ -200,3 +200,25 @@ test('سهما الجوال: الخطوات أولًا ثم الشريحة ال�
   await expect.poll(() => activeIndex(ipad)).toBe(String(Number(slide) - 1));
   expect(errors).toEqual([]);
 });
+
+test('الضغطات السريعة تصل كلها مرة واحدة', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  // ثلاث ضغطات «التالي» متتالية دون انتظار: أول شرائح الدرس بلا خطوات، فكل ضغطة شريحة واحدة بالضبط
+  await expect.poll(() => activeIndex(ipad)).toBe('0');
+  for (let k = 0; k < 3; k++) await phone.locator('.rnav .next').click({ noWaitAfter: true });
+  await expect.poll(() => activeIndex(ipad)).toBe('3');
+  await phone.waitForTimeout(2000);
+  expect(await activeIndex(ipad), 'لا ضغطة مكررة').toBe('3');
+  await expect(phone.locator('.rhead .dot')).not.toContainText('يرسل');
+  expect(errors).toEqual([]);
+});
+
+test('بعد إعادة فتح الدرس على الآيباد يعود الجوال وحده', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  await ipad.reload();
+  // الآيباد يتذكر أن التحكم مفعّل، والجوال يعيد الاتصال دون مسح الرمز
+  await expect(phone.locator('.rhead .dot')).toContainText('مباشرة', { timeout: 60000 });
+  await phone.locator('.rnav .next').click();
+  await expect.poll(() => activeIndex(ipad), { timeout: 15000 }).toBe('1');
+  expect(errors).toEqual([]);
+});

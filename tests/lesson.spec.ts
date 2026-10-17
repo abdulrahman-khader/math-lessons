@@ -114,6 +114,28 @@ for (const file of files) {
       }
     });
 
+    test('إعادة الدرس كاملًا تمحو كل الشرائح والنقاط وتعود إلى البداية', async ({ page }) => {
+      await open(page, file, []);
+      const n = await slideCount(page);
+      let touched = 0;
+      for (let i = 1; i < n && touched < 3; i++) {
+        const slide = await goTo(page, i);
+        if ((await slide.locator('.step').count()) === 0) continue;
+        await page.keyboard.press('Space');
+        touched++;
+      }
+      expect(touched).toBeGreaterThan(0);
+      await page.locator('.team button[aria-label="إضافة نقطة"]').first().click();
+      await expect(page.locator('.team .tn').first()).toContainText('١');
+      await page.locator('.rmenu > button').click();
+      await page.locator('.rpop button', { hasText: 'إعادة الدرس كاملًا' }).click();
+      await page.locator('.rpop button', { hasText: 'نعم، أعد الدرس' }).click();
+      await expect(page.locator('.rpop')).toHaveCount(0);
+      await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', '0');
+      await expect(page.locator('.step.shown')).toHaveCount(0);
+      await expect(page.locator('.team .tn').first()).toContainText('٠');
+    });
+
     test('«بدون» فرق يخفي النقاط وأزرار النجوم', async ({ page }) => {
       await open(page, file, []);
       await page.locator('.teamset .btn', { hasText: 'بدون' }).click();

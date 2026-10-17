@@ -272,3 +272,15 @@ body.flow #prog { order: -1; flex-basis: 100%; }
 body.flow #teams { flex-wrap: wrap; }
 body.flow .mbox { grid-template-columns: 1fr; }
 body.flow .home h1 { font-size: 2em; }
+
+/* قائمة الإعادة: الشريحة أو الدرس كاملًا */
+.rmenu { position: relative; display: inline-flex; }
+.rback { position: fixed; inset: 0; z-index: 29; }
+.rpop { position: absolute; top: calc(100% + .35em); inset-inline-start: 0; z-index: 30; display: flex; flex-direction: column; gap: .3em; min-width: 13em; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: .55em; padding: .4em; box-shadow: 0 8px 24px #0005; font-size: .8em; }
+.rpop button { text-align: start; font: inherit; font-weight: 700; color: var(--ink); background: var(--bg); border: 2px solid var(--line); border-radius: .4em; padding: .6em .7em; min-height: 2.6em; cursor: pointer; touch-action: manipulation; }
+.rpop button:hover { border-color: var(--ink); }
+.rpop button small { font-weight: 500; opacity: .7; }
+.rpop button.all { background: var(--warn-t); border-color: var(--warn); color: var(--warn); }
+.rpop .q { font-weight: 700; line-height: 1.6; padding: .2em .3em; max-width: 16em; }
+/* على الآيباد لا لوحة مفاتيح غالبًا: نخفي اختصار R */
+@media (hover: none) { .rpop button small { display: none; } }

@@ -35,6 +35,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [layout, setLayout] = useState({ flow: false, scale: 1 });
   /** عدد مرات إعادة كل شريحة؛ تغيّره يعيد تركيب الشريحة فتعود كل حالتها (الخطوات، الإجابات، السحب، الكتابة) */
   const [resets, setResets] = useState<Record<number, number>>({});
+  /** عدد مرات إعادة الدرس كاملًا؛ يدخل في مفتاح كل شريحة وفي مفتاح القلم */
+  const [lessonGen, setLessonGen] = useState(0);
+  /** قائمة الإعادة: مغلقة، أو مفتوحة، أو تنتظر تأكيد إعادة الدرس كاملًا */
+  const [resetMenu, setResetMenu] = useState<'closed' | 'open' | 'confirm'>('closed');
   const appRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const slideApis = useRef<(SlideApi | null)[]>([]);
@@ -104,6 +108,16 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     else goto(0);
   };
   const resetSlide = useCallback(() => setResets((r) => ({ ...r, [cur]: (r[cur] ?? 0) + 1 })), [cur]);
+  /** إعادة الدرس كاملًا: كل الشرائح ورسوم القلم والنقاط والمؤقت، ثم العودة إلى البداية. أسماء الفرق وعددها تبقى. */
+  const resetLesson = () => {
+    setResets({});
+    setLessonGen((g) => g + 1);
+    setPen(false);
+    setTimer(TIMER_OFF);
+    patch({ scores: [0, 0, 0, 0] });
+    setResetMenu('closed');
+    goto(0);
+  };
 
   const engine = useMemo<EngineApi>(
     () => ({ nTeams: st.nTeams, teamNames: st.names, scores: st.scores, addScore, startTimer, goto, registerSlide }),
@@ -115,6 +129,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     const onKey = (e: KeyboardEvent) => {
       const tg = (e.target as HTMLElement).tagName;
       if (tg === 'INPUT' || tg === 'TEXTAREA') return;
+      if (resetMenu !== 'closed') {
+        if (e.key === 'Escape') setResetMenu('closed');
+        return;
+      }
       if (wheelOpen) {
         if (e.key === 'Escape') setWheelOpen(false);
         return;
@@ -139,7 +157,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [cur, wheelOpen, goto, resetSlide]);
+  }, [cur, wheelOpen, resetMenu, goto, resetSlide]);
 
   const s = slides[cur];
   const m = lesson.meta;
@@ -163,10 +181,51 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             <span id="secChip">{SECTION_NAMES[s.sec]}</span>
             <span className="sp" />
             <div className="tools">
-              <button className="ib" title="إعادة الشريحة (R)" aria-label="إعادة الشريحة" onClick={resetSlide}>
-                <IconReset />
-                <span className="lbl">إعادة</span>
-              </button>
+              <span className="rmenu">
+                <button
+                  className={toolBtn(resetMenu !== 'closed')}
+                  title="إعادة"
+                  aria-label="إعادة"
+                  aria-expanded={resetMenu !== 'closed'}
+                  onClick={() => setResetMenu((x) => (x === 'closed' ? 'open' : 'closed'))}
+                >
+                  <IconReset />
+                  <span className="lbl">إعادة</span>
+                </button>
+                {resetMenu !== 'closed' && (
+                  <>
+                    <span className="rback" onClick={() => setResetMenu('closed')} />
+                    <span className="rpop" role="menu">
+                      {resetMenu === 'open' ? (
+                        <>
+                          <button
+                            role="menuitem"
+                            onClick={() => {
+                              resetSlide();
+                              setResetMenu('closed');
+                            }}
+                          >
+                            إعادة هذه الشريحة <small>(R)</small>
+                          </button>
+                          <button role="menuitem" className="all" onClick={() => setResetMenu('confirm')}>
+                            إعادة الدرس كاملًا
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="q">تُمحى كل الإجابات والرسوم ونقاط الفرق، ويعود الدرس إلى البداية. متأكد؟</span>
+                          <button role="menuitem" className="all" onClick={resetLesson}>
+                            نعم، أعد الدرس
+                          </button>
+                          <button role="menuitem" onClick={() => setResetMenu('closed')}>
+                            إلغاء
+                          </button>
+                        </>
+                      )}
+                    </span>
+                  </>
+                )}
+              </span>
               <button className={toolBtn(pen)} title="قلم الرسم" aria-label="قلم الرسم" onClick={() => setPen(!pen)}>
                 <IconPen />
                 <span className="lbl">قلم</span>
@@ -201,7 +260,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
           <main id="main" ref={mainRef}>
             {slides.map((sl, i) => (
               <section key={i} className={'slide' + (i === cur ? ' active' : '')} data-sec={sl.sec} data-index={i}>
-                <SlideScope index={i} key={resets[i] ?? 0}>
+                <SlideScope index={i} key={`${lessonGen}-${resets[i] ?? 0}`}>
                   {i === 0 ? (
                     <Home
                       lesson={lesson}
@@ -220,7 +279,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
                 </SlideScope>
               </section>
             ))}
-            <Pen active={pen} onClose={() => setPen(false)} slide={cur} resetCount={resets[cur] ?? 0} layoutKey={`${layout.flow}-${layout.scale}-${st.teacher}`} main={mainRef} />
+            <Pen key={lessonGen} active={pen} onClose={() => setPen(false)} slide={cur} resetCount={resets[cur] ?? 0} layoutKey={`${layout.flow}-${layout.scale}-${st.teacher}`} main={mainRef} />
             <TimerWidget t={timer} set={setTimer} />
           </main>
 

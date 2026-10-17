@@ -37,12 +37,25 @@ export type RemoteCmd =
   | { c: 'teacher'; on: boolean }
   | { c: 'chart'; i: number; v: number }
   | { c: 'chartMode'; m: string }
+  /** مستكشف الحقائق المترابطة: عدد كل لون، أو الجملة المختارة (٠–٣) */
+  | { c: 'family'; a?: number; b?: number; pick?: number }
   | { c: 'mcq'; k: number; o: string }
   | { c: 'mcqAward'; k: number; team: number }
   | { c: 'timer'; a: 'start'; sec: number }
   | { c: 'timer'; a: 'toggle' | 'close' }
   /** مكان المؤقت وحجمه: s الحجم، وax وay من −١ إلى ١ (٠ = الوسط) */
   | { c: 'timerView'; v: { s?: number; ax?: number; ay?: number } };
+
+/** مستكشف الحقائق المترابطة في الشريحة الحالية */
+export interface RemoteFamily {
+  a: number;
+  b: number;
+  max: number;
+  /** الجملة المختارة: ٠ و١ جمع، ٢ و٣ طرح */
+  pick: number;
+  colors: [string, string];
+  names: [string, string];
+}
 
 /** سؤال اختيار من متعدد في الشريحة الحالية */
 export interface RemoteMcq {
@@ -88,6 +101,7 @@ export interface RemoteState {
   wheelResult: string;
   teacher: boolean;
   chart: RemoteChart | null;
+  family?: RemoteFamily | null;
   mcqs: RemoteMcq[];
   /** المؤقت. لا تُرسل الحالة كل ثانية: الجوال يعدّ تنازليًا وحده من آخر حالة وصلته */
   timer: { show: boolean; run: boolean; left: number; view?: { s: number; ax: number; ay: number } };

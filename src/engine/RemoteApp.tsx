@@ -7,6 +7,7 @@ const SPOTS = [-1, 0, 1].flatMap((ay) => [-1, 0, 1].map((ax) => ({ ax, ay })));
 import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
+import { RemoteFamilyCard } from './components/RemoteFamilyCard';
 
 /** شاشة الجوال: أزرار التحكم بالآيباد، وملاحظات المعلم للشريحة الحالية */
 /** المؤقت على الجوال: يعدّ تنازليًا وحده من آخر حالة وصلت من الآيباد */
@@ -232,6 +233,8 @@ export function RemoteApp({ channel }: { channel: string }) {
               ))}
             </section>
           )}
+
+          {st.family && <RemoteFamilyCard f={st.family} send={(v) => send({ c: 'family', ...v })} />}
 
           {st.chart && <RemoteChartCard chart={st.chart} send={(i, v) => send({ c: 'chart', i, v })} onMode={(m) => send({ c: 'chartMode', m })} />}
 

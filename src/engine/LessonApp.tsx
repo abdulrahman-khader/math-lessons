@@ -189,6 +189,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'chartMode':
         api?.chart()?.setMode?.(c.m);
         break;
+      case 'family':
+        api?.family()?.set({ a: c.a, b: c.b, pick: c.pick });
+        break;
       case 'mcq':
         api?.mcqs()[c.k]?.choose(c.o);
         break;
@@ -256,6 +259,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         wheelResult,
         teacher: st.teacher,
         chart: slideApis.current[cur]?.chart()?.get() ?? null,
+        family: slideApis.current[cur]?.family()?.get() ?? null,
         mcqs: (slideApis.current[cur]?.mcqs() ?? []).map((m) => m.get()),
         timer: { show: timerNow.current.show, run: timerNow.current.run, left: timerNow.current.left, view: st.timerView },
       };

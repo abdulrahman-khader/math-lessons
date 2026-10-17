@@ -1,6 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { HlKey } from './types';
-import type { RemoteChart, RemoteMcq } from './remote';
+import type { RemoteChart, RemoteFamily, RemoteMcq } from './remote';
+
+/** مستكشف الحقائق المترابطة يسجّل نفسه ليتحكم به الجوال */
+export interface FamilyCtrl {
+  get: () => RemoteFamily;
+  set: (v: { a?: number; b?: number; pick?: number }) => void;
+}
 
 /** سؤال اختيار من متعدد يسجّل نفسه ليُجاب من الجوال */
 export interface McqCtrl {
@@ -55,6 +61,7 @@ export interface SlideApi {
   /** عدد الخطوات الظاهرة من مجموعها */
   info: () => { shown: number; total: number };
   chart: () => ChartCtrl | null;
+  family: () => FamilyCtrl | null;
   /** أسئلة الاختيار في الشريحة بترتيب ظهورها */
   mcqs: () => McqCtrl[];
 }
@@ -67,6 +74,7 @@ interface SlideState extends SlideApi {
   activeHl: ReadonlySet<string>;
   hintOpen: boolean;
   setChart: (c: ChartCtrl | null) => void;
+  setFamily: (c: FamilyCtrl | null) => void;
   registerMcq: (id: string, c: McqCtrl) => () => void;
   /** تغيّرت حالة رسم تفاعلي: أبلغ جهاز التحكم */
   touch: () => void;
@@ -125,6 +133,11 @@ export function SlideScope({ index, children }: { index: number; children: React
   const setChart = useCallback((c: ChartCtrl | null) => {
     chartRef.current = c;
   }, []);
+  const familyRef = useRef<FamilyCtrl | null>(null);
+  const family = useCallback(() => familyRef.current, []);
+  const setFamily = useCallback((c: FamilyCtrl | null) => {
+    familyRef.current = c;
+  }, []);
   const mcqMap = useRef(new Map<string, McqCtrl>());
   const registerMcq = useCallback((id: string, c: McqCtrl) => {
     mcqMap.current.set(id, c);
@@ -143,9 +156,9 @@ export function SlideScope({ index, children }: { index: number; children: React
   );
 
   useEffect(() => {
-    engine.registerSlide(index, { reveal, hideAll, toggleHint, info, chart, mcqs });
+    engine.registerSlide(index, { reveal, hideAll, toggleHint, info, chart, family, mcqs });
     return () => engine.registerSlide(index, null);
-  }, [engine, index, reveal, hideAll, toggleHint, info, chart, mcqs]);
+  }, [engine, index, reveal, hideAll, toggleHint, info, chart, family, mcqs]);
 
   const { slideChanged } = engine;
   useEffect(() => slideChanged(), [shown, hintOpen, slideChanged]);
@@ -166,11 +179,13 @@ export function SlideScope({ index, children }: { index: number; children: React
       info,
       chart,
       setChart,
+      family,
+      setFamily,
       mcqs,
       registerMcq,
       touch: slideChanged,
     };
-  }, [shown, hintOpen, reveal, hideAll, register, toggleHint, info, chart, setChart, mcqs, registerMcq, slideChanged]);
+  }, [shown, hintOpen, reveal, hideAll, register, toggleHint, info, chart, setChart, family, setFamily, mcqs, registerMcq, slideChanged]);
 
   return <SlideCtx.Provider value={value}>{children}</SlideCtx.Provider>;
 }

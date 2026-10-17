@@ -126,3 +126,26 @@ test('الجوال يغيّر مكان المؤقت وحجمه على الآيب
   await expect(phone.locator('.rspots button').first()).toHaveClass(/on/);
   expect(errors).toEqual([]);
 });
+
+test('الجوال يتحكم بمستكشف الحقائق المترابطة', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  // ننتقل بالأقسام حتى يظهر المستكشف (إن كان في الدرس)
+  const secs = await phone.locator('.rsecs .rbtn').count();
+  let found = false;
+  for (let k = 0; k < secs && !found; k++) {
+    await phone.locator('.rsecs .rbtn').nth(k).click();
+    await ipad.waitForTimeout(400);
+    found = (await ipad.locator('section.slide.active .ffam').count()) > 0;
+  }
+  test.skip(!found, 'لا مستكشف حقائق في هذا الدرس');
+  await expect(phone.locator('.rfamily')).toBeVisible();
+  const a0 = await ipad.locator('section.slide.active .ffstep b').first().textContent();
+  await phone.locator('.rfamily .rval button[aria-label^="زيادة"]').first().click();
+  await expect(ipad.locator('section.slide.active .ffstep b').first()).not.toHaveText(a0!);
+  // جملة طرح: يُؤخذ جزء من المكعبات على الآيباد
+  await phone.locator('.rfact.sub').first().click();
+  await expect(ipad.locator('section.slide.active .fffact.sub.on')).toHaveCount(1);
+  await expect(ipad.locator('section.slide.active .cpart.off')).toHaveCount(1);
+  await expect(phone.locator('.rfact.sub.on')).toHaveCount(1);
+  expect(errors).toEqual([]);
+});

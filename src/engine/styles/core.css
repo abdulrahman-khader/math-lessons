@@ -389,3 +389,68 @@ body.remote-body { background: var(--bg); height: auto; min-height: 100%; }
 .rspots { direction: ltr; display: grid; grid-template-columns: repeat(3, 2.6rem); grid-template-rows: repeat(3, 1.8rem); gap: .25rem; padding: .3rem; background: var(--ink); border-radius: .5rem; }
 .rspots button { border: 0; border-radius: .3rem; background: #ffffff2e; cursor: pointer; touch-action: manipulation; }
 .rspots button.on { background: var(--hl); }
+
+/* ===== المكعبات المتصلة والحقائق المترابطة (الصفوف الأولى) ===== */
+.cubes { width: 100%; height: auto; display: block; direction: ltr; }
+.cubes .cpart { transition: transform .45s ease, opacity .45s ease; }
+.cubes .cpart.off { opacity: .22; }
+.cubes .ccount { font-family: var(--display); font-size: 30px; font-weight: 800; fill: var(--ink); transition: opacity .45s; }
+.cubes .ccount.off { opacity: .35; text-decoration: line-through; }
+.cubebox { display: flex; flex-direction: column; justify-content: center; gap: .4em; padding: .6em; }
+
+/* خانة الناتج: إطار متقطع ثابت، والرقم يظهر داخله */
+.blank { display: inline-flex; align-items: center; justify-content: center; min-width: 2.2em; min-height: 1.45em; border: 3px dashed var(--muted); border-radius: .35em; vertical-align: middle; background: var(--paper); }
+.blank .step.bv.shown { display: inline; font-weight: 800; color: var(--ex); animation: pop .3s ease; }
+.blank:has(.step.shown) { border-style: solid; border-color: var(--ex); background: var(--ex-t); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.fline { display: flex; align-items: center; gap: .35em; font-size: 1.15em; font-weight: 800; }
+.flines { display: flex; flex-direction: column; gap: .35em; }
+
+/* جمع وطرح رأسي: عمود الإشارة يمين الأرقام (RTL)، والأرقام محاذاة للآحاد */
+.vsum { display: inline-grid; grid-template-columns: 1.1em auto; column-gap: .25em; font-family: var(--display); font-size: 1.25em; font-weight: 800; line-height: 1.25; }
+.vsum .vn { direction: ltr; text-align: end; min-width: 2em; }
+.vsum .vop { text-align: center; }
+.vsum .vline { grid-column: 1 / -1; border-block-start: 4px solid var(--ink); margin-block: .1em; }
+.vsum .blank { min-width: 1.9em; font-size: .85em; }
+
+/* مستكشف الحقائق المترابطة */
+.ffam { display: grid; grid-template-columns: 1.15fr 1fr; gap: .8em; align-items: center; }
+.ffcubes { display: flex; flex-direction: column; gap: .5em; background: var(--paper); border: 3px solid var(--line); border-radius: .6em; padding: .5em; }
+.ffsteps { display: flex; gap: .5em; justify-content: center; flex-wrap: wrap; }
+.ffstep { display: grid; grid-template-columns: auto 2.2em 1.8em 2.2em; align-items: center; gap: .3em; border: 3px solid; border-radius: .5em; padding: .15em .35em; font-weight: 800; font-size: .8em; }
+.ffstep b { text-align: center; font-size: 1.2em; }
+.ffstep button { min-height: 2em; border: 0; border-radius: .35em; background: var(--bg); font-size: 1.2em; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+.fffacts { display: grid; grid-template-columns: 1fr 1fr; gap: .5em; }
+.fffact { min-height: 2.6em; border: 3px solid var(--line); border-radius: .55em; background: var(--paper); font-size: 1.05em; cursor: pointer; touch-action: manipulation; }
+.fffact.add { border-color: var(--rule); }
+.fffact.sub { border-color: var(--warn); }
+.fffact.on { box-shadow: 0 0 0 4px var(--hl); background: #fff7ef; }
+
+/* عدة أسئلة كتاب على شريحة واحدة */
+.qgrid { display: grid; gap: .5em; }
+.qgrid.three { grid-template-columns: repeat(3, 1fr); }
+.qgrid.two { grid-template-columns: repeat(2, 1fr); }
+.qgrid.one { grid-template-columns: 1fr; }
+.qcard { display: flex; align-items: center; justify-content: space-around; gap: .6em; position: relative; padding: .35em .6em; }
+.qcard > .qnum { position: absolute; top: .3em; inset-inline-start: .3em; }
+.qcard .flines { padding-inline-start: 1.8em; }
+.qcard .mcq { flex: 1; padding-inline-start: 1.8em; }
+body.flow .qgrid.three, body.flow .qgrid.two { grid-template-columns: 1fr; }
+
+/* الرأس: العنوان الطويل يُختصر بنقاط بدل أن تنكسر أزرار الأدوات إلى سطرين */
+.ib { white-space: nowrap; flex: none; }
+#hdr .ttl { flex: 0 1 auto; overflow: hidden; }
+#hdr .ttl b, #hdr .ttl span { overflow: hidden; text-overflow: ellipsis; }
+#secChip { white-space: nowrap; flex: none; }
+#hdr .ttl b { font-size: .92em; }
+
+/* مستكشف الحقائق المترابطة على الجوال */
+.rcubes { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; padding: .5rem; background: var(--bg); border-radius: .5rem; }
+.rcubes i { width: 1.35rem; height: 1.35rem; border-radius: .25rem; border: 2px solid #0003; transition: opacity .3s, transform .3s; }
+.rcubes i.off { opacity: .2; transform: translateY(.5rem); }
+.rcubes .rgap { width: .6rem; }
+.rfacts { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.rfact { min-height: 3.2rem; border: 2px solid var(--line); border-radius: .7rem; background: var(--paper); font-size: 1.2rem; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+.rfact.add { border-color: var(--rule); }
+.rfact.sub { border-color: var(--warn); }
+.rfact.on { box-shadow: 0 0 0 3px var(--hl); background: #fff7ef; }

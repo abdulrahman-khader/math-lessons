@@ -15,6 +15,15 @@ const RELAY = (() => {
     return 'https://ntfy.sh/';
   }
 })();
+/** سجل التشخيص: localStorage['remote:debug'] = '1' */
+const DEBUG = (() => {
+  try {
+    return localStorage.getItem('remote:debug') === '1';
+  } catch {
+    return false;
+  }
+})();
+const log = (...a: unknown[]) => DEBUG && console.info('[remote]', ...a);
 const ICE: RTCConfiguration = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }] };
 const KEY = 'remote:channel';
 const ON_KEY = 'remote:on';
@@ -28,13 +37,14 @@ export type RemoteCmd =
   | { c: 'hello'; v?: string }
   | { c: 'next' } // يُظهر الخطوة التالية، وإن لم تبقَ خطوات ينتقل إلى الشريحة التالية
   | { c: 'prev' }
+  /** يُخفي آخر خطوة ظاهرة، وإن لم تكن خطوة ظاهرة يعود إلى الشريحة السابقة */
+  | { c: 'back' }
   | { c: 'goto'; i: number }
   | { c: 'hint' }
   | { c: 'resetSlide' }
   | { c: 'score'; team: number; d: number }
   | { c: 'wheel'; open: boolean }
   | { c: 'spin' }
-  | { c: 'teacher'; on: boolean }
   | { c: 'chart'; i: number; v: number }
   | { c: 'chartMode'; m: string }
   /** مستكشف الحقائق المترابطة: عدد كل لون، أو الجملة المختارة (٠–٣) */
@@ -99,7 +109,6 @@ export interface RemoteState {
   sections: { name: string; first: number }[];
   wheel: boolean;
   wheelResult: string;
-  teacher: boolean;
   chart: RemoteChart | null;
   family?: RemoteFamily | null;
   mcqs: RemoteMcq[];
@@ -199,17 +208,23 @@ function subscribe(topic: string, onMsg: (e: Envelope) => void, onOpen: (open: b
   return () => es.close();
 }
 
-/** ينتظر جمع عناوين الاتصال كلها (أو مهلة قصيرة) لنرسل الوصف في رسالة واحدة */
-function gathered(pc: RTCPeerConnection, ms = 2500) {
+/**
+ * ينتظر عناوين الاتصال قبل إرسال الوصف في رسالة واحدة: حتى يكتمل الجمع،
+ * أو بعد نصف ثانية من ظهور أول عنوان، وبحد أقصى ١٠ ثوانٍ.
+ * لا نرسل وصفًا بلا عناوين: بعض الأجهزة يتأخر فيها أول عنوان ثانيتين أو أكثر، فيفشل الاتصال.
+ */
+function gathered(pc: RTCPeerConnection, grace = 500, max = 10000) {
   return new Promise<void>((done) => {
-    if (pc.iceGatheringState === 'complete') return done();
-    const t = setTimeout(done, ms);
-    pc.addEventListener('icegatheringstatechange', () => {
-      if (pc.iceGatheringState === 'complete') {
-        clearTimeout(t);
-        done();
-      }
-    });
+    const t0 = Date.now();
+    let firstAt = 0;
+    const tick = () => {
+      if (pc.iceGatheringState === 'complete') return done();
+      const has = /a=candidate/.test(pc.localDescription?.sdp ?? '');
+      if (has && !firstAt) firstAt = Date.now();
+      if ((firstAt && Date.now() - firstAt >= grace) || Date.now() - t0 >= max) return done();
+      setTimeout(tick, 100);
+    };
+    tick();
   });
 }
 
@@ -235,9 +250,16 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   let dc: RTCDataChannel | null = null;
   let attempt = '';
   let retry: ReturnType<typeof setTimeout> | undefined;
-  let backoff = 15000;
+  /* إن لم تُفتح القناة: محاولة بعد ٢ ثم ٤ ثم ٨ ثوانٍ… حتى ٥ دقائق. كل محاولة رسالتان على الخادم */
+  const FIRST_RETRY = 2000;
+  let backoff = FIRST_RETRY;
   let stopped = false;
 
+  const watch = (c: RTCPeerConnection, tag: string) => {
+    const t0 = Date.now();
+    c.addEventListener('iceconnectionstatechange', () => log(role, tag, 'ice', c.iceConnectionState, Date.now() - t0, 'ms'));
+    c.addEventListener('connectionstatechange', () => log(role, tag, 'conn', c.connectionState, Date.now() - t0, 'ms'));
+  };
   const closePc = () => {
     const old = pc;
     pc = null;
@@ -252,7 +274,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     dc = ch;
     ch.onopen = () => {
       status.direct = true;
-      backoff = 15000;
+      backoff = FIRST_RETRY;
       report();
     };
     ch.onclose = () => {
@@ -270,7 +292,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     };
   };
 
-  /* الجوال: محاولة اتصال مباشر. إن لم تُفتح القناة خلال ١٠ ثوانٍ يُعاد بمهلة متزايدة؛ كل محاولة رسالة واحدة على الخادم */
+  /* الجوال: محاولة اتصال مباشر. إن لم تُفتح القناة خلال ٨ ثوانٍ يُعاد بمهلة متزايدة */
   const schedule = (ms: number) => {
     clearTimeout(retry);
     retry = setTimeout(() => void offer().catch(() => {}), ms);
@@ -282,17 +304,19 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     attempt = id;
     const c = new RTCPeerConnection(ICE);
     pc = c;
+    watch(c, 'offer');
     useChannel(c.createDataChannel('remote', { ordered: true }));
     await c.setLocalDescription(await c.createOffer());
     await gathered(c);
     if (pc !== c || stopped) return;
+    log(role, 'send offer', (c.localDescription!.sdp.match(/a=candidate/g) ?? []).length, 'candidates');
     post({ sig: { kind: 'offer', sdp: c.localDescription!.sdp, id } });
     retry = setTimeout(() => {
       if (!status.direct && pc === c) {
-        backoff = Math.min(backoff * 2, 300000);
         schedule(backoff);
+        backoff = Math.min(backoff * 2, 300000);
       }
-    }, 10000);
+    }, 8000);
   };
 
   /* الآيباد: يجيب كل عرض جديد، ويستبدل أي اتصال سابق */
@@ -300,6 +324,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     closePc();
     const c = new RTCPeerConnection(ICE);
     pc = c;
+    watch(c, 'answer');
     c.ondatachannel = (e) => {
       if (pc === c) useChannel(e.channel);
     };
@@ -307,6 +332,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
     await c.setLocalDescription(await c.createAnswer());
     await gathered(c);
     if (pc !== c || stopped) return;
+    log(role, 'send answer', (c.localDescription!.sdp.match(/a=candidate/g) ?? []).length, 'candidates');
     post({ sig: { kind: 'answer', sdp: c.localDescription!.sdp, id: sig.id } });
   };
 

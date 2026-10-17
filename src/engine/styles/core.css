@@ -166,9 +166,6 @@ mark { background: #ffe066; color: inherit; padding: 0 .15em; border-radius: .15
 .teamset input { font: inherit; font-weight: 700; width: 7.5em; padding: .2em .4em; border: 3px solid var(--line); border-radius: .35em; min-height: 2.2em; }
 
 /* ===== الملاحظات والتذييل ===== */
-#notes { flex: none; display: none; align-items: center; gap: .5em; background: #fffbe6; border-block-start: 3px solid #e6c200; padding: .15em .8em; font-size: .6em; font-weight: 700; min-height: 2.6em; line-height: 1.4; color: #3d3000; }
-#notes b { flex: none; background: #3d3000; color: #fff; border-radius: .35em; padding: .05em .5em; }
-body.teacher #notes { display: flex; }
 #ftr { flex: none; display: flex; align-items: center; gap: .5em; background: var(--paper); border-block-start: 3px solid var(--line); padding: .25em .5em; min-height: 3em; }
 .nav { min-width: 5.2em; min-height: 2.35em; font-size: .75em; }
 .nav svg { width: 1.4em; height: 1.4em; }
@@ -323,9 +320,15 @@ body.remote-body { background: var(--bg); height: auto; min-height: 100%; }
 .rbtn svg { width: 1.4rem; height: 1.4rem; }
 .rbtn.primary { background: var(--ink); color: #fff; }
 .rbtn:active { transform: scale(.97); }
-.rnav { display: grid; grid-template-columns: 1fr 2fr; gap: .6rem; }
-.rnav .rbtn { min-height: 5.5rem; font-size: 1.2rem; }
+.rnav { display: grid; grid-template-columns: 1fr auto 1fr; gap: .6rem; align-items: center; }
+.rnav .rbtn { min-height: 5.5rem; }
+.rnav .rbtn svg { width: 2.6rem; height: 2.6rem; }
 .rnav .next { background: var(--ex); border-color: var(--ex); color: #fff; }
+.rnav .rbtn:disabled { background: var(--paper); border-color: var(--line); color: var(--muted); }
+.rcount { display: flex; flex-direction: column; align-items: center; min-width: 4.5rem; }
+.rcount b { font-family: var(--display); font-size: 1.5rem; line-height: 1.2; }
+.rcount small { font-size: .8rem; font-weight: 700; color: var(--muted); }
+.rhintnav { margin: -.4rem 0 0; text-align: center; font-size: .85rem; font-weight: 700; color: var(--muted); }
 .rtools { display: flex; flex-wrap: wrap; gap: .5rem; }
 .rtools .rbtn { flex: 1 1 9rem; }
 .wres { margin: 0; font-family: var(--display); font-size: 1.8rem; font-weight: 800; color: var(--hl); text-align: center; }
@@ -467,13 +470,7 @@ body.flow .qgrid.three, body.flow .qgrid.two { grid-template-columns: 1fr; }
 .cubes .ctotal text { font-family: var(--display); font-weight: 800; fill: var(--ink); }
 
 /* بطاقات الأسئلة مع صورها */
-/* الصورة بعرض البطاقة تحت الجمع والطرح، بلا أرقام الأجزاء (تكفي خانات الناتج) */
-.qcard.vcard, .qcard.fcard { flex-direction: column; align-items: stretch; gap: .15em; padding-block: .25em; }
-.qcard.vcard .cubes, .qcard.fcard .cubes { width: 100%; }
-.qcard .vrow { display: flex; justify-content: space-around; }
-.qcard.vcard .vsum { font-size: 1.02em; }
-.qcard.fcard .flines { flex-direction: row; flex-wrap: wrap; justify-content: space-around; gap: .2em .6em; padding-inline-start: 1.8em; }
-.qcard.fcard .fline { font-size: .95em; }
+.qcard .vrow { display: flex; flex: 1; justify-content: space-around; }
 .qcard.mcard .cubes { width: 40%; flex: none; }
 .facts4 { display: grid; grid-template-columns: 1fr 1fr; gap: .2em .8em; font-size: 1.15em; font-weight: 800; }
 .mcqpics { display: grid; grid-template-columns: 1fr 15em; gap: .45em 1em; align-items: center; }

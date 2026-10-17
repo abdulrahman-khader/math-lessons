@@ -15,6 +15,7 @@ interface Pic {
   k?: number;
   joined?: boolean;
   size?: number;
+  hide?: number[];
 }
 
 /** الصف في إطار، في عمود الرسم */
@@ -45,19 +46,15 @@ const PRACTICE = 'أتدرَّبُ · ص ٧٣';
 const SOLVE = 'أحُلُّ المسألةَ · ص ٧٣';
 const FIND = 'أَجِدُ نَاتِجَ الطَّرْحِ مُسْتَعْمِلًا حَقَائِقَ الْجَمْعِ:';
 
-/**
- * سؤال رأسي من أتدرب ٦–١١: الصف فوق، ثم الجمع والطرح.
- * ناتج الجمع يضمّ الجزأين، وناتج الطرح يأخذ الجزء المطروح.
- */
+/** سؤال رأسي من أتدرب ٦–١١: الجمع، ثم الطرح */
 function VPair({ n, a, b, sub }: { n: number; a: number; b: number; sub: number }) {
   const c = a + b;
   return (
     <QCard n={n} className="vcard">
       <div className="vrow">
-        <VSum a={a} op="+" b={b} v={c} hl={[`p${n}`]} />
-        <VSum a={c} op="−" b={sub} v={c - sub} hl={[`v${n}`]} />
+        <VSum a={a} op="+" b={b} v={c} />
+        <VSum a={c} op="−" b={sub} v={c - sub} />
       </div>
-      <CubeTrain parts={g(a, b)} k={n} take={[sub === a ? 0 : 1]} size={40} counts={false} />
     </QCard>
   );
 }
@@ -68,11 +65,10 @@ function Family({ n, a, b }: { n: number; a: number; b: number }) {
   return (
     <QCard n={n} className="fcard">
       <div className="flines">
-        <FactLine a={a} op="+" b={b} v={c} hl={[`p${n}`]} />
-        <FactLine a={c} op="−" b={b} v={a} hl={[`v${n}`]} />
-        <FactLine a={c} op="−" b={a} v={b} hl={[`x${n}`]} />
+        <FactLine a={a} op="+" b={b} v={c} />
+        <FactLine a={c} op="−" b={b} v={a} />
+        <FactLine a={c} op="−" b={a} v={b} />
       </div>
-      <CubeTrain parts={g(a, b)} k={n} take={[1, 0]} size={40} counts={false} />
     </QCard>
   );
 }
@@ -255,7 +251,7 @@ export default defineLesson({
           <SlideHead tag="نعمل معًا" kind="ex">أي حقيقة تساعدني؟</SlideHead>
           <div className="mcqpics">
             <MCQ q="أ) أيّ حقيقة جمع تساعدني على إيجاد ١٢ − ٥ ؟" options={['٥ + ٧ = ١٢', '٥ + ٥ = ١٠', '٦ + ٦ = ١٢']} answer="٥ + ٧ = ١٢" award />
-            <CubeTrain parts={g(5, 7)} joined size={34} />
+            <CubeTrain parts={g(5, 7)} joined hide={[1]} size={34} />
             <MCQ q="ب) إذا كان ٨ + ٦ = ١٤، فما ناتج ١٤ − ٦ ؟" options={['٦', '٨', '٢٠']} answer="٨" award />
             <CubeTrain parts={g(8, 6)} joined size={34} />
             <MCQ q="ج) أيّ جملة لا تستعمل الأعداد ٣ و٧ و١٠ نفسها؟" options={['٣ + ٧ = ١٠', '١٠ − ٣ = ٧', '١٠ − ٤ = ٦']} answer="١٠ − ٤ = ٦" award />
@@ -284,7 +280,7 @@ export default defineLesson({
                 <Step kind="ans" hl={['v0']}>إذن ١٥ − ٩ = ٦، بقيت ٦ علب.</Step>
               </Solution>
             </QCol>
-            <Cubes parts={[{ n: 9, color: CUBE.orange }, { n: 6, color: CUBE.blue }]} shape="juice" joined take={[0]} size={40} />
+            <Cubes parts={[{ n: 9, color: CUBE.orange }, { n: 6, color: CUBE.blue }]} shape="juice" joined take={[0]} hide={[1]} size={40} />
           </Cols>
         </>
       ),
@@ -389,7 +385,7 @@ export default defineLesson({
     /* ================= أتدرب ٦–١١ ================= */
     {
       sec: 'practice', min: 4,
-      notes: 'الأسئلة الرأسية: اطلب من الطلاب حل الجمع أولًا ثم الطرح على السبورات الصغيرة. كل ضغطة على السهم تكشف ناتجًا واحدًا: الجمع يضمّ المكعبات، والطرح يأخذ جزءًا منها. تلميح للطلاب: ناتج الطرح هو العدد الآخر في جملة الجمع.',
+      notes: 'الأسئلة الرأسية: اطلب من الطلاب حل الجمع أولًا ثم الطرح على السبورات الصغيرة. كل ضغطة على السهم تكشف ناتجًا واحدًا. تلميح للطلاب: ناتج الطرح هو العدد الآخر في جملة الجمع.',
       content: (
         <>
           <div className="row">

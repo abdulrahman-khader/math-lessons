@@ -36,6 +36,8 @@ interface TrainProps {
   removed?: number | null;
   /** عدد عناصر كل جزء تحته */
   counts?: boolean;
+  /** أجزاء لا يُكتب عددها لأنه الجواب ولم يُذكر في السؤال */
+  hide?: number[];
   label?: string;
 }
 
@@ -72,7 +74,7 @@ function Item({ shape, x, s, color }: { shape: ItemShape; x: number; s: number; 
  * صف من العناصر بألوان الأجزاء. الجمع: يقترب الجزآن حتى يتلاصقا ويظهر المجموع فوقهما.
  * الطرح: يُؤخذ جزء فينزل ويبهت، ويبقى الآخر.
  */
-export function CubeTrain({ parts, shape = 'cube', size = 46, k = 0, take = [0, 1], joined, removed, counts = true, label }: TrainProps) {
+export function CubeTrain({ parts, shape = 'cube', size = 46, k = 0, take = [0, 1], joined, removed, counts = true, hide = [], label }: TrainProps) {
   const { activeHl } = useSlide();
   const stage = activeHl.has(`x${k}`) ? 2 : activeHl.has(`v${k}`) ? 1 : 0;
   const gone = removed !== undefined ? removed : stage === 2 ? (take[1] ?? null) : stage === 1 ? take[0] : null;
@@ -109,7 +111,7 @@ export function CubeTrain({ parts, shape = 'cube', size = 46, k = 0, take = [0, 
         ))}
       </g>,
     );
-    if (counts)
+    if (counts && !hide.includes(i))
       marks.push(
         <text key={i} className={'ccount' + (off ? ' off' : '')} textAnchor="middle" style={{ transform: `translate(${x + w / 2}px, ${dy + ih + size * 0.9}px)` }}>
           {num(p.n)}

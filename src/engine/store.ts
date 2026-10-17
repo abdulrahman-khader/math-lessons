@@ -7,7 +7,6 @@ export interface Saved {
   scores: number[];
   nTeams: number;
   names: string[];
-  teacher: boolean;
   muted: boolean;
   wheel: string;
   /** مكان المؤقت وحجمه */
@@ -19,7 +18,6 @@ export const DEFAULT_SAVED: Saved = {
   scores: [0, 0, 0, 0],
   nTeams: 2,
   names: ['الصقور', 'النخيل', 'الفرسان', 'النجوم'],
-  teacher: true,
   muted: false,
   wheel: '',
   timerView: TIMER_VIEW,

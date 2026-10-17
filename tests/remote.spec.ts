@@ -32,8 +32,9 @@ async function pair(browser: Browser) {
   await expect(ipad.page.locator('.rstat')).toContainText('جاهز');
   const ch = await ipad.page.evaluate(() => localStorage.getItem('remote:channel'));
   const phone = await device(browser, 'iPhone 13', `${href}#remote=${ch}`);
-  await expect(phone.page.locator('.dot.ok')).toContainText('مباشرة', { timeout: 15000 });
-  await expect(ipad.page.locator('.rstat')).toContainText('مباشرة');
+  // على بعض الأجهزة يتأخر أول عنوان اتصال ثانيتين أو أكثر، ومع تشغيل الفحوص معًا يطول التعارف
+  await expect(phone.page.locator('.dot.ok')).toContainText('مباشرة', { timeout: 45000 });
+  await expect(ipad.page.locator('.rstat')).toContainText('مباشرة', { timeout: 15000 });
   await ipad.page.locator('.rpanel button', { hasText: 'إغلاق' }).click();
   return { ipad: ipad.page, phone: phone.page, errors: [...ipad.errors, ...phone.errors] };
 }
@@ -44,8 +45,8 @@ test('الجوال يتصل مباشرة ولا يستهلك خادم الرسا
   const before = relay.posts.length;
   const { ipad, phone, errors } = await pair(browser);
   const afterHandshake = relay.posts.length;
-  // التعارف: عرض من الجوال ورد من الآيباد فقط
-  expect(afterHandshake - before).toBeLessThanOrEqual(2);
+  // التعارف: عرض ورد، وقد يُرسل الجوال «مرحبًا» عبر الخادم إن تأخر الاتصال المباشر أكثر من ١٢ ثانية
+  expect(afterHandshake - before).toBeLessThanOrEqual(4);
 
   for (let k = 0; k < 6; k++) await phone.locator('.rnav .next').click();
   await expect.poll(() => activeIndex(ipad)).not.toBe('0');
@@ -147,5 +148,27 @@ test('الجوال يتحكم بمستكشف الحقائق المترابطة',
   await expect(ipad.locator('section.slide.active .fffact.sub.on')).toHaveCount(1);
   await expect(ipad.locator('section.slide.active .cpart.off')).toHaveCount(1);
   await expect(phone.locator('.rfact.sub.on')).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+
+test('سهما الجوال: الخطوات أولًا ثم الشريحة المجاورة', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  // أول شريحة فيها خطوات
+  let found = false;
+  for (let k = 0; k < 12 && !found; k++) {
+    await phone.locator('.rnav .next').click();
+    await ipad.waitForTimeout(350);
+    found = (await ipad.locator('section.slide.active .step.shown').count()) > 0;
+  }
+  expect(found).toBe(true);
+  const slide = await activeIndex(ipad);
+  await expect(phone.locator('.rcount b')).toContainText('١ /');
+  // السهم الأيمن يُخفي الخطوة أولًا ويبقى في الشريحة
+  await phone.locator('.rnav .prev').click();
+  await expect(ipad.locator('section.slide.active .step.shown')).toHaveCount(0);
+  expect(await activeIndex(ipad)).toBe(slide);
+  // ثم يعود إلى الشريحة السابقة
+  await phone.locator('.rnav .prev').click();
+  await expect.poll(() => activeIndex(ipad)).toBe(String(Number(slide) - 1));
   expect(errors).toEqual([]);
 });

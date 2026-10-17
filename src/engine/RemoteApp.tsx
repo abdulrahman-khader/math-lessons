@@ -181,23 +181,47 @@ export function RemoteApp({ channel }: { channel: string }) {
               </span>
             </div>
             <h1>{st.title || '—'}</h1>
-            {total > 0 && (
-              <p className="steps">
-                الخطوات: {num(shown)} / {num(total)}
-              </p>
-            )}
           </section>
 
+          {/* سهمان كما على الشاشة: الخطوات أولًا، ثم الشريحة المجاورة عند الطرفين */}
           <div className="rnav">
-            <button className="rbtn prev" aria-label="السابق" disabled={st.cur === 0} onClick={() => send({ c: 'prev' })}>
+            <button
+              className="rbtn prev"
+              aria-label={shown > 0 ? 'الخطوة السابقة' : 'الشريحة السابقة'}
+              disabled={st.cur === 0 && shown === 0}
+              onClick={() => send({ c: 'back' })}
+            >
               <IconPrevRtl />
-              السابق
             </button>
-            <button className="rbtn next" aria-label="التالي" disabled={st.cur === st.total - 1 && !moreSteps} onClick={() => send({ c: 'next' })}>
-              {moreSteps ? 'الخطوة التالية' : 'الشريحة التالية'}
+            <span className="rcount">
+              {total > 0 ? (
+                <>
+                  <b>{num(shown)} / {num(total)}</b>
+                  <small>{moreSteps ? 'الخطوات' : 'انتهت الخطوات'}</small>
+                </>
+              ) : (
+                <small>لا خطوات</small>
+              )}
+            </span>
+            <button
+              className="rbtn next"
+              aria-label={moreSteps ? 'الخطوة التالية' : 'الشريحة التالية'}
+              disabled={st.cur === st.total - 1 && !moreSteps}
+              onClick={() => send({ c: 'next' })}
+            >
               <IconNextRtl />
             </button>
           </div>
+          <p className="rhintnav">{moreSteps ? 'السهم الأيسر يُظهر الخطوة التالية' : 'السهم الأيسر ينتقل إلى الشريحة التالية'}</p>
+
+          {/* ملاحظات المعلم: لا تظهر على شاشة العرض، بل هنا فقط */}
+          <section className="rcard notes">
+            <h2>
+              ملاحظات المعلم <small>{num(st.min)} د</small>
+            </h2>
+            <p>{st.notes}</p>
+          </section>
+
 
           {st.mcqs.length > 0 && (
             <section className="rcard rmcqs">
@@ -247,9 +271,6 @@ export function RemoteApp({ channel }: { channel: string }) {
             <button className="rbtn" onClick={() => send({ c: 'resetSlide' })}>
               إعادة الشريحة
             </button>
-            <button className="rbtn" onClick={() => send({ c: 'teacher', on: !st.teacher })}>
-              {st.teacher ? 'إخفاء الملاحظات عن الشاشة' : 'إظهار الملاحظات على الشاشة'}
-            </button>
           </div>
 
           <RemoteTimer t={st.timer} at={stAt} send={send} />
@@ -287,13 +308,6 @@ export function RemoteApp({ channel }: { channel: string }) {
               ))}
             </section>
           )}
-
-          <section className="rcard notes">
-            <h2>
-              ملاحظات المعلم <small>{num(st.min)} د</small>
-            </h2>
-            <p>{st.notes}</p>
-          </section>
 
           <section className="rcard">
             <h2>انتقل إلى</h2>

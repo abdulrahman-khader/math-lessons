@@ -11,7 +11,7 @@ import { RemotePanel } from './components/RemotePanel';
 import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
 import { TIMER_OFF, TimerWidget, fixView, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
-import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTeacher, IconTimer, IconWheel } from './components/icons';
+import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTimer, IconWheel } from './components/icons';
 
 const HOME_NOTES = 'رحّب بالطلاب، وقسّمهم إلى فرق وسمِّ كل فريق. اضغط «متابعة» إن كنت توقفت في حصة سابقة. الاختصارات: الأسهم للتنقل، المسافة للخطوة التالية، F لملء الشاشة.';
 const STAGE_W = 1600;
@@ -91,9 +91,6 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     document.title = `${lesson.meta.shortTitle} ${lesson.meta.code}`;
   }, [lesson]);
   useEffect(() => {
-    document.body.classList.toggle('teacher', st.teacher);
-  }, [st.teacher]);
-  useEffect(() => {
     document.body.classList.toggle('flow', layout.flow);
   }, [layout.flow]);
   useEffect(() => {
@@ -112,7 +109,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
-  }, [st.teacher]);
+  }, []);
 
   const addScore = useCallback(
     (i: number, d: number) => {
@@ -161,6 +158,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'prev':
         goto(cur - 1);
         break;
+      case 'back':
+        if (!api?.unreveal()) goto(cur - 1);
+        break;
       case 'goto':
         goto(c.i);
         break;
@@ -179,9 +179,6 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'spin':
         setWheelOpen(true);
         setSpinReq((n) => n + 1);
-        break;
-      case 'teacher':
-        patch({ teacher: c.on });
         break;
       case 'chart':
         if (Number.isFinite(c.v)) api?.chart()?.set(c.i, c.v);
@@ -257,7 +254,6 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         sections: sections.map((o) => ({ name: SECTION_NAMES[o.k], first: o.first })),
         wheel: wheelOpen,
         wheelResult,
-        teacher: st.teacher,
         chart: slideApis.current[cur]?.chart()?.get() ?? null,
         family: slideApis.current[cur]?.family()?.get() ?? null,
         mcqs: (slideApis.current[cur]?.mcqs() ?? []).map((m) => m.get()),
@@ -270,7 +266,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.teacher, st.timerView, wheelOpen, wheelResult, slides, sections, lesson]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -400,10 +396,6 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
                 <IconWheel />
                 <span className="lbl">العجلة</span>
               </button>
-              <button className={toolBtn(st.teacher)} title="وضع المعلم / الطالب" aria-label="وضع المعلم أو الطالب" onClick={() => patch({ teacher: !st.teacher })}>
-                <IconTeacher />
-                <span className="lbl">{st.teacher ? 'المعلم' : 'الطالب'}</span>
-              </button>
               <button className={toolBtn(st.muted)} title={st.muted ? 'تشغيل الصوت' : 'كتم الصوت'} aria-label="كتم الصوت" onClick={() => patch({ muted: !st.muted })}>
                 <IconSound muted={st.muted} />
               </button>
@@ -440,14 +432,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
                 </SlideScope>
               </section>
             ))}
-            <Pen key={lessonGen} active={pen} onClose={() => setPen(false)} slide={cur} resetCount={resets[cur] ?? 0} layoutKey={`${layout.flow}-${layout.scale}-${st.teacher}`} main={mainRef} />
+            <Pen key={lessonGen} active={pen} onClose={() => setPen(false)} slide={cur} resetCount={resets[cur] ?? 0} layoutKey={`${layout.flow}-${layout.scale}`} main={mainRef} />
             <TimerWidget t={timer} set={setTimer} view={st.timerView} onView={(v) => patch({ timerView: fixView(v) })} />
           </main>
 
-          <div id="notes">
-            <b>{num(s.min)} د</b>
-            <span>{s.notes}</span>
-          </div>
 
           <footer id="ftr">
             <button className="btn nav" aria-label="الشريحة السابقة" disabled={cur === 0} onClick={() => goto(cur - 1)}>

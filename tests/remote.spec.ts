@@ -109,3 +109,20 @@ test('حين يصل خادم الربط حدّه اليومي يظهر تنبي�
   await ctx.close();
   await full.close();
 });
+
+test('الجوال يغيّر مكان المؤقت وحجمه على الآيباد', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  await phone.locator('.rpresets .rbtn').nth(1).click();
+  const timer = ipad.locator('#timerw');
+  await expect(timer).toBeVisible();
+  const w0 = (await timer.boundingBox())!.width;
+  await phone.locator('.rtview .rbtn', { hasText: 'تكبير' }).click();
+  await expect.poll(async () => (await timer.boundingBox())!.width).toBeGreaterThan(w0 * 1.1);
+  // الخانة الأولى في الشبكة = أعلى يسار الشاشة
+  await phone.locator('.rspots button').first().click();
+  const main = (await ipad.locator('#main').boundingBox())!;
+  await expect.poll(async () => (await timer.boundingBox())!.x - main.x).toBeLessThan(5);
+  await expect.poll(async () => (await timer.boundingBox())!.y - main.y).toBeLessThan(5);
+  await expect(phone.locator('.rspots button').first()).toHaveClass(/on/);
+  expect(errors).toEqual([]);
+});

@@ -9,7 +9,7 @@ import { Home } from './components/Home';
 import { Pen } from './components/Pen';
 import { RemotePanel } from './components/RemotePanel';
 import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
-import { TIMER_OFF, TimerWidget, type TimerState } from './components/Timer';
+import { TIMER_OFF, TimerWidget, fixView, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
 import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTeacher, IconTimer, IconWheel } from './components/icons';
 
@@ -201,6 +201,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         } else if (c.a === 'toggle') setTimer((x) => (x.left > 0 ? { ...x, show: true, run: !x.run } : x));
         else setTimer((x) => ({ ...x, show: false, run: false }));
         break;
+      case 'timerView':
+        patch((x) => ({ timerView: fixView({ ...x.timerView, ...c.v }) }));
+        break;
     }
   };
 
@@ -254,7 +257,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         teacher: st.teacher,
         chart: slideApis.current[cur]?.chart()?.get() ?? null,
         mcqs: (slideApis.current[cur]?.mcqs() ?? []).map((m) => m.get()),
-        timer: { show: timerNow.current.show, run: timerNow.current.run, left: timerNow.current.left },
+        timer: { show: timerNow.current.show, run: timerNow.current.run, left: timerNow.current.left, view: st.timerView },
       };
       // خادم الرسائل يقبل ٤ ك.ب للرسالة: تُقصَّر الملاحظات إن لزم
       const size = () => new Blob([JSON.stringify({ state })]).size;
@@ -263,7 +266,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.teacher, wheelOpen, wheelResult, slides, sections, lesson]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.teacher, st.timerView, wheelOpen, wheelResult, slides, sections, lesson]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -434,7 +437,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
               </section>
             ))}
             <Pen key={lessonGen} active={pen} onClose={() => setPen(false)} slide={cur} resetCount={resets[cur] ?? 0} layoutKey={`${layout.flow}-${layout.scale}-${st.teacher}`} main={mainRef} />
-            <TimerWidget t={timer} set={setTimer} />
+            <TimerWidget t={timer} set={setTimer} view={st.timerView} onView={(v) => patch({ timerView: fixView(v) })} />
           </main>
 
           <div id="notes">

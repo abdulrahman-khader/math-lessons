@@ -120,6 +120,12 @@ export function Winner({ cap = 'نتيجة الفرق اليوم' }: { cap?: str
   );
 }
 
+/** يعرض محتواه فقط إن كانت في الحصة فرق (أو فقط إن لم تكن، مع none) */
+export function IfTeams({ none = false, children }: { none?: boolean; children: ReactNode }) {
+  const { nTeams } = useEngine();
+  return (nTeams > 0) !== none ? <>{children}</> : null;
+}
+
 export function GoHomeButton() {
   const { goto } = useEngine();
   return (

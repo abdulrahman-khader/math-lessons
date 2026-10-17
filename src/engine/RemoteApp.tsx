@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { clock, duration, num } from './digits';
-import { PRESETS } from './components/Timer';
+import { PRESETS, SCALE_MAX, SCALE_MIN, SCALE_STEP } from './components/Timer';
+
+/** مواضع المؤقت على الشاشة: صفوف من الأعلى إلى الأسفل، وأعمدة من اليسار إلى اليمين كما تُرى الشاشة */
+const SPOTS = [-1, 0, 1].flatMap((ay) => [-1, 0, 1].map((ax) => ({ ax, ay })));
 import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
@@ -26,6 +29,30 @@ function RemoteTimer({ t, at, send }: { t: RemoteState['timer']; at: number; sen
           </button>
         ))}
       </div>
+      {t.show && (
+        <div className="rtview">
+          <div>
+            <b>الحجم</b>
+            <div className="rtools">
+              <button className="rbtn" disabled={(t.view?.s ?? 1) <= SCALE_MIN} onClick={() => send({ c: 'timerView', v: { s: (t.view?.s ?? 1) - SCALE_STEP } })}>
+                تصغير −
+              </button>
+              <button className="rbtn" disabled={(t.view?.s ?? 1) >= SCALE_MAX} onClick={() => send({ c: 'timerView', v: { s: (t.view?.s ?? 1) + SCALE_STEP } })}>
+                تكبير +
+              </button>
+            </div>
+          </div>
+          <div>
+            <b>المكان على الشاشة</b>
+            <div className="rspots" role="group" aria-label="مكان المؤقت">
+              {SPOTS.map((p) => {
+                const on = Math.round(t.view?.ax ?? 0) === p.ax && Math.round(t.view?.ay ?? 0) === p.ay;
+                return <button key={`${p.ax}${p.ay}`} className={on ? 'on' : ''} aria-label="ضع المؤقت هنا" onClick={() => send({ c: 'timerView', v: p })} />;
+              })}
+            </div>
+          </div>
+        </div>
+      )}
       {t.show && (
         <div className="rtools">
           <button className="rbtn primary" disabled={t.left === 0} onClick={() => send({ c: 'timer', a: 'toggle' })}>

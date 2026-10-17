@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { TIMER_VIEW, type TimerView } from './components/Timer';
 
 /** ما يبقى محفوظًا في المتصفح بين الحصص */
 export interface Saved {
@@ -9,6 +10,8 @@ export interface Saved {
   teacher: boolean;
   muted: boolean;
   wheel: string;
+  /** مكان المؤقت وحجمه */
+  timerView: TimerView;
 }
 
 export const DEFAULT_SAVED: Saved = {
@@ -19,6 +22,7 @@ export const DEFAULT_SAVED: Saved = {
   teacher: true,
   muted: false,
   wheel: '',
+  timerView: TIMER_VIEW,
 };
 
 function load(key: string): Saved {

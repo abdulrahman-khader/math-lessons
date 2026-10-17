@@ -40,7 +40,9 @@ export type RemoteCmd =
   | { c: 'mcq'; k: number; o: string }
   | { c: 'mcqAward'; k: number; team: number }
   | { c: 'timer'; a: 'start'; sec: number }
-  | { c: 'timer'; a: 'toggle' | 'close' };
+  | { c: 'timer'; a: 'toggle' | 'close' }
+  /** مكان المؤقت وحجمه: s الحجم، وax وay من −١ إلى ١ (٠ = الوسط) */
+  | { c: 'timerView'; v: { s?: number; ax?: number; ay?: number } };
 
 /** سؤال اختيار من متعدد في الشريحة الحالية */
 export interface RemoteMcq {
@@ -88,7 +90,7 @@ export interface RemoteState {
   chart: RemoteChart | null;
   mcqs: RemoteMcq[];
   /** المؤقت. لا تُرسل الحالة كل ثانية: الجوال يعدّ تنازليًا وحده من آخر حالة وصلته */
-  timer: { show: boolean; run: boolean; left: number };
+  timer: { show: boolean; run: boolean; left: number; view?: { s: number; ax: number; ay: number } };
 }
 
 /** وصف اتصال WebRTC يُتبادل عبر الخادم */

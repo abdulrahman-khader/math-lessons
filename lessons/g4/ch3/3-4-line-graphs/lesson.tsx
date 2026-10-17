@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Card, Chart, Cols, Ctrls, DataTable, DragChart, Eq, GoHomeButton, HideButton, Hint, HintButton, MCQ, Mark, MindMap,
+  Card, Chart, Cols, Ctrls, DataTable, DragChart, Eq, GoHomeButton, HideButton, Hint, HintButton, IfTeams, MCQ, Mark, MindMap,
   NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step, ThinkPairShare, TrendExplorer, Winner, defineLesson,
 } from '@engine';
 import * as C from './charts';
@@ -579,10 +579,13 @@ export default defineLesson({
     },
     {
       sec: 'close', min: 1,
-      notes: 'أعلن الفريق الفائز.',
+      notes: 'أعلن الفريق الفائز إن كانت في الحصة فرق، واشكر الطلاب.',
       content: (
         <>
-          <SlideHead tag="الختام" kind="ink">الفريق الفائز</SlideHead>
+          <SlideHead tag="الختام" kind="ink">
+            <IfTeams>الفريق الفائز</IfTeams>
+            <IfTeams none>انتهى الدرس، شكرًا لكم</IfTeams>
+          </SlideHead>
           <Stack>
             <Winner />
             <GoHomeButton />

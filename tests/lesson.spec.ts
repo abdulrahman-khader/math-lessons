@@ -177,6 +177,45 @@ for (const file of files) {
         await expect(slide.locator('.award')).toHaveCount(0);
       }
       await expect(page.locator('#winner')).toHaveCount(0);
+      await expect(page.locator('section.slide h2', { hasText: 'الفريق الفائز' })).toHaveCount(0);
+    });
+
+    test('المؤقت يُسحب ويُكبَّر ويبقى مكانه بعد إعادة الفتح', async ({ page }) => {
+      await page.setViewportSize({ width: 1600, height: 900 });
+      await open(page, file, []);
+      await page.locator('button[aria-label="المؤقت"]').click();
+      const timer = page.locator('#timerw');
+      await expect(timer).toBeVisible();
+      const main = (await page.locator('#main').boundingBox())!;
+      const center = async () => {
+        const b = (await timer.boundingBox())!;
+        return { x: b.x + b.width / 2 - main.x, y: b.y + b.height / 2 - main.y, w: b.width };
+      };
+      const c0 = await center();
+      expect(Math.abs(c0.x - main.width / 2)).toBeLessThan(3);
+
+      await page.locator('button[aria-label="تكبير المؤقت"]').click();
+      const c1 = await center();
+      expect(c1.w).toBeGreaterThan(c0.w * 1.1);
+
+      // سحب الرقم إلى أعلى اليسار: يبقى داخل منطقة الشرائح
+      const tv = (await page.locator('#tval').boundingBox())!;
+      await page.mouse.move(tv.x + tv.width / 2, tv.y + tv.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(tv.x - 2000, tv.y - 2000, { steps: 8 });
+      await page.mouse.up();
+      const b = (await timer.boundingBox())!;
+      expect(b.x).toBeGreaterThanOrEqual(main.x - 1);
+      expect(b.y).toBeGreaterThanOrEqual(main.y - 1);
+      expect(b.x - main.x).toBeLessThan(5);
+
+      await page.reload();
+      await page.locator('button[aria-label="المؤقت"]').click();
+      const after = (await timer.boundingBox())!;
+      expect(Math.abs(after.x - b.x)).toBeLessThan(3);
+      expect(Math.abs(after.width - b.width)).toBeLessThan(3);
+      await page.locator('button[aria-label="المؤقت في الوسط"]').click();
+      expect(Math.abs((await center()).x - main.width / 2)).toBeLessThan(3);
     });
 
     // iPad أفقي وعمودي، iPad Pro، شاشات الحاسب الصغيرة، والسبورة

@@ -12,9 +12,9 @@ export interface TimerState {
 
 export const TIMER_OFF: TimerState = { show: false, left: 60, run: false, gen: 0 };
 
-const PRESETS = [30, 60, 120, 180, 300];
+export const PRESETS = [30, 60, 120, 180, 300];
 
-/** مؤقت عائم في زاوية الشريحة؛ يومض ويصدر صوتًا عند الانتهاء. */
+/** مؤقت كبير في منتصف الشاشة؛ يومض ويصدر صوتًا عند الانتهاء. */
 export function TimerWidget({ t, set }: { t: TimerState; set: (f: (t: TimerState) => TimerState) => void }) {
   const [done, setDone] = useState(false);
 
@@ -37,15 +37,17 @@ export function TimerWidget({ t, set }: { t: TimerState; set: (f: (t: TimerState
   return (
     <div id="timerw" className={'show' + (done ? ' done' : '')} role="timer">
       <span id="tval">{clock(t.left)}</span>
-      {PRESETS.map((s) => (
-        <button key={s} onClick={() => set((x) => ({ show: true, left: s, run: true, gen: x.gen + 1 }))}>
-          {duration(s).replace(' ', '')}
+      <div className="tbtns">
+        {PRESETS.map((s) => (
+          <button key={s} onClick={() => set((x) => ({ show: true, left: s, run: true, gen: x.gen + 1 }))}>
+            {duration(s).replace(' ', '')}
+          </button>
+        ))}
+        <button onClick={() => set((x) => (x.left > 0 ? { ...x, run: !x.run } : x))}>{t.run ? 'إيقاف' : 'تشغيل'}</button>
+        <button aria-label="إغلاق المؤقت" onClick={() => set((x) => ({ ...x, show: false, run: false }))}>
+          ✕
         </button>
-      ))}
-      <button onClick={() => set((x) => (x.left > 0 ? { ...x, run: !x.run } : x))}>{t.run ? 'إيقاف' : 'تشغيل'}</button>
-      <button aria-label="إغلاق المؤقت" onClick={() => set((x) => ({ ...x, show: false, run: false }))}>
-        ✕
-      </button>
+      </div>
     </div>
   );
 }

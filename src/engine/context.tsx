@@ -1,6 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { HlKey } from './types';
-import type { RemoteChart } from './remote';
+import type { RemoteChart, RemoteMcq } from './remote';
+
+/** سؤال اختيار من متعدد يسجّل نفسه ليُجاب من الجوال */
+export interface McqCtrl {
+  el: () => HTMLElement | null;
+  get: () => RemoteMcq;
+  choose: (o: string) => void;
+  award: (team: number) => void;
+}
 
 /** رسم تفاعلي يسجّل نفسه في شريحته ليتحكم به الجوال */
 export interface ChartCtrl {
@@ -47,6 +55,8 @@ export interface SlideApi {
   /** عدد الخطوات الظاهرة من مجموعها */
   info: () => { shown: number; total: number };
   chart: () => ChartCtrl | null;
+  /** أسئلة الاختيار في الشريحة بترتيب ظهورها */
+  mcqs: () => McqCtrl[];
 }
 
 interface SlideState extends SlideApi {
@@ -57,6 +67,7 @@ interface SlideState extends SlideApi {
   activeHl: ReadonlySet<string>;
   hintOpen: boolean;
   setChart: (c: ChartCtrl | null) => void;
+  registerMcq: (id: string, c: McqCtrl) => () => void;
   /** تغيّرت حالة رسم تفاعلي: أبلغ جهاز التحكم */
   touch: () => void;
 }
@@ -114,11 +125,27 @@ export function SlideScope({ index, children }: { index: number; children: React
   const setChart = useCallback((c: ChartCtrl | null) => {
     chartRef.current = c;
   }, []);
+  const mcqMap = useRef(new Map<string, McqCtrl>());
+  const registerMcq = useCallback((id: string, c: McqCtrl) => {
+    mcqMap.current.set(id, c);
+    return () => {
+      mcqMap.current.delete(id);
+    };
+  }, []);
+  const mcqs = useCallback(
+    () =>
+      [...mcqMap.current.values()]
+        .map((c) => ({ c, el: c.el() }))
+        .filter((x): x is { c: McqCtrl; el: HTMLElement } => !!x.el)
+        .sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+        .map((x) => x.c),
+    [],
+  );
 
   useEffect(() => {
-    engine.registerSlide(index, { reveal, hideAll, toggleHint, info, chart });
+    engine.registerSlide(index, { reveal, hideAll, toggleHint, info, chart, mcqs });
     return () => engine.registerSlide(index, null);
-  }, [engine, index, reveal, hideAll, toggleHint, info, chart]);
+  }, [engine, index, reveal, hideAll, toggleHint, info, chart, mcqs]);
 
   const { slideChanged } = engine;
   useEffect(() => slideChanged(), [shown, hintOpen, slideChanged]);
@@ -139,9 +166,11 @@ export function SlideScope({ index, children }: { index: number; children: React
       info,
       chart,
       setChart,
+      mcqs,
+      registerMcq,
       touch: slideChanged,
     };
-  }, [shown, hintOpen, reveal, hideAll, register, toggleHint, info, chart, setChart, slideChanged]);
+  }, [shown, hintOpen, reveal, hideAll, register, toggleHint, info, chart, setChart, mcqs, registerMcq, slideChanged]);
 
   return <SlideCtx.Provider value={value}>{children}</SlideCtx.Provider>;
 }

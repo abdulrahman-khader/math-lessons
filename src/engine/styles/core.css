@@ -196,13 +196,16 @@ body.pen #penbar { display: flex; }
 #penbar .pen-ic svg { width: 1.5em; height: 1.5em; }
 
 /* ===== المؤقت ===== */
-#timerw { position: absolute; inset-inline-end: .5em; bottom: .5em; z-index: 7; display: none; align-items: center; gap: .35em; background: var(--ink); color: #fff; border-radius: .6em; padding: .25em .45em; box-shadow: 0 6px 20px #0004; }
+/* في منتصف الشاشة وكبير ليراه الفصل كله */
+#timerw { position: absolute; inset: 0; margin: auto; width: fit-content; height: fit-content; z-index: 7; display: none; flex-direction: column; align-items: center; gap: .3em; background: var(--ink); color: #fff; border: 4px solid #ffffff33; border-radius: .8em; padding: .35em .8em .55em; box-shadow: 0 14px 50px #0007; }
 #timerw.show { display: flex; }
-#tval { font-family: var(--display); font-size: 1.8em; font-weight: 800; min-width: 2.9em; text-align: center; line-height: 1; }
+body.flow #timerw { position: fixed; }
+#tval { font-family: var(--display); font-size: 4.4em; font-weight: 800; min-width: 2.9em; text-align: center; line-height: 1.15; }
+#timerw .tbtns { display: flex; flex-wrap: wrap; justify-content: center; gap: .35em; }
 #timerw.done { animation: pulse 1s 3; }
 #timerw.done #tval { color: #ffd43b; }
 @keyframes pulse { 50% { background: var(--hl); } }
-#timerw button { min-height: 2.2em; min-width: 2.2em; border-radius: .4em; border: 2px solid #ffffff55; background: #ffffff1a; color: #fff; font-size: .6em; font-weight: 800; cursor: pointer; padding: 0 .4em; }
+#timerw button { min-height: 2.3em; min-width: 2.3em; border-radius: .45em; border: 2px solid #ffffff55; background: #ffffff1a; color: #fff; font-size: .7em; font-weight: 800; cursor: pointer; padding: 0 .55em; touch-action: manipulation; }
 
 /* ===== العجلة ===== */
 .modal { position: absolute; inset: 0; z-index: 20; background: #0e1a2fcc; display: none; align-items: center; justify-content: center; }
@@ -348,3 +351,25 @@ body.remote-body { background: var(--bg); height: auto; min-height: 100%; }
 .rtrends .chip, .rchal .ck { font-size: .85rem; }
 .rtrends .chip { color: #fff; border-radius: 99px; padding: .05rem .6rem; }
 .rchal { font-size: .95rem; }
+
+/* أسئلة الاختيار على الجوال */
+.rmcq { display: flex; flex-direction: column; gap: .45rem; padding-block: .3rem; }
+.rmcq + .rmcq { border-block-start: 2px dashed var(--line); padding-block-start: .7rem; }
+.rmcq .rq { margin: 0; font-weight: 800; line-height: 1.7; }
+.ropts { display: flex; flex-direction: column; gap: .4rem; }
+.ropt { position: relative; min-height: 3.2rem; padding: .4rem .9rem; border: 2px solid var(--qs); border-radius: .7rem; background: var(--paper); color: var(--ink); font-size: 1.05rem; font-weight: 800; text-align: start; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.ropt:active { transform: scale(.98); }
+.ropt.right { background: var(--good); border-color: var(--good); color: #fff; }
+.ropt.wrong { background: #fdecec; border-color: var(--bad); color: var(--bad); }
+.ropt:disabled { opacity: 1; cursor: default; }
+.ropt .rkey { flex: none; font-size: .75rem; font-weight: 700; color: var(--good); border: 1.5px dashed var(--good); border-radius: 99px; padding: 0 .5rem; }
+.rfb { margin: 0; font-weight: 800; }
+.rfb.ok { color: var(--good); } .rfb.no { color: var(--bad); }
+.raward { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; font-weight: 800; }
+.raward button { min-height: 2.8rem; padding: .2rem .8rem; border: 2px solid; border-radius: .6rem; background: var(--paper); font-size: 1rem; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+
+/* المؤقت على الجوال */
+.rclock { margin: 0; text-align: center; font-family: var(--display); font-size: 3rem; font-weight: 800; line-height: 1.2; color: var(--ink); }
+.rclock.end { color: var(--hl); }
+.rpresets { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); gap: .4rem; }
+.rpresets .rbtn { min-height: 2.8rem; font-size: .95rem; padding: .2rem; }

@@ -1,12 +1,49 @@
 import { useEffect, useRef, useState } from 'react';
-import { num } from './digits';
+import { clock, duration, num } from './digits';
+import { PRESETS } from './components/Timer';
 import { remoteLink, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
 
 /** شاشة الجوال: أزرار التحكم بالآيباد، وملاحظات المعلم للشريحة الحالية */
+/** المؤقت على الجوال: يعدّ تنازليًا وحده من آخر حالة وصلت من الآيباد */
+function RemoteTimer({ t, at, send }: { t: RemoteState['timer']; at: number; send: (c: RemoteCmd) => void }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!t.run) return;
+    const id = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(id);
+  }, [t.run, at]);
+  const left = t.run ? Math.max(0, Math.ceil(t.left - (now - at) / 1000)) : t.left;
+  return (
+    <section className="rcard rtimer">
+      <h2>المؤقت</h2>
+      {t.show && <p className={'rclock' + (left === 0 ? ' end' : '')}>{clock(left)}</p>}
+      <div className="rpresets">
+        {PRESETS.map((sec) => (
+          <button key={sec} className="rbtn" onClick={() => send({ c: 'timer', a: 'start', sec })}>
+            {duration(sec)}
+          </button>
+        ))}
+      </div>
+      {t.show && (
+        <div className="rtools">
+          <button className="rbtn primary" disabled={t.left === 0} onClick={() => send({ c: 'timer', a: 'toggle' })}>
+            {t.run ? 'إيقاف مؤقت' : 'متابعة'}
+          </button>
+          <button className="rbtn" onClick={() => send({ c: 'timer', a: 'close' })}>
+            إغلاق المؤقت
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function RemoteApp({ channel }: { channel: string }) {
   const [st, setSt] = useState<RemoteState | null>(null);
+  /** وقت وصول آخر حالة، ليعدّ المؤقت منه */
+  const [stAt, setStAt] = useState(0);
   const [online, setOnline] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const linkRef = useRef<ReturnType<typeof remoteLink> | null>(null);
@@ -21,6 +58,7 @@ export function RemoteApp({ channel }: { channel: string }) {
         gotState.current = true;
         setWaiting(false);
         setSt(s);
+        setStAt(Date.now());
       },
       setOnline,
     );
@@ -94,6 +132,41 @@ export function RemoteApp({ channel }: { channel: string }) {
             </button>
           </div>
 
+          {st.mcqs.length > 0 && (
+            <section className="rcard rmcqs">
+              <h2>{st.mcqs.length > 1 ? 'الأسئلة' : 'السؤال'}</h2>
+              {st.mcqs.map((m, k) => (
+                <div key={k} className={'rmcq' + (m.right ? ' done' : '')}>
+                  <p className="rq">{m.q || `الشكل ${num(k + 1)} من اليمين`}</p>
+                  <div className="ropts">
+                    {m.options.map((o) => (
+                      <button
+                        key={o}
+                        className={'ropt' + (m.right && o === m.answer ? ' right' : !m.right && m.wrong === o ? ' wrong' : '')}
+                        disabled={m.right}
+                        onClick={() => send({ c: 'mcq', k, o })}
+                      >
+                        {o}
+                        {o === m.answer && !m.right && <small className="rkey">الصحيحة</small>}
+                      </button>
+                    ))}
+                  </div>
+                  {m.right ? <p className="rfb ok">صح ✓</p> : m.wrong ? <p className="rfb no">حاول مرة ثانية</p> : null}
+                  {m.canAward && (
+                    <div className="raward">
+                      امنح نجمة:
+                      {st.teams.map((t, i) => (
+                        <button key={i} style={{ borderColor: t.color, color: t.color }} onClick={() => send({ c: 'mcqAward', k, team: i })}>
+                          +★ {t.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </section>
+          )}
+
           {st.chart && <RemoteChartCard chart={st.chart} send={(i, v) => send({ c: 'chart', i, v })} onMode={(m) => send({ c: 'chartMode', m })} />}
 
           <div className="rtools">
@@ -109,6 +182,8 @@ export function RemoteApp({ channel }: { channel: string }) {
               {st.teacher ? 'إخفاء الملاحظات عن الشاشة' : 'إظهار الملاحظات على الشاشة'}
             </button>
           </div>
+
+          <RemoteTimer t={st.timer} at={stAt} send={send} />
 
           <section className="rcard">
             <h2>عجلة الأسماء</h2>

@@ -24,7 +24,22 @@ export type RemoteCmd =
   | { c: 'spin' }
   | { c: 'teacher'; on: boolean }
   | { c: 'chart'; i: number; v: number }
-  | { c: 'chartMode'; m: string };
+  | { c: 'chartMode'; m: string }
+  | { c: 'mcq'; k: number; o: string }
+  | { c: 'mcqAward'; k: number; team: number }
+  | { c: 'timer'; a: 'start'; sec: number }
+  | { c: 'timer'; a: 'toggle' | 'close' };
+
+/** سؤال اختيار من متعدد في الشريحة الحالية */
+export interface RemoteMcq {
+  q: string;
+  options: string[];
+  answer: string;
+  right: boolean;
+  wrong: string | null;
+  /** أزرار منح النجمة ظاهرة على الآيباد */
+  canAward: boolean;
+}
 
 /** رسم تفاعلي في الشريحة الحالية (يُسحب)، كما يعرضه الجوال ويعدّله */
 export interface RemoteChart {
@@ -57,6 +72,9 @@ export interface RemoteState {
   wheelResult: string;
   teacher: boolean;
   chart: RemoteChart | null;
+  mcqs: RemoteMcq[];
+  /** المؤقت. لا تُرسل الحالة كل ثانية: الجوال يعدّ تنازليًا وحده من آخر حالة وصلته */
+  timer: { show: boolean; run: boolean; left: number };
 }
 
 type Envelope = { cmd: RemoteCmd } | { state: RemoteState };

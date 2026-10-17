@@ -186,6 +186,18 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'chartMode':
         api?.chart()?.setMode?.(c.m);
         break;
+      case 'mcq':
+        api?.mcqs()[c.k]?.choose(c.o);
+        break;
+      case 'mcqAward':
+        api?.mcqs()[c.k]?.award(c.team);
+        break;
+      case 'timer':
+        if (c.a === 'start') {
+          if (c.sec > 0 && c.sec <= 3600) startTimer(Math.round(c.sec));
+        } else if (c.a === 'toggle') setTimer((x) => (x.left > 0 ? { ...x, show: true, run: !x.run } : x));
+        else setTimer((x) => ({ ...x, show: false, run: false }));
+        break;
     }
   };
 
@@ -202,6 +214,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   }, [remoteOn, channel]);
 
   remoteLive.current = remoteOn && phoneSeen;
+  const timerNow = useRef(timer);
+  timerNow.current = timer;
   /* إرسال الحالة إلى الجوال بعد كل تغيير (مجمَّعة)، فقط بعد أن يتصل جوال */
   useEffect(() => {
     if (!remoteOn || !phoneSeen) return;
@@ -226,6 +240,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         wheelResult,
         teacher: st.teacher,
         chart: slideApis.current[cur]?.chart()?.get() ?? null,
+        mcqs: (slideApis.current[cur]?.mcqs() ?? []).map((m) => m.get()),
+        timer: { show: timerNow.current.show, run: timerNow.current.run, left: timerNow.current.left },
       };
       // خادم الرسائل يقبل ٤ ك.ب للرسالة: تُقصَّر الملاحظات إن لزم
       const size = () => new Blob([JSON.stringify({ state })]).size;
@@ -233,7 +249,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       linkRef.current?.send(state);
     }, 250);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, cur, slideTick, st.scores, st.names, st.nTeams, st.teacher, wheelOpen, wheelResult, slides, sections, lesson]);
+  }, [remoteOn, phoneSeen, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.teacher, wheelOpen, wheelResult, slides, sections, lesson]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);

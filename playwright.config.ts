@@ -7,5 +7,7 @@ export default defineConfig({
   testDir: 'tests',
   fullyParallel: true,
   reporter: [['list']],
+  // الفحوص التي تمر على كل الشرائح تقارب ٣٠ ثانية محليًا، وأبطأ على خوادم GitHub
+  timeout: 90_000,
   use: { browserName: 'chromium', channel: process.env.PW_CHANNEL ?? 'chrome', locale: 'ar-SA' },
 });

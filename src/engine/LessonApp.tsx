@@ -55,7 +55,11 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [spinReq, setSpinReq] = useState(0);
   /** يزداد مع كل تغيّر داخل شريحة (خطوة، تلميح) فتُرسل الحالة من جديد */
   const [slideTick, setSlideTick] = useState(0);
-  const slideChanged = useCallback(() => setSlideTick((t) => t + 1), []);
+  /** لا يُعاد رسم التطبيق مع كل خطوة إلا إذا كان جوال متصلًا ينتظر الحالة */
+  const remoteLive = useRef(false);
+  const slideChanged = useCallback(() => {
+    if (remoteLive.current) setSlideTick((t) => t + 1);
+  }, []);
   const linkRef = useRef<ReturnType<typeof hostLink> | null>(null);
   const onCmdRef = useRef<(c: RemoteCmd) => void>(() => {});
 
@@ -197,6 +201,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     };
   }, [remoteOn, channel]);
 
+  remoteLive.current = remoteOn && phoneSeen;
   /* إرسال الحالة إلى الجوال بعد كل تغيير (مجمَّعة)، فقط بعد أن يتصل جوال */
   useEffect(() => {
     if (!remoteOn || !phoneSeen) return;

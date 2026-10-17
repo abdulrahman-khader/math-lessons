@@ -100,9 +100,10 @@ interface MindItem {
   text: ReactNode;
 }
 
-/** نتيجة الفرق: الفائز أو التعادل */
-export function Winner() {
+/** بطاقة نتيجة الفرق: الفائز أو التعادل. لا تظهر إذا اختار المعلم «بدون» فرق. */
+export function Winner({ cap = 'نتيجة الفرق اليوم' }: { cap?: string }) {
   const { scores, teamNames, nTeams } = useEngine();
+  if (nTeams === 0) return null;
   const sc = scores.slice(0, nTeams);
   const mx = Math.max(...sc);
   let text = 'لم تُسجَّل نقاط بعد';
@@ -111,9 +112,11 @@ export function Winner() {
     text = (ws.length > 1 ? 'تعادل: ' : 'الفائز: ') + ws.join(' و') + ` (${num(mx)} ★)`;
   }
   return (
-    <div id="winner" style={{ fontFamily: 'var(--display)', fontSize: '1.4em', fontWeight: 800 }}>
-      {text}
-    </div>
+    <Card kind="rule" cap={cap}>
+      <div id="winner" style={{ fontFamily: 'var(--display)', fontSize: '1.4em', fontWeight: 800 }}>
+        {text}
+      </div>
+    </Card>
   );
 }
 

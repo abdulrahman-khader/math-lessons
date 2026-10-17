@@ -188,6 +188,7 @@ body.pen #penbar { display: flex; }
 #penbar button { width: 2em; height: 2em; border-radius: .4em; border: 3px solid var(--line); cursor: pointer; background: var(--paper); display: grid; place-items: center; font-size: .6em; font-weight: 800; }
 #penbar button.sel { border-color: var(--ink); box-shadow: 0 0 0 3px #fff inset; }
 #penbar .sw { width: 1.2em; height: 1.2em; border-radius: 50%; }
+#penbar .pen-ic svg { width: 1.5em; height: 1.5em; }
 
 /* ===== المؤقت ===== */
 #timerw { position: absolute; inset-inline-end: .5em; bottom: .5em; z-index: 7; display: none; align-items: center; gap: .35em; background: var(--ink); color: #fff; border-radius: .6em; padding: .25em .45em; box-shadow: 0 6px 20px #0004; }

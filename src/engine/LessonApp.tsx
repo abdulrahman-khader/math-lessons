@@ -9,7 +9,7 @@ import { Home } from './components/Home';
 import { Pen } from './components/Pen';
 import { TIMER_OFF, TimerWidget, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
-import { IconFull, IconHome, IconNextRtl, IconPen, IconPrevRtl, IconSound, IconStar, IconTeacher, IconTimer, IconWheel } from './components/icons';
+import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPrevRtl, IconSound, IconStar, IconTeacher, IconTimer, IconWheel } from './components/icons';
 
 const HOME_NOTES = 'رحّب بالطلاب، وقسّمهم إلى فرق وسمِّ كل فريق. اضغط «متابعة» إن كنت توقفت في حصة سابقة. الاختصارات: الأسهم للتنقل، المسافة للخطوة التالية، F لملء الشاشة.';
 const STAGE_W = 1600;
@@ -33,6 +33,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [wheelOpen, setWheelOpen] = useState(false);
   const [pen, setPen] = useState(false);
   const [layout, setLayout] = useState({ flow: false, scale: 1 });
+  /** عدد مرات إعادة كل شريحة؛ تغيّره يعيد تركيب الشريحة فتعود كل حالتها (الخطوات، الإجابات، السحب، الكتابة) */
+  const [resets, setResets] = useState<Record<number, number>>({});
   const appRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const slideApis = useRef<(SlideApi | null)[]>([]);
@@ -96,6 +98,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const registerSlide = useCallback((i: number, api: SlideApi | null) => {
     slideApis.current[i] = api;
   }, []);
+  const resetSlide = useCallback(() => setResets((r) => ({ ...r, [cur]: (r[cur] ?? 0) + 1 })), [cur]);
 
   const engine = useMemo<EngineApi>(
     () => ({ nTeams: st.nTeams, teamNames: st.names, scores: st.scores, addScore, startTimer, goto, registerSlide }),
@@ -124,11 +127,14 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       } else if (e.code === 'KeyF') {
         e.preventDefault();
         fullscreen();
+      } else if (e.code === 'KeyR' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        resetSlide();
       } else if (e.key === 'Home') goto(0);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [cur, wheelOpen, goto]);
+  }, [cur, wheelOpen, goto, resetSlide]);
 
   const s = slides[cur];
   const m = lesson.meta;
@@ -152,6 +158,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             <span id="secChip">{SECTION_NAMES[s.sec]}</span>
             <span className="sp" />
             <div className="tools">
+              <button className="ib" title="إعادة الشريحة (R)" aria-label="إعادة الشريحة" onClick={resetSlide}>
+                <IconReset />
+                <span className="lbl">إعادة</span>
+              </button>
               <button className={toolBtn(pen)} title="قلم الرسم" aria-label="قلم الرسم" onClick={() => setPen(!pen)}>
                 <IconPen />
                 <span className="lbl">قلم</span>
@@ -186,7 +196,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
           <main id="main" ref={mainRef}>
             {slides.map((sl, i) => (
               <section key={i} className={'slide' + (i === cur ? ' active' : '')} data-sec={sl.sec} data-index={i}>
-                <SlideScope index={i}>
+                <SlideScope index={i} key={resets[i] ?? 0}>
                   {i === 0 ? (
                     <Home
                       lesson={lesson}
@@ -205,7 +215,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
                 </SlideScope>
               </section>
             ))}
-            <Pen active={pen} onClose={() => setPen(false)} slide={cur} layoutKey={`${layout.flow}-${layout.scale}-${st.teacher}`} main={mainRef} />
+            <Pen active={pen} onClose={() => setPen(false)} slide={cur} resetCount={resets[cur] ?? 0} layoutKey={`${layout.flow}-${layout.scale}-${st.teacher}`} main={mainRef} />
             <TimerWidget t={timer} set={setTimer} />
           </main>
 

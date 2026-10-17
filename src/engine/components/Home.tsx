@@ -37,14 +37,16 @@ export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTea
         <div className="teamset">
           <div className="row">
             <b>عدد الفرق:</b>
-            {[2, 3, 4].map((n) => (
+            {[0, 2, 3, 4].map((n) => (
               <button key={n} className={'btn' + (nTeams === n ? ' sel' : '')} onClick={() => setTeams(n)}>
-                {num(n)}
+                {n === 0 ? 'بدون' : num(n)}
               </button>
             ))}
-            <button className="btn hide" onClick={resetScores}>
-              تصفير النقاط
-            </button>
+            {nTeams > 0 && (
+              <button className="btn hide" onClick={resetScores}>
+                تصفير النقاط
+              </button>
+            )}
           </div>
           <div className="row">
             {names.slice(0, nTeams).map((n, i) => (

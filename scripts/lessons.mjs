@@ -14,7 +14,7 @@ export function findLessons(dir = path.join(root, 'lessons'), rel = '') {
     if (existsSync(path.join(full, 'lesson.tsx'))) out.push(r);
     else out.push(...findLessons(full, r));
   }
-  return out.sort();
+  return out.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
 /** اسم ملف الإخراج: g4/ch3/3-4-line-graphs → g4-3-4-line-graphs.html */

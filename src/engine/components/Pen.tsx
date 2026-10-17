@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { IconEraser } from './icons';
 
 const COLORS = [
   { c: '#e03131', label: 'أحمر' },
@@ -10,13 +11,15 @@ interface Props {
   active: boolean;
   onClose: () => void;
   slide: number;
+  /** يزيد عند إعادة الشريحة الحالية، فيُمسح رسمها */
+  resetCount: number;
   /** يتغير عند تغيّر حجم المسرح أو وضع العرض */
   layoutKey: string;
   main: RefObject<HTMLElement>;
 }
 
 /** قلم فوق الشريحة؛ لكل شريحة رسمها المحفوظ حتى نهاية الحصة. */
-export function Pen({ active, onClose, slide, layoutKey, main }: Props) {
+export function Pen({ active, onClose, slide, resetCount, layoutKey, main }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const store = useRef<Record<number, string>>({});
   const [color, setColor] = useState('#e03131');
@@ -63,6 +66,19 @@ export function Pen({ active, onClose, slide, layoutKey, main }: Props) {
     size();
     load(slide);
   }, [slide, layoutKey]);
+
+  const clear = () => {
+    const c = cv.current;
+    c?.getContext('2d')?.clearRect(0, 0, c.width, c.height);
+    delete store.current[slide];
+  };
+
+  // إعادة الشريحة: يزيد العدّاد والشريحة نفسها، بخلاف الانتقال إلى شريحة أخرى
+  const lastReset = useRef({ slide, resetCount });
+  useEffect(() => {
+    if (lastReset.current.slide === slide && resetCount > lastReset.current.resetCount) clear();
+    lastReset.current = { slide, resetCount };
+  }, [slide, resetCount]);
 
   useEffect(() => {
     document.body.classList.toggle('pen', active);
@@ -117,15 +133,8 @@ export function Pen({ active, onClose, slide, layoutKey, main }: Props) {
         <button className={color === 'hl' ? 'sel' : ''} aria-label="تظليل" onClick={() => setColor('hl')}>
           <span className="sw" style={{ background: '#ffd43b', borderRadius: '.2em' }} />
         </button>
-        <button
-          aria-label="مسح"
-          onClick={() => {
-            const c = cv.current;
-            c?.getContext('2d')?.clearRect(0, 0, c.width, c.height);
-            delete store.current[slide];
-          }}
-        >
-          مسح
+        <button className="pen-ic" aria-label="مسح الرسم" title="مسح الرسم" onClick={clear}>
+          <IconEraser />
         </button>
         <button aria-label="إغلاق القلم" onClick={onClose}>
           ✕

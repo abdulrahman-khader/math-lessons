@@ -53,6 +53,18 @@ export const IconNextRtl = () => (
     <path d="M15 5l-7 7 7 7" />
   </svg>
 );
+export const IconReset = () => (
+  <svg {...base}>
+    <path d="M3 12a9 9 0 1 0 2.6-6.4L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+);
+export const IconEraser = () => (
+  <svg {...base}>
+    <path d="M7 21l-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21" />
+    <path d="M22 21H7M5 11l9 9" />
+  </svg>
+);
 export const IconStar = () => (
   <svg viewBox="0 0 24 24">
     <path fill="currentColor" d="M12 2l3 6.6 7 .7-5.3 4.8 1.6 7L12 17.5 5.7 21l1.6-7L2 9.3l7-.7z" />

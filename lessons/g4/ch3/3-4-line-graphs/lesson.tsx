@@ -598,7 +598,7 @@ export default defineLesson({
               <Card kind="ex" cap="مهمة من حياتي">سجّل درجة الحرارة العظمى في مدينتك ٥ أيام (من تطبيق الطقس أو نشرة الأخبار)، وارسمها تمثيلًا بالخطوط، ثم اكتب جملتين تصف التغير.</Card>
             </Stack>
             <Stack>
-              <Card kind="rule" cap="نتيجة الفرق اليوم"><Winner /></Card>
+              <Winner />
               <GoHomeButton />
             </Stack>
           </Cols>

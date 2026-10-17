@@ -47,7 +47,7 @@ export function MCQ<const O extends readonly string[]>({ q, options, answer, awa
         ))}
       </div>
       <div className={'fb' + (right ? ' ok' : wrong ? ' no' : '')}>{right ? 'صح ✓ أحسنت!' : wrong ? 'حاول مرة ثانية' : ''}</div>
-      {award && right && !awarded && (
+      {award && right && !awarded && eng.nTeams > 0 && (
         <div className="award">
           امنح نجمة:
           {eng.teamNames.slice(0, eng.nTeams).map((n, i) => (

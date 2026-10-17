@@ -25,13 +25,17 @@ for (const lesson of pickLessons(process.argv[2])) {
 }
 rmSync(path.join(root, '.lesson-build'), { recursive: true, force: true });
 
-/* ---------- فهرس الدروس ---------- */
-const items = findLessons()
-  .filter((l) => existsSync(path.join(dist, outName(l))))
-  .map((l) => {
-    const m = readMeta(l);
-    return `<a class="lesson" href="${outName(l)}"><span class="code">${esc(m.code)}</span><span class="t"><b>${esc(m.shortTitle)}</b><small>${esc(m.grade)} · ${esc(m.chapter)} · ${esc(m.source)}</small></span></a>`;
-  });
+/* ---------- فهرس الدروس: مجموعة لكل صف، بترتيب مجلدات lessons/ (g1، g2، …) ---------- */
+const built = findLessons().filter((l) => existsSync(path.join(dist, outName(l))));
+const grades = new Map();
+for (const l of built) {
+  const m = readMeta(l);
+  if (!grades.has(m.grade)) grades.set(m.grade, []);
+  grades.get(m.grade).push(
+    `<a class="lesson" href="${outName(l)}"><span class="code">${esc(m.code)}</span><span class="t"><b>${esc(m.shortTitle)}</b><small>${esc(m.chapter)} · ${esc(m.source)}</small></span></a>`,
+  );
+}
+const items = [...grades].map(([grade, links]) => `<section>\n<h2>${esc(grade)}</h2>\n${links.join('\n')}\n</section>`);
 
 writeFileSync(
   path.join(dist, 'index.html'),
@@ -48,6 +52,8 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe 
 main { max-width: 760px; margin-inline: auto; padding: 32px 16px; }
 h1 { margin: 0 0 4px; font-size: 1.8rem; }
 p { margin: 0 0 24px; color: var(--muted); }
+section { margin-block-end: 28px; }
+h2 { font-size: 1.25rem; margin: 0 0 10px; padding-block-end: 6px; border-block-end: 2px solid var(--line); }
 .lesson { display: flex; align-items: center; gap: 16px; padding: 14px 16px; margin-block-end: 10px; background: #fff; border: 2px solid var(--line); border-radius: 10px; color: inherit; text-decoration: none; }
 .lesson:hover, .lesson:focus-visible { border-color: var(--rule); outline: none; }
 .code { flex: none; min-width: 3.2em; text-align: center; background: var(--rule); color: #fff; border-radius: 8px; padding: 4px 8px; font-weight: 700; font-size: 1.2rem; }
@@ -66,4 +72,4 @@ ${items.join('\n')}
 </html>
 `,
 );
-console.log(`✓ dist/index.html (${items.length} درس)`);
+console.log(`✓ dist/index.html (${built.length} درس في ${grades.size} صف)`);

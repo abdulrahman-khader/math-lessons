@@ -90,6 +90,46 @@ for (const file of files) {
       expect(nums).toEqual(Array.from({ length: expected }, (_, i) => i + 1));
     });
 
+    test('إعادة الشريحة تمحو الخطوات والإجابات', async ({ page }) => {
+      await open(page, file, []);
+      const n = await slideCount(page);
+      for (let i = 1; i < n; i++) {
+        const slide = await goTo(page, i);
+        const hasStep = (await slide.locator('.step').count()) > 0;
+        const hasMcq = (await slide.locator('.mcq').count()) > 0;
+        if (!hasStep && !hasMcq) continue;
+        await page.keyboard.press('Space');
+        if (hasMcq) await slide.locator('.mcq .opts button').first().click();
+        const before = await slide.locator('.step.shown, .mcq .fb.ok, .mcq .fb.no').count();
+        expect(before, `الشريحة ${i + 1}: لم يتغير شيء قبل الإعادة`).toBeGreaterThan(0);
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+        await page.keyboard.press('r');
+        const after = page.locator('section.slide.active');
+        await expect(after.locator('.step.shown, .mcq .fb.ok, .mcq .fb.no, .opts button.right, .opts button.wrong')).toHaveCount(0);
+        // الخطوات تعمل بعد الإعادة
+        if (hasStep) {
+          await page.keyboard.press('Space');
+          await expect(after.locator('.step.shown')).not.toHaveCount(0);
+        }
+      }
+    });
+
+    test('«بدون» فرق يخفي النقاط وأزرار النجوم', async ({ page }) => {
+      await open(page, file, []);
+      await page.locator('.teamset .btn', { hasText: 'بدون' }).click();
+      await expect(page.locator('#teams .team')).toHaveCount(0);
+      await expect(page.locator('.teamset input')).toHaveCount(0);
+      const n = await slideCount(page);
+      for (let i = 1; i < n; i++) {
+        const slide = await goTo(page, i);
+        const q = slide.locator('.mcq:has(.award), .mcq').first();
+        if (!(await q.count())) continue;
+        for (const b of await q.locator('.opts button').all()) await b.click();
+        await expect(slide.locator('.award')).toHaveCount(0);
+      }
+      await expect(page.locator('#winner')).toHaveCount(0);
+    });
+
     test('على الجوال: لا تمرير أفقي في أي شريحة', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 });
       await open(page, file, []);

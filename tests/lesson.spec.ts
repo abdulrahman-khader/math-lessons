@@ -130,6 +130,29 @@ for (const file of files) {
       await expect(page.locator('#winner')).toHaveCount(0);
     });
 
+    // iPad أفقي وعمودي، iPad Pro، شاشات الحاسب الصغيرة، والسبورة
+    for (const [w, h] of [[1180, 820], [820, 1180], [1024, 768], [1366, 1024], [1280, 720], [1920, 1080]]) {
+      test(`المسرح كله داخل الشاشة ومتوسط عند ${w}×${h}`, async ({ page }) => {
+        await page.setViewportSize({ width: w, height: h });
+        await open(page, file, []);
+        const box = (await page.locator('#stage').boundingBox())!;
+        expect(box.x).toBeGreaterThanOrEqual(-1);
+        expect(box.y).toBeGreaterThanOrEqual(-1);
+        expect(box.x + box.width).toBeLessThanOrEqual(w + 1);
+        expect(box.y + box.height).toBeLessThanOrEqual(h + 1);
+        // متوسط: الهامشان متساويان
+        expect(Math.abs(box.x - (w - box.x - box.width))).toBeLessThanOrEqual(2);
+        expect(Math.abs(box.y - (h - box.y - box.height))).toBeLessThanOrEqual(2);
+      });
+    }
+
+    test('زر الرئيسية يعمل دون اتصال (يعود إلى أول شريحة)', async ({ page }) => {
+      await open(page, file, []);
+      await goTo(page, 3);
+      await page.locator('#hdr .ib').first().click();
+      await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', '0');
+    });
+
     test('على الجوال: لا تمرير أفقي في أي شريحة', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 });
       await open(page, file, []);

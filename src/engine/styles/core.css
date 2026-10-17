@@ -27,9 +27,12 @@ button { font-family: inherit; color: inherit; }
 button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 4px solid var(--hl); outline-offset: 3px; }
 button:disabled { opacity: .45; cursor: default; }
 
-#app { position: fixed; inset: 0; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); overflow: hidden; }
-/* التوسيط بـ inset + margin:auto لا يعتمد على اتجاه الصفحة */
-#stage { position: absolute; inset: 0; margin: auto; width: 1600px; height: 900px; transform-origin: center;
+/* الحاوية LTR للتوسيط فقط، والمسرح نفسه RTL. لا تستعمل inset:0 + margin:auto هنا:
+ * حين تكون الشاشة أضيق من ١٦٠٠ تُرسي صفحة RTL المسرح على الحافة اليمنى فيخرج عن الشاشة (iPad). */
+#app { position: fixed; inset: 0; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); overflow: hidden; direction: ltr; }
+/* inset-inline-end يُفسَّر باتجاه المسرح نفسه (RTL) فيساوي left:50% هنا، ثم translate(-50%) يوسّطه.
+ * يضيف LessonApp scale() بعد translate لملاءمة الشاشة. */
+#stage { direction: rtl; position: absolute; top: 50%; inset-inline-end: 50%; transform: translate(-50%, -50%); width: 1600px; height: 900px; transform-origin: center;
   display: flex; flex-direction: column; font-size: 30px; line-height: 1.55; overflow: hidden;
   background-color: var(--bg);
   background-image: linear-gradient(var(--gridline) 1px, transparent 1px), linear-gradient(90deg, var(--gridline) 1px, transparent 1px);

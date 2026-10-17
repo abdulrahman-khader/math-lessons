@@ -98,6 +98,11 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const registerSlide = useCallback((i: number, api: SlideApi | null) => {
     slideApis.current[i] = api;
   }, []);
+  /** على الموقع: قائمة الدروس (index.html بجانب ملف الدرس). ملف محفوظ دون اتصال لا قائمة معه: أول شريحة. */
+  const goHome = () => {
+    if (/^https?:$/.test(location.protocol)) location.href = './';
+    else goto(0);
+  };
   const resetSlide = useCallback(() => setResets((r) => ({ ...r, [cur]: (r[cur] ?? 0) + 1 })), [cur]);
 
   const engine = useMemo<EngineApi>(
@@ -143,9 +148,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   return (
     <EngineCtx.Provider value={engine}>
       <div id="app" ref={appRef} data-lesson={m.id} data-book-questions={m.bookQuestions}>
-        <div id="stage" style={layout.flow ? undefined : { transform: `scale(${layout.scale})` }}>
+        <div id="stage" style={layout.flow ? undefined : { transform: `translate(-50%, -50%) scale(${layout.scale})` }}>
           <header id="hdr">
-            <button className="ib" title="الصفحة الرئيسية" aria-label="الصفحة الرئيسية" onClick={() => goto(0)}>
+            <button className="ib" title="قائمة الدروس" aria-label="الصفحة الرئيسية: قائمة الدروس" onClick={goHome}>
               <IconHome />
               <span className="lbl">الرئيسية</span>
             </button>

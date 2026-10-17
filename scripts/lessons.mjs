@@ -1,4 +1,4 @@
-import { readdirSync, statSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,6 +22,13 @@ export const outName = (lesson) => {
   const parts = lesson.split('/');
   return `${parts[0]}-${parts[parts.length - 1]}.html`;
 };
+
+/** يقرأ بيانات الدرس النصية من lesson.tsx دون تشغيله (للفهرس وعنوان الصفحة) */
+export function readMeta(lesson) {
+  const src = readFileSync(path.join(root, 'lessons', lesson, 'lesson.tsx'), 'utf8');
+  const field = (k) => src.match(new RegExp(`\\b${k}:\\s*'([^']*)'`))?.[1] ?? '';
+  return { code: field('code'), shortTitle: field('shortTitle'), grade: field('grade'), chapter: field('chapter'), source: field('source') };
+}
 
 /** يختار الدرس من سطر الأوامر: جزء من المسار يكفي، مثل 3-4 */
 export function pickLessons(arg) {

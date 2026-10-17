@@ -24,6 +24,8 @@
 html, body { height: 100%; }
 body { margin: 0; background: var(--frame); color: var(--ink); font-family: var(--body); direction: rtl; -webkit-tap-highlight-color: transparent; }
 button { font-family: inherit; color: inherit; }
+/* أرقام القوائم المرقمة هندية-عربية مثل باقي الأرقام */
+ol { list-style-type: arabic-indic; }
 button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 4px solid var(--hl); outline-offset: 3px; }
 button:disabled { opacity: .45; cursor: default; }
 
@@ -284,3 +286,65 @@ body.flow .home h1 { font-size: 2em; }
 .rpop .q { font-weight: 700; line-height: 1.6; padding: .2em .3em; max-width: 16em; }
 /* على الآيباد لا لوحة مفاتيح غالبًا: نخفي اختصار R */
 @media (hover: none) { .rpop button small { display: none; } }
+
+/* ---------- نافذة ربط الجوال (على الآيباد) ---------- */
+.rpanel { align-items: center; }
+.rpanel .qr { width: 12em; height: 12em; display: block; border: 3px solid var(--ink); border-radius: .4em; }
+.rpanel .qr.off { background: repeating-linear-gradient(45deg, var(--bg) 0 .5em, var(--line) .5em 1em); }
+.rpanel ol { margin: 0; padding-inline-start: 1.4em; line-height: 1.7; font-weight: 500; }
+.rpanel .btn { min-height: 2.6em; font-size: .85em; }
+.rstat { margin: 0; font-weight: 800; color: var(--muted); }
+.rstat.wait { color: var(--rule); }
+.rstat.ok { color: var(--good); }
+
+/* ---------- شاشة الجوال: التحكم بالدرس ---------- */
+body.remote-body { background: var(--bg); height: auto; min-height: 100%; }
+.remote { max-width: 34rem; margin-inline: auto; padding: .75rem 1rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: .8rem; font-size: 17px; line-height: 1.6; }
+.rhead { display: flex; flex-direction: column; gap: .15rem; background: var(--hdr); color: var(--hdr-ink); border-radius: .8rem; padding: .7rem .9rem; }
+.rhead b { font-family: var(--display); font-size: 1.25rem; font-weight: 800; }
+.rhead .dot { font-size: .9rem; font-weight: 700; opacity: .9; }
+.rhead .dot::before { content: ""; display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: #f59f00; margin-inline-end: .4rem; }
+.rhead .dot.ok::before { background: #40c057; }
+.rcard { background: var(--paper); border: 2px solid var(--line); border-radius: .8rem; padding: .7rem .9rem; display: flex; flex-direction: column; gap: .5rem; }
+.rcard h1 { margin: 0; font-family: var(--display); font-size: 1.3rem; font-weight: 800; line-height: 1.5; }
+.rcard h2 { margin: 0; font-size: 1.05rem; font-weight: 800; }
+.rcard h2 small { font-weight: 700; color: var(--muted); }
+.rcard.now { border-color: var(--ink); }
+.rcard.notes { background: #fffbea; border-color: #e5c64a; }
+.rcard.notes p { margin: 0; font-weight: 500; line-height: 1.8; }
+.rrow { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.rcard .rsec { background: var(--ink); color: #fff; border-radius: 99px; padding: .1rem .7rem; font-size: .9rem; font-weight: 700; }
+.rcard .pg { font-weight: 800; color: var(--muted); }
+.rcard .steps { margin: 0; font-weight: 700; color: var(--ex); }
+.rbtn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 3rem; padding: .4rem .9rem; border-radius: .7rem; border: 2px solid var(--ink); background: var(--paper); font-size: 1rem; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+.rbtn svg { width: 1.4rem; height: 1.4rem; }
+.rbtn.primary { background: var(--ink); color: #fff; }
+.rbtn:active { transform: scale(.97); }
+.rnav { display: grid; grid-template-columns: 1fr 2fr; gap: .6rem; }
+.rnav .rbtn { min-height: 5.5rem; font-size: 1.2rem; }
+.rnav .next { background: var(--ex); border-color: var(--ex); color: #fff; }
+.rtools { display: flex; flex-wrap: wrap; gap: .5rem; }
+.rtools .rbtn { flex: 1 1 9rem; }
+.wres { margin: 0; font-family: var(--display); font-size: 1.8rem; font-weight: 800; color: var(--hl); text-align: center; }
+.rteam { display: grid; grid-template-columns: 3.2rem 1fr 3.2rem; align-items: center; gap: .5rem; border: 2px solid; border-radius: .7rem; padding: .3rem; }
+.rteam span { text-align: center; font-weight: 800; font-size: 1.1rem; }
+.rteam button { min-height: 3rem; border-radius: .5rem; border: 0; background: var(--bg); font-size: 1.6rem; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+.rsecs { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.rsecs .rbtn { min-height: 2.8rem; font-size: .95rem; }
+
+/* الرسم التفاعلي على الجوال */
+.rchart .rsvg { width: 100%; height: auto; direction: ltr; touch-action: none; border-radius: .5rem; background: var(--bg); }
+.rchart .rtick { font-size: 13px; font-weight: 700; fill: var(--muted); }
+.rchart .rpt { fill: #fff; stroke: var(--hl); stroke-width: 4; }
+.rchart .rpt.ghost { stroke-dasharray: 4 3; }
+.rmodes { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+.rmodes .rbtn { min-height: 2.6rem; font-size: .9rem; padding: .3rem; }
+.rvals { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .4rem; }
+.rval { display: grid; grid-template-columns: 2.6rem 1fr 2.6rem; grid-template-rows: auto auto; align-items: center; gap: .1rem .3rem; border: 2px solid var(--line); border-radius: .6rem; padding: .3rem; }
+.rval span { grid-column: 1 / -1; text-align: center; font-weight: 800; font-size: .9rem; color: var(--muted); }
+.rval b { text-align: center; font-size: 1.2rem; }
+.rval button { min-height: 2.6rem; border: 0; border-radius: .45rem; background: var(--bg); font-size: 1.4rem; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+.rtrends { display: flex; flex-direction: column; gap: .3rem; font-weight: 800; font-size: .95rem; }
+.rtrends .chip, .rchal .ck { font-size: .85rem; }
+.rtrends .chip { color: #fff; border-radius: 99px; padding: .05rem .6rem; }
+.rchal { font-size: .95rem; }

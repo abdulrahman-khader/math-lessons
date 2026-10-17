@@ -71,7 +71,19 @@ export function TrendExplorer({ spec, intro, challenges, snap = 1 }: Props) {
           ))}
         </div>
       </div>
-      <DragChart spec={spec} values={values} onChange={setValues} editable={spec.labels.map((_, i) => i)} snap={snap} mode={mode} />
+      <DragChart
+        spec={spec}
+        values={values}
+        onChange={setValues}
+        editable={spec.labels.map((_, i) => i)}
+        snap={snap}
+        mode={mode}
+        remote={{
+          modes: MODES.map((m) => ({ k: m.k, label: m.label })),
+          onMode: (m) => MODES.some((x) => x.k === m) && setMode(m as (typeof MODES)[number]['k']),
+          challenges: challenges.map((c, i) => ({ text: c.text, done: done[i] })),
+        }}
+      />
     </div>
   );
 }

@@ -1,6 +1,15 @@
-import { useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ChartSvg, geom } from './Chart';
+import { useSlide } from '../context';
+import type { RemoteChart } from '../remote';
 import type { ChartSpec } from '../types';
+
+/** ما يضيفه مكوّن أعلى (مثل TrendExplorer) إلى ما يراه الجوال */
+export interface DragRemoteExtra {
+  modes?: { k: string; label: string }[];
+  onMode?: (m: string) => void;
+  challenges?: { text: string; done: boolean }[];
+}
 
 interface Props {
   spec: ChartSpec;
@@ -13,10 +22,11 @@ interface Props {
   mode?: ChartSpec['mode'];
   /** نقطة «اسحب» الإرشادية، تختفي بعد أول سحب عندها */
   ghost?: number;
+  remote?: DragRemoteExtra;
 }
 
 /** رسم يغيّر الطالب قيمه بسحب النقطة أو أعلى العمود. يعمل باللمس والقلم والفأرة. */
-export function DragChart({ spec, values, onChange, editable, snap = 1, mode, ghost }: Props) {
+export function DragChart({ spec, values, onChange, editable, snap = 1, mode, ghost, remote }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const active = useRef(-1);
   const [ghostAt, setGhostAt] = useState(ghost ?? null);
@@ -37,6 +47,35 @@ export function DragChart({ spec, values, onChange, editable, snap = 1, mode, gh
     if (ghostAt === i) setGhostAt(null);
     onChange(next);
   };
+
+  /* التحكم من الجوال: يسجّل الرسم في شريحته، ويُبلغ عند كل تغيير */
+  const slide = useSlide();
+  const latest = useRef({ spec, values, editable, snap, mode, remote, setv });
+  latest.current = { spec, values, editable, snap, mode, remote, setv };
+  useEffect(() => {
+    slide.setChart({
+      get: (): RemoteChart => {
+        const l = latest.current;
+        return {
+          title: l.spec.title,
+          labels: l.spec.labels,
+          values: l.values,
+          editable: l.editable,
+          min: l.spec.min,
+          max: l.spec.max,
+          step: l.snap,
+          mode: l.mode ?? l.spec.mode ?? 'line',
+          modes: l.remote?.modes,
+          challenges: l.remote?.challenges,
+        };
+      },
+      set: (i, v) => latest.current.editable.includes(i) && latest.current.setv(i, v),
+      setMode: (m) => latest.current.remote?.onMode?.(m),
+    });
+    return () => slide.setChart(null);
+  }, [slide.setChart]);
+  const doneKey = remote?.challenges?.map((c) => +c.done).join('');
+  useEffect(() => slide.touch(), [values, mode, doneKey, slide.touch]);
 
   return (
     <div

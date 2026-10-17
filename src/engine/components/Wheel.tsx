@@ -10,10 +10,14 @@ interface Props {
   onClose: () => void;
   names: string;
   onNames: (s: string) => void;
+  /** يزداد عند طلب التدوير من الجوال */
+  spinReq?: number;
+  /** الاسم المختار (أو «…» أثناء الدوران) لعرضه على الجوال */
+  onResult?: (name: string) => void;
 }
 
 /** عجلة أسماء عشوائية. النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة. */
-export function WheelModal({ open, onClose, names, onNames }: Props) {
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
@@ -80,6 +84,7 @@ export function WheelModal({ open, onClose, names, onNames }: Props) {
     if (!N.length || spinning) return;
     setSpinning(true);
     setResult('…');
+    onResult?.('…');
     const a = (2 * Math.PI) / N.length;
     const pick = Math.floor(Math.random() * N.length);
     // المؤشر في الأعلى (زاوية -π/2)
@@ -97,11 +102,18 @@ export function WheelModal({ open, onClose, names, onNames }: Props) {
       if (p < 1) return void requestAnimationFrame(f);
       setSpinning(false);
       setResult(N[pick]);
+      onResult?.(N[pick]);
       sGood();
       if (remove) setTimeout(() => onNames(N.filter((_, i) => i !== pick).join('\n')), 900);
     };
     requestAnimationFrame(f);
   };
+
+  const lastSpin = useRef(spinReq);
+  useEffect(() => {
+    if (spinReq !== lastSpin.current && open) spin();
+    lastSpin.current = spinReq;
+  }, [spinReq, open]);
 
   if (!open) return null;
   return (

@@ -136,6 +136,33 @@ for (const file of files) {
       await expect(page.locator('.team .tn').first()).toContainText('٠');
     });
 
+    // خادم الرسائل محجوب في هذين الفحصين: لا يعتمدان على الشبكة
+    test('نافذة ربط الجوال تعرض رمز QR بلا أرقام لاتينية', async ({ page }) => {
+      await page.route('https://ntfy.sh/**', (r) => r.abort());
+      await open(page, file, []);
+      await page.locator('button[aria-label="التحكم من الجوال"]').click();
+      await page.locator('.rpanel button', { hasText: 'تشغيل' }).click();
+      await expect(page.locator('.rpanel svg.qr path')).toHaveCount(1);
+      const ch = await page.evaluate(() => localStorage.getItem('remote:channel'));
+      expect(ch).toMatch(/^mlr[a-z]{18}$/);
+      expect(await page.locator('.rpanel').innerText()).not.toMatch(/[0-9]/);
+      await page.keyboard.press('Escape');
+      await expect(page.locator('.rpanel')).toHaveCount(0);
+    });
+
+    test('شاشة الجوال تفتح من الرابط وتنتظر الآيباد', async ({ page }) => {
+      await page.route('https://ntfy.sh/**', (r) => r.abort());
+      const errors: string[] = [];
+      page.on('pageerror', (e) => errors.push(e.message));
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(pathToFileURL(path.join(dist, file)).href + '#remote=mlrabcdefghijkmnpqrst');
+      await expect(page.locator('.remote .rhead')).toBeVisible();
+      await expect(page.locator('#stage')).toHaveCount(0);
+      expect(await page.locator('.remote').innerText()).not.toMatch(/[0-9]/);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+      expect(errors).toEqual([]);
+    });
+
     test('«بدون» فرق يخفي النقاط وأزرار النجوم', async ({ page }) => {
       await open(page, file, []);
       await page.locator('.teamset .btn', { hasText: 'بدون' }).click();

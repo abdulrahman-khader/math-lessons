@@ -7,9 +7,11 @@ import { useSaved } from './store';
 import type { Lesson, SectionKey, SlideDef } from './types';
 import { Home } from './components/Home';
 import { Pen } from './components/Pen';
+import { RemotePanel } from './components/RemotePanel';
+import { deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
 import { TIMER_OFF, TimerWidget, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
-import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPrevRtl, IconSound, IconStar, IconTeacher, IconTimer, IconWheel } from './components/icons';
+import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTeacher, IconTimer, IconWheel } from './components/icons';
 
 const HOME_NOTES = 'رحّب بالطلاب، وقسّمهم إلى فرق وسمِّ كل فريق. اضغط «متابعة» إن كنت توقفت في حصة سابقة. الاختصارات: الأسهم للتنقل، المسافة للخطوة التالية، F لملء الشاشة.';
 const STAGE_W = 1600;
@@ -42,6 +44,20 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const appRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const slideApis = useRef<(SlideApi | null)[]>([]);
+
+  /* التحكم من الجوال */
+  const [remotePanel, setRemotePanel] = useState(false);
+  const [remoteOn, setRemoteOn] = useState(remoteEnabled);
+  const [channel, setChannel] = useState(() => deviceChannel());
+  const [online, setOnline] = useState(false);
+  const [phoneSeen, setPhoneSeen] = useState(false);
+  const [wheelResult, setWheelResult] = useState('');
+  const [spinReq, setSpinReq] = useState(0);
+  /** يزداد مع كل تغيّر داخل شريحة (خطوة، تلميح) فتُرسل الحالة من جديد */
+  const [slideTick, setSlideTick] = useState(0);
+  const slideChanged = useCallback(() => setSlideTick((t) => t + 1), []);
+  const linkRef = useRef<ReturnType<typeof hostLink> | null>(null);
+  const onCmdRef = useRef<(c: RemoteCmd) => void>(() => {});
 
   const slides: SlideDef[] = useMemo(() => [{ sec: 'start', min: 1, notes: HOME_NOTES, content: null }, ...lesson.slides], [lesson]);
   const sections = useMemo(() => {
@@ -120,15 +136,114 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   };
 
   const engine = useMemo<EngineApi>(
-    () => ({ nTeams: st.nTeams, teamNames: st.names, scores: st.scores, addScore, startTimer, goto, registerSlide }),
-    [st.nTeams, st.names, st.scores, addScore, startTimer, goto, registerSlide],
+    () => ({ nTeams: st.nTeams, teamNames: st.names, scores: st.scores, addScore, startTimer, goto, registerSlide, slideChanged }),
+    [st.nTeams, st.names, st.scores, addScore, startTimer, goto, registerSlide, slideChanged],
   );
+
+  /* أوامر الجوال: تُنفَّذ بأحدث حالة عبر المرجع */
+  onCmdRef.current = (c: RemoteCmd) => {
+    setPhoneSeen(true);
+    const api = slideApis.current[cur];
+    switch (c.c) {
+      case 'hello':
+        setSlideTick((t) => t + 1);
+        break;
+      case 'next':
+        if (!api?.reveal()) goto(cur + 1);
+        break;
+      case 'prev':
+        goto(cur - 1);
+        break;
+      case 'goto':
+        goto(c.i);
+        break;
+      case 'hint':
+        api?.toggleHint();
+        break;
+      case 'resetSlide':
+        resetSlide();
+        break;
+      case 'score':
+        if (c.team >= 0 && c.team < st.nTeams) addScore(c.team, c.d > 0 ? 1 : -1);
+        break;
+      case 'wheel':
+        setWheelOpen(c.open);
+        break;
+      case 'spin':
+        setWheelOpen(true);
+        setSpinReq((n) => n + 1);
+        break;
+      case 'teacher':
+        patch({ teacher: c.on });
+        break;
+      case 'chart':
+        if (Number.isFinite(c.v)) api?.chart()?.set(c.i, c.v);
+        break;
+      case 'chartMode':
+        api?.chart()?.setMode?.(c.m);
+        break;
+    }
+  };
+
+  useEffect(() => {
+    if (!remoteOn) return;
+    const link = hostLink(channel, (c) => onCmdRef.current(c), setOnline);
+    linkRef.current = link;
+    return () => {
+      link.stop();
+      linkRef.current = null;
+      setOnline(false);
+      setPhoneSeen(false);
+    };
+  }, [remoteOn, channel]);
+
+  /* إرسال الحالة إلى الجوال بعد كل تغيير (مجمَّعة)، فقط بعد أن يتصل جوال */
+  useEffect(() => {
+    if (!remoteOn || !phoneSeen) return;
+    const t = setTimeout(() => {
+      const active = mainRef.current?.querySelector('.slide.active');
+      const head = active?.querySelector('h2, .qhead')?.textContent?.trim();
+      const info = slideApis.current[cur]?.info() ?? { shown: 0, total: 0 };
+      const sl = slides[cur];
+      const state: RemoteState = {
+        lesson: `${lesson.meta.shortTitle} ${lesson.meta.code}`,
+        cur,
+        total: slides.length,
+        sec: SECTION_NAMES[sl.sec],
+        title: cur === 0 ? 'البداية' : (head ?? '').slice(0, 160),
+        notes: sl.notes.slice(0, 900),
+        min: sl.min,
+        steps: [info.shown, info.total],
+        hasHint: !!active?.querySelector('.btn.hint'),
+        teams: Array.from({ length: st.nTeams }, (_, i) => ({ name: st.names[i], score: st.scores[i], color: TEAM_COLORS[i] })),
+        sections: sections.map((o) => ({ name: SECTION_NAMES[o.k], first: o.first })),
+        wheel: wheelOpen,
+        wheelResult,
+        teacher: st.teacher,
+        chart: slideApis.current[cur]?.chart()?.get() ?? null,
+      };
+      // خادم الرسائل يقبل ٤ ك.ب للرسالة: تُقصَّر الملاحظات إن لزم
+      const size = () => new Blob([JSON.stringify({ state })]).size;
+      while (size() > 3800 && state.notes.length > 40) state.notes = state.notes.slice(0, Math.floor(state.notes.length * 0.7)) + '…';
+      linkRef.current?.send(state);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [remoteOn, phoneSeen, cur, slideTick, st.scores, st.names, st.nTeams, st.teacher, wheelOpen, wheelResult, slides, sections, lesson]);
+
+  const enableRemote = (on: boolean) => {
+    setRemoteEnabled(on);
+    setRemoteOn(on);
+  };
 
   /* لوحة المفاتيح: في RTL السهم الأيسر للتالي والأيمن للسابق */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tg = (e.target as HTMLElement).tagName;
       if (tg === 'INPUT' || tg === 'TEXTAREA') return;
+      if (remotePanel) {
+        if (e.key === 'Escape') setRemotePanel(false);
+        return;
+      }
       if (resetMenu !== 'closed') {
         if (e.key === 'Escape') setResetMenu('closed');
         return;
@@ -157,7 +272,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [cur, wheelOpen, resetMenu, goto, resetSlide]);
+  }, [cur, wheelOpen, resetMenu, remotePanel, goto, resetSlide]);
 
   const s = slides[cur];
   const m = lesson.meta;
@@ -250,6 +365,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
               <button className={toolBtn(st.muted)} title={st.muted ? 'تشغيل الصوت' : 'كتم الصوت'} aria-label="كتم الصوت" onClick={() => patch({ muted: !st.muted })}>
                 <IconSound muted={st.muted} />
               </button>
+              <button className={toolBtn(remoteOn)} title="التحكم من الجوال" aria-label="التحكم من الجوال" onClick={() => setRemotePanel(true)}>
+                <IconPhone />
+                <span className="lbl">الجوال</span>
+              </button>
               <button className="ib" title="ملء الشاشة (F)" aria-label="ملء الشاشة" onClick={fullscreen}>
                 <IconFull />
                 <span className="lbl">ملء الشاشة</span>
@@ -332,7 +451,17 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             </button>
           </footer>
 
-          <WheelModal open={wheelOpen} onClose={() => setWheelOpen(false)} names={st.wheel} onNames={(w) => patch({ wheel: w })} />
+          <WheelModal open={wheelOpen} onClose={() => setWheelOpen(false)} names={st.wheel} onNames={(w) => patch({ wheel: w })} spinReq={spinReq} onResult={setWheelResult} />
+          <RemotePanel
+            open={remotePanel}
+            onClose={() => setRemotePanel(false)}
+            enabled={remoteOn}
+            online={online}
+            phoneSeen={phoneSeen}
+            url={remoteUrl(channel, lesson.meta.id)}
+            onEnable={enableRemote}
+            onNewCode={() => setChannel(deviceChannel(true))}
+          />
         </div>
       </div>
     </EngineCtx.Provider>

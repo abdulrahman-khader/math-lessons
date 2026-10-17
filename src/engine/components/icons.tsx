@@ -70,3 +70,9 @@ export const IconStar = () => (
     <path fill="currentColor" d="M12 2l3 6.6 7 .7-5.3 4.8 1.6 7L12 17.5 5.7 21l1.6-7L2 9.3l7-.7z" />
   </svg>
 );
+export const IconPhone = () => (
+  <svg {...base}>
+    <rect x="6" y="2" width="12" height="20" rx="2.5" />
+    <path d="M11 18h2" />
+  </svg>
+);

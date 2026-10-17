@@ -1,5 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { HlKey } from './types';
+import type { RemoteChart } from './remote';
+
+/** رسم تفاعلي يسجّل نفسه في شريحته ليتحكم به الجوال */
+export interface ChartCtrl {
+  get: () => RemoteChart;
+  set: (i: number, v: number) => void;
+  setMode?: (m: string) => void;
+}
 
 /* ---------- سياق المحرك: ما تحتاجه المكوّنات من الحصة كلها ---------- */
 
@@ -11,6 +19,8 @@ export interface EngineApi {
   startTimer: (sec: number) => void;
   goto: (slide: number) => void;
   registerSlide: (index: number, api: SlideApi | null) => void;
+  /** تُستدعى عند تغيّر حالة شريحة (خطوة، تلميح) ليصل التحديث إلى جهاز التحكم */
+  slideChanged: () => void;
 }
 
 export const EngineCtx = createContext<EngineApi | null>(null);
@@ -33,6 +43,10 @@ export interface SlideApi {
   /** يُظهر الخطوة التالية بترتيب ظهورها في الصفحة. يعيد false إن لم يبقَ شيء. */
   reveal: () => boolean;
   hideAll: () => void;
+  toggleHint: () => void;
+  /** عدد الخطوات الظاهرة من مجموعها */
+  info: () => { shown: number; total: number };
+  chart: () => ChartCtrl | null;
 }
 
 interface SlideState extends SlideApi {
@@ -42,7 +56,9 @@ interface SlideState extends SlideApi {
   /** مفاتيح الإبراز للخطوات الظاهرة، يقرؤها كل رسم في الشريحة */
   activeHl: ReadonlySet<string>;
   hintOpen: boolean;
-  toggleHint: () => void;
+  setChart: (c: ChartCtrl | null) => void;
+  /** تغيّرت حالة رسم تفاعلي: أبلغ جهاز التحكم */
+  touch: () => void;
 }
 
 const SlideCtx = createContext<SlideState | null>(null);
@@ -91,10 +107,21 @@ export function SlideScope({ index, children }: { index: number; children: React
     setShown([]);
   }, []);
 
+  const toggleHint = useCallback(() => setHintOpen((h) => !h), []);
+  const info = useCallback(() => ({ shown: shownRef.current.length, total: steps.current.size }), []);
+  const chartRef = useRef<ChartCtrl | null>(null);
+  const chart = useCallback(() => chartRef.current, []);
+  const setChart = useCallback((c: ChartCtrl | null) => {
+    chartRef.current = c;
+  }, []);
+
   useEffect(() => {
-    engine.registerSlide(index, { reveal, hideAll });
+    engine.registerSlide(index, { reveal, hideAll, toggleHint, info, chart });
     return () => engine.registerSlide(index, null);
-  }, [engine, index, reveal, hideAll]);
+  }, [engine, index, reveal, hideAll, toggleHint, info, chart]);
+
+  const { slideChanged } = engine;
+  useEffect(() => slideChanged(), [shown, hintOpen, slideChanged]);
 
   const value = useMemo<SlideState>(() => {
     const metas = shown.map((id) => steps.current.get(id)).filter((m): m is StepMeta => !!m);
@@ -108,9 +135,13 @@ export function SlideScope({ index, children }: { index: number; children: React
       isGroupOpen: (g) => groups.has(g),
       activeHl,
       hintOpen,
-      toggleHint: () => setHintOpen((h) => !h),
+      toggleHint,
+      info,
+      chart,
+      setChart,
+      touch: slideChanged,
     };
-  }, [shown, hintOpen, reveal, hideAll, register]);
+  }, [shown, hintOpen, reveal, hideAll, register, toggleHint, info, chart, setChart, slideChanged]);
 
   return <SlideCtx.Provider value={value}>{children}</SlideCtx.Provider>;
 }

@@ -66,7 +66,7 @@ for (const file of files) {
           const { sh, ch, wide } = await page.locator('section.slide.active').evaluate((el) => {
             // البطاقات التي يخرج محتواها عن عرضها (يُقصّ جانبيًا ولا يزيد الارتفاع)
             const wide = [...el.querySelectorAll<HTMLElement>('.card, .chart')].filter((c) => c.scrollWidth > c.clientWidth + 2).length;
-            return { sh: el.scrollHeight, ch: el.clientHeight, wide };
+            return { sh: el.scrollHeight, ch: el.clientHeight, wide: wide + (el.scrollWidth > el.clientWidth + 1 ? 1 : 0) };
           });
           if (sh > ch + 1) overflow.push(`الشريحة ${i + 1} (${state}): ${sh - ch}px زائدة`);
           if (wide) overflow.push(`الشريحة ${i + 1} (${state}): ${wide} بطاقة يفيض محتواها عن عرضها`);

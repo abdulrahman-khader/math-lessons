@@ -98,6 +98,27 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     if (s) s.scrollTop = 0;
   }, [cur]);
 
+  /* الصف الثاني: أسئلة الكتاب بأكبر خط يتسع للشريحة (--qs)، ويُعاد الحساب عند إظهار خطوة أو تلميح */
+  useLayoutEffect(() => {
+    if (!lesson.meta.id.startsWith('g2') || layout.flow) return;
+    const s = mainRef.current?.querySelector<HTMLElement>('.slide.active');
+    if (!s || !s.querySelector(':scope > .bookrow') || !s.querySelector(':scope > .qgrid')) return;
+    const cards = [...s.querySelectorAll<HTMLElement>(':scope > .qgrid > .qcard')];
+    const over = () => s.scrollHeight > s.clientHeight + 1 || s.scrollWidth > s.clientWidth + 1 || cards.some((c) => c.scrollWidth > c.clientWidth + 2);
+    const fit = () => {
+      let k = 1.7;
+      s.style.setProperty('--qs', k + 'em');
+      while (over() && k > 0.85) {
+        k = Math.round((k - 0.05) * 100) / 100;
+        s.style.setProperty('--qs', k + 'em');
+      }
+    };
+    fit();
+    const mo = new MutationObserver(fit);
+    mo.observe(s, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+    return () => mo.disconnect();
+  }, [cur, lesson.meta.id, layout.flow]);
+
   /* التحجيم: المسرح ثابت ١٦٠٠×٩٠٠ ويُكبَّر أو يُصغَّر ليملأ الشاشة */
   useLayoutEffect(() => {
     const fit = () => {

@@ -667,3 +667,19 @@ table.dgrid.horiz { font-size: 1em; }
 table.dgrid.horiz.small { font-size: .82em; }
 table.dgrid.horiz td { min-width: 1.8em; padding: .3em .4em; }
 .tight table.dgrid { font-size: .7em; }
+
+/* ===== الصف الثاني: أسئلة الكتاب أكبر وتملأ الشريحة ===== */
+/* شبكة الأسئلة تأخذ الارتفاع الفارغ ويتوزع على صفوفها؛ الخط --qs يضبطه LessonApp بأكبر قيمة تتسع */
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid { flex: 1 0 auto; grid-auto-rows: auto; align-content: stretch; font-size: var(--qs, 1em); }
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard { justify-content: center; align-items: center; padding-inline-start: 2.2em; }
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard > .qnum { font-size: .75em; }
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard.ccard,
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard.dcard,
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard.vcard { justify-content: center; }
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid .flines { gap: .45em; }
+/* ما فوق الشبكة وتحتها لا ينضغط؛ إن ضاق المكان يصغُر خط الشبكة بدلًا منه */
+#app[data-lesson^="g2"] .slide:has(> .bookrow):has(> .qgrid) > :not(.qgrid) { flex: 0 0 auto; }
+/* الصف الثاني، مسائل أخمّن وأتحقق: الأكياس وجدول التخمين أكبر ويملآن الجهة الفارغة */
+#app[data-lesson^="g2"] .cols > .ppick { font-size: 1.6em; align-self: center; align-items: center; }
+#app[data-lesson^="g2"] .cols > .gcheck { font-size: 1.25em; align-self: center; }
+#app[data-lesson^="g2"] .qhead ~ .cols .qtext.long { font-size: 1em; }

@@ -152,9 +152,10 @@ export function CubeTrain({ parts, shape = 'cube', size = 46, k = 0, take = [0, 
 /* ---------- خانة إجابة تمتلئ في مكانها ---------- */
 
 /** مربع فارغ يظهر فيه الناتج عند «الخطوة التالية»، بترتيبه في الصفحة. */
-export function Blank({ v, hl }: { v: number; hl?: readonly HlKey[] }) {
+/** box: مربع كما في الكتاب حين يرسم □؛ وإلا سطر نقاط «......» في دروس الصف الثاني */
+export function Blank({ v, hl, box }: { v: number; hl?: readonly HlKey[]; box?: boolean }) {
   return (
-    <span className="blank">
+    <span className={'blank' + (box ? ' box' : '')}>
       <Step hl={hl} className="bv">
         {num(v)}
       </Step>
@@ -176,13 +177,14 @@ export function FactLine({ a, op, b, v, hl }: { a: number; op: '+' | '−'; b: n
 
 /** جمع أو طرح رأسي كما في الكتاب: الإشارة يمين العدد الثاني، والآحاد تحت الآحاد */
 export function VSum({ a, op, b, v, hl, missing }: { a: number; op: '+' | '−'; b: number; v: number; hl?: readonly HlKey[]; missing?: 'b' }) {
+  // العدد المفقود في الوسط يُرسم مربعًا كما في الكتاب
   // missing='b': العدد الثاني هو المفقود (خانة في الوسط) والناتج معروف تحت الخط
   return (
     <div className="vsum" aria-label={`${num(a)} ${op} ${missing === 'b' ? '؟' : num(b)}`}>
       <span />
       <span className="vn">{num(a)}</span>
       <span className="vop">{op}</span>
-      <span className="vn">{missing === 'b' ? <Blank v={b} hl={hl} /> : num(b)}</span>
+      <span className="vn">{missing === 'b' ? <Blank v={b} hl={hl} box /> : num(b)}</span>
       <span className="vline" />
       <span />
       <span className="vn vans">{missing === 'b' ? num(v) : <Blank v={v} hl={hl} />}</span>

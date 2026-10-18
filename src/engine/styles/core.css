@@ -572,3 +572,32 @@ body.flow .qgrid.four { grid-template-columns: 1fr 1fr; }
 .flines.tri2 { display: grid; grid-template-columns: repeat(2, max-content); gap: .3em 1.4em; padding-inline-start: 0; }
 .tri-rows .qcard.tricard { padding-block: .15em; }
 .tri-rows .qcard.tricard .ftri { max-width: 4.2em; }
+
+/* ===== شكل الكتاب في دروس الصف الثاني ===== */
+/* رقم السؤال مربع أزرق كما في الكتاب */
+#app[data-lesson^="g2"] .qnum { border-radius: .18em; background: linear-gradient(#2a4fb0, #10307a); box-shadow: inset 0 -3px 0 #0006; }
+/* سطر النقاط مكان الناتج، والرقم يُكتب فوقه */
+#app[data-lesson^="g2"] .blank:not(.box) { border: 0; border-radius: 0; border-block-end: 4px dotted #7a8597; background: none; min-width: 2.6em; padding-inline: .2em; }
+#app[data-lesson^="g2"] .blank:not(.box):has(.step.shown) { border-block-end-color: var(--ex); background: none; }
+#app[data-lesson^="g2"] .blank.box { border-style: solid; border-color: var(--ink); border-width: 3px; border-radius: .1em; }
+#app[data-lesson^="g2"] .blank.box:has(.step.shown) { border-color: var(--ex); }
+/* خلايا الأسئلة بلا إطار، تفصلها خطوط صفراء كما في الكتاب */
+.qgrid.book { gap: 4px; background: #f5c400; }
+.qgrid.book > .qcard { border: 0; border-radius: 0; background: var(--paper); }
+.qgrid.plain > .qcard { border: 0; background: transparent; }
+/* عناوين أقسام الكتاب */
+#app[data-lesson^="g2"] .bookrow > .tag.qs, #app[data-lesson^="g2"] .qhead > .tag.qs { background: linear-gradient(#e8372b, #b5180f); color: #ffe066; font-size: .72em; padding: .2em .9em; box-shadow: inset 0 -3px 0 #0004; }
+#app[data-lesson^="g2"] .bookrow > .tag.ex, #app[data-lesson^="g2"] .qhead > .tag.ex { background: none; color: #2f9a3c; font-family: var(--display); font-size: .95em; padding: 0; }
+.qcard.tcard .twbox { flex: none; }
+.qcard.tcard .twbox .towers { height: 7.6em; width: auto; max-height: none; }
+.qgrid.book > .qcard { justify-content: flex-start; gap: 1.2em; padding-inline-start: 2.6em; }
+.qgrid.book > .qcard.vcard { justify-content: center; }
+/* سؤال ص ٧٢: المكعبات فوق، والجمل في عمودين كما في الكتاب */
+.qgrid.book > .qcard.ccard { flex-direction: column; align-items: stretch; gap: .25em; padding-block: .3em; }
+.qcard.ccard .cubes { width: auto; height: 2.2em; margin-inline-end: auto; }
+.flines.two72 { display: grid; grid-template-columns: repeat(2, max-content); gap: .25em 2em; padding-inline-start: 0; }
+/* دومينو ص ٧٤: فوق الجملتين؛ وسؤال ٦: بجانبهما */
+.qgrid.book > .qcard.dcard { flex-direction: column; align-items: stretch; gap: .3em; }
+.qgrid.book > .qcard.dcard .domino { margin-inline: auto; max-width: 6em; }
+.qgrid.book > .qcard.dcard.side { flex-direction: row; align-items: center; justify-content: flex-start; }
+.qgrid.book > .qcard.dcard.side .domino { margin: 0; }

@@ -88,9 +88,9 @@ function DominoQ({ n, known, total }: { n: number; known: number; total: number 
   return (
     <QCard n={n} className="dcard">
       <Domino known={known} missing={m} k={n} />
-      <div className="flines">
-        <Sentence t={[known, '+', { b: m, hl: [`p${n}`] }, '=', total]} />
-        <Sentence t={[total, '−', known, '=', { b: m }]} />
+      <div className="flines two72">
+        <Sentence t={[known, '+', { box: true, b: m, hl: [`p${n}`] }, '=', total]} />
+        <Sentence t={[total, '−', known, '=', { box: true, b: m }]} />
       </div>
     </QCard>
   );
@@ -203,7 +203,7 @@ export default defineLesson({
           </Card>
           <Cols even>
             <Card kind="ex" cap="جملة الجمع">
-              <Sentence t={[9, '+', { b: 6 }, '=', 15]} big />
+              <Sentence t={[9, '+', { box: true, b: 6 }, '=', 15]} big />
             </Card>
             <Card kind="ex" cap="حقيقة الطرح المرتبطة">
               <Sentence t={[15, '−', 9, '=', 6]} big />
@@ -223,7 +223,7 @@ export default defineLesson({
           <Cols>
             <QCol>
               <p className="qtext">أَجِدُ الْعَدَدَ الْمَفْقُودَ فِي جُمْلَةِ الْجَمْعِ مُسْتَعْمِلًا حَقِيقَةَ الطَّرْحِ الْمُرْتَبِطَةَ بِهَا.</p>
-              <Sentence t={[9, '+', { b: 6, hl: ['p0'] }, '=', 15]} big />
+              <Sentence t={[9, '+', { box: true, b: 6, hl: ['p0'] }, '=', 15]} big />
               <Ctrls>
                 <NextButton />
               </Ctrls>
@@ -269,7 +269,7 @@ export default defineLesson({
           <Cols>
             <QCol>
               <p className="qtext">فِي سَلَّةِ الْمَلْعَبِ ١٤ كُرَةً، مِنْهَا ٨ كُرَاتٍ حَمْرَاءُ وَالْبَاقِي زَرْقَاءُ. كَمْ كُرَةً زَرْقَاءَ؟</p>
-              <Sentence t={[8, '+', { b: 6, hl: ['p0'] }, '=', 14]} big />
+              <Sentence t={[8, '+', { box: true, b: 6, hl: ['p0'] }, '=', 14]} big />
               <MCQ options={['٥', '٦', '٢٢']} answer="٦" award />
               <Ctrls>
                 <NextButton label="كيف أفكّر؟" />
@@ -294,11 +294,11 @@ export default defineLesson({
       notes: 'مع أول ناتج في كل سؤال يظهر النصف المخفي من الدومينو. اطلب من الطلاب عدّ النقاط للتحقق.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{CHECK}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND_DOTS}</p>
-          <div className="qgrid two">
+          <div className="qgrid two book">
             <DominoQ n={1} known={8} total={14} />
             <DominoQ n={2} known={5} total={11} />
             <DominoQ n={3} known={4} total={8} />
@@ -335,13 +335,13 @@ export default defineLesson({
       ),
     },
 
-    /* ================= أتدرب ٦–١٠ ================= */
+    /* ================= أتدرب ٦–١٠ · كما في ص ٧٤–٧٥ ================= */
     {
-      sec: 'practice', min: 4,
-      notes: 'في كل سؤال جملتان: الطرح يساعد على إيجاد العدد المفقود في الجمع.',
+      sec: 'practice', min: 5,
+      notes: 'كما في الكتاب: في كل سؤال جملة طرح ثم جملة جمع مرتبطة. ناتج الطرح هو العدد المفقود في الجمع.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <Cols style={{ gridTemplateColumns: '1fr auto', alignItems: 'start' }}>
@@ -350,40 +350,40 @@ export default defineLesson({
               ١٤ − ٩ = ٥ وَ ٩ + ٥ = ١٤ حَقِيقَتَانِ مُتَرَابِطَتَانِ.
             </Card>
           </Cols>
-          <div className="qgrid three">
-            <QCard n={6} className="dcard span2">
+          <div className="qgrid two book">
+            <QCard n={6} className="dcard span2 side">
               <Domino known={9} missing={5} k={6} />
               <div className="flines">
-                <Sentence t={[14, '−', 9, '=', { b: 5, hl: ['p6'] }]} />
-                <Sentence t={[9, '+', { b: 5 }, '=', 14]} />
+                <Sentence t={[14, '−', 9, '=', { box: true, b: 5, hl: ['p6'] }]} />
+                <Sentence t={[9, '+', { box: true, b: 5 }, '=', 14]} />
               </div>
             </QCard>
-            {Two(7, [12, '−', 6, '=', { b: 6 }], [{ b: 6 }, '+', 6, '=', 12])}
-            {Two(8, [8, '−', 7, '=', { b: 1 }], [7, '+', { b: 1 }, '=', 8])}
-            {Two(9, [12, '−', 9, '=', { b: 3 }], [9, '+', { b: 3 }, '=', 12])}
-            {Two(10, [7, '−', 2, '=', { b: 5 }], [2, '+', { b: 5 }, '=', 7])}
+            {Two(7, [12, '−', 6, '=', { box: true, b: 6 }], [{ box: true, b: 6 }, '+', 6, '=', 12])}
+            {Two(8, [8, '−', 7, '=', { box: true, b: 1 }], [7, '+', { box: true, b: 1 }, '=', 8])}
+            {Two(9, [12, '−', 9, '=', { box: true, b: 3 }], [9, '+', { box: true, b: 3 }, '=', 12])}
+            {Two(10, [7, '−', 2, '=', { box: true, b: 5 }], [2, '+', { box: true, b: 5 }, '=', 7])}
           </div>
           <Ctrls>
             <NextButton label="الناتج التالي" />
-            <TimerButton sec={120} />
+            <TimerButton sec={150} />
           </Ctrls>
         </>
       ),
     },
 
-    /* ================= أتدرب ١١–١٤ ================= */
+    /* ================= أتدرب ١١–١٤ · كما في ص ٧٥ ================= */
     {
       sec: 'practice', min: 4,
       notes: 'انتبه في ١٢: المربعان مختلفان (٧ ثم ١٤). وفي ١٣ و١٤ المربع في وسط الجمع والطرح الرأسي.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
-          <div className="qgrid four">
-            {Two(11, [15, '−', { b: 8 }, '=', 7], [7, '+', { b: 8 }, '=', 15])}
-            {Two(12, [7, '+', { b: 7 }, '=', 14], [{ b: 14 }, '−', 7, '=', 7])}
+          <div className="qgrid two book">
+            {Two(11, [15, '−', { box: true, b: 8 }, '=', 7], [7, '+', { box: true, b: 8 }, '=', 15])}
+            {Two(12, [7, '+', { box: true, b: 7 }, '=', 14], [{ box: true, b: 14 }, '−', 7, '=', 7])}
             <QCard n={13} className="vcard">
               <div className="vrow">
                 <VSum a={9} op="+" b={9} v={18} missing="b" />
@@ -427,7 +427,7 @@ export default defineLesson({
           ]}
           chart={
             <div className="chart cubebox">
-              <Sentence t={[5, '+', 4, '+', { b: 2 }, '=', 11]} big />
+              <Sentence t={[5, '+', 4, '+', { box: true, b: 2 }, '=', 11]} big />
             </div>
           }
         />

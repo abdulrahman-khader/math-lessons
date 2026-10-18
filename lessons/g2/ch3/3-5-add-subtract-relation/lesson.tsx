@@ -286,81 +286,59 @@ export default defineLesson({
       ),
     },
 
-    /* ================= أتأكد ١–٥ ================= */
+    /* ================= أتأكد ١–٤ · كما في ص ٧٢ ================= */
     {
-      sec: 'check', min: 2,
-      notes: '«أنت تعمل»: أعطِ ٤٥ ثانية للحل على السبورات الصغيرة. ذكّر الطلاب: ابدأ بجملة الجمع، ثم استعمل الأعداد نفسها.',
+      sec: 'check', min: 6,
+      notes: 'كما في الكتاب ص ٧٢. «أنت تعمل»: أعطِ دقيقتين للحل على السبورات الصغيرة. مع ناتج الجمع تنضمّ المكعبات، ومع كل طرح يُؤخذ جزء منها. ذكّر الطلاب: ابدأ بجملة الجمع، ثم استعمل الأعداد نفسها.',
       content: (
-        <QuestionSlide
-          source={CHECK} n={1} time={45}
-          question={FIND}
-          hint="اجمع المكعبات أولًا، ثم خذ جزءًا وانظر كم يبقى."
-          steps={[{ text: 'الأعداد نفسها: ٦ و٧ و١٣', kind: 'ans' }]}
-          chart={<Cubes parts={[{ n: 6, color: CUBE.green }, { n: 7, color: CUBE.orange }]} take={[0, 1]} />}
-        >
-          <div className="flines">
-            <FactLine a={6} op="+" b={7} v={13} hl={['p0']} />
-            <FactLine a={13} op="−" b={6} v={7} hl={['v0']} />
-            <FactLine a={13} op="−" b={7} v={6} hl={['x0']} />
+        <>
+          <div className="row bookrow">
+            <Tag kind="qs">{CHECK}</Tag>
           </div>
-        </QuestionSlide>
-      ),
-    },
-    {
-      sec: 'check', min: 1,
-      notes: 'اطلب من طالب أن يقرأ جملة الجمع، ثم يأخذ المكعبات الزرقاء بإصبعه على السبورة.',
-      content: (
-        <QuestionSlide
-          source={CHECK} n={2} time={45}
-          question={FIND}
-          hint="٥ + ٧ = ؟ ثم استعمل الأعداد نفسها."
-          steps={[{ text: 'الأعداد نفسها: ٥ و٧ و١٢', kind: 'ans' }]}
-          chart={<Cubes parts={[{ n: 5, color: CUBE.yellow }, { n: 7, color: CUBE.blue }]} take={[1, 0]} />}
-        >
-          <div className="flines">
-            <FactLine a={5} op="+" b={7} v={12} hl={['p0']} />
-            <FactLine a={12} op="−" b={7} v={5} hl={['v0']} />
-            <FactLine a={12} op="−" b={5} v={7} hl={['x0']} />
+          <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
+          <div className="qgrid two book">
+            <QCard n={1} className="ccard">
+              <CubeTrain parts={[{ n: 6, color: CUBE.green }, { n: 7, color: CUBE.orange }]} k={1} take={[0, 1]} size={30} counts={false} />
+              <div className="flines two72">
+                <FactLine a={6} op="+" b={7} v={13} hl={['p1']} />
+                <FactLine a={13} op="−" b={6} v={7} hl={['v1']} />
+                <span />
+                <FactLine a={13} op="−" b={7} v={6} hl={['x1']} />
+              </div>
+            </QCard>
+            <QCard n={2} className="ccard">
+              <CubeTrain parts={[{ n: 5, color: CUBE.yellow }, { n: 7, color: CUBE.blue }]} k={2} take={[1, 0]} size={30} counts={false} />
+              <div className="flines two72">
+                <FactLine a={5} op="+" b={7} v={12} hl={['p2']} />
+                <FactLine a={12} op="−" b={7} v={5} hl={['v2']} />
+                <span />
+                <FactLine a={12} op="−" b={5} v={7} hl={['x2']} />
+              </div>
+            </QCard>
+            <QCard n={3} className="ccard">
+              <CubeTrain parts={[{ n: 9, color: CUBE.green }, { n: 6, color: CUBE.red }]} k={3} take={[1, 0]} size={30} counts={false} />
+              <div className="flines two72">
+                <FactLine a={9} op="+" b={6} v={15} hl={['p3']} />
+                <FactLine a={15} op="−" b={6} v={9} hl={['v3']} />
+                <span />
+                <FactLine a={15} op="−" b={9} v={6} hl={['x3']} />
+              </div>
+            </QCard>
+            <QCard n={4} className="ccard">
+              <CubeTrain parts={[{ n: 7, color: CUBE.green }, { n: 4, color: CUBE.yellow }]} k={4} take={[1, 0]} size={30} counts={false} />
+              <div className="flines two72">
+                <FactLine a={7} op="+" b={4} v={11} hl={['p4']} />
+                <FactLine a={11} op="−" b={4} v={7} hl={['v4']} />
+                <span />
+                <FactLine a={11} op="−" b={7} v={4} hl={['x4']} />
+              </div>
+            </QCard>
           </div>
-        </QuestionSlide>
-      ),
-    },
-    {
-      sec: 'check', min: 1,
-      notes: 'هذا السؤال فيه ٩ مكعبات خضراء: ذكّر الطلاب بإستراتيجية «أكوّن العشرة» إن احتاجوا: ٩ + ٦ = ٩ + ١ + ٥.',
-      content: (
-        <QuestionSlide
-          source={CHECK} n={3} time={45}
-          question={FIND}
-          hint="٩ + ٦ = ؟ (أكمل ٩ إلى ١٠ أولًا)."
-          steps={[{ text: 'الأعداد نفسها: ٩ و٦ و١٥', kind: 'ans' }]}
-          chart={<Cubes parts={[{ n: 9, color: CUBE.green }, { n: 6, color: CUBE.red }]} take={[1, 0]} />}
-        >
-          <div className="flines">
-            <FactLine a={9} op="+" b={6} v={15} hl={['p0']} />
-            <FactLine a={15} op="−" b={6} v={9} hl={['v0']} />
-            <FactLine a={15} op="−" b={9} v={6} hl={['x0']} />
-          </div>
-        </QuestionSlide>
-      ),
-    },
-    {
-      sec: 'check', min: 1,
-      notes: 'اطلب من الطلاب كتابة الجمل الثلاث على السبورات الصغيرة ورفعها معًا.',
-      content: (
-        <QuestionSlide
-          source={CHECK} n={4} time={45}
-          question={FIND}
-          hint="٧ + ٤ = ؟ ثم خذ الأصفر مرة، والأخضر مرة."
-          steps={[{ text: 'الأعداد نفسها: ٧ و٤ و١١', kind: 'ans' }]}
-          chart={<Cubes parts={[{ n: 7, color: CUBE.green }, { n: 4, color: CUBE.yellow }]} take={[1, 0]} />}
-        >
-          <div className="flines">
-            <FactLine a={7} op="+" b={4} v={11} hl={['p0']} />
-            <FactLine a={11} op="−" b={4} v={7} hl={['v0']} />
-            <FactLine a={11} op="−" b={7} v={4} hl={['x0']} />
-          </div>
-        </QuestionSlide>
+          <Ctrls>
+            <NextButton label="الناتج التالي" />
+            <TimerButton sec={150} />
+          </Ctrls>
+        </>
       ),
     },
     {
@@ -388,11 +366,11 @@ export default defineLesson({
       notes: 'الأسئلة الرأسية: اطلب من الطلاب حل الجمع أولًا ثم الطرح على السبورات الصغيرة. كل ضغطة على السهم تكشف ناتجًا واحدًا. تلميح للطلاب: ناتج الطرح هو العدد الآخر في جملة الجمع.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
-          <div className="qgrid three">
+          <div className="qgrid three plain">
             <VPair n={6} a={8} b={9} sub={8} />
             <VPair n={7} a={9} b={6} sub={9} />
             <VPair n={8} a={9} b={5} sub={5} />
@@ -414,14 +392,14 @@ export default defineLesson({
       notes: 'كل سؤال ثلاث جمل مترابطة. اسأل قبل الكشف: أي جملة أبدأ بها؟ (الجمع).',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <Cols style={{ gridTemplateColumns: '1fr auto', alignItems: 'start' }}>
             <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
             <Card kind="rule" cap="أَتَذَكَّرُ" style={{ fontSize: '.75em' }}>أَسْتَعْمِلُ الْأَعْدَادَ نَفْسَهَا فِي الْحَقَائِقِ الْمُتَرَابِطَةِ.</Card>
           </Cols>
-          <div className="qgrid two">
+          <div className="qgrid two book">
             <Family n={12} a={7} b={9} />
             <Family n={13} a={5} b={6} />
             <Family n={14} a={6} b={8} />
@@ -441,20 +419,18 @@ export default defineLesson({
       notes: 'الحس العددي: كل الجمل صحيحة حسابيًا، لكن واحدة فقط تستعمل الأعداد نفسها. اسأل: لماذا لا تصلح ١٠ − ٤ = ٦؟',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="ex">{SOLVE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>
             <b style={{ color: 'var(--ex)' }}>الْحِسُّ الْعَدَدِيُّ:</b> أُحَوِّطُ جُمْلَةَ الطَّرْحِ الَّتِي أَسْتَعْمِلُهَا لِلتَّحَقُّقِ مِنْ عَمَلِيَّةِ الْجَمْعِ:
           </p>
-          <div className="qgrid one">
+          <div className="qgrid one book">
             <QCard n={16} className="mcard">
               <MCQ q="٩ + ٤ = ١٣" options={['١٣ − ١ = ١٢', '١٣ − ٤ = ٩', '١٠ − ٤ = ٦']} answer="١٣ − ٤ = ٩" award />
-              <CubeTrain parts={g(9, 4)} joined size={34} />
             </QCard>
             <QCard n={17} className="mcard">
               <MCQ q="٧ + ٥ = ١٢" options={['١٢ − ٤ = ٨', '١٢ − ١ = ١١', '١٢ − ٥ = ٧']} answer="١٢ − ٥ = ٧" award />
-              <CubeTrain parts={g(7, 5)} joined size={34} />
             </QCard>
           </div>
         </>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  CUBE, Card, Cols, CubeTrain, Ctrls, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, NumberLine, QCard, QCol, QuestionSlide,
+  Blank, CUBE, Card, Cols, CubeTrain, Ctrls, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, NumberLine, QCard, QCol, QuestionSlide,
   Sentence, SlideHead, Solution, Stack, Step, Tag, TimerButton, VSum, Winner, defineLesson, num, useRemoteWidget, type Token,
 } from '@engine';
 
@@ -288,17 +288,17 @@ export default defineLesson({
       ),
     },
 
-    /* ================= أتأكد ١–٣ ================= */
+    /* ================= أتأكد ١–٦ · كما في ص ٦٤ ================= */
     {
-      sec: 'check', min: 3,
-      notes: 'كل سؤال فيه طرح الكل وطرح الصفر. اطلب من الطلاب قول القاعدة مع كل ناتج.',
+      sec: 'check', min: 5,
+      notes: 'كما في الكتاب ص ٦٤: كل سؤال فيه طرح الكل وطرح الصفر. اطلب من الطلاب قول القاعدة مع كل ناتج.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{CHECK}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
-          <div className="qgrid three">
+          <div className="qgrid three book">
             <QCard n={1}>
               <div className="flines">
                 <Sentence t={S(3, 3)} />
@@ -317,26 +317,6 @@ export default defineLesson({
                 <Sentence t={S(6, 0)} />
               </div>
             </QCard>
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={60} />
-          </Ctrls>
-        </>
-      ),
-    },
-
-    /* ================= أتأكد ٤–٦ ================= */
-    {
-      sec: 'check', min: 2,
-      notes: 'الطرح الرأسي: العدد العلوي ناقص العدد السفلي.',
-      content: (
-        <>
-          <div className="row">
-            <Tag kind="qs">{CHECK}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
-          <div className="qgrid three">
             <QCard n={4} className="vcard">
               <div className="vrow">
                 <VSum a={9} op="−" b={0} v={9} />
@@ -358,7 +338,7 @@ export default defineLesson({
           </div>
           <Ctrls>
             <NextButton label="الناتج التالي" />
-            <TimerButton sec={60} />
+            <TimerButton sec={120} />
           </Ctrls>
         </>
       ),
@@ -393,7 +373,7 @@ export default defineLesson({
       notes: 'بعد كل ناتج صفر تظهر دائرة حول المسألة. اسأل: لماذا كان الناتج صفرًا؟',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <Cols style={{ gridTemplateColumns: '1fr auto', alignItems: 'start' }}>
@@ -402,7 +382,7 @@ export default defineLesson({
               عِنْدَمَا أَطْرَحُ الصِّفْرَ مِنْ أَيِّ عَدَدٍ فَإِنَّ نَاتِجَ الطَّرْحِ هُوَ العَدَدُ نَفْسُهُ.
             </Card>
           </Cols>
-          <div className="qgrid three">
+          <div className="qgrid three plain">
             <HQ n={8} a={9} b={3} />
             <HQ n={9} a={8} b={1} />
             <HQ n={10} a={8} b={3} />
@@ -424,11 +404,11 @@ export default defineLesson({
       notes: 'الطرح الرأسي. اطلب من الطلاب أن يحوّطوا المسائل التي ناتجها صفر في كتبهم.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND_CIRCLE}</p>
-          <div className="qgrid four">
+          <div className="qgrid four plain">
             <VQ n={14} a={8} b={8} />
             <VQ n={15} a={6} b={0} />
             <VQ n={16} a={5} b={5} />
@@ -452,10 +432,10 @@ export default defineLesson({
       notes: 'الجبر: المطلوب عدد الخرزات التي أضاعها، فهو العدد المطروح المجهول. الجملتان تعطيان العدد نفسه، لكن الجملة التي «تبيّن» القصة هي ١٢ − □ = ٧ (من ١٢ ضاع عدد فبقي ٧).',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="ex">{HOT}</Tag>
           </div>
-          <div className="qgrid one">
+          <div className="qgrid one book">
             <QCard n={22}>
               <div className="mcq-wrap">
                 <p className="qtext" style={{ margin: 0 }}>
@@ -465,13 +445,9 @@ export default defineLesson({
               </div>
             </QCard>
             <QCard n={23}>
-              <p className="qtext" style={{ margin: 0 }}>
-                كَمْ خَرَزَةً أَضَاعَ سَعِيدٌ؟
+              <p className="qtext" style={{ margin: 0, paddingInlineStart: '1.8em' }}>
+                كَمْ خَرَزَةً أَضَاعَ سَعِيدٌ؟ <Blank v={5} /> خَرَزَاتٍ
               </p>
-              <div className="flines">
-                <Sentence t={[12, '−', { b: 5 }, '=', 7]} big />
-              </div>
-              <Step kind="ans" className="inl">أضاع ٥ خرزات</Step>
             </QCard>
           </div>
           <Ctrls>

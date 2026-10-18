@@ -185,7 +185,7 @@ export default defineLesson({
           <Card kind="rule" style={{ fontSize: '1.05em', fontWeight: 700, lineHeight: 1.8 }}>
             إذا عَرَفْتُ أَنَّ <Mark>العَدَدَ + نَفْسَهُ = المَجْمُوعَ</Mark>، فَإِنَّ <Mark>المَجْمُوعَ − العَدَدَ = العَدَدَ</Mark>.
           </Card>
-          <div className="qgrid three">
+          <div className="qgrid three plain">
             {[
               [4, 8],
               [6, 12],
@@ -278,55 +278,35 @@ export default defineLesson({
       ),
     },
 
-    /* ================= أتأكد ١–٢ ================= */
+    /* ================= أتأكد ١–٦ · كما في ص ٦٦ ================= */
     {
-      sec: 'check', min: 3,
-      notes: 'الخطوة الأولى تكمل جملة الجمع وتُظهر المجموع فوق البرجين، والثانية تشطب البرج الثاني.',
+      sec: 'check', min: 6,
+      notes: 'كما في الكتاب ص ٦٦. في ١ و٢ الخطوة الأولى تكمل جملة الجمع وتُظهر المجموع فوق البرجين، والثانية تشطب البرج الثاني. في ٥ و٦ اسأل: أي حقيقة جمع العدد ونفسه تساعدك؟',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{CHECK}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND_CUBES}</p>
-          <div className="qgrid two">
+          <div className="qgrid two book">
             <QCard n={1} className="tcard">
-              <div className="chart cubebox dbl sm">
-                <Towers a={9} b={9} k={1} colors={['#d7302a', '#f6c21c']} size={28} />
-              </div>
               <div className="flines">
                 <Sentence t={[9, '+', { b: 9, hl: ['p1'] }, '=', 18]} />
                 <Sentence t={[18, '−', 9, '=', { b: 9, hl: ['v1'] }]} />
               </div>
+              <div className="twbox">
+                <Towers a={9} b={9} k={1} colors={['#d7302a', '#f6c21c']} size={22} />
+              </div>
             </QCard>
             <QCard n={2} className="tcard">
-              <div className="chart cubebox dbl sm">
-                <Towers a={5} b={5} k={2} colors={['#d7302a', '#4fae3a']} size={28} />
-              </div>
               <div className="flines">
                 <Sentence t={[5, '+', { b: 5, hl: ['p2'] }, '=', 10]} />
                 <Sentence t={[10, '−', 5, '=', { b: 5, hl: ['v2'] }]} />
               </div>
+              <div className="twbox">
+                <Towers a={5} b={5} k={2} colors={['#d7302a', '#4fae3a']} size={22} />
+              </div>
             </QCard>
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={60} />
-          </Ctrls>
-        </>
-      ),
-    },
-
-    /* ================= أتأكد ٣–٦ ================= */
-    {
-      sec: 'check', min: 3,
-      notes: 'في ٥ و٦ لا توجد حقيقة جمع مكتوبة: اسأل الطلاب أي حقيقة جمع العدد ونفسه تساعدهم.',
-      content: (
-        <>
-          <div className="row">
-            <Tag kind="qs">{CHECK}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{FIND_CUBES}</p>
-          <div className="qgrid two">
             <QCard n={3}>
               <div className="flines">
                 <Sentence t={[6, '+', { b: 6 }, '=', 12]} />
@@ -344,7 +324,7 @@ export default defineLesson({
           </div>
           <Ctrls>
             <NextButton label="الناتج التالي" />
-            <TimerButton sec={90} />
+            <TimerButton sec={150} />
           </Ctrls>
         </>
       ),
@@ -379,11 +359,11 @@ export default defineLesson({
       notes: 'بعد كل ناتج تظهر دائرة حول المسائل التي نستعمل فيها حقيقة جمع العدد ونفسه (٨ و٩ وغيرها لا).',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND_CIRCLE}</p>
-          <div className="qgrid three">
+          <div className="qgrid three plain">
             {Q(8, [9, '−', 3, '=', { b: 6 }])}
             {Q(9, [11, '−', 9, '=', { b: 2 }])}
             {Q(10, [5, '−', 5, '=', { b: 0 }])}
@@ -405,11 +385,11 @@ export default defineLesson({
       notes: 'في ١٤ و١٦ و٢٠ العدد المطروح هو المفقود (في المربع). ذكّر: ١٦ − □ = ٨، أي حقيقة؟ ٨ + ٨ = ١٦.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{FIND_CIRCLE}</p>
-          <div className="qgrid four">
+          <div className="qgrid four plain">
             {V(14, 16, 8, 'b', true)}
             {V(15, 7, 0)}
             {V(16, 10, 5, 'b', true)}

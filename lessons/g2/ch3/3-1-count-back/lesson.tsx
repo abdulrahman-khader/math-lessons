@@ -228,41 +228,22 @@ export default defineLesson({
       ),
     },
 
-    /* ================= أتأكد ١–٤ ================= */
+    /* ================= أتأكد ١–٧ · كما في ص ٦٢ ================= */
     {
-      sec: 'check', min: 4,
-      notes: 'كل ضغطة على السهم تكشف ناتجًا وترسم قفزاته على خط الأعداد. اطلب من الطلاب أن يعدّوا القفزات بصوت عالٍ.',
+      sec: 'check', min: 6,
+      notes: 'كما في الكتاب ص ٦٢: الطرح الرأسي ١–٤ ثم الأفقي ٥–٧. كل ضغطة على السهم تكشف ناتجًا وترسم قفزاته على خط الأعداد. اطلب من الطلاب أن يعدّوا القفزات بصوت عالٍ.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{CHECK}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{COUNT}</p>
-          <Line max={10} ps={Q1_4} />
-          <div className="qgrid four">{Q1_4.map(VQ)}</div>
+          <Line max={10} ps={[...Q1_4, ...Q5_7]} small />
+          <div className="qgrid four plain">{Q1_4.map(VQ)}</div>
+          <div className="qgrid three plain">{Q5_7.map(HQ)}</div>
           <Ctrls>
             <NextButton label="الناتج التالي" />
-            <TimerButton sec={90} />
-          </Ctrls>
-        </>
-      ),
-    },
-
-    /* ================= أتأكد ٥–٧ ================= */
-    {
-      sec: 'check', min: 3,
-      notes: 'الطرح هنا أفقي. ذكّر: أبدأ بالعدد الأول ثم أعدّ تنازليًا.',
-      content: (
-        <>
-          <div className="row">
-            <Tag kind="qs">{CHECK}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{COUNT}</p>
-          <Line max={10} ps={Q5_7} />
-          <div className="qgrid three">{Q5_7.map(HQ)}</div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={60} />
+            <TimerButton sec={120} />
           </Ctrls>
         </>
       ),
@@ -293,12 +274,12 @@ export default defineLesson({
       notes: 'خط الأعداد هنا حتى ١٢. أعطِ دقيقتين للحل على السبورات الصغيرة، ثم اكشف الناتج واحدًا واحدًا.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{COUNT}</p>
           <Line max={12} ps={Q9_17} />
-          <div className="qgrid three">{Q9_17.map(HQ)}</div>
+          <div className="qgrid three plain">{Q9_17.map(HQ)}</div>
           <Ctrls>
             <NextButton label="الناتج التالي" />
             <TimerButton sec={120} />
@@ -313,11 +294,11 @@ export default defineLesson({
       notes: 'الطرح الرأسي: العدد العلوي هو البداية، والسفلي كم نعدّ إلى الخلف.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <Line max={12} ps={Q18_25} />
-          <div className="qgrid four">{Q18_25.map(VQ)}</div>
+          <div className="qgrid four plain">{Q18_25.map(VQ)}</div>
           <Ctrls>
             <NextButton label="الناتج التالي" />
             <TimerButton sec={120} />

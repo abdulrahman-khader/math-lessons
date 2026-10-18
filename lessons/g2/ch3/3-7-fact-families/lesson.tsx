@@ -30,8 +30,8 @@ function FullFamily({ n, top, left, right, color }: { n: number; top: number; le
       <FactTriangle top={top} left={left} right={right} color={color[0]} edge={color[1]} />
       <div className="flines tri2">
         <Sentence t={[{ b: right }, '+', { b: left }, '=', { b: top }]} />
-        {!same && <Sentence t={[{ b: left }, '+', { b: right }, '=', { b: top }]} />}
         <Sentence t={[{ b: top }, '−', { b: right }, '=', { b: left }]} />
+        {!same && <Sentence t={[{ b: left }, '+', { b: right }, '=', { b: top }]} />}
         {!same && <Sentence t={[{ b: top }, '−', { b: left }, '=', { b: right }]} />}
       </div>
     </QCard>
@@ -160,8 +160,8 @@ export default defineLesson({
               <p className="qtext">أَسْتَفِيدُ مِنْ حَقَائِقِ الْجَمْعِ وَالطَّرْحِ لِأُكَوِّنَ الْحَقَائِقَ الْمُتَرَابِطَةَ.</p>
               <div className="flines tri2">
                 <Sentence t={[7, '+', 3, '=', { b: 10 }]} />
-                <Sentence t={[3, '+', 7, '=', { b: 10 }]} />
                 <Sentence t={[10, '−', 3, '=', { b: 7 }]} />
+                <Sentence t={[3, '+', 7, '=', { b: 10 }]} />
                 <Sentence t={[10, '−', 7, '=', { b: 3 }]} />
               </div>
               <Ctrls>
@@ -241,17 +241,17 @@ export default defineLesson({
       notes: 'في ٢ السطران الأخيران فارغان: يكتب الطلاب الحقيقتين الناقصتين. في ٣ حقيقتان فقط (لماذا؟ يُسأل في ٤).',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{CHECK}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{COMPLETE}</p>
-          <div className="qgrid one tri-rows">
+          <div className="qgrid one tri-rows book">
             <QCard n={1} className="tricard">
               <FactTriangle top={16} left={7} right={9} color={TRI.green[0]} edge={TRI.green[1]} />
               <div className="flines tri2">
                 <Sentence t={[7, '+', 9, '=', { b: 16 }]} />
-                <Sentence t={[9, '+', 7, '=', { b: 16 }]} />
                 <Sentence t={[16, '−', 9, '=', { b: 7 }]} />
+                <Sentence t={[9, '+', 7, '=', { b: 16 }]} />
                 <Sentence t={[16, '−', 7, '=', { b: 9 }]} />
               </div>
             </QCard>
@@ -259,8 +259,8 @@ export default defineLesson({
               <FactTriangle top={17} left={8} right={9} color={TRI.red[0]} edge={TRI.red[1]} />
               <div className="flines tri2">
                 <Sentence t={[9, '+', 8, '=', { b: 17 }]} />
-                <Sentence t={[{ b: 8 }, '+', { b: 9 }, '=', { b: 17 }]} />
                 <Sentence t={[17, '−', 9, '=', { b: 8 }]} />
+                <Sentence t={[{ b: 8 }, '+', { b: 9 }, '=', { b: 17 }]} />
                 <Sentence t={[{ b: 17 }, '−', { b: 8 }, '=', { b: 9 }]} />
               </div>
             </QCard>
@@ -305,7 +305,7 @@ export default defineLesson({
       notes: 'السطور فارغة كلها: يكتب الطلاب الحقائق الأربع. اكشف الأعداد واحدًا واحدًا.',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <Cols style={{ gridTemplateColumns: '1fr auto', alignItems: 'start' }}>
@@ -314,7 +314,7 @@ export default defineLesson({
               تَشْتَرِكُ الْحَقَائِقُ الْمُتَرَابِطَةُ بِالأَعْدَادِ الثَّلاثَةِ نَفْسِهَا.
             </Card>
           </Cols>
-          <div className="qgrid one tri-rows">
+          <div className="qgrid one tri-rows book">
             <FullFamily n={5} top={14} left={6} right={8} color={TRI.blue} />
             <FullFamily n={6} top={13} left={5} right={8} color={TRI.violet} />
           </div>
@@ -332,11 +332,11 @@ export default defineLesson({
       notes: 'في ٨ الجزآن متساويان (٨ و٨): كم حقيقة؟ (اثنتان).',
       content: (
         <>
-          <div className="row">
+          <div className="row bookrow">
             <Tag kind="qs">{PRACTICE}</Tag>
           </div>
           <p className="qtext" style={{ margin: 0 }}>{COMPLETE}</p>
-          <div className="qgrid one tri-rows">
+          <div className="qgrid one tri-rows book">
             <FullFamily n={7} top={15} left={6} right={9} color={TRI.orange} />
             <FullFamily n={8} top={16} left={8} right={8} color={TRI.red} />
           </div>
@@ -365,10 +365,10 @@ export default defineLesson({
           chart={<FactTriangle top={13} left={3} right={10} color={TRI.green[0]} edge={TRI.green[1]} />}
         >
           <div className="flines tri2">
-            <Sentence t={[3, '+', { b: 10 }, '=', 13]} big />
-            <Sentence t={[{ b: 13 }, '−', 3, '=', 10]} big />
-            <Sentence t={[10, '+', { b: 3 }, '=', 13]} big />
-            <Sentence t={[13, '−', { b: 10 }, '=', 3]} big />
+            <Sentence t={[3, '+', { box: true, b: 10 }, '=', 13]} big />
+            <Sentence t={[{ box: true, b: 13 }, '−', 3, '=', 10]} big />
+            <Sentence t={[10, '+', { box: true, b: 3 }, '=', 13]} big />
+            <Sentence t={[13, '−', { box: true, b: 10 }, '=', 3]} big />
           </div>
         </QuestionSlide>
       ),

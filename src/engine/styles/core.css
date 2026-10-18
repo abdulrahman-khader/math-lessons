@@ -569,7 +569,13 @@ body.flow .qgrid.four { grid-template-columns: 1fr 1fr; }
 /* مثلث الحقائق بجانب جمله */
 .qcard.tricard { justify-content: flex-start; gap: 1em; padding-inline-start: 2.2em; }
 .qcard.tricard .ftri { max-width: 5.5em; flex: none; }
-.flines.tri2 { display: grid; grid-template-columns: repeat(2, max-content); gap: .3em 1.4em; padding-inline-start: 0; }
+.flines.tri2 { display: grid; grid-template-columns: repeat(2, max-content); gap: .3em 1.1em; padding-inline-start: 0; }
+/* خط فاصل بين جملتي السطر الواحد حتى لا تتداخل الأعداد (مثل ١٤ ١٤) */
+.flines.tri2 > :nth-child(even),
+.flines.two72 > :nth-child(even),
+.facts4 > :nth-child(even) { border-inline-start: 4px solid #b9c3d6; padding-inline-start: 1.1em; }
+/* مسألتان رأسيتان متجاورتان في بطاقة واحدة: خط فاصل بينهما */
+.qcard .vrow > * + * { border-inline-start: 4px solid #b9c3d6; padding-inline-start: .8em; }
 .tri-rows .qcard.tricard { padding-block: .15em; }
 .tri-rows .qcard.tricard .ftri { max-width: 4.2em; }
 
@@ -595,7 +601,7 @@ body.flow .qgrid.four { grid-template-columns: 1fr 1fr; }
 /* سؤال ص ٧٢: المكعبات فوق، والجمل في عمودين كما في الكتاب */
 .qgrid.book > .qcard.ccard { flex-direction: column; align-items: stretch; gap: .25em; padding-block: .3em; }
 .qcard.ccard .cubes { width: auto; height: 2.2em; margin-inline-end: auto; }
-.flines.two72 { display: grid; grid-template-columns: repeat(2, max-content); gap: .25em 2em; padding-inline-start: 0; }
+.flines.two72 { display: grid; grid-template-columns: repeat(2, max-content); gap: .25em 1.1em; padding-inline-start: 0; }
 /* دومينو ص ٧٤: فوق الجملتين؛ وسؤال ٦: بجانبهما */
 .qgrid.book > .qcard.dcard { flex-direction: column; align-items: stretch; gap: .3em; }
 .qgrid.book > .qcard.dcard .domino { margin-inline: auto; max-width: 6em; }
@@ -669,8 +675,8 @@ table.dgrid.horiz td { min-width: 1.8em; padding: .3em .4em; }
 .tight table.dgrid { font-size: .7em; }
 
 /* ===== الصف الثاني: أسئلة الكتاب أكبر وتملأ الشريحة ===== */
-/* شبكة الأسئلة تأخذ الارتفاع الفارغ ويتوزع على صفوفها؛ الخط --qs يضبطه LessonApp بأكبر قيمة تتسع */
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid { flex: 1 0 auto; grid-auto-rows: auto; align-content: stretch; font-size: var(--qs, 1em); }
+/* شبكة الأسئلة تأخذ الارتفاع الفارغ ويتوزع على صفوفها؛ الخط --qfs يضبطه LessonApp بأكبر قيمة تتسع */
+#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid { flex: 1 0 auto; grid-auto-rows: auto; align-content: stretch; font-size: var(--qfs, 1em); }
 #app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard { justify-content: center; align-items: center; padding-inline-start: 2.2em; }
 #app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard > .qnum { font-size: .75em; }
 #app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard.ccard,

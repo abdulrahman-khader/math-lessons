@@ -481,3 +481,94 @@ body.flow .qgrid.three, body.flow .qgrid.two { grid-template-columns: 1fr; }
 .rslides .rbtn svg { width: 1.3rem; height: 1.3rem; flex: none; }
 .rslides .rbtn:disabled { border-color: var(--line); color: var(--muted); }
 .rslides .rcount b { font-size: 1.15rem; }
+.rwinfo { margin: 0; font-weight: 800; color: var(--ex); }
+
+/* ===== خط الأعداد ===== */
+.nline { width: 100%; height: auto; display: block; direction: ltr; }
+.nline .nl-axis { stroke: #3fae63; stroke-width: 6; }
+.nline .nl-arrow { fill: #3fae63; }
+.nline .nl-tick { stroke: #3fae63; stroke-width: 4; }
+.nline .nl-num { font-family: var(--display); font-size: 36px; font-weight: 800; fill: var(--ink); }
+.nline .nl-start { fill: none; stroke: var(--bad); stroke-width: 3; stroke-dasharray: 6 5; }
+.nline .nl-dot { fill: var(--ink); }
+.nline .nl-end { fill: var(--hl); stroke: #fff; stroke-width: 3; }
+.nline .nl-arc { fill: none; stroke: var(--bad); stroke-width: 4; stroke-dasharray: 9 7; }
+.nline .nl-head { fill: none; stroke: var(--bad); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.nline .nl-count { font-family: var(--display); font-size: 30px; font-weight: 800; fill: var(--bad); }
+.nline .nl-hop { opacity: 0; animation: hopin .35s ease forwards; }
+@keyframes hopin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.hopx { display: flex; flex-direction: column; gap: .5em; }
+.hopx-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: .5em; }
+.hopx-eq { font-family: var(--display); font-size: 1.4em; font-weight: 800; padding: .1em .6em; border-radius: .4em; background: var(--paper); border: 3px solid var(--line); }
+.hopx-eq.done { border-color: var(--ex); color: var(--ex); }
+
+/* ===== الدومينو ===== */
+.domino { width: 100%; max-width: 11em; height: auto; display: block; }
+.domino .dm-body { fill: #e23a2e; stroke: #9c1c14; stroke-width: 4; }
+.domino .dm-blank { fill: #fff; stroke: #13213b; stroke-width: 3; }
+.domino .dm-split { stroke: #9c1c14; stroke-width: 4; }
+.domino .dm-pip { fill: #fff; }
+.domino .dm-pip2 { fill: #e23a2e; }
+.domino .dm-open { animation: pop .35s ease; }
+.domino .dm-q { font-family: var(--display); font-size: 80px; font-weight: 800; fill: #13213b; }
+
+/* ===== الجملة العددية ===== */
+.sent .snum, .sent .sop { font-weight: 800; }
+.sent .sop { min-width: .7em; text-align: center; }
+.sent.big { font-size: 1.35em; }
+
+/* ===== مثلث الحقائق ===== */
+.ftri { width: 100%; max-width: 8em; height: auto; display: block; }
+.ftri .ft-num { font-family: var(--display); font-size: 46px; font-weight: 800; fill: #13213b; }
+
+/* ===== أخمّن وأتحقق ===== */
+.gcheck { display: flex; flex-direction: column; gap: .4em; }
+.gc-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: .5em; }
+.gc-table { font-size: .8em; }
+.gc-table tr.ok td { background: var(--ex-t); color: var(--ex); font-weight: 800; }
+.gc-table tr.no td:last-child { color: var(--bad); }
+.gc-empty { color: var(--muted); text-align: center; }
+.ppick { display: flex; flex-direction: column; gap: .4em; }
+.pp-opts { display: flex; flex-wrap: wrap; gap: .5em; }
+.pp-opt { min-width: 4.5em; min-height: 2.4em; border: 3px solid var(--qs); border-radius: .5em; background: var(--paper); font-family: var(--display); font-size: 1em; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+.pp-opt small { font-family: var(--body); font-size: .6em; }
+.pp-opt.on { background: var(--qs); color: #fff; }
+.pp-msg { margin: 0; font-weight: 800; color: var(--muted); }
+.pp-msg.ok { color: var(--ex); } .pp-msg.no { color: var(--bad); }
+.qgrid.four { grid-template-columns: repeat(4, 1fr); }
+body.flow .qgrid.four { grid-template-columns: 1fr 1fr; }
+.nlbox { padding: .2em .4em; }
+.countdown { display: flex; flex-wrap: wrap; gap: .25em; font-family: var(--display); font-size: 1.5em; font-weight: 800; min-height: 1.6em; }
+.countdown .step.cd.shown { display: inline-block; color: var(--hl); }
+/* خط الأعداد في الشرائح المزدحمة: بعرض محدود ومتوسط */
+.nlbox .nline { max-height: 5.4em; width: auto; max-width: 100%; margin-inline: auto; }
+.nlbox.sm .nline { max-height: 4em; }
+/* «أُحَوِّطُ»: حلقة حول البطاقة تظهر خطوةً بعد ناتجها */
+.qcard > .step.ring.shown { display: block; position: absolute; inset: 0; z-index: 2; margin: 0; border: 6px solid var(--hl); border-radius: 46% / 40%; pointer-events: none; font-size: 0; animation: pop .35s ease; }
+.frogx { display: flex; flex-direction: column; gap: .5em; }
+.countdown { gap: .6em; }
+.frogx .cubes { max-height: 5.5em; width: auto; max-width: 100%; margin-inline: auto; }
+
+/* ===== برجا المكعبات ===== */
+.towers { width: auto; height: 100%; max-height: 13em; max-width: 100%; display: block; margin-inline: auto; }
+.towers .tw { transition: opacity .4s; }
+.towers .tw.off rect { opacity: .55; }
+.towers .tw-x { stroke: #13213b; stroke-width: 3; stroke-linecap: round; }
+.towers .tw-num { font-family: var(--display); font-size: 26px; font-weight: 800; fill: var(--ink); }
+.towers .tw-total { font-family: var(--display); font-size: 26px; font-weight: 800; fill: var(--ex); opacity: 0; transition: opacity .3s; }
+.towers .tw-total.on { opacity: 1; }
+.cubebox.dbl { align-items: center; }
+.cubebox.dbl.sm .towers { max-height: 9em; }
+.qcard.tcard { justify-content: space-around; }
+.qcard.tcard .cubebox { flex: none; padding: .2em .6em; }
+.mcq-wrap { display: flex; flex-direction: column; gap: .3em; padding-inline-start: 1.8em; }
+.step.inl.shown { display: inline-block; }
+.qcard.dcard { justify-content: space-around; }
+.qcard.dcard .domino { max-width: 7em; flex: none; margin-inline-start: 1.6em; }
+.qcard.span2 { grid-column: span 2; }
+/* مثلث الحقائق بجانب جمله */
+.qcard.tricard { justify-content: flex-start; gap: 1em; padding-inline-start: 2.2em; }
+.qcard.tricard .ftri { max-width: 5.5em; flex: none; }
+.flines.tri2 { display: grid; grid-template-columns: repeat(2, max-content); gap: .3em 1.4em; padding-inline-start: 0; }
+.tri-rows .qcard.tricard { padding-block: .15em; }
+.tri-rows .qcard.tricard .ftri { max-width: 4.2em; }

@@ -82,12 +82,26 @@ export type RemoteCmd =
   | { c: 'chartMode'; m: string }
   /** مستكشف الحقائق المترابطة: عدد كل لون، أو الجملة المختارة (٠–٣) */
   | { c: 'family'; a?: number; b?: number; pick?: number }
+  /** أداة تفاعلية عامة في الشريحة: عدّاد يُغيَّر (v) أو زر يُضغط */
+  | { c: 'widget'; key: string; v?: number }
   | { c: 'mcq'; k: number; o: string }
   | { c: 'mcqAward'; k: number; team: number }
   | { c: 'timer'; a: 'start'; sec: number }
   | { c: 'timer'; a: 'toggle' | 'close' }
   /** مكان المؤقت وحجمه: s الحجم، وax وay من −١ إلى ١ (٠ = الوسط) */
   | { c: 'timerView'; v: { s?: number; ax?: number; ay?: number } };
+
+/**
+ * أداة تفاعلية عامة يعرضها الجوال دون أن يعرف نوعها: عدّادات (+ و −) وأزرار وسطر حالة.
+ * أي مستكشف جديد يسجّل نفسه بـ useRemoteWidget فيصبح قابلًا للتحكم من الجوال تلقائيًا.
+ */
+export interface RemoteWidget {
+  title: string;
+  steppers: { key: string; label: string; value: number; min: number; max: number; color?: string }[];
+  buttons: { key: string; label: string; on?: boolean; disabled?: boolean }[];
+  /** سطر يصف ما يظهر الآن على الشاشة */
+  info?: string;
+}
 
 /** مستكشف الحقائق المترابطة في الشريحة الحالية */
 export interface RemoteFamily {
@@ -144,6 +158,7 @@ export interface RemoteState {
   wheelResult: string;
   chart: RemoteChart | null;
   family?: RemoteFamily | null;
+  widget?: RemoteWidget | null;
   mcqs: RemoteMcq[];
   /** المؤقت. لا تُرسل الحالة كل ثانية: الجوال يعدّ تنازليًا وحده من آخر حالة وصلته */
   timer: { show: boolean; run: boolean; left: number; view?: { s: number; ax: number; ay: number } };

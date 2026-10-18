@@ -8,6 +8,7 @@ import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } 
 import { IconNextRtl, IconPrevRtl } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
 import { RemoteFamilyCard } from './components/RemoteFamilyCard';
+import { RemoteWidgetCard } from './components/RemoteWidgetCard';
 
 /** شاشة الجوال: أزرار التحكم بالآيباد، وملاحظات المعلم للشريحة الحالية */
 /** المؤقت على الجوال: يعدّ تنازليًا وحده من آخر حالة وصلت من الآيباد */
@@ -285,6 +286,8 @@ export function RemoteApp({ channel }: { channel: string }) {
               ))}
             </section>
           )}
+
+          {st.widget && <RemoteWidgetCard w={st.widget} send={(key, v) => send({ c: 'widget', key, v })} />}
 
           {st.family && <RemoteFamilyCard f={st.family} send={(v) => send({ c: 'family', ...v })} />}
 

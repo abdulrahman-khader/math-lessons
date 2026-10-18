@@ -6,7 +6,8 @@ import { startPeerServer, startRelay } from './relay';
 
 // التحكم من الجوال من طرف إلى طرف: آيباد وجوال في سياقين منفصلين، وخادم رسائل محلي بدل ntfy.sh.
 const dist = path.resolve(process.cwd(), 'dist');
-const file = readdirSync(dist).find((f) => f.endsWith('.html') && f !== 'index.html')!;
+// الفحوص مكتوبة على ترتيب شرائح درس التمثيل بالخطوط (أول شرائحه بلا خطوات)
+const file = readdirSync(dist).find((f) => f === 'g4-3-4-line-graphs.html') ?? readdirSync(dist).find((f) => f.endsWith('.html') && f !== 'index.html')!;
 const href = pathToFileURL(path.join(dist, file)).href;
 
 /**
@@ -15,6 +16,12 @@ const href = pathToFileURL(path.join(dist, file)).href;
  */
 const READY = 25000;
 test.setTimeout(120000);
+
+/*
+ * فحوص هذا الملف تعمل واحدًا بعد الآخر: تشغيل WebRTC في عدة متصفحات معًا يبطئه على Windows
+ * حتى يتجاوز مهلة الاتصال أحيانًا. فحوص الدروس الأخرى تبقى متوازية.
+ */
+test.describe.configure({ mode: 'default' });
 
 let relay: Awaited<ReturnType<typeof startRelay>>;
 let peers: Awaited<ReturnType<typeof startPeerServer>>;
@@ -27,8 +34,15 @@ test.afterAll(async () => {
   await peers.close();
 });
 
+/* كل فحص يغلق أجهزته: جوال متروك من فحص سابق يظل يرسل فيُفسد عدّ الرسائل في الفحص التالي */
+const open: import('@playwright/test').BrowserContext[] = [];
+test.afterEach(async () => {
+  await Promise.all(open.splice(0).map((c) => c.close().catch(() => {})));
+});
+
 async function device(browser: Browser, dev: string, url: string) {
   const ctx = await browser.newContext({ ...devices[dev] });
+  open.push(ctx);
   await ctx.addInitScript(
     ([r, p]) => {
       localStorage.setItem('remote:relay', r);
@@ -63,8 +77,9 @@ test('الجوال يتصل مباشرة عبر PeerJS ولا يستهلك ntfy'
   const before = relay.posts.length;
   const { ipad, phone, errors } = await pair(browser);
   const afterHandshake = relay.posts.length;
-  // التعارف عبر PeerJS، فلا رسائل على ntfy (إلا «مرحبًا» احتياطية إن تأخر الاتصال أكثر من ١٢ ثانية)
-  expect(afterHandshake - before).toBeLessThanOrEqual(1);
+  // التعارف عبر PeerJS. إن تأخر الاتصال المباشر أكثر من ١٢ ثانية (بطء WebRTC عند تشغيل الفحوص معًا)
+  // يرسل الجوال «مرحبًا» احتياطية واحدة ويرد الآيباد بحالته مرة واحدة: رسالتان على الأكثر
+  expect(afterHandshake - before).toBeLessThanOrEqual(2);
 
   for (let k = 0; k < 6; k++) await phone.locator('.rnav .next').click();
   await expect.poll(() => activeIndex(ipad)).not.toBe('0');
@@ -107,6 +122,7 @@ test('إن تعذّر الاتصال المباشر يعمل التحكم عبر
   const ch = await ipad.page.evaluate(() => localStorage.getItem('remote:channel'));
   // جوال على شبكة تحجب WebRTC
   const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+  open.push(ctx);
   await ctx.addInitScript(
     ([r, p]) => {
       localStorage.setItem('remote:relay', r);
@@ -125,6 +141,7 @@ test('إن تعذّر الاتصال المباشر يعمل التحكم عبر
 test('حين يصل خادم الربط حدّه اليومي يظهر تنبيه واضح على الجوال', async ({ browser }) => {
   const full = await startRelay({ quotaUsed: true });
   const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+  open.push(ctx);
   await ctx.addInitScript(
     ([r, p]) => {
       localStorage.setItem('remote:relay', r);

@@ -1,6 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { HlKey } from './types';
-import type { RemoteChart, RemoteFamily, RemoteMcq } from './remote';
+import type { RemoteChart, RemoteFamily, RemoteMcq, RemoteWidget } from './remote';
+
+/** أداة تفاعلية عامة تسجّل نفسها ليتحكم بها الجوال (انظر useRemoteWidget) */
+export interface WidgetCtrl {
+  get: () => RemoteWidget;
+  act: (key: string, v?: number) => void;
+}
 
 /** مستكشف الحقائق المترابطة يسجّل نفسه ليتحكم به الجوال */
 export interface FamilyCtrl {
@@ -64,6 +70,7 @@ export interface SlideApi {
   info: () => { shown: number; total: number };
   chart: () => ChartCtrl | null;
   family: () => FamilyCtrl | null;
+  widget: () => WidgetCtrl | null;
   /** أسئلة الاختيار في الشريحة بترتيب ظهورها */
   mcqs: () => McqCtrl[];
 }
@@ -80,6 +87,7 @@ interface SlideState extends SlideApi {
   stepTotal: number;
   setChart: (c: ChartCtrl | null) => void;
   setFamily: (c: FamilyCtrl | null) => void;
+  setWidget: (c: WidgetCtrl | null) => void;
   registerMcq: (id: string, c: McqCtrl) => () => void;
   /** تغيّرت حالة رسم تفاعلي: أبلغ جهاز التحكم */
   touch: () => void;
@@ -149,6 +157,11 @@ export function SlideScope({ index, children }: { index: number; children: React
   const setChart = useCallback((c: ChartCtrl | null) => {
     chartRef.current = c;
   }, []);
+  const widgetRef = useRef<WidgetCtrl | null>(null);
+  const widget = useCallback(() => widgetRef.current, []);
+  const setWidget = useCallback((c: WidgetCtrl | null) => {
+    widgetRef.current = c;
+  }, []);
   const familyRef = useRef<FamilyCtrl | null>(null);
   const family = useCallback(() => familyRef.current, []);
   const setFamily = useCallback((c: FamilyCtrl | null) => {
@@ -172,9 +185,9 @@ export function SlideScope({ index, children }: { index: number; children: React
   );
 
   useEffect(() => {
-    engine.registerSlide(index, { reveal, hideAll, unreveal, toggleHint, info, chart, family, mcqs });
+    engine.registerSlide(index, { reveal, hideAll, unreveal, toggleHint, info, chart, family, widget, mcqs });
     return () => engine.registerSlide(index, null);
-  }, [engine, index, reveal, hideAll, unreveal, toggleHint, info, chart, family, mcqs]);
+  }, [engine, index, reveal, hideAll, unreveal, toggleHint, info, chart, family, widget, mcqs]);
 
   const { slideChanged } = engine;
   useEffect(() => slideChanged(), [shown, hintOpen, slideChanged]);
@@ -200,11 +213,13 @@ export function SlideScope({ index, children }: { index: number; children: React
       setChart,
       family,
       setFamily,
+      widget,
+      setWidget,
       mcqs,
       registerMcq,
       touch: slideChanged,
     };
-  }, [shown, hintOpen, stepTotal, reveal, hideAll, unreveal, register, toggleHint, info, chart, setChart, family, setFamily, mcqs, registerMcq, slideChanged]);
+  }, [shown, hintOpen, stepTotal, reveal, hideAll, unreveal, register, toggleHint, info, chart, setChart, family, setFamily, widget, setWidget, mcqs, registerMcq, slideChanged]);
 
   return <SlideCtx.Provider value={value}>{children}</SlideCtx.Provider>;
 }

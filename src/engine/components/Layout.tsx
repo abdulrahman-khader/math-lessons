@@ -134,3 +134,13 @@ export function GoHomeButton() {
     </button>
   );
 }
+
+/** بطاقة سؤال من الكتاب بين عدة أسئلة على شريحة واحدة؛ data-qnum تعدّها الاختبارات */
+export function QCard({ n, className, children }: { n: number; className?: string; children: ReactNode }) {
+  return (
+    <div className={'card qcard ' + (className ?? '')} data-qnum={n}>
+      <span className="qnum">{num(n)}</span>
+      {children}
+    </div>
+  );
+}

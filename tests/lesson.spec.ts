@@ -63,8 +63,13 @@ for (const file of files) {
       const overflow: string[] = [];
       for (let i = 0; i < n; i++) {
         await eachState(page, i, async (state) => {
-          const { sh, ch } = await page.locator('section.slide.active').evaluate((el) => ({ sh: el.scrollHeight, ch: el.clientHeight }));
+          const { sh, ch, wide } = await page.locator('section.slide.active').evaluate((el) => {
+            // البطاقات التي يخرج محتواها عن عرضها (يُقصّ جانبيًا ولا يزيد الارتفاع)
+            const wide = [...el.querySelectorAll<HTMLElement>('.card, .chart')].filter((c) => c.scrollWidth > c.clientWidth + 2).length;
+            return { sh: el.scrollHeight, ch: el.clientHeight, wide };
+          });
           if (sh > ch + 1) overflow.push(`الشريحة ${i + 1} (${state}): ${sh - ch}px زائدة`);
+          if (wide) overflow.push(`الشريحة ${i + 1} (${state}): ${wide} بطاقة يفيض محتواها عن عرضها`);
         });
       }
       expect(overflow).toEqual([]);

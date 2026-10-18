@@ -16,7 +16,7 @@ export interface CubePart {
 }
 
 /** شكل كل عنصر في الصف: مكعبات متصلة كما في الكتاب، أو أشياء من القصة */
-export type ItemShape = 'cube' | 'spoon' | 'juice';
+export type ItemShape = 'cube' | 'spoon' | 'juice' | 'frog';
 
 interface TrainProps {
   /** الأجزاء من اليمين إلى اليسار: الجزء الأول هو العدد الأول في جملة الجمع */
@@ -41,8 +41,8 @@ interface TrainProps {
   label?: string;
 }
 
-const SHAPE_H: Record<ItemShape, number> = { cube: 1, spoon: 1.9, juice: 1.45 };
-const SHAPE_W: Record<ItemShape, number> = { cube: 1, spoon: 0.92, juice: 1.08 };
+const SHAPE_H: Record<ItemShape, number> = { cube: 1, spoon: 1.9, juice: 1.45, frog: 1 };
+const SHAPE_W: Record<ItemShape, number> = { cube: 1, spoon: 0.92, juice: 1.08, frog: 1.2 };
 
 function Item({ shape, x, s, color }: { shape: ItemShape; x: number; s: number; color: string }) {
   const h = s * SHAPE_H[shape];
@@ -52,6 +52,19 @@ function Item({ shape, x, s, color }: { shape: ItemShape; x: number; s: number; 
         <ellipse cx={x + s / 2} cy={h * 0.2} rx={s * 0.3} ry={h * 0.18} fill={color} stroke="#0005" strokeWidth={2} />
         <ellipse cx={x + s / 2 - s * 0.06} cy={h * 0.16} rx={s * 0.1} ry={h * 0.07} fill="#fff6" />
         <rect x={x + s / 2 - s * 0.075} y={h * 0.36} width={s * 0.15} height={h * 0.6} rx={s * 0.07} fill={color} stroke="#0005" strokeWidth={2} />
+      </g>
+    );
+  if (shape === 'frog')
+    return (
+      <g>
+        <ellipse cx={x + s / 2} cy={h * 0.62} rx={s * 0.44} ry={h * 0.32} fill={color} stroke="#0005" strokeWidth={2} />
+        <circle cx={x + s * 0.3} cy={h * 0.3} r={s * 0.14} fill={color} stroke="#0005" strokeWidth={2} />
+        <circle cx={x + s * 0.7} cy={h * 0.3} r={s * 0.14} fill={color} stroke="#0005" strokeWidth={2} />
+        <circle cx={x + s * 0.3} cy={h * 0.3} r={s * 0.07} fill="#fff" />
+        <circle cx={x + s * 0.7} cy={h * 0.3} r={s * 0.07} fill="#fff" />
+        <circle cx={x + s * 0.31} cy={h * 0.31} r={s * 0.035} fill="#13213b" />
+        <circle cx={x + s * 0.71} cy={h * 0.31} r={s * 0.035} fill="#13213b" />
+        <path d={`M${x + s * 0.34} ${h * 0.66} q${s * 0.16} ${h * 0.1} ${s * 0.32} 0`} fill="none" stroke="#0007" strokeWidth={2.5} strokeLinecap="round" />
       </g>
     );
   if (shape === 'juice')
@@ -162,18 +175,17 @@ export function FactLine({ a, op, b, v, hl }: { a: number; op: '+' | '−'; b: n
 }
 
 /** جمع أو طرح رأسي كما في الكتاب: الإشارة يمين العدد الثاني، والآحاد تحت الآحاد */
-export function VSum({ a, op, b, v, hl }: { a: number; op: '+' | '−'; b: number; v: number; hl?: readonly HlKey[] }) {
+export function VSum({ a, op, b, v, hl, missing }: { a: number; op: '+' | '−'; b: number; v: number; hl?: readonly HlKey[]; missing?: 'b' }) {
+  // missing='b': العدد الثاني هو المفقود (خانة في الوسط) والناتج معروف تحت الخط
   return (
-    <div className="vsum" aria-label={`${num(a)} ${op} ${num(b)}`}>
+    <div className="vsum" aria-label={`${num(a)} ${op} ${missing === 'b' ? '؟' : num(b)}`}>
       <span />
       <span className="vn">{num(a)}</span>
       <span className="vop">{op}</span>
-      <span className="vn">{num(b)}</span>
+      <span className="vn">{missing === 'b' ? <Blank v={b} hl={hl} /> : num(b)}</span>
       <span className="vline" />
       <span />
-      <span className="vn vans">
-        <Blank v={v} hl={hl} />
-      </span>
+      <span className="vn vans">{missing === 'b' ? num(v) : <Blank v={v} hl={hl} />}</span>
     </div>
   );
 }

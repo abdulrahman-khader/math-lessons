@@ -601,3 +601,69 @@ body.flow .qgrid.four { grid-template-columns: 1fr 1fr; }
 .qgrid.book > .qcard.dcard .domino { margin-inline: auto; max-width: 6em; }
 .qgrid.book > .qcard.dcard.side { flex-direction: row; align-items: center; justify-content: flex-start; }
 .qgrid.book > .qcard.dcard.side .domino { margin: 0; }
+
+/* ===== تنظيم البيانات (الصف الرابع، الفصل الثالث) ===== */
+.frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.05; font-size: .85em; margin-inline: .15em; }
+.frac > span:first-child { border-block-end: 2px solid currentColor; padding-inline: .15em; }
+.tally { display: inline-block; vertical-align: middle; fill: none; stroke-width: 2.6; stroke-linecap: round; }
+
+table.dgrid { border-collapse: collapse; background: var(--paper); font-weight: 700; font-size: .84em; margin-inline: auto; box-shadow: 0 2px 6px #0002; }
+table.dgrid.small { font-size: .66em; }
+table.dgrid th, table.dgrid td { border: 2px solid var(--ink); padding: .2em .7em; text-align: center; transition: background .25s; }
+table.dgrid.blue thead th { background: #0d3b8c; color: #fff; }
+table.dgrid.blue thead tr:nth-child(2) th, table.dgrid.blue thead tr:only-child th { background: #6f8fc9; }
+table.dgrid.orange thead th { background: #ffb366; }
+table.dgrid.salmon thead th { background: #ff9a80; }
+table.dgrid.green thead th, table.dgrid.green tbody th { background: #9ccc65; }
+table.dgrid.horiz tbody th { background: #e6f2d9; white-space: nowrap; }
+table.dgrid.blue.horiz tbody th { background: #dbe6f7; }
+table.dgrid tr.on td, table.dgrid tr.on th, table.dgrid td.on { background: #ffe8cc; box-shadow: inset 0 0 0 3px var(--hl); }
+table.dgrid .dg-title { font-size: 1.05em; }
+.cellhide { display: inline-block; width: 1.4em; height: 1.1em; background: #c9ccd2; vertical-align: middle; border-radius: 2px; }
+.cellshow { color: var(--ex); animation: pop .3s ease; }
+.chart.tbl { display: flex; align-items: center; justify-content: center; padding: .5em; }
+
+.hbars .bar { stroke: var(--ink); stroke-width: 2; transition: filter .25s; }
+.hbars .bar.on { stroke: var(--ink); stroke-width: 4; }
+.hbars .xl.on { fill: var(--hl); }
+
+.pie { width: 100%; height: auto; display: block; margin-inline: auto; direction: ltr; }
+.pie .slice { transition: transform .35s ease, opacity .35s; }
+.pie .slice path { stroke: #fff; stroke-width: 3; }
+.pie .slice.on path { stroke: var(--ink); stroke-width: 4; }
+.pie .slice.dim { opacity: .35; }
+.pie .pie-l { font-family: var(--body); font-weight: 800; fill: var(--ink); }
+.pie .pie-s { font-family: var(--display); font-weight: 800; fill: var(--ink); }
+.pie .pie-t { font-family: var(--body); font-size: 30px; font-weight: 800; fill: var(--ink); }
+.pie .pie-edge { fill: none; stroke: var(--ink); stroke-width: 5; }
+.pie .pointer line { stroke: #e8b54a; stroke-width: 12; stroke-linecap: round; }
+.pie .pointer circle { fill: #fff; stroke: #e8b54a; stroke-width: 6; }
+
+.bag { width: 100%; height: auto; display: block; margin-inline: auto; }
+.bag .bag-body, .bag .bag-neck { fill: #eef3f7cc; stroke: #9aa7b4; stroke-width: 4; }
+.bag .bag-tie { fill: none; stroke: #b08a5a; stroke-width: 4; }
+.bag .bag-item { transition: opacity .3s; stroke: #0004; stroke-width: 2; }
+.bag .bag-item.dim { opacity: .2; }
+.bag .bag-item.on { stroke: var(--ink); stroke-width: 3; }
+.chart.pic { display: flex; align-items: center; justify-content: center; padding: .4em; }
+.tally5 { font-weight: 800; color: var(--muted); }
+.chart.tbl.board { background: #234f3a; }
+.chart.tbl.board table.dgrid td { background: #2f6b4e; color: #fff; border-color: #ffffff55; }
+.pex-f { font-size: 1.15em; font-weight: 800; }
+.piefig { margin: 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; gap: .1em; }
+.piefig figcaption { font-weight: 800; font-size: .78em; text-align: center; line-height: 1.5; }
+.chart.pic svg.pie, .chart.pic svg.bag { max-height: 16.5em; }
+/* الاحتمال: بطاقات الحروف والأعداد، والأكواب، وصف الأكياس الخمسة */
+.lcards { display: flex; flex-wrap: wrap; justify-content: center; gap: .3em; direction: rtl; }
+.lcard { display: inline-grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: .25em; color: #fff; font-weight: 800; font-size: 1.15em; box-shadow: 0 3px 0 #0003; transition: opacity .3s, transform .3s; }
+.lcard.on { transform: translateY(-.3em); box-shadow: 0 0 0 4px var(--hl); }
+.lcard.dim { opacity: .3; }
+.ncards { display: flex; flex-wrap: wrap; justify-content: center; gap: .3em; }
+.ncards span { display: inline-grid; place-items: center; width: 2em; height: 2.6em; border: 3px solid var(--ink); border-radius: .3em; background: var(--paper); font-weight: 800; font-size: 1.05em; }
+svg.cup { height: 1.7em; width: auto; vertical-align: middle; }
+.qgrid.five { grid-template-columns: repeat(5, 1fr); }
+body.flow .qgrid.five { grid-template-columns: 1fr 1fr; }
+table.dgrid.horiz { font-size: 1em; }
+table.dgrid.horiz.small { font-size: .82em; }
+table.dgrid.horiz td { min-width: 1.8em; padding: .3em .4em; }
+.tight table.dgrid { font-size: .7em; }

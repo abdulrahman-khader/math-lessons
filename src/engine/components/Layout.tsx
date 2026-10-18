@@ -25,8 +25,10 @@ export function Cols({ even, style, className, children }: { even?: boolean; sty
   );
 }
 
-export const Stack = ({ gap = '.5em', children }: { gap?: string; children: ReactNode }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap }}>{children}</div>
+export const Stack = ({ gap = '.5em', className, children }: { gap?: string; className?: string; children: ReactNode }) => (
+  <div className={className} style={{ display: 'flex', flexDirection: 'column', gap }}>
+    {children}
+  </div>
 );
 
 export const QCol = ({ style, children }: { style?: CSSProperties; children: ReactNode }) => (

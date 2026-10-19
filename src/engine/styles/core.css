@@ -633,13 +633,14 @@ table.dgrid .dg-title { font-size: 1.05em; }
 .hbars .bar.on { stroke: var(--ink); stroke-width: 4; }
 .hbars .xl.on { fill: var(--hl); }
 
-.pie { width: 100%; height: auto; display: block; margin-inline: auto; direction: ltr; }
+.pie { width: 100%; height: auto; display: block; margin-inline: auto; direction: ltr; overflow: visible; }
 .pie .slice { transition: transform .35s ease, opacity .35s; }
 .pie .slice path { stroke: #fff; stroke-width: 3; }
-.pie .slice.on path { stroke: var(--ink); stroke-width: 4; }
+.pie .pie-hl { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; }
 .pie .slice.dim { opacity: .35; }
 .pie .pie-l { font-family: var(--body); font-weight: 800; fill: var(--ink); }
 .pie .pie-s { font-family: var(--display); font-weight: 800; fill: var(--ink); }
+.pie .slice.light .pie-l, .pie .slice.light .pie-s { fill: #fff; }
 .pie .pie-t { font-family: var(--body); font-size: 30px; font-weight: 800; fill: var(--ink); }
 .pie .pie-edge { fill: none; stroke: var(--ink); stroke-width: 5; }
 .pie .pointer line { stroke: #e8b54a; stroke-width: 12; stroke-linecap: round; }

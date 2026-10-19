@@ -241,6 +241,15 @@ interface PieProps {
 }
 
 /** تمثيل بالقطاعات الدائرية؛ القطاع i يبرز (ويبهت غيره) بمفتاح p{i} */
+/** لون غامق؟ (لكتابة الاسم بالأبيض فوقه) */
+function isDark(hex: string) {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return false;
+  const n = parseInt(m[1], 16);
+  const lum = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+  return lum < 120;
+}
+
 export function Pie({ title, slices, pointer, size = 300, fs = 26, picked, start = 0 }: PieProps) {
   const { activeHl } = useSlide();
   const lit = picked ?? slices.map((_, i) => i).filter((i) => activeHl.has(`p${i}`));
@@ -255,29 +264,48 @@ export function Pie({ title, slices, pointer, size = 300, fs = 26, picked, start
   const cy = S / 2 + top;
   const pt = (a: number, r: number) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
   let a0 = (start * Math.PI) / 180;
+  /** إطار القطاعات المبرزة يُرسم فوق كل القطاعات حتى لا يغطيه القطاع المجاور */
+  const outlines: { i: number; d: string }[] = [];
   const parts = slices.map((s, i) => {
     const a1 = a0 + (2 * Math.PI * s.value) / total;
     const mid = (a0 + a1) / 2;
     const on = lit.includes(i);
-    const pop = on ? 14 : 0;
-    const [dx, dy] = [pop * Math.sin(mid), -pop * Math.cos(mid)];
     const [x0, y0] = pt(a0, R);
     const [x1, y1] = pt(a1, R);
     const large = a1 - a0 > Math.PI ? 1 : 0;
     const d = s.value >= total ? `M${cx - R} ${cy} a${R} ${R} 0 1 0 ${2 * R} 0 a${R} ${R} 0 1 0 ${-2 * R} 0` : `M${cx} ${cy} L${x0} ${y0} A${R} ${R} 0 ${large} 1 ${x1} ${y1} Z`;
-    const small = s.value / total < 0.07;
-    const [lx, ly] = pt(mid, small ? R + 34 : R * 0.6);
+    if (on) outlines.push({ i, d });
+    const frac = s.value / total;
+    /** قطاع ضيق لا يتسع لاسمه أفقيًا: يُكتب الاسم والعدد على سطر واحد بطول القطاع داخله */
+    const thin = frac < 0.07 && frac >= 0.04;
+    /** قطاع ضيق جدًا: الاسم خارج الدائرة بجانبه */
+    const tiny = frac < 0.04;
+    const [lx, ly] = pt(mid, tiny ? R + 14 : thin ? R * 0.62 : R * 0.6);
+    // خارج الدائرة يمتد الاسم بعيدًا عنها (يسارًا في النصف الأيسر، يمينًا في الأيمن)
+    const anchor = !tiny ? 'middle' : Math.sin(mid) < 0 ? 'end' : 'start';
+    // بطول القطاع: اتجاه نصف القطر، ويُقلب نصف دورة في النصف الأيسر حتى لا يُقرأ مقلوبًا
+    const deg = (mid * 180) / Math.PI - 90 + (Math.sin(mid) < 0 ? 180 : 0);
     a0 = a1;
     return (
-      <g key={i} className={'slice' + (on ? ' on' : any ? ' dim' : '')} style={{ transform: `translate(${dx}px, ${dy}px)` }}>
+      // القطاع المبرز يبقى في مكانه داخل الدائرة (لا يُسحب للخارج) ويُميَّز بإطار داكن، والباقي يبهت
+      <g key={i} className={'slice' + (on ? ' on' : any ? ' dim' : '') + (!tiny && isDark(s.color) ? ' light' : '')}>
         <path d={d} fill={s.color} />
-        <text x={lx} y={ly - (s.sub ? fs * 0.35 : 0)} textAnchor="middle" dominantBaseline="middle" className="pie-l" style={{ fontSize: fs }}>
-          {s.label}
-        </text>
-        {s.sub && (
-          <text x={lx} y={ly + fs * 0.75} textAnchor="middle" dominantBaseline="middle" className="pie-s" style={{ fontSize: fs * 0.85 }}>
-            {s.sub}
+        {thin ? (
+          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="pie-l" style={{ fontSize: fs * 0.85 }} transform={`rotate(${deg} ${lx} ${ly})`}>
+            {s.label}
+            {s.sub && <tspan className="pie-s">{' ' + s.sub}</tspan>}
           </text>
+        ) : (
+          <>
+            <text x={lx} y={ly - (s.sub ? fs * 0.35 : 0)} textAnchor={anchor} dominantBaseline="middle" className="pie-l" style={{ fontSize: fs }}>
+              {s.label}
+            </text>
+            {s.sub && (
+              <text x={lx} y={ly + fs * 0.75} textAnchor={anchor} dominantBaseline="middle" className="pie-s" style={{ fontSize: fs * 0.85 }}>
+                {s.sub}
+              </text>
+            )}
+          </>
         )}
       </g>
     );
@@ -288,6 +316,9 @@ export function Pie({ title, slices, pointer, size = 300, fs = 26, picked, start
     <svg viewBox={`0 0 ${S} ${S + top}`} className="pie" style={{ maxWidth: size }} role="img" aria-label={title ?? 'تمثيل بالقطاعات الدائرية'}>
       {parts}
       <circle cx={cx} cy={cy} r={R} className="pie-edge" />
+      {outlines.map((o) => (
+        <path key={o.i} d={o.d} className="pie-hl" />
+      ))}
       {pointer !== undefined && (
         <g className="pointer">
           <line x1={cx - (px - cx) * 0.2} y1={cy - (py - cy) * 0.2} x2={px} y2={py} />

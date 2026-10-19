@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { digits } from '../digits';
+import { digits, num } from '../digits';
+import type { Klass } from '../classes';
+import { TEAM_COLORS } from '../sections';
 import { sGood } from '../sound';
 
 const COLORS = ['#a5d8ff', '#b2f2bb', '#ffd8a8', '#d0bfff', '#ffec99', '#99e9f2', '#fcc2d7', '#c0eb75'];
@@ -14,20 +16,43 @@ interface Props {
   spinReq?: number;
   /** الاسم المختار (أو «…» أثناء الدوران) لعرضه على الجوال */
   onResult?: (name: string) => void;
+  /** الفصل المختار: العجلة تدور على طلابه بدل النص */
+  klass?: Klass;
+  nTeams?: number;
+  teamNames?: string[];
+  /** -١ الفصل كله، أو رقم فريق */
+  teamFilter?: number;
+  onTeamFilter?: (t: number) => void;
+  /** من خرجت أسماؤهم في هذه الحصة (لا تتكرر) */
+  picked?: string[];
+  onPick?: (name: string) => void;
+  onRestore?: () => void;
+  onManage?: () => void;
 }
 
 /** عجلة أسماء عشوائية. النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة. */
-export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult }: Props) {
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamNames = [], teamFilter = -1, onTeamFilter, picked = [], onPick, onRestore, onManage }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState('—');
-  const [remove, setRemove] = useState(false);
+  const [removeFree, setRemoveFree] = useState(false);
+  /** مع الفصل: الاسم الذي يخرج لا يعود حتى يُضغط «أرجع الأسماء» */
+  const [removeClass, setRemoveClass] = useState(true);
+  const remove = klass ? removeClass : removeFree;
   const text = names || DEFAULT_NAMES;
-  const list = text
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const hasTeams = !!klass && nTeams > 0 && Object.values(klass.team).some((t) => t < nTeams);
+  const filter = hasTeams ? teamFilter : -1;
+  const pool = klass ? klass.students.filter((s) => filter < 0 || klass.team[s] === filter) : [];
+  const list = klass
+    ? pool.filter((s) => !picked.includes(s))
+    : text
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+  const emptyMsg = klass && pool.length ? 'خرجت كل الأسماء' : 'أضف أسماء';
+  const emptyRef = useRef(emptyMsg);
+  emptyRef.current = emptyMsg;
   const listRef = useRef(list);
   listRef.current = list;
 
@@ -44,7 +69,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       x.fillStyle = '#13213b';
       x.font = 'bold 32px Tajawal, Tahoma';
       x.textAlign = 'center';
-      x.fillText('أضف أسماء', C, C);
+      x.fillText(emptyRef.current, C, C);
       return;
     }
     const a = (2 * Math.PI) / N.length;
@@ -61,12 +86,21 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       x.stroke();
       x.save();
       x.translate(C, C);
-      x.rotate(s + a / 2);
+      const mid = s + a / 2;
+      x.rotate(mid);
       x.fillStyle = '#13213b';
       x.font = `bold ${N.length > 18 ? 20 : 26}px Tajawal, Tahoma`;
-      // في RTL تعني «start» الحافة اليمنى: يبدأ الاسم من قرب الحافة الخارجية ويتجه نحو المركز
-      x.textAlign = 'start';
-      x.fillText(n, R - 16, 8);
+      // الاسم يمتد من قرب الحافة الخارجية نحو المركز. في النصف الأيسر يُقلب نصف دورة حتى لا يُقرأ مقلوبًا.
+      // في RTL تعني «start» الحافة اليمنى و«end» اليسرى.
+      const c = Math.cos(mid);
+      if (c < 0) {
+        x.rotate(Math.PI);
+        x.textAlign = 'end';
+        x.fillText(n, -(R - 16), 8);
+      } else {
+        x.textAlign = 'start';
+        x.fillText(n, R - 16, 8);
+      }
       x.restore();
     });
     x.beginPath();
@@ -77,7 +111,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
 
   useEffect(() => {
     if (open) draw();
-  }, [open, text, draw]);
+  }, [open, list.join('\n'), emptyMsg, draw]);
 
   const spin = () => {
     const N = list;
@@ -104,7 +138,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       setResult(N[pick]);
       onResult?.(N[pick]);
       sGood();
-      if (remove) setTimeout(() => onNames(N.filter((_, i) => i !== pick).join('\n')), 900);
+      if (remove) setTimeout(() => (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n'))), 900);
     };
     requestAnimationFrame(f);
   };
@@ -129,13 +163,50 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
             أدِر العجلة
           </button>
           <label className="row" style={{ fontWeight: 700 }}>
-            <input type="checkbox" checked={remove} onChange={(e) => setRemove(e.target.checked)} style={{ width: '1.3em', height: '1.3em' }} /> احذف الاسم بعد
-            اختياره
+            <input
+              type="checkbox"
+              checked={remove}
+              onChange={(e) => (klass ? setRemoveClass : setRemoveFree)(e.target.checked)}
+              style={{ width: '1.3em', height: '1.3em' }}
+            />{' '}
+            {klass ? 'لا يتكرر الاسم في الحصة' : 'احذف الاسم بعد اختياره'}
           </label>
-          <label htmlFor="wnames" style={{ fontWeight: 800 }}>
-            الأسماء (اسم في كل سطر):
-          </label>
-          <textarea id="wnames" value={text} onChange={(e) => onNames(e.target.value)} />
+          {klass ? (
+            <>
+              <p className="wklass">
+                <b>{klass.name}</b> · باقٍ {num(list.length)} من {num(pool.length)}
+              </p>
+              {hasTeams && (
+                <div className="row wteams">
+                  <button className={'btn' + (filter < 0 ? ' sel' : '')} onClick={() => onTeamFilter?.(-1)}>
+                    الكل
+                  </button>
+                  {teamNames.slice(0, nTeams).map((t, i) => (
+                    <button key={i} className={'btn' + (filter === i ? ' sel' : '')} style={{ borderColor: TEAM_COLORS[i] }} onClick={() => onTeamFilter?.(i)}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {picked.length > 0 && (
+                <button className="btn" onClick={onRestore}>
+                  أرجع كل الأسماء ({num(picked.length)})
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <label htmlFor="wnames" style={{ fontWeight: 800 }}>
+                الأسماء (اسم في كل سطر):
+              </label>
+              <textarea id="wnames" value={text} onChange={(e) => onNames(e.target.value)} />
+            </>
+          )}
+          {onManage && (
+            <button className="btn" onClick={onManage}>
+              {klass ? 'تعديل أسماء الفصول' : 'أسماء فصولي'}
+            </button>
+          )}
           <button className="btn hide" onClick={onClose}>
             إغلاق
           </button>

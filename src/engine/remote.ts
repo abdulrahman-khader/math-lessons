@@ -78,6 +78,10 @@ export type RemoteCmd =
   | { c: 'score'; team: number; d: number }
   | { c: 'wheel'; open: boolean }
   | { c: 'spin' }
+  /** يختار فصل الطلاب للعجلة ('' = بلا فصل) */
+  | { c: 'klass'; id: string }
+  /** يعيد إلى العجلة كل الأسماء التي خرجت في الحصة */
+  | { c: 'wheelRestore' }
   | { c: 'chart'; i: number; v: number }
   | { c: 'chartMode'; m: string }
   /** مستكشف الحقائق المترابطة: عدد كل لون، أو الجملة المختارة (٠–٣) */
@@ -156,6 +160,10 @@ export interface RemoteState {
   sections: { name: string; first: number }[];
   wheel: boolean;
   wheelResult: string;
+  /** فصول صف الدرس، والمختار منها، وعدد الأسماء التي خرجت من العجلة في الحصة */
+  klasses?: { id: string; name: string }[];
+  klass?: string;
+  wheelPicked?: number;
   chart: RemoteChart | null;
   family?: RemoteFamily | null;
   widget?: RemoteWidget | null;

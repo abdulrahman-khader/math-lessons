@@ -309,6 +309,23 @@ export function RemoteApp({ channel }: { channel: string }) {
           <section className="rcard">
             <h2>عجلة الأسماء</h2>
             {st.wheel && st.wheelResult && <p className="wres">{st.wheelResult}</p>}
+            {!!st.klasses?.length && (
+              <div className="rtools">
+                {st.klasses.map((k) => (
+                  <button key={k.id} className={'rbtn' + (st.klass === k.id ? ' on' : '')} aria-pressed={st.klass === k.id} onClick={() => send({ c: 'klass', id: k.id })}>
+                    {k.name}
+                  </button>
+                ))}
+                <button className={'rbtn' + (!st.klass ? ' on' : '')} aria-pressed={!st.klass} onClick={() => send({ c: 'klass', id: '' })}>
+                  بدون فصل
+                </button>
+              </div>
+            )}
+            {!!st.wheelPicked && (
+              <button className="rbtn" onClick={() => send({ c: 'wheelRestore' })}>
+                أرجع كل الأسماء ({num(st.wheelPicked)})
+              </button>
+            )}
             <div className="rtools">
               <button className="rbtn primary" onClick={() => send({ c: 'spin' })}>
                 أدِر العجلة

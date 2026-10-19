@@ -1,5 +1,6 @@
 import { digits, num } from '../digits';
 import { SECTION_NAMES, TEAM_COLORS } from '../sections';
+import type { Klass } from '../classes';
 import type { Lesson, SectionKey } from '../types';
 import { Card, Tag } from './Layout';
 
@@ -13,10 +14,17 @@ interface Props {
   setTeams: (n: number) => void;
   setName: (i: number, name: string) => void;
   resetScores: () => void;
+  /** فصول صف هذا الدرس، والفصل المختار لهذه الحصة */
+  classes: Klass[];
+  klass: Klass | undefined;
+  setKlass: (id: string) => void;
+  onManage: () => void;
+  onGroups: () => void;
 }
 
 /** الصفحة الرئيسية لكل درس: العنوان، إعداد الفرق، فهرس الأقسام، والمتابعة من آخر شريحة. */
-export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTeams, setName, resetScores }: Props) {
+export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTeams, setName, resetScores, classes, klass, setKlass, onManage, onGroups }: Props) {
+  const placed = klass ? klass.students.filter((s) => (klass.team[s] ?? 99) < nTeams).length : 0;
   const m = lesson.meta;
   return (
     <div className="home">
@@ -36,12 +44,33 @@ export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTea
         </Card>
         <div className="teamset">
           <div className="row">
+            <b>الفصل:</b>
+            {classes.map((c) => (
+              <button key={c.id} className={'btn' + (klass?.id === c.id ? ' sel' : '')} onClick={() => setKlass(c.id)}>
+                {c.name}
+              </button>
+            ))}
+            {classes.length > 0 && (
+              <button className={'btn' + (!klass ? ' sel' : '')} onClick={() => setKlass('')}>
+                بدون
+              </button>
+            )}
+            <button className="btn hide" onClick={onManage}>
+              {classes.length ? 'تعديل الفصول' : 'أضف فصولك وأسماء الطلاب'}
+            </button>
+          </div>
+          <div className="row">
             <b>عدد الفرق:</b>
             {[0, 2, 3, 4].map((n) => (
               <button key={n} className={'btn' + (nTeams === n ? ' sel' : '')} onClick={() => setTeams(n)}>
                 {n === 0 ? 'بدون' : num(n)}
               </button>
             ))}
+            {nTeams > 0 && klass && klass.students.length > 0 && (
+              <button className="btn" onClick={onGroups}>
+                توزيع الطلاب ({num(placed)}/{num(klass.students.length)})
+              </button>
+            )}
             {nTeams > 0 && (
               <button className="btn hide" onClick={resetScores}>
                 تصفير النقاط

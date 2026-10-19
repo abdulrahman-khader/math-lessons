@@ -4,6 +4,8 @@ import { num } from './digits';
 import { SECTION_NAMES, TEAM_COLORS } from './sections';
 import { setMuted, sGood } from './sound';
 import { useSaved } from './store';
+import { classesOf, gradeOf, setClass, setGrade, useRoster } from './classes';
+import { ClassesModal, GroupsModal } from './components/Classes';
 import type { Lesson, SectionKey, SlideDef } from './types';
 import { Home } from './components/Home';
 import { Pen } from './components/Pen';
@@ -33,6 +35,23 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [cur, setCur] = useState(0);
   const [timer, setTimer] = useState<TimerState>(TIMER_OFF);
   const [wheelOpen, setWheelOpen] = useState(false);
+  /* فصول الطلاب: مشتركة بين كل الدروس، والفصل المختار لهذه الحصة يبدأ بآخر فصل اختير في هذا الصف */
+  const grade = gradeOf(lesson.meta.id);
+  const { roster, update: updateRoster } = useRoster();
+  const classes = classesOf(roster, grade);
+  const [klassId, setKlassId] = useState(() => roster.grades[grade]?.last ?? '');
+  const klass = classes.find((c) => c.id === klassId);
+  /** أسماء خرجت من العجلة في هذه الحصة فلا تتكرر */
+  const [picked, setPicked] = useState<string[]>([]);
+  const [teamFilter, setTeamFilter] = useState(-1);
+  const [classesOpen, setClassesOpen] = useState(false);
+  const [groupsOpen, setGroupsOpen] = useState(false);
+  const chooseKlass = (id: string) => {
+    setKlassId(id);
+    setPicked([]);
+    setTeamFilter(-1);
+    updateRoster((r) => setGrade(r, grade, (g) => ({ ...g, last: id })));
+  };
   const [pen, setPen] = useState(false);
   const [layout, setLayout] = useState({ flow: false, scale: 1 });
   /** عدد مرات إعادة كل شريحة؛ تغيّره يعيد تركيب الشريحة فتعود كل حالتها (الخطوات، الإجابات، السحب، الكتابة) */
@@ -200,6 +219,12 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'wheel':
         setWheelOpen(c.open);
         break;
+      case 'klass':
+        if (c.id === '' || classes.some((k) => k.id === c.id)) chooseKlass(c.id);
+        break;
+      case 'wheelRestore':
+        setPicked([]);
+        break;
       case 'spin':
         setWheelOpen(true);
         setSpinReq((n) => n + 1);
@@ -281,6 +306,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         sections: sections.map((o) => ({ name: SECTION_NAMES[o.k], first: o.first })),
         wheel: wheelOpen,
         wheelResult,
+        klasses: classes.map((k) => ({ id: k.id, name: k.name })),
+        klass: klass?.id ?? '',
+        wheelPicked: picked.length,
         chart: slideApis.current[cur]?.chart()?.get() ?? null,
         family: slideApis.current[cur]?.family()?.get() ?? null,
         widget: slideApis.current[cur]?.widget()?.get() ?? null,
@@ -294,7 +322,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -312,6 +340,13 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       }
       if (resetMenu !== 'closed') {
         if (e.key === 'Escape') setResetMenu('closed');
+        return;
+      }
+      if (classesOpen || groupsOpen) {
+        if (e.key === 'Escape') {
+          setClassesOpen(false);
+          setGroupsOpen(false);
+        }
         return;
       }
       if (wheelOpen) {
@@ -338,7 +373,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [cur, wheelOpen, resetMenu, remotePanel, goto, resetSlide]);
+  }, [cur, wheelOpen, classesOpen, groupsOpen, resetMenu, remotePanel, goto, resetSlide]);
 
   const s = slides[cur];
   const m = lesson.meta;
@@ -453,6 +488,11 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
                       setTeams={(n) => patch({ nTeams: n })}
                       setName={(j, name) => patch((x) => ({ names: x.names.map((v, k) => (k === j ? name : v)) }))}
                       resetScores={() => patch({ scores: [0, 0, 0, 0] })}
+                      classes={classes}
+                      klass={klass}
+                      setKlass={chooseKlass}
+                      onManage={() => setClassesOpen(true)}
+                      onGroups={() => setGroupsOpen(true)}
                     />
                   ) : (
                     sl.content
@@ -509,7 +549,27 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             </button>
           </footer>
 
-          <WheelModal open={wheelOpen} onClose={() => setWheelOpen(false)} names={st.wheel} onNames={(w) => patch({ wheel: w })} spinReq={spinReq} onResult={setWheelResult} />
+          <WheelModal open={wheelOpen} onClose={() => setWheelOpen(false)} names={st.wheel} onNames={(w) => patch({ wheel: w })} spinReq={spinReq}
+            onResult={setWheelResult}
+            klass={klass}
+            nTeams={st.nTeams}
+            teamNames={st.names}
+            teamFilter={teamFilter}
+            onTeamFilter={setTeamFilter}
+            picked={picked}
+            onPick={(n) => setPicked((p) => [...p, n])}
+            onRestore={() => setPicked([])}
+            onManage={() => setClassesOpen(true)}
+          />
+          <ClassesModal open={classesOpen} onClose={() => setClassesOpen(false)} grade={grade} roster={roster} update={updateRoster} />
+          <GroupsModal
+            open={groupsOpen}
+            onClose={() => setGroupsOpen(false)}
+            klass={klass}
+            nTeams={st.nTeams}
+            teamNames={st.names}
+            setTeams={(team) => klass && updateRoster((r) => setClass(r, grade, klass.id, (k) => ({ ...k, team })))}
+          />
           <RemotePanel
             open={remotePanel}
             onClose={() => setRemotePanel(false)}

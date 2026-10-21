@@ -60,9 +60,9 @@ function scene(t: number) {
             [0, 1, 2].map((j) => (
               <g key={j} opacity={steps}>
                 <path d={`M${colX(j) - 14},${TOP - 14} Q${colX(j) - CW / 2},${TOP - 50} ${colX(j + 1) + 14},${TOP - 14}`} fill="none" stroke="var(--ex)" strokeWidth={3} />
-                <text x={colX(j) - CW / 2} y={TOP - 46} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--ex)">+{num(2)}</text>
+                <text x={colX(j) - CW / 2} y={TOP - 46} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--ex)">{'+' + num(2)}</text>
                 <path d={`M${colX(j) - 14},${TOP + RH * 2 + 14} Q${colX(j) - CW / 2},${TOP + RH * 2 + 50} ${colX(j + 1) + 14},${TOP + RH * 2 + 14}`} fill="none" stroke="var(--rule)" strokeWidth={3} />
-                <text x={colX(j) - CW / 2} y={TOP + RH * 2 + 78} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--rule)">+{num(9)}</text>
+                <text x={colX(j) - CW / 2} y={TOP + RH * 2 + 78} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--rule)">{'+' + num(9)}</text>
               </g>
             ))}
         </g>

@@ -88,10 +88,11 @@ function scene(t: number) {
           return (
             <g key={g.name} opacity={on ? 1 : 0.3}>
               <path d={sector(CX, CY, g.a0, g.a1, R)} fill={g.color} stroke="#fff" strokeWidth={4} opacity={merged} />
-              <text x={lx} y={ly} fontSize={g.n > 1 ? 34 : 26} textAnchor="middle" style={{ fill: g.ink }} opacity={tw(t, 29, 30.5)}>
-                <tspan x={lx} dy="-0.2em">{g.name}</tspan>
-                <tspan x={lx} dy="1.15em">{num(g.n)}</tspan>
-              </text>
+              {/* سطران منفصلان: Safari يخلط الاسم بالعدد إذا جُمعا في نص واحد */}
+              <g style={{ fill: g.ink }} opacity={tw(t, 29, 30.5)}>
+                <text x={lx} y={ly - 4} fontSize={g.n > 1 ? 34 : 26} textAnchor="middle" style={{ fill: g.ink }}>{g.name}</text>
+                <text x={lx} y={ly + (g.n > 1 ? 36 : 28)} fontSize={g.n > 1 ? 34 : 26} textAnchor="middle" style={{ fill: g.ink }}>{num(g.n)}</text>
+              </g>
             </g>
           );
         })}

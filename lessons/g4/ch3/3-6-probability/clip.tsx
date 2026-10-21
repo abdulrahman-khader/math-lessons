@@ -40,7 +40,7 @@ function scene(t: number) {
             );
           })}
           <text x={1150} y={470} fontSize={28} textAnchor="middle" direction="rtl">
-            {num(8)} كرات: {num(3)} زرقاء، {num(3)} حمراء، {num(2)} صفراء
+            {`${num(8)} كرات: ${num(3)} زرقاء، ${num(3)} حمراء، ${num(2)} صفراء`}
           </text>
         </g>
       )}
@@ -55,7 +55,7 @@ function scene(t: number) {
           <ClipCard key={title} x={x} y={y} w={380} h={190} op={op} color={cur?.[0] === s ? 'var(--hl)' : 'var(--line)'}>
             <circle cx={x + 340} cy={y + 42} r={14} fill={color} stroke="var(--ink)" strokeWidth={2} />
             <text x={x + 315} y={y + 52} fontSize={title.length > 12 ? 24 : 30} textAnchor="start" direction="rtl">{title}</text>
-            <text x={x + 190} y={y + 112} fontSize={42} textAnchor="middle" direction="rtl">{num(k)} من {num(8)}</text>
+            <text x={x + 190} y={y + 112} fontSize={42} textAnchor="middle" direction="rtl">{`${num(k)} من ${num(8)}`}</text>
             <text x={x + 190} y={y + 166} fontSize={36} textAnchor="middle" fill="var(--hl)">{word}</text>
           </ClipCard>
         );

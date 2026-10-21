@@ -3,6 +3,7 @@ import {
   Card, Cols, Ctrls, DataGrid, Eq, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack,
   Step, Winner, defineLesson, num, useRemoteWidget, type Cell, type HlKey,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
@@ -129,6 +130,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه بعد ظهور ثلاثة أعمدة واسأل: ما العمود التالي؟ كيف عرفت؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

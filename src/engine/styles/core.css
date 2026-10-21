@@ -709,3 +709,19 @@ table.dgrid.horiz td { min-width: 1.8em; padding: .3em .4em; }
 .wteams .btn { border-width: 3px; }
 body.flow .cbox, body.flow .gbox { width: auto; }
 body.flow .gcols { grid-template-columns: 1fr 1fr !important; }
+
+/* ===== مقطع فكرة الدرس ===== */
+.clip { flex: 1; min-block-size: 0; display: flex; flex-direction: column; background: var(--paper); border: 3px solid var(--line); border-radius: .6em; overflow: hidden; }
+.clip-scene { flex: 1; min-block-size: 0; position: relative; background: var(--bg); }
+.clip-scene > svg { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
+.clip-scene text { font-family: var(--body); font-weight: 800; }
+.clip-scene text:not([fill]) { fill: var(--ink); }
+.clip-cap { display: grid; place-items: center; min-block-size: 2.4em; padding: .2em 1em; border-block-start: 3px solid var(--line); text-align: center; font-weight: 800; font-size: 1.12em; line-height: 1.6; animation: fadein .35s ease; }
+.clip-cap b { color: var(--hl); }
+.clip-bar { display: flex; align-items: center; gap: .55em; padding: .3em .6em; background: var(--rule-t); }
+.clip-track { flex: 1; block-size: .45em; border-radius: .25em; background: var(--line); position: relative; cursor: pointer; }
+.clip-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: .25em; background: var(--hl); }
+.clip-time { font-size: .7em; font-weight: 700; color: var(--muted); }
+body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
+.clip-big { font-size: 30px; position: absolute; inset-block-start: 82%; inset-inline-start: 50%; transform: translate(50%, -50%); inline-size: 3.6em; block-size: 3.6em; border-radius: 50%; border: 0; background: var(--hl); color: #fff; cursor: pointer; display: grid; place-items: center; box-shadow: 0 .2em .8em #13213b44; touch-action: manipulation; }
+.clip-big svg { inline-size: 1.6em; block-size: 1.6em; }

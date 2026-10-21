@@ -3,6 +3,7 @@ import {
   NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step, Tag, TimerButton, VSum, Winner, defineLesson, num,
   type CubePart, type ItemShape,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- رسوم صغيرة خاصة بهذا الدرس ---------- */
 
@@ -119,6 +120,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه بعد ٥ + ٤ = ٩ واسأل: إذا أخذنا الحمراء، كم يبقى؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

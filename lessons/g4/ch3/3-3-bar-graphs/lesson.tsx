@@ -3,6 +3,7 @@ import {
   Card, Chart, Cols, Ctrls, DragChart, Eq, GoHomeButton, HBars, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead,
   Solution, Stack, Step, Winner, defineChart, defineLesson, num,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- البيانات ---------- */
 
@@ -121,6 +122,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه بعد ظهور الأعمدة واسأل: أيّ رياضة هي الأكثر؟ كيف عرفت دون أن تقرأ الأعداد؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

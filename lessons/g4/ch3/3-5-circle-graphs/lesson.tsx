@@ -3,6 +3,7 @@ import {
   Card, Cols, Ctrls, Eq, Frac, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, Pie, QCol, QuestionSlide, SlideHead, Solution, Stack,
   Step, Winner, defineLesson, num, useRemoteWidget, type Slice,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- البيانات (القطاعات باتجاه عقارب الساعة من الأعلى كما في الكتاب) ---------- */
 
@@ -141,6 +142,18 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه عند كل خطوة واسأل قبل أن يكمل: كم طالبًا اختار جدة؟ ما الكسر الذي يمثّله قطاعها؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

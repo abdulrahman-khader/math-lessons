@@ -3,6 +3,7 @@ import {
   CUBE, Card, Cols, Ctrls, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, Sentence, SlideHead,
   Solution, Stack, Step, Tag, TimerButton, Towers, VSum, Winner, defineLesson, num, useRemoteWidget, type Token,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
@@ -135,6 +136,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه بعد ظهور ٨ + ٨ = ١٦ واسأل: كم ١٦ − ٨؟ هل نحتاج أن نعدّ؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

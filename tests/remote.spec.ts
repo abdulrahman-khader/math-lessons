@@ -196,6 +196,42 @@ test('الجوال يتحكم بمستكشف الحقائق المترابطة',
   expect(errors).toEqual([]);
 });
 
+test('الجوال يوقف مقطع فكرة الدرس ويشغّله', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  let found = false;
+  for (let k = 0; k < 6 && !found; k++) {
+    await phone.locator('.rnav .next').click();
+    await ipad.waitForTimeout(350);
+    found = (await ipad.locator('section.slide.active .clip').count()) > 0;
+  }
+  expect(found).toBe(true);
+  const play = ipad.locator('section.slide.active .clip-bar .btn.primary');
+  const pos = () => ipad.locator('section.slide.active .clip-track').getAttribute('aria-valuenow').then(Number);
+  const card = phone.locator('.rwidget', { hasText: 'مقطع فكرة الدرس' });
+  await expect(card).toBeVisible();
+  // لا يبدأ وحده: ينتظر المعلم
+  await expect(play).toHaveText('تشغيل');
+  await ipad.waitForTimeout(1000);
+  expect(await pos()).toBe(0);
+  await card.locator('.rbtn', { hasText: 'تشغيل المقطع' }).click();
+  await expect(play).toHaveText('إيقاف');
+  await expect.poll(pos).toBeGreaterThan(0);
+
+  await card.locator('.rbtn', { hasText: 'إيقاف المقطع' }).click();
+  await expect(play).toHaveText('تشغيل');
+  const stopped = await pos();
+  await ipad.waitForTimeout(1500);
+  expect(await pos()).toBe(stopped);
+
+  await card.locator('.rbtn', { hasText: 'تشغيل المقطع' }).click();
+  await expect(play).toHaveText('إيقاف');
+  await expect.poll(pos).toBeGreaterThan(stopped);
+
+  await card.locator('.rbtn', { hasText: 'من البداية' }).click();
+  await expect.poll(pos).toBeLessThan(2);
+  expect(errors).toEqual([]);
+});
+
 test('سهما الجوال: الخطوات أولًا ثم الشريحة المجاورة', async ({ browser }) => {
   const { ipad, phone, errors } = await pair(browser);
   // أول شريحة فيها خطوات

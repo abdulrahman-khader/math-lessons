@@ -8,6 +8,7 @@ Interactive smartboard presentations for Saudi elementary math lessons (Arabic, 
 - `npm run build`: build every lesson to `dist/<grade>-<lesson>.html` (`npm run build -- 3-4` builds one)
 - `npm test`: typecheck, RTL CSS check, build, then the Playwright checks against the built files
 - `npm run shots -- 3-4 [slide numbers]`: screenshot slides into `shots/` with every step revealed. Look at these before calling a lesson done.
+- `npm run clip-shots -- 3-4 [seconds]`: screenshot the lesson idea clip at given seconds (default every 5 s) into `shots/<lesson>/clip-<s>.png`.
 
 Playwright drives the **installed Chrome** (`channel: 'chrome'`). Windows blocks the Chromium build Playwright downloads. Running it may need the command sandbox disabled.
 
@@ -17,12 +18,13 @@ Playwright drives the **installed Chrome** (`channel: 'chrome'`). Windows blocks
 src/engine/            shared engine, imported as '@engine'
   LessonApp.tsx        stage, header, footer, navigation, keyboard, teams, saved state
   context.tsx          slide scope: step reveal order, highlight keys, hint state
-  components/          Chart, DragChart, TrendExplorer, QuestionSlide, MCQ, Steps, Layout, Wheel, Timer, Pen, Home
+  components/          Chart, DragChart, TrendExplorer, QuestionSlide, MCQ, Steps, Layout, Wheel, Timer, Pen, Home, Clip
   styles/core.css      all styles (logical properties only)
   digits.ts            num(), digits(): the only way numbers reach the screen
 lessons/g4/ch3/3-4-line-graphs/
   lesson.tsx           defineLesson({ meta, sectionDesc, slides })
   charts.ts            defineChart(...) data, validated when the lesson loads
+  clip.tsx             IntroClip: the short animated clip explaining the lesson idea
 tests/lesson.spec.ts   runs against every dist/*.html
 tests/remote.spec.ts   phone remote end to end (iPad + phone contexts) over tests/relay.ts
 ```
@@ -35,6 +37,7 @@ tests/remote.spec.ts   phone remote end to end (iPad + phone contexts) over test
 - `MCQ`: `answer` must be one of `options` verbatim. TypeScript rejects anything else.
 - Chart values come from the book or the teacher's guide. `defineChart` throws if a value is off the axis or label/value counts differ.
 - Verify every calculation by hand before writing it into a step.
+- Every lesson has a **lesson idea clip** (`clip.tsx` → `IntroClip`) as the slide right after the objectives, under `<SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>`. It uses the book's own example (استعد/أستعد), runs 35–55 s, and is a pure function of time: `<Clip duration captions scene={(t) => …} />`, drawn in a 1400×520 SVG with the helpers `tw`, `fade`, `lerp`, `ClipTitle`, `SvgEq` (equations laid out right to left), `Cube`, `Person`, `ClipCard`, `SvgFrac`, `sector`. Captions mark emphasis with `**…**`. It starts only when the teacher presses play (big button on the scene, the bar, or the phone), pauses when the teacher leaves the slide, and the phone remote gets play/pause/restart automatically. Review it with `npm run clip-shots`.
 - Each slide's `notes` are teacher notes, shown in teacher mode. `min` is suggested minutes; the slides should add up to roughly the lesson length.
 
 ## Arabic / RTL rules (enforced)

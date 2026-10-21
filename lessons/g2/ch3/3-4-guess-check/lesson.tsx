@@ -2,6 +2,7 @@ import {
   Card, Cols, Ctrls, CubeTrain, GoHomeButton, GuessCheck, IfTeams, MCQ, Mark, MindMap, NextButton, PairPick, QCol, QuestionSlide,
   Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
@@ -62,6 +63,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه بعد التخمين الأول واسأل: هل نزيد التخمين أم ننقصه؟ لماذا؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

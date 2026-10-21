@@ -3,6 +3,7 @@ import {
   Card, Cols, Ctrls, Domino, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, Sentence, SlideHead,
   Solution, Stack, Step, Tag, TimerButton, VSum, Winner, defineLesson, num, useRemoteWidget, type Token,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
@@ -153,6 +154,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه قبل كشف الغطاء واسأل: كم نقطة تحت الغطاء؟ كيف عرفت؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

@@ -12,4 +12,5 @@ export { Tag, SlideHead, Cols, Stack, QCol, Card, Mark, Eq, DataTable, MindMap, 
 export { CubeTrain, Blank, FactLine, VSum, FactFamily, CUBE, type CubePart, type ItemShape } from './components/Cubes';
 export { NumberLine, HopExplorer, Domino, Sentence, FactTriangle, GuessCheck, PairPick, Towers, useRemoteWidget, type Jump, type Token } from './components/Primary';
 export { Frac, Tally, DataGrid, HBars, Pie, Bag, chanceWord, type Cell, type Slice, type BagItem } from './components/DataViz';
+export { Clip, ClipCard, ClipTitle, Cube, Person, SvgEq, SvgFrac, CLIP_W, CLIP_H, tw, lerp, fade, ease, sector, type EqPart } from './components/Clip';
 export { useSlide } from './context';

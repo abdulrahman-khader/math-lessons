@@ -2,6 +2,7 @@ import {
   CUBE, Card, Cols, Ctrls, CubeTrain, FactFamily, FactTriangle, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol,
   QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
@@ -85,6 +86,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه بعد كل جملة واسأل: ما الجملة التالية من الأعداد نفسها؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

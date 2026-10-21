@@ -3,6 +3,7 @@ import {
   Bag, Card, Cols, Ctrls, DataGrid, Eq, GoHomeButton, HBars, IfTeams, MCQ, Mark, MindMap, NextButton, Pie, QCol, QuestionSlide, SlideHead,
   Solution, Stack, Step, Winner, chanceWord, defineLesson, num, useRemoteWidget, useSlide, type BagItem, type HlKey, type Slice,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- البيانات (مقروءة من رسوم الكتاب) ---------- */
 
@@ -303,6 +304,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه قبل كل بطاقة واسأل: كم كرة من ٨؟ ما الكلمة التي تصف الاحتمال؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

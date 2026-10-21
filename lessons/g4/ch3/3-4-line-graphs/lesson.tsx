@@ -3,6 +3,7 @@ import {
   Card, Chart, Cols, Ctrls, DataTable, DragChart, Eq, GoHomeButton, Hint, HintButton, IfTeams, MCQ, Mark, MindMap,
   NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step, ThinkPairShare, TrendExplorer, Winner, defineLesson,
 } from '@engine';
+import { IntroClip } from './clip';
 import * as C from './charts';
 
 /* ---------- رسوم صغيرة خاصة بهذا الدرس ---------- */
@@ -105,6 +106,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه قبل رسم الخط واسأل: ماذا نفعل بالنقاط؟ ثم بين أي أسبوعين نمت النبتة أكثر؟ يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

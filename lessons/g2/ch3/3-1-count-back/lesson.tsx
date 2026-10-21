@@ -2,6 +2,7 @@ import {
   Card, Cols, CubeTrain, Ctrls, GoHomeButton, HopExplorer, IfTeams, MCQ, Mark, MindMap, NextButton, NumberLine, QCard, QCol,
   QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Tag, TimerButton, VSum, Winner, defineLesson, type Jump,
 } from '@engine';
+import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
@@ -89,6 +90,19 @@ export default defineLesson({
               </ol>
             </Card>
           </Cols>
+        </>
+      ),
+    },
+
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'مقطع قصير (أقل من دقيقة) لا يبدأ إلا عندما تضغط تشغيل. أوقفه قبل كل قفزة ودع الطلاب يعدّون معك إلى الخلف. يمكن تشغيله وإيقافه من الجوال.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
         </>
       ),
     },

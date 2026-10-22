@@ -349,7 +349,11 @@ export interface BagItem {
  * كيس شفاف فيه كرات أو مكعبات بألوانها. اللون i يبرز (ويبهت غيره) بمفتاح p{i}.
  * picked يتقدّم على الخطوات (للمستكشف).
  */
-export function Bag({ items, shape = 'ball', picked, size = 380 }: { items: BagItem[]; shape?: 'ball' | 'cube'; picked?: number[]; size?: number }) {
+/**
+ * out: الكرة المسحوبة (رقمها بين كل الكرات بالترتيب) تخرج فوق فتحة الكيس، ومكانها يبقى فارغًا.
+ * id يتغير مع كل سحبة لتُعاد الحركة. null = لم نسحب بعد (تُحجز المساحة فوق الكيس).
+ */
+export function Bag({ items, shape = 'ball', picked, size = 380, out }: { items: BagItem[]; shape?: 'ball' | 'cube'; picked?: number[]; size?: number; out?: { k: number; id: number } | null }) {
   const { activeHl } = useSlide();
   const lit = picked ?? items.map((_, i) => i).filter((i) => activeHl.has(`p${i}`));
   const flat = items.flatMap((it, i) => Array.from({ length: it.n }, () => ({ i, color: it.color })));
@@ -360,16 +364,21 @@ export function Bag({ items, shape = 'ball', picked, size = 380 }: { items: BagI
   const W = 300;
   const H = 120 + rowsN * cell + 40;
   const bodyTop = 100;
+  const top = out === undefined ? 0 : 84;
+  const pos = (k: number) => {
+    const row = Math.floor(k / per);
+    const inRow = Math.min(per, total - row * per);
+    return [W / 2 + (k % per - (inRow - 1) / 2) * cell, bodyTop + 24 + row * cell + cell / 2];
+  };
+  const drawn = out && out.k < total ? flat[out.k] : null;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="bag" style={{ maxWidth: size }} role="img" aria-label={items.map((it) => `${num(it.n)} ${it.name}`).join('، ')}>
+    <svg viewBox={`0 ${-top} ${W} ${H + top}`} className="bag" style={{ maxWidth: size }} role="img" aria-label={items.map((it) => `${num(it.n)} ${it.name}`).join('، ')}>
       <path d={`M115 60 Q100 30 120 28 L180 28 Q200 30 185 60 Z`} className="bag-neck" />
       <path d={`M115 62 C40 90 18 ${H - 70} 40 ${H - 22} Q150 ${H} 260 ${H - 22} C282 ${H - 70} 260 90 185 62 Z`} className="bag-body" />
       <path d="M112 64 Q150 74 188 64" className="bag-tie" />
       {flat.map((b, k) => {
-        const row = Math.floor(k / per);
-        const inRow = Math.min(per, total - row * per);
-        const x = W / 2 + (k % per - (inRow - 1) / 2) * cell;
-        const y = bodyTop + 24 + row * cell + cell / 2;
+        const [x, y] = pos(k);
+        if (drawn && out!.k === k) return <circle key={k} cx={x} cy={y} r={cell * 0.44} className="bag-gone" />;
         const cls = 'bag-item' + (lit.length ? (lit.includes(b.i) ? ' on' : ' dim') : '');
         return shape === 'cube' ? (
           <rect key={k} className={cls} x={x - cell * 0.42} y={y - cell * 0.42} width={cell * 0.84} height={cell * 0.84} rx={5} fill={b.color} />
@@ -380,6 +389,22 @@ export function Bag({ items, shape = 'ball', picked, size = 380 }: { items: BagI
           </g>
         );
       })}
+      {drawn && (() => {
+        const [x, y] = pos(out!.k);
+        const r = cell * 0.62;
+        return (
+          <g key={out!.id} className="bag-out" style={{ ['--dx' as string]: `${x - W / 2}px`, ['--dy' as string]: `${y + 40}px` }}>
+            {shape === 'cube' ? (
+              <rect x={W / 2 - r} y={-40 - r} width={r * 2} height={r * 2} rx={6} fill={drawn.color} />
+            ) : (
+              <>
+                <circle cx={W / 2} cy={-40} r={r} fill={drawn.color} />
+                <circle cx={W / 2 - r * 0.32} cy={-40 - r * 0.32} r={r * 0.27} fill="#fff8" />
+              </>
+            )}
+          </g>
+        );
+      })()}
     </svg>
   );
 }

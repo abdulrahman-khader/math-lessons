@@ -112,7 +112,9 @@ function LetterCards() {
 function BagExplorer() {
   const [r, setR] = useState(3);
   const [b, setB] = useState(5);
-  const [last, setLast] = useState<string | null>(null);
+  /** آخر كرة مسحوبة: رقمها في الكيس (الحمراء أولًا) ورقم السحبة */
+  const [out, setOut] = useState<{ k: number; id: number } | null>(null);
+  const last = out ? (out.k < r ? 'حمراء' : 'زرقاء') : null;
   const [draws, setDraws] = useState({ red: 0, blue: 0 });
   const n = r + b;
   const word = n ? chanceWord(r, n) : '—';
@@ -120,13 +122,14 @@ function BagExplorer() {
     const x = Math.max(0, Math.min(10, v));
     if (which === 'r') setR(x);
     else setB(x);
-    setLast(null);
+    setOut(null);
     setDraws({ red: 0, blue: 0 });
   };
   const draw = () => {
     if (!n) return;
-    const red = Math.random() * n < r;
-    setLast(red ? 'حمراء' : 'زرقاء');
+    const k = Math.floor(Math.random() * n);
+    const red = k < r;
+    setOut((o) => ({ k, id: (o?.id ?? 0) + 1 }));
     setDraws((d) => (red ? { ...d, red: d.red + 1 } : { ...d, blue: d.blue + 1 }));
   };
   useRemoteWidget(
@@ -144,7 +147,7 @@ function BagExplorer() {
       else if (k === 'b' && v !== undefined) set('b', v);
       else if (k === 'draw') draw();
     },
-    [r, b, last, draws],
+    [r, b, out, draws],
   );
   const stepper = (label: string, v: number, which: 'r' | 'b', color: string) => (
     <div className="ffstep" style={{ borderColor: color }}>
@@ -171,7 +174,16 @@ function BagExplorer() {
             اسحب كرة
           </button>
           <span className="hopx-eq done">
-            <span className="eq">{last ? `سُحبت: ${last}` : 'لم نسحب بعد'}</span>
+            <span className="eq">
+              {last ? (
+                <>
+                  <span className="ball-dot" style={{ background: last === 'حمراء' ? RED : BLUE }} />
+                  سُحبت: {last}
+                </>
+              ) : (
+                'لم نسحب بعد'
+              )}
+            </span>
           </span>
         </div>
         <p style={{ margin: 0, fontWeight: 700, fontSize: '.8em' }}>
@@ -179,7 +191,7 @@ function BagExplorer() {
         </p>
       </Stack>
       <Pic>
-        <Bag items={[{ name: 'حمراء', n: r, color: RED }, { name: 'زرقاء', n: b, color: BLUE }]} />
+        <Bag items={[{ name: 'حمراء', n: r, color: RED }, { name: 'زرقاء', n: b, color: BLUE }]} out={out} />
       </Pic>
     </Cols>
   );

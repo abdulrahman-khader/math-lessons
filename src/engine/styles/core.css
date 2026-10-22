@@ -725,3 +725,8 @@ body.flow .gcols { grid-template-columns: 1fr 1fr !important; }
 body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .clip-big { font-size: 30px; position: absolute; inset-block-start: 82%; inset-inline-start: 50%; transform: translate(50%, -50%); inline-size: 3.6em; block-size: 3.6em; border-radius: 50%; border: 0; background: var(--hl); color: #fff; cursor: pointer; display: grid; place-items: center; box-shadow: 0 .2em .8em #13213b44; touch-action: manipulation; }
 .clip-big svg { inline-size: 1.6em; block-size: 1.6em; }
+.bag .bag-gone { fill: none; stroke: #9aa7b4; stroke-width: 2.5; stroke-dasharray: 5 4; }
+.bag .bag-out { stroke: var(--ink); stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: bagout .7s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes bagout { from { transform: translate(var(--dx), var(--dy)) scale(.7); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .bag .bag-out { animation: none; } }
+.ball-dot { display: inline-block; inline-size: .9em; block-size: .9em; border-radius: 50%; border: 2px solid var(--ink); vertical-align: -.1em; margin-inline-end: .3em; }

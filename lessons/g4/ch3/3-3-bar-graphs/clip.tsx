@@ -1,13 +1,14 @@
 import { Clip, ClipTitle, SvgEq, fade, num, tw } from '@engine';
 
-/* مقطع فكرة الدرس: من الجدول التكراري إلى الأعمدة، ثم الأكثر والأقل والفرق (بيانات الاستكشاف) */
+/* مقطع فكرة الدرس: من الجدول التكراري إلى الأعمدة، ثم الأكثر والأقل والفرق (مثال غير مثال الكتاب) */
 
 const SPORTS = [
-  { name: 'القدم', n: 8, color: '#4f9be0' },
-  { name: 'السلة', n: 5, color: '#f2a03d' },
-  { name: 'السباحة', n: 4, color: '#3fb6a8' },
-  { name: 'الجري', n: 3, color: '#e0607e' },
+  { name: 'الحصان', n: 4, color: '#f2a03d' },
+  { name: 'القطة', n: 7, color: '#4f9be0' },
+  { name: 'الأرنب', n: 2, color: '#e0607e' },
+  { name: 'الصقر', n: 6, color: '#3fb6a8' },
 ];
+const MOST = 1, LEAST = 2;
 const BASE = 430, U = 32, AX = 200;
 const barX = (i: number) => 300 + i * 150; // من اليسار كما في الكتاب
 const GROW = (i: number) => 11 + i * 2.2;
@@ -28,7 +29,7 @@ function scene(t: number) {
           <rect x={1010} y={110} width={330} height={300} rx={14} fill="var(--paper)" stroke="var(--ink)" strokeWidth={3} />
           <rect x={1010} y={110} width={330} height={52} rx={14} fill="var(--rule-t)" stroke="var(--ink)" strokeWidth={3} />
           <line x1={1180} y1={110} x2={1180} y2={410} stroke="var(--ink)" strokeWidth={2} />
-          <text x={1260} y={146} fontSize={26} textAnchor="middle">الرياضة</text>
+          <text x={1260} y={146} fontSize={26} textAnchor="middle">الحيوان</text>
           <text x={1095} y={146} fontSize={26} textAnchor="middle">التكرار</text>
           {SPORTS.map((s, i) => (
             <g key={s.name}>
@@ -41,7 +42,7 @@ function scene(t: number) {
 
       {/* المحوران والشبكة */}
       <g opacity={axes}>
-        <text x={540} y={70} fontSize={30} textAnchor="middle">الرياضة المفضّلة في صفّنا</text>
+        <text x={540} y={70} fontSize={30} textAnchor="middle">الحيوان المفضّل</text>
         {[2, 4, 6, 8, 10].map((v) => (
           <g key={v}>
             <line x1={AX} y1={BASE - v * U} x2={900} y2={BASE - v * U} stroke="var(--gridline)" strokeWidth={2} />
@@ -57,7 +58,7 @@ function scene(t: number) {
       {SPORTS.map((s, i) => {
         const x = barX(i);
         const shown = Math.min(s.n, Math.floor((t - GROW(i)) / 0.22) + 1);
-        const dim = (most > 0.5 && i !== 0) || (least > 0.5 && i !== 3) ? 0.3 : 1;
+        const dim = (most > 0.5 && i !== MOST) || (least > 0.5 && i !== LEAST) ? 0.3 : 1;
         return (
           <g key={s.name} opacity={dim}>
             {shown > 0 &&
@@ -70,16 +71,18 @@ function scene(t: number) {
           </g>
         );
       })}
-      {most > 0.01 && <rect x={barX(0) - 54} y={BASE - 8 * U - 9} width={108} height={8 * U + 9} rx={6} fill="none" stroke="var(--hl)" strokeWidth={6} opacity={most} />}
-      {least > 0.01 && <rect x={barX(3) - 54} y={BASE - 3 * U - 9} width={108} height={3 * U + 9} rx={6} fill="none" stroke="var(--hl)" strokeWidth={6} opacity={least} />}
+      {most > 0.01 && <rect x={barX(MOST) - 54} y={BASE - 7 * U - 9} width={108} height={7 * U + 9} rx={6} fill="none" stroke="var(--hl)" strokeWidth={6} opacity={most} />}
+      {least > 0.01 && <rect x={barX(LEAST) - 54} y={BASE - 2 * U - 9} width={108} height={2 * U + 9} rx={6} fill="none" stroke="var(--hl)" strokeWidth={6} opacity={least} />}
 
       {/* الفرق بين الأكثر والأقل */}
       {diff > 0.01 && (
         <g opacity={diff}>
-          <line x1={barX(0) + 45} y1={BASE - 8 * U} x2={barX(3) + 60} y2={BASE - 8 * U} stroke="var(--hl)" strokeWidth={3} strokeDasharray="8 6" />
-          <line x1={barX(3) + 60} y1={BASE - 8 * U} x2={barX(3) + 60} y2={BASE - 3 * U} stroke="var(--hl)" strokeWidth={5} />
-          <text x={barX(3) + 88} y={BASE - 5.3 * U} fontSize={34} textAnchor="middle" fill="var(--hl)">{num(5)}</text>
-          <SvgEq x={1170} y={290} size={60} parts={[8, '−', 3, '=', { v: 5, color: 'var(--hl)' }]} />
+          {/* الفرق في الفراغ بين العمودين */}
+          <line x1={(barX(MOST) + barX(LEAST)) / 2} y1={BASE - 7 * U} x2={(barX(MOST) + barX(LEAST)) / 2} y2={BASE - 2 * U} stroke="var(--hl)" strokeWidth={5} />
+          <line x1={barX(LEAST) - 45} y1={BASE - 2 * U} x2={(barX(MOST) + barX(LEAST)) / 2 - 10} y2={BASE - 2 * U} stroke="var(--hl)" strokeWidth={3} strokeDasharray="6 5" />
+          <rect x={(barX(MOST) + barX(LEAST)) / 2 - 20} y={BASE - 4.5 * U - 24} width={40} height={44} rx={8} fill="var(--paper)" />
+          <text x={(barX(MOST) + barX(LEAST)) / 2} y={BASE - 4.5 * U + 10} fontSize={34} textAnchor="middle" fill="var(--hl)">{num(5)}</text>
+          <SvgEq x={1170} y={290} size={60} parts={[7, '−', 2, '=', { v: 5, color: 'var(--hl)' }]} />
         </g>
       )}
     </>
@@ -92,12 +95,12 @@ export const IntroClip = () => (
     scene={scene}
     captions={[
       [0, 'فكرة الدرس'],
-      [4.5, 'سألنا طلاب الصف: ما رياضتك المفضّلة؟'],
+      [4.5, 'سألنا طلاب الصف: ما حيوانك المفضّل؟'],
       [10, 'نحوّل كل عدد إلى **عمود**: كل مربع = طالب واحد'],
       [20.5, 'طول العمود يدلّ على العدد'],
-      [24, 'العمود الأطول = **الأكثر**: كرة القدم ٨'],
-      [30, 'العمود الأقصر = **الأقل**: الجري ٣'],
-      [35, 'الفرق بين الأكثر والأقل: ٨ − ٣ = **٥**'],
+      [24, 'العمود الأطول = **الأكثر**: القطة ٧'],
+      [30, 'العمود الأقصر = **الأقل**: الأرنب ٢'],
+      [35, 'الفرق بين الأكثر والأقل: ٧ − ٢ = **٥**'],
     ]}
   />
 );

@@ -1,9 +1,11 @@
 import { Clip, ClipTitle, SvgEq, lerp, num, tw } from '@engine';
-import { bean } from './charts';
 
-/* مقطع فكرة الدرس: نبتة الفول تنمو كل أسبوع ← نقاط ← خط (بيانات لغز التهيئة) */
+/* مقطع فكرة الدرس: نبتة دوّار الشمس تنمو كل أسبوع ← نقاط ← خط (مثال غير مثال الكتاب) */
 
-const V = bean.values as number[];
+const V = [3, 5, 6, 10, 12];
+const WEEKS = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس'];
+/** أشد صعود: من الأسبوع الثالث إلى الرابع */
+const UP = 2;
 const BASE = 440, U = 24, AX = 210;
 const px = (i: number) => 310 + i * 140; // من اليسار كما في الكتاب
 const py = (v: number) => BASE - v * U;
@@ -51,7 +53,7 @@ function scene(t: number) {
 
       {/* المحوران */}
       <g opacity={axes}>
-        <text x={560} y={52} fontSize={30} textAnchor="middle">طول نبتة الفول</text>
+        <text x={560} y={52} fontSize={30} textAnchor="middle">طول نبتة دوّار الشمس</text>
         {[2, 4, 6, 8, 10, 12, 14].map((v) => (
           <g key={v}>
             <line x1={AX} y1={py(v)} x2={920} y2={py(v)} stroke="var(--gridline)" strokeWidth={2} />
@@ -60,7 +62,7 @@ function scene(t: number) {
         ))}
         <line x1={AX} y1={BASE} x2={930} y2={BASE} stroke="var(--ink)" strokeWidth={3} />
         <line x1={AX} y1={BASE} x2={AX} y2={py(14.6)} stroke="var(--ink)" strokeWidth={3} />
-        {bean.labels.map((l, i) => (
+        {WEEKS.map((l, i) => (
           <text key={l} x={px(i)} y={BASE + 34} fontSize={22} textAnchor="middle">{l}</text>
         ))}
         <text x={570} y={BASE + 68} fontSize={22} textAnchor="middle">الأسبوع</text>
@@ -76,12 +78,12 @@ function scene(t: number) {
       {line > 0 && (
         <polyline points={pts.map((p) => p.join(',')).join(' ')} fill="none" stroke="var(--plot)" strokeWidth={6} strokeLinejoin="round" strokeDasharray={len} strokeDashoffset={len * (1 - line)} opacity={steep > 0.5 ? 0.35 : 1} />
       )}
-      {steep > 0.01 && <line x1={pts[1][0]} y1={pts[1][1]} x2={pts[2][0]} y2={pts[2][1]} stroke="var(--plot)" strokeWidth={11} strokeLinecap="round" opacity={steep} />}
+      {steep > 0.01 && <line x1={pts[UP][0]} y1={pts[UP][1]} x2={pts[UP + 1][0]} y2={pts[UP + 1][1]} stroke="var(--plot)" strokeWidth={11} strokeLinecap="round" opacity={steep} />}
 
       {/* النقاط وقيمها */}
       {V.map((v, i) => {
         const op = tw(t, WEEK(i) + 0.3, WEEK(i) + 0.7);
-        const on = steep < 0.5 || i === 1 || i === 2;
+        const on = steep < 0.5 || i === UP || i === UP + 1;
         return op > 0.01 ? (
           <g key={i} opacity={op * (on ? 1 : 0.35)}>
             <circle cx={px(i)} cy={py(v)} r={11} fill="var(--plot)" stroke="#fff" strokeWidth={3} />
@@ -92,7 +94,7 @@ function scene(t: number) {
 
       {steep > 0.01 && (
         <g opacity={steep}>
-          <SvgEq x={390} y={170} size={42} parts={[9, '−', 4, '=', { v: 5, color: 'var(--hl)' }]} />
+          <SvgEq x={390} y={170} size={42} parts={[10, '−', 6, '=', { v: 4, color: 'var(--hl)' }]} />
         </g>
       )}
     </>
@@ -105,10 +107,10 @@ export const IntroClip = () => (
     scene={scene}
     captions={[
       [0, 'فكرة الدرس'],
-      [4.5, 'زرعنا بذرة فول، ونقيس طولها في نهاية كل أسبوع'],
+      [4.5, 'زرعنا بذرة دوّار الشمس، ونقيس طولها في نهاية كل أسبوع'],
       [10, 'كل أسبوع نضع **نقطة** عند طول النبتة'],
       [24, 'نصل النقاط بخط: هذا هو **التمثيل بالخطوط**'],
-      [28, 'أشدّ صعود بين الأسبوعين الثاني والثالث: زادت **٥** سم'],
+      [28, 'أشدّ صعود بين الأسبوعين الثالث والرابع: زادت **٤** سم'],
       [34, 'الخط يصعد = الطول **يزيد** مع مرور الزمن'],
       [39, 'التمثيل بالخطوط يوضّح **التغيّر مع مرور الزمن**'],
     ]}

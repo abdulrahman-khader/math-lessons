@@ -1,33 +1,33 @@
 import { Clip, ClipTitle, Person, SvgEq, fade, num, tw } from '@engine';
 
-/* مقطع فكرة الدرس: الرحلة العلمية (ص ٨٢): كل معلِّمَين مع ٩ طلاب، والمعلمون ١٦ */
+/* مقطع فكرة الدرس: رحلة مدرسية (مثال غير مثال الكتاب): كل ٣ معلِّمين مع ٨ طلاب، والمعلِّمون ١٨ */
 
-const COLS = 8;
-const COL_AT = (j: number) => 14.5 + j * 1.6;
-const HEAD_X = 1160, CW = 118, TOP = 190, RH = 80;
+const T = 3, K = 8, COLS = 6;
+const COL_AT = (j: number) => 14.5 + j * 1.9;
+const HEAD_X = 1100, CW = 130, TOP = 190, RH = 80;
 const colX = (j: number) => HEAD_X - CW * (j + 0.5);
 
 function scene(t: number) {
   const group = fade(t, 4.5, 14);
   const table = tw(t, 13.5, 14.3);
-  const steps = fade(t, 18, 27);
+  const steps = fade(t, 18.5, 27);
   const final = tw(t, 28.5, 29.3);
   const check = tw(t, 35, 35.6);
   return (
     <>
-      <ClipTitle t={t} title="خُطَّةُ حَلِّ الْمَسْأَلَةِ: إنشاءُ جدولٍ" q="١٦ معلِّمًا في الرحلة… فكم طالبًا؟" />
+      <ClipTitle t={t} title="خُطَّةُ حَلِّ الْمَسْأَلَةِ: إنشاءُ جدولٍ" q="١٨ معلِّمًا في الرحلة… فكم طالبًا؟" />
 
       {/* مجموعة واحدة: معلِّمان و٩ طلاب */}
       {group > 0.01 && (
         <g opacity={group}>
-          {[0, 1].map((k) => (
-            <Person key={k} x={1000 - k * 90} y={250} s={1.15 * tw(t, 4.6 + k * 0.2, 5 + k * 0.2)} fill="#13213b" />
+          {[0, 1, 2].map((k) => (
+            <Person key={k} x={1060 - k * 90} y={250} s={1.15 * tw(t, 4.6 + k * 0.2, 5 + k * 0.2)} fill="#13213b" />
           ))}
-          {Array.from({ length: 9 }, (_, k) => (
-            <Person key={k} x={760 - (k % 5) * 70} y={k < 5 ? 200 : 310} s={0.7 * tw(t, 5.2 + k * 0.15, 5.6 + k * 0.15)} fill="#ffcf6b" />
+          {Array.from({ length: K }, (_, k) => (
+            <Person key={k} x={760 - (k % 4) * 80} y={k < 4 ? 200 : 310} s={0.7 * tw(t, 5.2 + k * 0.15, 5.6 + k * 0.15)} fill="#ffcf6b" />
           ))}
-          <text x={955} y={360} fontSize={30} textAnchor="middle" opacity={tw(t, 6, 6.5)}>معلِّمان</text>
-          <text x={620} y={420} fontSize={30} textAnchor="middle" opacity={tw(t, 7, 7.5)}>{num(9)} طلاب</text>
+          <text x={970} y={360} fontSize={30} textAnchor="middle" opacity={tw(t, 6, 6.5)}>{num(T)} معلِّمين</text>
+          <text x={640} y={420} fontSize={30} textAnchor="middle" opacity={tw(t, 7, 7.5)}>{num(K)} طلاب</text>
         </g>
       )}
 
@@ -48,9 +48,9 @@ function scene(t: number) {
             return (
               <g key={j} opacity={op}>
                 {last && final > 0 && <rect x={HEAD_X - CW * (j + 1) + 4} y={TOP + 4} width={CW - 8} height={RH * 2 - 8} rx={10} fill="none" stroke="var(--hl)" strokeWidth={6} opacity={final} />}
-                <text x={colX(j)} y={TOP + 54} fontSize={38} textAnchor="middle">{num(2 * (j + 1))}</text>
+                <text x={colX(j)} y={TOP + 54} fontSize={38} textAnchor="middle">{num(T * (j + 1))}</text>
                 <text x={colX(j)} y={TOP + RH + 54} fontSize={38} textAnchor="middle" fill={last ? 'var(--hl)' : 'var(--rule)'}>
-                  {num(9 * (j + 1))}
+                  {num(K * (j + 1))}
                 </text>
               </g>
             );
@@ -60,9 +60,9 @@ function scene(t: number) {
             [0, 1, 2].map((j) => (
               <g key={j} opacity={steps}>
                 <path d={`M${colX(j) - 14},${TOP - 14} Q${colX(j) - CW / 2},${TOP - 50} ${colX(j + 1) + 14},${TOP - 14}`} fill="none" stroke="var(--ex)" strokeWidth={3} />
-                <text x={colX(j) - CW / 2} y={TOP - 46} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--ex)">{'+' + num(2)}</text>
+                <text x={colX(j) - CW / 2} y={TOP - 46} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--ex)">{'+' + num(T)}</text>
                 <path d={`M${colX(j) - 14},${TOP + RH * 2 + 14} Q${colX(j) - CW / 2},${TOP + RH * 2 + 50} ${colX(j + 1) + 14},${TOP + RH * 2 + 14}`} fill="none" stroke="var(--rule)" strokeWidth={3} />
-                <text x={colX(j) - CW / 2} y={TOP + RH * 2 + 78} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--rule)">{'+' + num(9)}</text>
+                <text x={colX(j) - CW / 2} y={TOP + RH * 2 + 78} fontSize={28} textAnchor="middle" direction="ltr" fill="var(--rule)">{'+' + num(K)}</text>
               </g>
             ))}
         </g>
@@ -71,8 +71,8 @@ function scene(t: number) {
       {/* أتحقق */}
       {check > 0.01 && (
         <g opacity={check}>
-          <SvgEq x={900} y={470} size={46} parts={[16, '÷', 2, '=', 8]} />
-          <SvgEq x={460} y={470} size={46} parts={[8, '×', 9, '=', { v: 72, color: 'var(--hl)' }]} />
+          <SvgEq x={900} y={470} size={46} parts={[18, '÷', 3, '=', 6]} />
+          <SvgEq x={460} y={470} size={46} parts={[6, '×', 8, '=', { v: 48, color: 'var(--hl)' }]} />
         </g>
       )}
     </>
@@ -85,13 +85,13 @@ export const IntroClip = () => (
     scene={scene}
     captions={[
       [0, 'فكرة الدرس'],
-      [4.5, 'كل **٢** معلِّمَين يصطحبان مجموعة من **٩** طلاب'],
-      [9.5, 'إذا كان المعلِّمون **١٦**، فكم طالبًا؟ ننشئ **جدولًا**'],
-      [14.5, 'مجموعة واحدة: ٢ معلِّمان و٩ طلاب'],
-      [18, 'كل مجموعة جديدة: يزيد المعلِّمون **٢** ويزيد الطلاب **٩**'],
-      [24, 'نكمل النمط حتى يصل المعلِّمون إلى **١٦**'],
-      [28.5, '١٦ معلِّمًا ← **٧٢** طالبًا'],
-      [35, 'أتحقّق: **٨** مجموعات، في كل مجموعة ٩ طلاب'],
+      [4.5, 'كل **٣** معلِّمين يرافقون مجموعة من **٨** طلاب'],
+      [9.5, 'إذا كان المعلِّمون **١٨**، فكم طالبًا؟ ننشئ **جدولًا**'],
+      [14.5, 'مجموعة واحدة: ٣ معلِّمين و٨ طلاب'],
+      [18.5, 'كل مجموعة جديدة: يزيد المعلِّمون **٣** ويزيد الطلاب **٨**'],
+      [23.5, 'نكمل النمط حتى يصل المعلِّمون إلى **١٨**'],
+      [28.5, '١٨ معلِّمًا ← **٤٨** طالبًا'],
+      [35, 'أتحقّق: **٦** مجموعات، في كل مجموعة ٨ طلاب'],
     ]}
   />
 );

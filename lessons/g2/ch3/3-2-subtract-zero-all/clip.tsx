@@ -1,9 +1,9 @@
 import { Clip, ClipTitle, SvgEq, tw, type EqPart } from '@engine';
 
-/* مقطع فكرة الدرس: ٥ ضفادع على أوراق اللوتس (أستعد ص ٦٤): ٥ − ٥ = ٠، ثم ٥ − ٠ = ٥ */
+/* مقطع فكرة الدرس: ٦ ضفادع على أوراق اللوتس (مثال غير مثال الكتاب): ٦ − ٦ = ٠، ثم ٦ − ٠ = ٦ */
 
-const N = 5;
-const padX = (i: number) => 700 + (2 - i) * 190;
+const N = 6;
+const padX = (i: number) => 700 + ((N - 1) / 2 - i) * 172;
 const PAD_Y = 360;
 const JUMP = (i: number) => 9 + i * 0.7;
 
@@ -27,8 +27,8 @@ function scene(t: number) {
   const pond = tw(t, 4.2, 5);
   const back = tw(t, 21.5, 23); // عودة الضفادع للمثال الثاني
   const second = t >= 21.5;
-  const eq1: EqPart[] = [5, '−', { v: 5, op: tw(t, 9, 9.5) }, '=', { v: t > 13.5 ? 0 : '؟', box: true, op: tw(t, 9, 9.5) }];
-  const eq2: EqPart[] = [5, '−', { v: 0, op: tw(t, 25, 25.5) }, '=', { v: t > 29 ? 5 : '؟', box: true, op: tw(t, 25, 25.5) }];
+  const eq1: EqPart[] = [N, '−', { v: N, op: tw(t, 9, 9.5) }, '=', { v: t > 14.5 ? 0 : '؟', box: true, op: tw(t, 9, 9.5) }];
+  const eq2: EqPart[] = [N, '−', { v: 0, op: tw(t, 25, 25.5) }, '=', { v: t > 29 ? N : '؟', box: true, op: tw(t, 25, 25.5) }];
   return (
     <>
       <ClipTitle t={t} title="طَرْحُ الصِّفْرِ وَطَرْحُ الْكُلِّ" q="ماذا يبقى إذا قفزت الضفادع كلها؟" />
@@ -36,7 +36,7 @@ function scene(t: number) {
       <g opacity={pond}>
         <ellipse cx={700} cy={385} rx={600} ry={110} fill="#bfe3f2" />
         {Array.from({ length: N }, (_, i) => (
-          <ellipse key={i} cx={padX(i)} cy={PAD_Y + 6} rx={78} ry={30} fill="#2f9a4a" stroke="#1e6b33" strokeWidth={3} />
+          <ellipse key={i} cx={padX(i)} cy={PAD_Y + 6} rx={70} ry={28} fill="#2f9a4a" stroke="#1e6b33" strokeWidth={3} />
         ))}
         <g opacity={second ? 0 : 1}>
           <SvgEq x={700} y={130} size={76} parts={eq1} />
@@ -75,13 +75,13 @@ export const IntroClip = () => (
     scene={scene}
     captions={[
       [0, 'فكرة الدرس'],
-      [4.5, 'على أوراق اللوتس **٥** ضفادع'],
+      [4.5, 'على أوراق اللوتس **٦** ضفادع'],
       [9, 'قفزت الضفادع **كلها** إلى الماء'],
-      [13.5, 'لم يبقَ أيّ ضفدع: ٥ − ٥ = **٠**'],
-      [17.5, 'عندما أطرح العدد من **نفسه** يكون الناتج **صفرًا**'],
-      [21.5, 'عادت الضفادع **الخمسة**'],
+      [14.5, 'لم يبقَ أيّ ضفدع: ٦ − ٦ = **٠**'],
+      [18, 'عندما أطرح العدد من **نفسه** يكون الناتج **صفرًا**'],
+      [21.5, 'عادت الضفادع **الستة**'],
       [25, 'هذه المرة لم يقفز أيّ ضفدع: نطرح **صفرًا**'],
-      [29, 'بقيت الضفادع كلها: ٥ − ٠ = **٥**'],
+      [29, 'بقيت الضفادع كلها: ٦ − ٠ = **٦**'],
       [33, 'عندما أطرح **الصفر** يبقى العدد **نفسه**'],
     ]}
   />

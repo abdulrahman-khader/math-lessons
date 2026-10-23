@@ -199,7 +199,10 @@ test('الجوال يتحكم بمستكشف الحقائق المترابطة',
 test('الجوال يوقف مقطع فكرة الدرس ويشغّله', async ({ browser }) => {
   const { ipad, phone, errors } = await pair(browser);
   let found = false;
-  for (let k = 0; k < 6 && !found; k++) {
+  // المقطع آخر شرائح الشرح: نذهب إلى قسم الشرح ثم نتقدّم حتى نصل إليه
+  await phone.locator('.rsecs .rbtn', { hasText: 'الشرح' }).click();
+  await ipad.waitForTimeout(400);
+  for (let k = 0; k < 30 && !found; k++) {
     await phone.locator('.rnav .next').click();
     await ipad.waitForTimeout(350);
     found = (await ipad.locator('section.slide.active .clip').count()) > 0;

@@ -18,14 +18,14 @@ The user gives a lesson number and book pages, usually with photos or a PDF of t
 
 Follow the shape of the closest existing lesson (start with `lessons/g4/ch3/3-4-line-graphs/lesson.tsx`):
 
-objectives → lesson idea clip → engage (link to the previous lesson, a hook) → explore (something hands-on) → explain (the book's rule, worked example as "I do") → elaborate ("we do" with MCQ, real life, quick check) → every تأكد question → every تدرب question → HOT questions → mind map, exit ticket (easy, medium, hard), homework.
+objectives → engage (link to the previous lesson, a hook) → explore (something hands-on) → explain (the book's rule, worked example as "I do", then the lesson idea clip) → elaborate ("we do" with MCQ, real life, quick check) → every تأكد question → every تدرب question → HOT questions → mind map, exit ticket (easy, medium, hard), homework.
 
 If the lesson needs a manipulative the engine doesn't have yet (number line, fraction bars, place-value blocks, clock, shapes, arrays), build it as a new engine component in `src/engine/components/` and export it from `src/engine/index.ts`, so later lessons can reuse it. Keep it RTL-safe per `CLAUDE.md`.
 
 ## 3. Write the lesson
 
 - Folder: `lessons/g<grade>/ch<chapter>/<code>-<slug>/` with `lesson.tsx`, `charts.ts` and `clip.tsx`.
-- `clip.tsx`: the lesson idea clip (see `CLAUDE.md`). Tell the book's own example as a short visual story that builds to the rule; copy the shape of the closest existing clip.
+- `clip.tsx`: the lesson idea clip (see `CLAUDE.md`). Tell a new example (not the book's numbers, not the engage/explore data) as a short visual story that confirms the rule; copy the shape of the closest existing clip.
 - `meta.id` = `g<grade>-<code>-<slug>`. Never change it after the lesson has been used in class; saved progress is keyed on it.
 - `meta.bookQuestions` = the number of book questions.
 - Each question: hint, step-by-step solution with chart highlights, `ans` step, one `warn` step for the most likely mistake, and a timer that fits the question.

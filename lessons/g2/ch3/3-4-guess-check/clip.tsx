@@ -1,13 +1,15 @@
 import { Clip, ClipTitle, num, tw } from '@engine';
 
-/* مقطع فكرة الدرس: قطط حديقة الحيوانات (أستعد ص ٦٨): ٩ قطط، السوداء أكثر من البنية بـ ٣ */
+/* مقطع فكرة الدرس: ١١ قطة (مثال غير مثال الكتاب)، السوداء أكثر من البنية بـ ٣ */
+
+const N = 11, MORE = 3;
 
 const BROWN = '#a0673a', BLACK = '#2b2b33', GREY = '#c9d4e3';
-const catX = (i: number) => 700 + (4 - i) * 125;
+const catX = (i: number) => 700 + ((N - 1) / 2 - i) * 112;
 /** [البداية، البنية] */
 const GUESSES: [number, number][] = [
-  [15, 2],
-  [23, 3],
+  [15, 3],
+  [23, 4],
 ];
 const COLS = [1040, 815, 590, 365];
 const HEADS = ['البنية', 'السوداء', 'المجموع', 'أتحقّق'];
@@ -28,16 +30,16 @@ function Cat({ x, y, color, s = 1, op = 1 }: { x: number; y: number; color: stri
 function scene(t: number) {
   const g = [...GUESSES].reverse().find(([s]) => t >= s);
   const brown = g ? g[1] : 0;
-  const black = brown + 3;
+  const black = brown + MORE;
   const table = tw(t, 13, 13.6);
   return (
     <>
       <ClipTitle t={t} size={64} title="أَحُلُّ الْمَسْأَلَةَ: أُخَمِّنُ وَأَتَحَقَّقُ" q="كم قطة بنية؟ وكم قطة سوداء؟" />
 
-      {Array.from({ length: 9 }, (_, i) => {
+      {Array.from({ length: N }, (_, i) => {
         const color = !g ? GREY : i < brown ? BROWN : i < brown + black ? BLACK : GREY;
         const extra = g && i >= brown + black;
-        return <Cat key={i} x={catX(i)} y={110} color={color} s={0.95} op={tw(t, 4.5 + i * 0.15, 4.9 + i * 0.15) * (extra ? 0.45 : 1)} />;
+        return <Cat key={i} x={catX(i)} y={110} color={color} s={0.85} op={tw(t, 4.5 + i * 0.15, 4.9 + i * 0.15) * (extra ? 0.45 : 1)} />;
       })}
 
       {table > 0.01 && (
@@ -53,12 +55,12 @@ function scene(t: number) {
           ))}
           {GUESSES.map(([s, b], r) => {
             const y = 352 + r * 95;
-            const ok = b + b + 3 === 9;
+            const ok = b + b + MORE === N;
             return (
               <g key={s}>
                 <text x={COLS[0]} y={y} fontSize={44} textAnchor="middle" fill={BROWN} opacity={tw(t, s, s + 0.5)}>{num(b)}</text>
-                <text x={COLS[1]} y={y} fontSize={44} textAnchor="middle" opacity={tw(t, s + 2, s + 2.5)}>{num(b + 3)}</text>
-                <text x={COLS[2]} y={y} fontSize={44} textAnchor="middle" opacity={tw(t, s + 4, s + 4.5)}>{num(b + b + 3)}</text>
+                <text x={COLS[1]} y={y} fontSize={44} textAnchor="middle" opacity={tw(t, s + 2, s + 2.5)}>{num(b + MORE)}</text>
+                <text x={COLS[2]} y={y} fontSize={44} textAnchor="middle" opacity={tw(t, s + 4, s + 4.5)}>{num(b + b + MORE)}</text>
                 <text x={COLS[3]} y={y} fontSize={44} textAnchor="middle" fill={ok ? 'var(--good)' : 'var(--bad)'} opacity={tw(t, s + 5.5, s + 6)}>{ok ? '✓' : '✗'}</text>
               </g>
             );
@@ -75,14 +77,14 @@ export const IntroClip = () => (
     scene={scene}
     captions={[
       [0, 'فكرة الدرس'],
-      [4.5, 'في الحديقة **٩** قطط، بعضها بنيّ وبعضها أسود'],
+      [4.5, 'في الحديقة **١١** قطة، بعضها بنيّ وبعضها أسود'],
       [9, 'عدد القطط السوداء أكثر من البنية بـ **٣**'],
       [13, 'لا نعرف الجواب بعد… **نخمّن** ثم **نتحقّق**'],
-      [15, 'أخمّن **٢** بنية، فتكون السوداء ٢ + ٣ = ٥'],
-      [19, 'المجموع ٢ + ٥ = ٧، أقل من ٩ ✗ نخمّن من جديد'],
-      [23, 'أخمّن **٣** بنية، فتكون السوداء ٣ + ٣ = ٦'],
-      [27, 'المجموع ٣ + ٦ = **٩** ✓ التخمين صحيح'],
-      [31, 'الحل: **٣** قطط بنية و**٦** قطط سوداء'],
+      [15, 'أخمّن **٣** بنية، فتكون السوداء ٣ + ٣ = ٦'],
+      [19, 'المجموع ٣ + ٦ = ٩، أقل من ١١ ✗ نخمّن من جديد'],
+      [23, 'أخمّن **٤** بنية، فتكون السوداء ٤ + ٣ = ٧'],
+      [27, 'المجموع ٤ + ٧ = **١١** ✓ التخمين صحيح'],
+      [31, 'الحل: **٤** قطط بنية و**٧** قطط سوداء'],
     ]}
   />
 );

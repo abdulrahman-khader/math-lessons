@@ -49,15 +49,34 @@ const fonts = [
   .join('\n');
 
 const built = findLessons().filter((l) => existsSync(path.join(dist, outName(l))));
+/** مجلد الصف (g2، g4) ← اسمه، وفصوله بالترتيب، ودروس كل فصل */
 const grades = new Map();
 for (const l of built) {
   const m = readMeta(l);
-  if (!grades.has(m.grade)) grades.set(m.grade, []);
-  grades.get(m.grade).push(
-    `<a class="lesson" href="${outName(l)}"><span class="num">${esc(m.code)}</span><span class="t"><b>${esc(m.shortTitle)}</b><small>${esc(m.chapter)} · ${esc(m.source)}</small></span></a>`,
+  const id = l.split('/')[0];
+  if (!grades.has(id)) grades.set(id, { name: m.grade, count: 0, chapters: new Map() });
+  const g = grades.get(id);
+  g.count++;
+  if (!g.chapters.has(m.chapter)) g.chapters.set(m.chapter, []);
+  g.chapters.get(m.chapter).push(
+    `<a class="lesson" href="${outName(l)}"><span class="num">${esc(m.code)}</span><span class="t"><b>${esc(m.shortTitle)}</b><small>${esc(m.source)}</small></span></a>`,
   );
 }
-const sections = [...grades].map(([grade, links]) => `<section>\n<h2>${esc(grade)}</h2>\n<div class="grid">\n${links.join('\n')}\n</div>\n</section>`);
+
+const arDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
+/** ١ درس، ٢ درسان، ٣–١٠ دروس، ١١ فأكثر درسًا */
+const lessonsCount = (n) => (n === 1 ? 'درس واحد' : n === 2 ? 'درسان' : n <= 10 ? `${arDigits(n)} دروس` : `${arDigits(n)} درسًا`);
+
+// الصفحة الأولى: بطاقة لكل صف. الضغط عليها يفتح #g4 مثلًا فتظهر فصول ذلك الصف ودروسه
+const picker = [...grades]
+  .map(([id, g]) => `<a class="grade" href="#${id}"><b>${esc(g.name)}</b><small>${lessonsCount(g.count)}</small></a>`)
+  .join('\n');
+const sections = [...grades].map(
+  ([id, g]) =>
+    `<section id="${id}" class="lessons" hidden>\n<a class="back" href="#">رجوع إلى الصفوف</a>\n<h2>${esc(g.name)}</h2>\n` +
+    [...g.chapters].map(([ch, links]) => `<h3>${esc(ch)}</h3>\n<div class="grid">\n${links.join('\n')}\n</div>`).join('\n') +
+    `\n</section>`,
+);
 
 // الأنماط من core.css نفسها: الألوان، ورق الرسم البياني، رأس داكن، بطاقات بإطار، والخطّان
 writeFileSync(
@@ -81,8 +100,19 @@ header b { display: block; font-family: var(--display); font-weight: 800; font-s
 header span { font-size: .9rem; opacity: .85; font-weight: 500; }
 main { padding: 24px 16px 40px; }
 .tip { margin: 0 0 24px; background: var(--rule-t); border: 3px solid var(--rule); border-radius: 12px; padding: 10px 14px; font-weight: 700; }
-section { margin-block-end: 28px; }
-h2 { font-family: var(--display); font-weight: 800; font-size: 1.6rem; margin: 0 0 10px; line-height: 1.3; }
+[hidden] { display: none !important; }
+#picker { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+.ask { font-family: var(--display); font-weight: 800; font-size: 1.6rem; margin: 0 0 14px; line-height: 1.3; }
+.grades { width: min(100%, 680px); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.grade { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 28px 22px; background: var(--paper); border: 3px solid var(--line); border-block-start: 10px solid var(--rule); border-radius: 14px; color: inherit; text-decoration: none; }
+.grade:hover { border-color: var(--ink); }
+.grade:focus-visible, .back:focus-visible { outline: 4px solid #e0590b; outline-offset: 3px; }
+.grade b { font-family: var(--display); font-weight: 800; font-size: 2rem; line-height: 1.3; }
+.grade small { color: var(--muted); font-weight: 700; font-size: 1.05rem; }
+.back { display: inline-block; margin-block-end: 14px; padding: 6px 16px; background: var(--paper); border: 3px solid var(--line); border-radius: 999px; color: var(--ink); font-weight: 700; text-decoration: none; }
+.back:hover { border-color: var(--ink); }
+h2 { font-family: var(--display); font-weight: 800; font-size: 1.9rem; margin: 0 0 6px; line-height: 1.3; }
+h3 { font-weight: 700; font-size: 1.15rem; color: var(--muted); margin: 18px 0 10px; line-height: 1.5; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 12px; }
 .lesson { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--paper); border: 3px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; }
 .lesson:hover { border-color: var(--ink); }
@@ -97,8 +127,29 @@ h2 { font-family: var(--display); font-weight: 800; font-size: 1.6rem; margin: 0
 <header><div class="in"><b>دروس الرياضيات التفاعلية</b><span>عروض تفاعلية للسبورة الذكية</span></div></header>
 <main>
 <p class="tip">افتح الدرس ثم اضغط F لملء الشاشة. للعمل دون إنترنت احفظ صفحة الدرس (Ctrl+S): كل درس ملف واحد.</p>
+<div id="picker">
+<h2 class="ask">اختر الصف</h2>
+<div class="grades">
+${picker}
+</div>
+</div>
 ${sections.join('\n')}
 </main>
+<script>
+// يعرض دروس الصف الذي في الرابط (#g4)، أو بطاقات الصفوف إن لم يكن فيه صف. زر الرجوع في المتصفح يعمل لأن الصف في الرابط
+function show() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  let found = false;
+  for (const s of document.querySelectorAll('section.lessons')) {
+    s.hidden = s.id !== id;
+    if (s.id === id) found = true;
+  }
+  document.getElementById('picker').hidden = found;
+  window.scrollTo(0, 0);
+}
+addEventListener('hashchange', show);
+show();
+</script>
 </body>
 </html>
 `,

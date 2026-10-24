@@ -3,6 +3,7 @@ import { digits, num } from '../digits';
 import type { Klass } from '../classes';
 import { TEAM_COLORS } from '../sections';
 import { sGood } from '../sound';
+import { IconStar } from './icons';
 
 const COLORS = ['#a5d8ff', '#b2f2bb', '#ffd8a8', '#d0bfff', '#ffec99', '#99e9f2', '#fcc2d7', '#c0eb75'];
 const DEFAULT_NAMES = Array.from({ length: 25 }, (_, i) => 'رقم ' + digits(i + 1)).join('\n');
@@ -28,14 +29,18 @@ interface Props {
   onPick?: (name: string) => void;
   onRestore?: () => void;
   onManage?: () => void;
+  /** نجمة (+١) أو غلطة (−١) لمن خرج اسمه، في نجم الأسبوع */
+  onStar?: (name: string, d: 1 | -1) => void;
 }
 
 /** عجلة أسماء عشوائية. النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة. */
-export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamNames = [], teamFilter = -1, onTeamFilter, picked = [], onPick, onRestore, onManage }: Props) {
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamNames = [], teamFilter = -1, onTeamFilter, picked = [], onPick, onRestore, onManage, onStar }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState('—');
+  /** ما أُعطي لصاحب الاسم الخارج من نجوم وأغلاط، يُعرض تحت الأزرار ويُمحى مع الدورة التالية */
+  const [given, setGiven] = useState(0);
   const [removeFree, setRemoveFree] = useState(false);
   /** مع الفصل: الاسم الذي يخرج لا يعود حتى يُضغط «أرجع الأسماء» */
   const [removeClass, setRemoveClass] = useState(true);
@@ -117,6 +122,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
     const N = list;
     if (!N.length || spinning) return;
     setSpinning(true);
+    setGiven(0);
     setResult('…');
     onResult?.('…');
     const a = (2 * Math.PI) / N.length;
@@ -159,6 +165,17 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
         <div className="wside">
           <h3>من سيجيب؟</h3>
           <div id="wres">{result}</div>
+          {klass && onStar && !spinning && klass.students.includes(result) && (
+            <div className="wstar">
+              <button className="sb up" aria-label={`نجمة لـ${result}`} onClick={() => (onStar(result, 1), setGiven((g) => g + 1))}>
+                <IconStar /> نجمة
+              </button>
+              <button className="sb down" aria-label={`غلطة على ${result}`} onClick={() => (onStar(result, -1), setGiven((g) => g - 1))}>
+                ✖ غلطة
+              </button>
+              {given !== 0 && <b className={'wgiven ' + (given > 0 ? 'up' : 'down')}>{given > 0 ? `+${num(given)}` : `−${num(-given)}`}</b>}
+            </div>
+          )}
           <button className="btn primary" onClick={spin}>
             أدِر العجلة
           </button>

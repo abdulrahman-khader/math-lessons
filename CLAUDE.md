@@ -17,6 +17,7 @@ Playwright drives the **installed Chrome** (`channel: 'chrome'`). Windows blocks
 ```
 src/engine/            shared engine, imported as '@engine'
   LessonApp.tsx        stage, header, footer, navigation, keyboard, teams, saved state
+  stars.ts             star of the week: star/mistake log shared by all lessons, week Thursday–Wednesday, ranks
   context.tsx          slide scope: step reveal order, highlight keys, hint state
   components/          Chart, DragChart, TrendExplorer, QuestionSlide, MCQ, Steps, Layout, Wheel, Timer, Pen, Home, Clip
   styles/core.css      all styles (logical properties only)
@@ -27,6 +28,7 @@ lessons/g4/ch3/3-4-line-graphs/
   clip.tsx             IntroClip: the short animated clip explaining the lesson idea
 tests/lesson.spec.ts   runs against every dist/*.html
 tests/remote.spec.ts   phone remote end to end (iPad + phone contexts) over tests/relay.ts
+tests/stars.spec.ts    star of the week: week boundary, ranking, board, wheel
 ```
 
 ## Writing a lesson

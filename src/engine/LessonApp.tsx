@@ -2,7 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { EngineCtx, SlideScope, type EngineApi, type SlideApi } from './context';
 import { num } from './digits';
 import { SECTION_NAMES, TEAM_COLORS } from './sections';
-import { setMuted, sGood } from './sound';
+import { sBad, setMuted, sGood } from './sound';
+import { useStars, tally, weekStart } from './stars';
 import { useSaved } from './store';
 import { classesOf, gradeOf, setClass, setGrade, useRoster } from './classes';
 import { ClassesModal, GroupsModal } from './components/Classes';
@@ -13,6 +14,7 @@ import { RemotePanel } from './components/RemotePanel';
 import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
 import { TIMER_OFF, TimerWidget, fixView, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
+import { StarsModal } from './components/Stars';
 import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTimer, IconWheel } from './components/icons';
 
 const HOME_NOTES = 'رحّب بالطلاب، وقسّمهم إلى فرق وسمِّ كل فريق. اضغط «متابعة» إن كنت توقفت في حصة سابقة. الاختصارات: الأسهم للتنقل، المسافة للخطوة التالية، F لملء الشاشة.';
@@ -51,6 +53,16 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     setPicked([]);
     setTeamFilter(-1);
     updateRoster((r) => setGrade(r, grade, (g) => ({ ...g, last: id })));
+  };
+  /* نجم الأسبوع: مشترك بين كل الدروس، لطلاب الفصل المختار */
+  const { events: starEvents, add: addStarEvent, undo: undoStar } = useStars();
+  const [starsOpen, setStarsOpen] = useState(false);
+  const [starsReq, setStarsReq] = useState<{ n: number; a: 'podium' | 'next' }>({ n: 0, a: 'next' });
+  const giveStar = (name: string, d: 1 | -1) => {
+    if (!klass?.students.includes(name)) return;
+    addStarEvent(klass.id, name, d);
+    if (d > 0) sGood();
+    else sBad();
   };
   const [pen, setPen] = useState(false);
   const [layout, setLayout] = useState({ flow: false, scale: 1 });
@@ -225,6 +237,19 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'wheelRestore':
         setPicked([]);
         break;
+      case 'stars':
+        setStarsOpen(c.open);
+        break;
+      case 'star':
+        giveStar(c.s, c.d > 0 ? 1 : -1);
+        break;
+      case 'podium':
+        if (c.a === 'open') setStarsOpen(true);
+        setStarsReq((r) => ({ n: r.n + 1, a: c.a === 'open' ? 'podium' : 'next' }));
+        break;
+      case 'starUndo':
+        if (klass) undoStar(klass.id);
+        break;
       case 'spin':
         setWheelOpen(true);
         setSpinReq((n) => n + 1);
@@ -309,6 +334,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         klasses: classes.map((k) => ({ id: k.id, name: k.name })),
         klass: klass?.id ?? '',
         wheelPicked: picked.length,
+        stars: klass
+          ? { open: starsOpen, list: tally(starEvents, klass.id, klass.students, weekStart(Date.now())).map((r) => [r.name, r.stars, r.mistakes] as [string, number, number]) }
+          : null,
         chart: slideApis.current[cur]?.chart()?.get() ?? null,
         family: slideApis.current[cur]?.family()?.get() ?? null,
         widget: slideApis.current[cur]?.widget()?.get() ?? null,
@@ -322,7 +350,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -353,6 +381,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         if (e.key === 'Escape') setWheelOpen(false);
         return;
       }
+      if (starsOpen) {
+        if (e.key === 'Escape') setStarsOpen(false);
+        return;
+      }
       if (e.key === 'ArrowLeft' || e.key === 'PageDown') {
         e.preventDefault();
         goto(cur + 1);
@@ -373,7 +405,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [cur, wheelOpen, classesOpen, groupsOpen, resetMenu, remotePanel, goto, resetSlide]);
+  }, [cur, wheelOpen, starsOpen, classesOpen, groupsOpen, resetMenu, remotePanel, goto, resetSlide]);
 
   const s = slides[cur];
   const m = lesson.meta;
@@ -458,6 +490,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
               <button className="ib" title="عجلة الأسماء" aria-label="عجلة الأسماء" onClick={() => setWheelOpen(true)}>
                 <IconWheel />
                 <span className="lbl">العجلة</span>
+              </button>
+              <button className={toolBtn(starsOpen)} title="نجم الأسبوع" aria-label="نجم الأسبوع" onClick={() => setStarsOpen(true)}>
+                <IconStar />
+                <span className="lbl">النجوم</span>
               </button>
               <button className={toolBtn(st.muted)} title={st.muted ? 'تشغيل الصوت' : 'كتم الصوت'} aria-label="كتم الصوت" onClick={() => patch({ muted: !st.muted })}>
                 <IconSound muted={st.muted} />
@@ -559,6 +595,17 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             picked={picked}
             onPick={(n) => setPicked((p) => [...p, n])}
             onRestore={() => setPicked([])}
+            onManage={() => setClassesOpen(true)}
+            onStar={giveStar}
+          />
+          <StarsModal
+            open={starsOpen}
+            onClose={() => setStarsOpen(false)}
+            klass={klass}
+            events={starEvents}
+            onStar={giveStar}
+            onUndo={() => klass && undoStar(klass.id)}
+            req={starsReq}
             onManage={() => setClassesOpen(true)}
           />
           <ClassesModal open={classesOpen} onClose={() => setClassesOpen(false)} grade={grade} roster={roster} update={updateRoster} />

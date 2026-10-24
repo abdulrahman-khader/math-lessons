@@ -82,6 +82,12 @@ export type RemoteCmd =
   | { c: 'klass'; id: string }
   /** يعيد إلى العجلة كل الأسماء التي خرجت في الحصة */
   | { c: 'wheelRestore' }
+  /** نجم الأسبوع: فتح اللوحة على الشاشة، ونجمة (+١) أو غلطة (−١) لطالب من الفصل المختار، والتراجع عن آخر ضغطة */
+  | { c: 'stars'; open: boolean }
+  | { c: 'star'; s: string; d: number }
+  | { c: 'starUndo' }
+  /** منصة النجوم للتقديم: تفتحها على الأسبوع الماضي، أو تُظهر المركز التالي */
+  | { c: 'podium'; a: 'open' | 'next' }
   | { c: 'chart'; i: number; v: number }
   | { c: 'chartMode'; m: string }
   /** مستكشف الحقائق المترابطة: عدد كل لون، أو الجملة المختارة (٠–٣) */
@@ -164,6 +170,8 @@ export interface RemoteState {
   klasses?: { id: string; name: string }[];
   klass?: string;
   wheelPicked?: number;
+  /** نجم الأسبوع لطلاب الفصل المختار: [الاسم، النجوم، الأغلاط] لهذا الأسبوع */
+  stars?: { open: boolean; list: [string, number, number][] } | null;
   chart: RemoteChart | null;
   family?: RemoteFamily | null;
   widget?: RemoteWidget | null;

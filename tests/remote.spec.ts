@@ -297,3 +297,28 @@ test('زرّا الشرائح في الجوال يتجاوزان الخطوات'
   await expect.poll(() => activeIndex(ipad)).toBe(String(at - 1));
   expect(errors).toEqual([]);
 });
+
+test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة النجوم على الآيباد', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  // فصل يُضاف بعد فتح الدرس، كما لو كتبه المعلم من «تعديل الفصول»
+  await ipad.evaluate(() => {
+    localStorage.setItem('classes', JSON.stringify({ grades: { g4: { classes: [{ id: 'k1', name: 'الفصل الأول', students: ['محمد', 'خالد'], team: {} }] } } }));
+    window.dispatchEvent(new Event('classes-changed'));
+  });
+  await phone.locator('.rbtn', { hasText: 'الفصل الأول' }).click();
+  await expect(phone.locator('.rstar')).toHaveCount(2);
+  await phone.locator('[aria-label="نجمة لـمحمد"]').click();
+  await phone.locator('[aria-label="نجمة لـمحمد"]').click();
+  await phone.locator('[aria-label="غلطة على محمد"]').click();
+  await expect(phone.locator('.rstar').first()).toContainText('المجموع ١');
+  await phone.locator('.rbtn', { hasText: 'اعرض اللوحة على الشاشة' }).click();
+  await expect(ipad.locator('.sbox')).toBeVisible();
+  await ipad.locator('.sbox').getByRole('button', { name: 'هذا الأسبوع' }).click();
+  await expect(ipad.locator('.scard', { hasText: 'محمد' }).locator('.stot')).toHaveText('١');
+  await phone.locator('.rbtn', { hasText: 'تراجع عن آخر ضغطة' }).click();
+  await expect(ipad.locator('.scard', { hasText: 'محمد' }).locator('.stot')).toHaveText('٢');
+  // منصة الأسبوع الماضي تُفتح من الجوال (فارغة هنا: النجوم كلها من هذا الأسبوع)
+  await phone.locator('.rbtn', { hasText: 'منصة الأسبوع الماضي' }).click();
+  await expect(ipad.locator('.sbox .sempty')).toContainText('لا نجوم');
+  expect(errors).toEqual([]);
+});

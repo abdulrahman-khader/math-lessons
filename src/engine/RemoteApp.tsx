@@ -4,11 +4,76 @@ import { PRESETS, SCALE_MAX, SCALE_MIN, SCALE_STEP } from './components/Timer';
 
 /** مواضع المؤقت على الشاشة: صفوف من الأعلى إلى الأسفل، وأعمدة من اليسار إلى اليمين كما تُرى الشاشة */
 const SPOTS = [-1, 0, 1].flatMap((ay) => [-1, 0, 1].map((ax) => ({ ax, ay })));
+import { rankRows, topRows } from './stars';
 import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
 import { RemoteFamilyCard } from './components/RemoteFamilyCard';
 import { RemoteWidgetCard } from './components/RemoteWidgetCard';
+
+/** ترتيب هذا الأسبوع حتى الآن: للمعلم على جواله فقط، لا يظهر على الشاشة */
+function RemoteRanking({ list }: { list: [string, number, number][] }) {
+  const top = topRows(rankRows(list.map(([name, stars, mistakes]) => ({ name, stars, mistakes }))));
+  if (!top.length) return null;
+  return (
+    <details className="rrank">
+      <summary>الترتيب حتى الآن (لك وحدك)</summary>
+      <ol>
+        {top.map((r) => (
+          <li key={r.name}>
+            <b>{num(r.rank)}</b> {r.name} <small>المجموع {num(r.total)}</small>
+          </li>
+        ))}
+      </ol>
+    </details>
+  );
+}
+
+/** نجم الأسبوع على الجوال: كل طالب بنجومه وأغلاطه ومجموعه، وزرّا ⭐ و✖ */
+function RemoteStars({ stars, send }: { stars: NonNullable<RemoteState['stars']>; send: (c: RemoteCmd) => void }) {
+  return (
+    <section className="rcard">
+      <h2>
+        نجم الأسبوع <small>المجموع = النجوم − الأغلاط</small>
+      </h2>
+      <div className="rtools">
+        <button className="rbtn" onClick={() => send({ c: 'stars', open: !stars.open })}>
+          {stars.open ? 'أخفِ اللوحة عن الشاشة' : 'اعرض اللوحة على الشاشة'}
+        </button>
+        <button className="rbtn" onClick={() => send({ c: 'starUndo' })}>
+          تراجع عن آخر ضغطة
+        </button>
+      </div>
+      <div className="rtools">
+        <button className="rbtn" onClick={() => send({ c: 'podium', a: 'open' })}>
+          منصة الأسبوع الماضي
+        </button>
+        {stars.open && (
+          <button className="rbtn primary" onClick={() => send({ c: 'podium', a: 'next' })}>
+            أظهر المركز التالي
+          </button>
+        )}
+      </div>
+      <RemoteRanking list={stars.list} />
+      {stars.list.map(([name, st, mi]) => (
+        <div key={name} className="rstar">
+          <button className="rsdown" aria-label={`غلطة على ${name}`} onClick={() => send({ c: 'star', s: name, d: -1 })}>
+            ✖
+          </button>
+          <span>
+            <b>{name}</b>
+            <small>
+              ⭐ {num(st)} · ✖ {num(mi)} · المجموع {num(Math.max(0, st - mi))}
+            </small>
+          </span>
+          <button className="rsup" aria-label={`نجمة لـ${name}`} onClick={() => send({ c: 'star', s: name, d: 1 })}>
+            ⭐
+          </button>
+        </div>
+      ))}
+    </section>
+  );
+}
 
 /** شاشة الجوال: أزرار التحكم بالآيباد، وملاحظات المعلم للشريحة الحالية */
 /** المؤقت على الجوال: يعدّ تنازليًا وحده من آخر حالة وصلت من الآيباد */
@@ -309,6 +374,16 @@ export function RemoteApp({ channel }: { channel: string }) {
           <section className="rcard">
             <h2>عجلة الأسماء</h2>
             {st.wheel && st.wheelResult && <p className="wres">{st.wheelResult}</p>}
+            {st.wheel && st.stars?.list.some(([n]) => n === st.wheelResult) && (
+              <div className="rtools rstarbtns">
+                <button className="rbtn rsup" onClick={() => send({ c: 'star', s: st.wheelResult, d: 1 })}>
+                  ⭐ نجمة
+                </button>
+                <button className="rbtn rsdown" onClick={() => send({ c: 'star', s: st.wheelResult, d: -1 })}>
+                  ✖ غلطة
+                </button>
+              </div>
+            )}
             {!!st.klasses?.length && (
               <div className="rtools">
                 {st.klasses.map((k) => (
@@ -337,6 +412,8 @@ export function RemoteApp({ channel }: { channel: string }) {
               )}
             </div>
           </section>
+
+          {st.stars && <RemoteStars stars={st.stars} send={send} />}
 
           {st.teams.length > 0 && (
             <section className="rcard">

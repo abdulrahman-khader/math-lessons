@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: الفاكهة المفضلة (مثال غير مثال الكتاب): إشارة لكل إجابة، والخامسة خط مائل، ثم نعدّ */
 
@@ -51,6 +52,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={40}
     scene={scene}
     captions={[

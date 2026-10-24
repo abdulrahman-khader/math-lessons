@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, SvgEq, lerp, tw, type EqPart } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: الدومينو المخفي (مثال غير مثال الكتاب): ٨ + □ = ١٣، أفكّر ١٣ − ٨ = ٥ */
 
@@ -58,6 +59,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={34}
     scene={scene}
     captions={[

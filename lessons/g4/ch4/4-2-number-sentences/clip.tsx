@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, Cube, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: جملة واحدة بثلاث طرق (رسم، كلمات، أرقام) بمثالين غير أمثلة الكتاب: ٤٠ − ١٣ = ٢٧ ثم ٥ + ٦ = ١١ */
 
@@ -70,6 +71,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={46}
     scene={scene}
     captions={[

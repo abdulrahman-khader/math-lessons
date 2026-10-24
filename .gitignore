@@ -4,3 +4,5 @@ test-results/
 playwright-report/
 .lesson-build/
 shots/
+.env.local
+voice-samples/

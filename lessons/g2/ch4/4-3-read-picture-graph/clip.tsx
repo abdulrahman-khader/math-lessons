@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: العصائر المفضلة (مثال غير مثال الكتاب)، كل صورة = طالبان: برتقال ٤ صور، تفاح ٢، مانجو ٣ */
 
@@ -50,6 +51,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={40}
     scene={scene}
     captions={[

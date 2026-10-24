@@ -1,4 +1,5 @@
 import { Clip, ClipCard, ClipTitle, Person, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: مسألة واحدة بخطتين (مثال غير مثال الكتاب): ٢٠ طالبًا، كل ٤ على طاولة، كم طاولة؟ ← ٥ طاولات */
 
@@ -56,6 +57,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={46}
     scene={scene}
     captions={[

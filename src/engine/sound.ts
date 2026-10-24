@@ -5,6 +5,7 @@ let muted = false;
 export const setMuted = (m: boolean) => {
   muted = m;
 };
+export const isMuted = () => muted;
 
 function tone(freqs: number[], dur = 0.12) {
   if (muted) return;

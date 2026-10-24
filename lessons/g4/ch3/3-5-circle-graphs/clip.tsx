@@ -1,4 +1,5 @@
 import { Clip, ClipCard, Person, SvgFrac, fade, lerp, num, sector, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: ٨ طلاب ← مجموعات ← حول دائرة ← قطاعات (مثال غير مثال الكتاب) */
 
@@ -146,6 +147,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={54}
     scene={scene}
     captions={[

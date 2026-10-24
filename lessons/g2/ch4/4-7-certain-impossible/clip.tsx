@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: صندوق كرات (مثال غير مثال الكتاب): ٦ كرات زرقاء ← الزرقاء أكيد، والحمراء مستحيل */
 
@@ -40,6 +41,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={40}
     scene={scene}
     captions={[

@@ -1,4 +1,5 @@
 import { Clip, ClipCard, ClipTitle, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: صناديق أقلام في كل منها ٧ أقلام حمراء والباقي زرقاء (مثال غير أمثلة الكتاب): الزرقاء = △ − ٧ */
 
@@ -64,6 +65,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={42}
     scene={scene}
     captions={[

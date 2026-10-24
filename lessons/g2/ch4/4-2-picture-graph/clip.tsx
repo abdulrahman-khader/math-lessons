@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: الألعاب المفضلة (مثال غير مثال الكتاب): الكرة ٦، الدراجة ٤. صورة = ١، ثم صورة = ٢ */
 
@@ -52,6 +53,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={42}
     scene={scene}
     captions={[

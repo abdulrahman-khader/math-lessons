@@ -1,4 +1,5 @@
 import { Clip, ClipCard, ClipTitle, SvgEq, fade } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: ألعاب الحديقة المفضلة (مثال غير مثال الكتاب): الأرجوحة ٧، الزحليقة ٤، الدوّامة ٤، الميزان ٢ */
 
@@ -50,6 +51,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={42}
     scene={scene}
     captions={[

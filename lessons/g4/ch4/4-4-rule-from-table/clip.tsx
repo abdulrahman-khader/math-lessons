@@ -1,4 +1,5 @@
 import { Clip, ClipCard, ClipTitle, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: عجلات السيارات (مثال غير أمثلة الكتاب): ١ ← ٤، ٢ ← ٨، ٣ ← ١٢ ⇐ القاعدة △ × ٤ ⇐ ٥ سيارات = ٢٠ عجلة */
 
@@ -71,6 +72,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={42}
     scene={scene}
     captions={[

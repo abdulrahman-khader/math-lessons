@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: بالونات في صندوق (مثال غير مثال الكتاب): ٧ زرقاء و٢ صفراء */
 
@@ -44,6 +45,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={40}
     scene={scene}
     captions={[

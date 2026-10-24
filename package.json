@@ -10,7 +10,8 @@
     "lint:css": "node scripts/check-css.mjs",
     "shots": "node scripts/shots.mjs",
     "test": "npm run typecheck && npm run lint:css && npm run build && playwright test",
-    "clip-shots": "node scripts/clip-shots.mjs"
+    "clip-shots": "node scripts/clip-shots.mjs",
+    "voice": "node scripts/voice.mjs"
   },
   "dependencies": {
     "@fontsource/baloo-bhaijaan-2": "^5.3.0",

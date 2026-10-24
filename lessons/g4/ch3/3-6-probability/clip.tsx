@@ -1,4 +1,5 @@
 import { Clip, ClipCard, ClipTitle, chanceWord, lerp, num, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: كيس فيه ١٠ كرات (مثال غير مثال الكتاب) ← وصف الاحتمال بالكلمات والأعداد */
 
@@ -71,6 +72,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={45}
     scene={scene}
     captions={[

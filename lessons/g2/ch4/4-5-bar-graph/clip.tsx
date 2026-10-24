@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: كيف نذهب إلى الحديقة؟ (مثال غير مثال الكتاب): مشيًا ٣، بالسيارة ٥، بالدراجة ٢ */
 
@@ -42,6 +43,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={40}
     scene={scene}
     captions={[

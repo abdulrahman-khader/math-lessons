@@ -1,4 +1,5 @@
 import { Clip, ClipCard, ClipTitle, fade, lerp, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: ترتيب أربعة أبراج من ثلاث معلومات (مثال غير مثال الكتاب). كل معلومة تضع برجًا في مكانه دون تغيير ما قبله. */
 
@@ -69,6 +70,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={42}
     scene={scene}
     captions={[

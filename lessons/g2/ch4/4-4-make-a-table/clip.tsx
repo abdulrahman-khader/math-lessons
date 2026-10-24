@@ -1,4 +1,5 @@
 import { CLIP_W, Clip, ClipCard, ClipTitle, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: عجلات الدراجات (مثال غير مثال الكتاب): لكل دراجة عجلتان، كم عجلة لـ ٦ دراجات؟ */
 
@@ -49,6 +50,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={40}
     scene={scene}
     captions={[

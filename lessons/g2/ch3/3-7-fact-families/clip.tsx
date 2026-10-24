@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, SvgEq, num, tw, type EqPart } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: مثلث الحقائق للأعداد ٣ و٨ و١١ (مثال غير مثال الكتاب) ← أربع حقائق مترابطة */
 
@@ -51,6 +52,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={36}
     scene={scene}
     captions={[

@@ -1,4 +1,5 @@
 import { Clip, ClipCard, ClipTitle, SvgEq, fade, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: علب البيض (مثال غير أمثلة الكتاب): في كل علبة ٦ بيضات ← △ × ٦، ثم العكس ٣٠ بيضة ← ٣٠ ÷ ٦ = ٥ علب */
 
@@ -70,6 +71,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={44}
     scene={scene}
     captions={[

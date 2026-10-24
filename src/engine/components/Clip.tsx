@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { clock, num } from '../digits';
+import { isMuted } from '../sound';
 import { useRemoteWidget } from './Primary';
 
 /* ---------- مقطع فكرة الدرس: مشهد متحرك قصير يُرسم من الزمن t ---------- */
@@ -139,6 +140,34 @@ const rich = (s: string) => s.split('**').map((p, i) => (i % 2 ? <b key={i}>{p}<
 const plain = (s: string) => s.replace(/\*\*/g, '');
 const mmss = (s: number) => clock(Math.floor(s));
 
+/** صوت جملة واحدة من النص المرافق: الملف ومدته بالثواني (يولّدهما scripts/voice.mjs) */
+export interface VoiceLine {
+  src: string;
+  d: number;
+}
+
+/*
+ * عنصر صوت واحد لكل الصفحة: Safari على الآيباد لا يسمح بتشغيل الصوت إلا بعد لمسة،
+ * فيُفتح هذا العنصر مرة واحدة مع أول لمسة، ويبقى مفتوحًا حتى لو شُغّل المقطع بعدها من الجوال.
+ */
+let shared: HTMLAudioElement | null = null;
+function voiceAudio() {
+  if (shared) return shared;
+  shared = new Audio();
+  shared.preload = 'auto';
+  const unlock = () => {
+    const a = shared!;
+    if (a.src) return;
+    a.muted = true;
+    a.play().catch(() => {}).finally(() => {
+      a.pause();
+      a.muted = false;
+    });
+  };
+  document.addEventListener('pointerdown', unlock, { once: true, capture: true });
+  return shared;
+}
+
 export interface ClipProps {
   /** المدة بالثواني */
   duration: number;
@@ -146,18 +175,25 @@ export interface ClipProps {
   captions: [number, string][];
   /** المشهد عند اللحظة t، بإحداثيات CLIP_W × CLIP_H */
   scene: (t: number) => ReactNode;
+  /** صوت كل جملة من captions بالترتيب (null = بلا صوت) */
+  voice?: (VoiceLine | null)[];
 }
 
 /**
  * لا يبدأ إلا إذا شغّله المعلم (من السبورة أو الجوال)، ويتوقف إذا غادر الشريحة.
  * أزرار التشغيل والإيقاف تظهر أيضًا في الجوال.
  */
-export function Clip({ duration, captions, scene }: ClipProps) {
+export function Clip({ duration, captions, scene, voice }: ClipProps) {
   const root = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const tRef = useRef(0);
   tRef.current = t;
+  /** الجملة المحمَّلة في عنصر الصوت الآن (-١ = لا شيء) */
+  const spoken = useRef(-1);
+  const audio = voice?.length ? voiceAudio() : null;
+  /** ما دام صوت جملة يُقرأ، لا يتقدم المقطع إلى الجملة التالية حتى ينتهي */
+  const speaking = () => !!audio && spoken.current >= 0 && !audio.paused && !audio.ended;
 
   // لا يبدأ إلا بضغطة من المعلم، ويتوقف إذا غادر الشريحة
   useEffect(() => {
@@ -172,7 +208,8 @@ export function Clip({ duration, captions, scene }: ClipProps) {
     if (!playing) return;
     let last = performance.now();
     let raf = requestAnimationFrame(function frame(now) {
-      const next = Math.min(duration, tRef.current + (now - last) / 1000);
+      let next = Math.min(duration, tRef.current + (now - last) / 1000);
+      if (speaking()) next = Math.min(next, (captions[spoken.current + 1]?.[0] ?? duration) - 0.001);
       last = now;
       setT(next);
       if (next >= duration) setPlaying(false);
@@ -181,18 +218,45 @@ export function Clip({ duration, captions, scene }: ClipProps) {
     return () => cancelAnimationFrame(raf);
   }, [playing, duration]);
 
+  let ci = 0;
+  captions.forEach(([s], i) => t >= s && (ci = i));
+
+  // صوت الجملة الحالية: يبدأ مع ظهورها، ويتوقف مع الإيقاف
+  useEffect(() => {
+    if (!audio) return;
+    const line = voice?.[ci];
+    if (!playing || !line || isMuted()) {
+      audio.pause();
+      if (!line) spoken.current = -1;
+      return;
+    }
+    const offset = tRef.current - captions[ci][0];
+    if (spoken.current !== ci) {
+      spoken.current = ci;
+      audio.src = line.src;
+      if (offset > 0.3 && offset < line.d) audio.currentTime = offset;
+      if (offset >= line.d) return;
+    }
+    if (audio.paused && !audio.ended) audio.play().catch(() => {});
+  }, [playing, ci]);
+  // عند مغادرة الشريحة أو إزالة المقطع
+  useEffect(() => () => audio?.pause(), []);
+
   const toggle = () => {
     if (!playing && tRef.current >= duration) setT(0);
     setPlaying(!playing);
   };
   const restart = () => {
+    spoken.current = -1;
     setT(0);
     setPlaying(true);
   };
-  const seek = (v: number) => setT(Math.max(0, Math.min(duration, v)));
+  const seek = (v: number) => {
+    spoken.current = -1;
+    audio?.pause();
+    setT(Math.max(0, Math.min(duration, v)));
+  };
 
-  let ci = 0;
-  captions.forEach(([s], i) => t >= s && (ci = i));
   const cap = captions[ci]?.[1] ?? '';
   const ended = t >= duration;
 

@@ -151,18 +151,22 @@ export interface VoiceLine {
  * فيُفتح هذا العنصر مرة واحدة مع أول لمسة، ويبقى مفتوحًا حتى لو شُغّل المقطع بعدها من الجوال.
  */
 let shared: HTMLAudioElement | null = null;
+/** ملف WAV صامت فارغ لفتح عنصر الصوت */
+const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 function voiceAudio() {
   if (shared) return shared;
   shared = new Audio();
   shared.preload = 'auto';
+  // يُشغَّل صوت صامت قصير ثم يُوقف، إلا إذا بدأ المقطع صوته في أثناء ذلك (أول ضغطة تكون غالبًا زر التشغيل نفسه)
   const unlock = () => {
     const a = shared!;
     if (a.src) return;
-    a.muted = true;
-    a.play().catch(() => {}).finally(() => {
-      a.pause();
-      a.muted = false;
-    });
+    a.src = SILENT;
+    a.play()
+      .catch(() => {})
+      .finally(() => {
+        if (a.src === SILENT) a.pause();
+      });
   };
   document.addEventListener('pointerdown', unlock, { once: true, capture: true });
   return shared;

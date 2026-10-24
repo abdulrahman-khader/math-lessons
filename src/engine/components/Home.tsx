@@ -34,7 +34,8 @@ export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTea
         </span>
         <div>
           <span className="num">{m.code}</span>
-          <h1>{m.title}</h1>
+          {/* العناوين الطويلة بخط أصغر حتى تبقى في سطرين */}
+          <h1 className={m.title.length > 30 ? 'long' : undefined}>{m.title}</h1>
         </div>
         <p className="lead">
           {m.subject} · {m.grade} · {m.source} · {num(m.minutes)} دقيقة

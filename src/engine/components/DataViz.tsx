@@ -142,15 +142,17 @@ interface HBarsProps {
   xTitle?: string;
   yTitle?: string;
   color?: string;
+  /** يكتب قيمة كل عمود عند طرفه كما في بعض رسوم الكتاب؛ تُبرز بالمفتاح v{i} */
+  ends?: boolean;
 }
 
 /** تمثيل بالأعمدة الأفقية: المحور الأفقي من اليسار إلى اليمين كما في الكتاب */
-export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, color = '#8bc34a' }: HBarsProps) {
+export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, color = '#8bc34a', ends }: HBarsProps) {
   const { activeHl } = useSlide();
   const on = (k: string) => (activeHl.has(k) ? ' on' : '');
   const W = 760;
   const H = 440;
-  const m = { l: 150, r: 30, t: title ? 56 : 20, b: xTitle ? 86 : 50 };
+  const m = { l: 150, r: ends ? 70 : 30, t: title ? 56 : 20, b: xTitle ? 86 : 50 };
   const pw = W - m.l - m.r;
   const ph = H - m.t - m.b;
   const n = labels.length;
@@ -179,6 +181,11 @@ export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, c
           <text className={'xl' + on(`p${i}`)} x={m.l - 12} y={Y(i)} textAnchor="end" dominantBaseline="middle">
             {L}
           </text>
+          {ends && (
+            <text className={'hv' + on(`v${i}`)} x={X(values[i]) + 10} y={Y(i)} dominantBaseline="middle">
+              {num(values[i])}
+            </text>
+          )}
         </g>
       ))}
       <line className="ax" x1={m.l} x2={m.l + pw} y1={m.t + ph} y2={m.t + ph} />

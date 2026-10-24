@@ -27,7 +27,34 @@
 
 | الدرس | الملف |
 | --- | --- |
-| ٣-٤ التمثيل بالخطوط (الصف الرابع) | `dist/g4-3-4-line-graphs.html` |
+| ٣-١ الطرح بالعد التنازلي (الثاني) | `dist/g2-3-1-count-back.html` |
+| ٣-٢ طرح الصفر وطرح الكل (الثاني) | `dist/g2-3-2-subtract-zero-all.html` |
+| ٣-٣ الطرح بحقائق جمع العدد ونفسه (الثاني) | `dist/g2-3-3-doubles.html` |
+| ٣-٤ أحل المسألة: أخمن وأتحقق (الثاني) | `dist/g2-3-4-guess-check.html` |
+| ٣-٥ العلاقة بين الجمع والطرح (الثاني) | `dist/g2-3-5-add-subtract-relation.html` |
+| ٣-٦ الأعداد المفقودة (الثاني) | `dist/g2-3-6-missing-numbers.html` |
+| ٣-٧ الحقائق المترابطة (الثاني) | `dist/g2-3-7-fact-families.html` |
+| ٤-١ جدول الإشارات (الثاني) | `dist/g2-4-1-tally-chart.html` |
+| ٤-٢ التمثيل بالصور (الثاني) | `dist/g2-4-2-picture-graph.html` |
+| ٤-٣ قراءة البيانات الممثلة بالصور (الثاني) | `dist/g2-4-3-read-picture-graph.html` |
+| ٤-٤ أحل المسألة: أنشئ جدولًا (الثاني) | `dist/g2-4-4-make-a-table.html` |
+| ٤-٥ التمثيل بالأعمدة (الثاني) | `dist/g2-4-5-bar-graph.html` |
+| ٤-٦ قراءة البيانات الممثلة بالأعمدة (الثاني) | `dist/g2-4-6-read-bar-graph.html` |
+| ٤-٧ الحدث الأكيد والحدث المستحيل (الثاني) | `dist/g2-4-7-certain-impossible.html` |
+| ٤-٨ أكثر إمكانية وأقل إمكانية (الثاني) | `dist/g2-4-8-more-less-likely.html` |
+| ٣-١ جمع البيانات وتنظيمها (الرابع) | `dist/g4-3-1-collect-data.html` |
+| ٣-٢ خطة حل المسألة: إنشاء جدول (الرابع) | `dist/g4-3-2-make-table.html` |
+| ٣-٣ التمثيل بالأعمدة (الرابع) | `dist/g4-3-3-bar-graphs.html` |
+| ٣-٤ التمثيل بالخطوط (الرابع) | `dist/g4-3-4-line-graphs.html` |
+| ٣-٥ التمثيل بالقطاعات الدائرية (الرابع) | `dist/g4-3-5-circle-graphs.html` |
+| ٣-٦ الاحتمال (الرابع) | `dist/g4-3-6-probability.html` |
+| ٤-١ العبارات والجمل العددية (الرابع) | `dist/g4-4-1-expressions-sentences.html` |
+| ٤-٢ تمثيل الجمل العددية وكتابتها (الرابع) | `dist/g4-4-2-number-sentences.html` |
+| ٤-٣ خطة حل المسألة: الاستدلال المنطقي (الرابع) | `dist/g4-4-3-logical-reasoning.html` |
+| ٤-٤ اكتشاف قاعدة من جدول (الرابع) | `dist/g4-4-4-rule-from-table.html` |
+| ٤-٥ جداول الدوال: الجمع والطرح (الرابع) | `dist/g4-4-5-add-subtract-tables.html` |
+| ٤-٦ استقصاء حل المسألة (الرابع) | `dist/g4-4-6-problem-solving-investigation.html` |
+| ٤-٧ جداول الدوال: الضرب والقسمة (الرابع) | `dist/g4-4-7-multiply-divide-tables.html` |
 
 ## للتطوير
 

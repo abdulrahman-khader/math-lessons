@@ -236,7 +236,8 @@ export function Domino({ known, missing, k = 0, show }: { known: number; missing
 
 /* ---------- الجملة العددية: الخانة الفارغة في أي موضع ---------- */
 
-export type Token = number | '+' | '−' | '=' | { b: number; hl?: readonly HlKey[]; box?: boolean };
+/** '<' و'>' بمعناهما المنطقي (أصغر من، أكبر من)؛ في سطر من اليمين يرسمهما المتصفح معكوسين كما في الكتاب */
+export type Token = number | '+' | '−' | '=' | '<' | '>' | { b: number | '+' | '−'; hl?: readonly HlKey[]; box?: boolean };
 
 /**
  * جملة عددية تُقرأ من اليمين كما في الكتاب: [٩، '+'، {b: ٦}، '='، ١٥] تُعرض «٩ + □ = ١٥»،

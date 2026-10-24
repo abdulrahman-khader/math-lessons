@@ -153,11 +153,12 @@ export function CubeTrain({ parts, shape = 'cube', size = 46, k = 0, take = [0, 
 
 /** مربع فارغ يظهر فيه الناتج عند «الخطوة التالية»، بترتيبه في الصفحة. */
 /** box: مربع كما في الكتاب حين يرسم □؛ وإلا سطر نقاط «......» في دروس الصف الثاني */
-export function Blank({ v, hl, box }: { v: number; hl?: readonly HlKey[]; box?: boolean }) {
+/** خانة تمتلئ عند الخطوة التالية: عدد، أو إشارة عملية (+ أو −) */
+export function Blank({ v, hl, box }: { v: number | string; hl?: readonly HlKey[]; box?: boolean }) {
   return (
     <span className={'blank' + (box ? ' box' : '')}>
       <Step hl={hl} className="bv">
-        {num(v)}
+        {typeof v === 'number' ? num(v) : v}
       </Step>
     </span>
   );

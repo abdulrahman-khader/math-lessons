@@ -1,0 +1,401 @@
+import {
+  Card, Cols, GoHomeButton, GridBars, IfTeams, MCQ, MindMap, QCol, QuestionSlide, SlideHead, Stack, Ctrls, NextButton, Solution, Step,
+  Winner, defineLesson, type GridBar,
+} from '@engine';
+import { IntroClip } from './clip';
+
+/* ---------- خاص بهذا الدرس ---------- */
+
+const CHECK = 'أتأكَّدُ · ص ٩٦';
+const PRACTICE = 'أتدرَّبُ · ص ٩٧';
+const DATA = 'مِلَفُّ الْبَيَانَاتِ · ص ٩٧';
+
+const ICE: GridBar[] = [
+  { label: 'الْمَانْجُو', n: 6, color: '#f6d03a' },
+  { label: 'الْفَرَاوِلَةُ', n: 5, color: '#f5c6d9' },
+  { label: 'الْفَانِيلَا', n: 3, color: '#fdebcf' },
+  { label: 'الشُّوكُولَاتَةُ', n: 7, color: '#8a3a2a' },
+];
+const FRUIT: GridBar[] = [
+  { label: 'بُرْتُقَالٌ', n: 5, color: '#f0643c' },
+  { label: 'تُفَّاحٌ', n: 3, color: '#1f5a2c' },
+  { label: 'مَوْزٌ', n: 4, color: '#f7ec8a' },
+  { label: 'فَرَاوِلَةٌ', n: 3, color: '#e3127a' },
+];
+const HORSES: GridBar[] = [
+  { label: 'الْعَنُودُ', n: 5, color: '#a61d3c' },
+  { label: 'الشَّهْبَاءُ', n: 2, color: '#f08cb0' },
+  { label: 'الأَصِيلَةُ', n: 4, color: '#fcc89a' },
+  { label: 'الْعَاصِفَةُ', n: 2, color: '#ee5a3a' },
+  { label: 'الْبَرْقُ', n: 6, color: '#5fbf7d' },
+];
+
+const Ice = () => <GridBars title="نَكَهَاتُ الآيْسِ كِرِيمِ الْمُفَضَّلَةُ" bars={ICE} max={8} vertical catTitle="النَّكَهَاتُ" valTitle="عَدَدُ الطُّلَّابِ" />;
+const Fruit = () => <GridBars title="الْفَاكِهَةُ الْمُفَضَّلَةُ" bars={FRUIT} max={5} catTitle="الْفَاكِهَةُ" valTitle="عَدَدُ الطُّلَّابِ" tone="#e9dcf5" />;
+const Horses = () => <GridBars title="مُسَابَقَةُ الْجَمَالِ لِلْخُيُولِ" bars={HORSES} max={7} catTitle="اسْمُ الْفَرَسِ" valTitle="عَدَدُ الأَصْوَاتِ" />;
+
+export default defineLesson({
+  meta: {
+    id: 'g2-4-6-read-bar-graph',
+    code: '٤-٦',
+    title: 'قِرَاءَةُ الْبَيَانَاتِ الْمُمَثَّلَةِ بِالأَعْمِدَةِ',
+    shortTitle: 'قراءة البيانات الممثلة بالأعمدة',
+    subject: 'الرياضيات',
+    grade: 'الصف الثاني الابتدائي',
+    chapter: 'الفصل الرابع: تمثيل البيانات وقراءتها',
+    source: 'الجزء الأول · ص ٩٦–٩٧',
+    minutes: 45,
+    idea: 'أَتَوَصَّلُ إِلَى نَتَائِجَ، ثُمَّ أُجِيبُ عَنْ أَسْئِلَةٍ اعْتِمَادًا عَلَى التَّمْثِيلِ بِالأَعْمِدَةِ.',
+    bookQuestions: 12,
+  },
+  sectionDesc: {
+    engage: 'تذكّر التمثيل بالأعمدة',
+    explore: 'أستعد: الآيس كريم',
+    explain: 'كيف أقرأ العمود؟',
+    elab: 'نعمل معًا',
+    check: 'الأسئلة ١–٥',
+    practice: 'الأسئلة ٦–١٢',
+    close: 'ملخص · تذكرة الخروج',
+  },
+  slides: [
+    /* ================= الأهداف ================= */
+    {
+      sec: 'start', min: 1,
+      notes: 'اقرأ فكرة الدرس.',
+      content: (
+        <>
+          <h2>ماذا سنتعلم اليوم؟</h2>
+          <Cols even>
+            <Card kind="rule" cap="فكرة الدرس">أَتَوَصَّلُ إِلَى نَتَائِجَ، ثُمَّ أُجِيبُ عَنْ أَسْئِلَةٍ اعْتِمَادًا عَلَى التَّمْثِيلِ بِالأَعْمِدَةِ.</Card>
+            <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
+              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, lineHeight: 1.6 }}>
+                <li>أقرأ طول العمود من الأعداد.</li>
+                <li>أجد الأكثر والأقل والمتساوي.</li>
+                <li>أجمع وأطرح من التمثيل.</li>
+              </ol>
+            </Card>
+          </Cols>
+        </>
+      ),
+    },
+
+    /* ================= تهيئة ================= */
+    {
+      sec: 'engage', min: 2,
+      notes: 'مراجعة الدرس ٤-٥.',
+      content: (
+        <>
+          <SlideHead tag="تذكّر · الدرس ٤-٥" kind="ink">مربع لكل استجابة</SlideHead>
+          <Cols>
+            <MCQ q="اختار ٤ طلاب الموز. كم مربعًا نلوّن؟" options={['٣', '٤', '٥']} answer="٤" award />
+            <Card kind="qs" cap="سؤال للتفكير">إذا رأيت عمودًا طويلًا وعمودًا قصيرًا، ماذا تعرف دون أن تعدّ؟</Card>
+          </Cols>
+        </>
+      ),
+    },
+
+    /* ================= أستعد ================= */
+    {
+      sec: 'explore', min: 3,
+      notes: 'أفكّر: ماذا يمكن أن أتعلم من هذا التمثيل؟ اجمع ملاحظات الطلاب.',
+      content: (
+        <>
+          <SlideHead tag="أستعدُّ · ص ٩٦" kind="qs">نكهات الآيس كريم</SlideHead>
+          <Cols>
+            <QCol>
+              <p className="qtext">سَأَلْتُ زُمَلَائِي فِي الصَّفِّ عَنْ نَكْهَةِ الآيْسِ كِرِيمِ الْمُفَضَّلَةِ لَدَيْهِمْ.</p>
+              <Card kind="qs" cap="أُفَكِّرُ">مَاذَا يُمْكِنُ أَنْ أَتَعَلَّمَ مِنْ هَذَا التَّمْثِيلِ؟</Card>
+              <Ctrls><NextButton /></Ctrls>
+              <Solution>
+                <Step hl={['p3']}>الشوكولاتة الأكثر: ٧</Step>
+                <Step hl={['p2']}>الفانيلا الأقل: ٣</Step>
+              </Solution>
+            </QCol>
+            <Ice />
+          </Cols>
+        </>
+      ),
+    },
+
+    /* ================= كيف أقرأ ================= */
+    {
+      sec: 'explain', min: 3,
+      notes: 'أنا أعمل: أتتبع أعلى العمود أفقيًا إلى الأعداد.',
+      content: (
+        <>
+          <SlideHead tag="القاعدة" kind="rule">كيف أقرأ العمود؟</SlideHead>
+          <Cols>
+            <QCol>
+              <Ctrls><NextButton label="الخطوة التالية" /></Ctrls>
+              <Step><Card kind="rule"><b>١</b> أقرأ العنوان والتسميات.</Card></Step>
+              <Step hl={['p0']}><Card kind="rule"><b>٢</b> أختار العمود: المانجو.</Card></Step>
+              <Step hl={['p0']}><Card kind="ex"><b>٣</b> أنظر إلى أعلى العمود وأقرأ العدد المقابل: ٦</Card></Step>
+              <Step><Card kind="qs"><b>٤</b> أقارن: الأطول هو الأكثر، والأقصر هو الأقل.</Card></Step>
+            </QCol>
+            <Ice />
+          </Cols>
+        </>
+      ),
+    },
+
+    /* ================= مقطع فكرة الدرس ================= */
+    {
+      sec: 'explain', min: 1,
+      notes: 'المقطع: ألعاب الحديقة (مثال غير مثال الكتاب). أوقفه قبل كل إجابة.',
+      content: (
+        <>
+          <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+          <IntroClip />
+        </>
+      ),
+    },
+
+    /* ================= نعمل معًا ================= */
+    {
+      sec: 'elab', min: 3,
+      notes: 'نعمل معًا: اختر طالبًا بالعجلة.',
+      content: (
+        <>
+          <SlideHead tag="نعمل معًا" kind="ex">الآيس كريم</SlideHead>
+          <Cols>
+            <QCol>
+              <MCQ q="كم طالبًا يفضّل الفراولة؟" options={['٤', '٥', '٦']} answer="٥" award />
+              <MCQ q="كم يزيد المانجو على الفانيلا؟" options={['٢', '٣', '٩']} answer="٣" award />
+            </QCol>
+            <Ice />
+          </Cols>
+        </>
+      ),
+    },
+
+    /* ================= أتأكد ١–٥ ================= */
+    {
+      sec: 'check', min: 1,
+      notes: 'أقصر عمود.',
+      content: (
+        <QuestionSlide
+          source={CHECK} n={1} time={30}
+          intro="أَسْتَعْمِلُ التَّمْثِيلَ بِالأَعْمِدَةِ لِأُكْمِلَ الْجُمَلَ الآتِيَةَ:"
+          question="النَّكْهَةُ الَّتِي حَصَلَتْ عَلَى أَقَلِّ عَدَدٍ مِنَ الاسْتِجَابَاتِ هِيَ …"
+          hint="أبحث عن أقصر عمود."
+          steps={[{ text: 'الفانيلا (٣)', hl: ['p2'], kind: 'ans' }]}
+          chart={<Ice />}
+        />
+      ),
+    },
+    {
+      sec: 'check', min: 1,
+      notes: 'الشوكولاتة ٧. أيّ نكهة ٧ − ٢ = ٥؟',
+      content: (
+        <QuestionSlide
+          source={CHECK} n={2} time={45}
+          question="يَزِيدُ عَدَدُ مَنْ فَضَّلَ نَكْهَةَ الشُّوكُولَاتَةِ ٢ عَلَى عَدَدِ الَّذِينَ فَضَّلُوا نَكْهَةَ …"
+          hint="الشوكولاتة ٧. أيّ عمود طوله ٥؟"
+          steps={[
+            { text: '٧ − ٢ = ٥', hl: ['p3'] },
+            { text: 'الفراولة', hl: ['p1'], kind: 'ans' },
+          ]}
+          chart={<Ice />}
+        />
+      ),
+    },
+    {
+      sec: 'check', min: 1,
+      notes: 'أيّ عمودين مجموعهما ١١؟',
+      content: (
+        <QuestionSlide
+          source={CHECK} n={3} time={60}
+          question="مَجْمُوعُ الطُّلَّابِ الَّذِينَ فَضَّلُوا نَكْهَتَيْ … وَ … يُسَاوِي ١١ طَالِبًا."
+          hint="أجرّب أزواجًا من الأعمدة."
+          steps={[
+            { text: '٥ + ٦ = ١١', hl: ['p0', 'p1'] },
+            { text: 'الفراولة والمانجو', kind: 'ans' },
+          ]}
+          chart={<Ice />}
+        />
+      ),
+    },
+    {
+      sec: 'check', min: 1,
+      notes: 'نجمع الأعمدة الأربعة.',
+      content: (
+        <QuestionSlide
+          source={CHECK} n={4} time={60}
+          question="طَرَحَ الطَّالِبُ سُؤَالَ جَمْعِ الْبَيَانَاتِ عَلَى … طَالِبًا."
+          hint="أجمع الأعمدة كلها."
+          steps={[
+            { text: '٦ + ٥ + ٣ + ٧', hl: ['p0', 'p1', 'p2', 'p3'] },
+            { text: '٢١ طالبًا', kind: 'ans' },
+          ]}
+          chart={<Ice />}
+        />
+      ),
+    },
+    {
+      sec: 'check', min: 1,
+      notes: 'أتحدث.',
+      content: (
+        <QuestionSlide
+          source={CHECK} n={5} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
+          question="كَيْفَ يُسَاعِدُ التَّمْثِيلُ أَعْلَاهُ مُعَلِّمًا يُخَطِّطُ لِإِقَامَةِ حَفْلَةٍ لِطُلَّابِ الْفَصْلِ؟"
+          hint="ماذا يعرف المعلم من التمثيل؟"
+          steps={[{ text: 'يعرفُ عددَ طلابِ الفصلِ ٢١، وأنَّ الشوكولاتةَ الأكثرُ تفضيلًا والفانيلا الأقلُّ، فيحضّرُ من كلِّ نكهةٍ بقدرِ عددِ من فضّلها.', kind: 'ans' }]}
+          chart={<Ice />}
+        />
+      ),
+    },
+
+    /* ================= أتدرب ٦–١٠ ================= */
+    {
+      sec: 'practice', min: 3,
+      notes: 'كل ضغطة تُظهر إجابة. اطلب من الطلاب الإشارة إلى العمود.',
+      content: (
+        <QuestionSlide
+          source={PRACTICE} n={6} time={30}
+          intro="أَسْتَعْمِلُ التَّمْثِيلَ بِالأَعْمِدَةِ فِي الشَّكْلِ الْمُجَاوِرِ لِأُكْمِلَ الْجُمَلَ الآتِيَةَ:"
+          question="خَمْسَةُ طُلَّابٍ يُفَضِّلُونَ …"
+          hint="أيّ عمود طوله ٥؟"
+          steps={[{ text: 'البرتقال', hl: ['p0'], kind: 'ans' }]}
+          chart={<Fruit />}
+        />
+      ),
+    },
+    {
+      sec: 'practice', min: 1,
+      notes: 'عمود طوله ٤.',
+      content: (
+        <QuestionSlide
+          source={PRACTICE} n={7} time={30}
+          question="أَرْبَعَةُ طُلَّابٍ يُفَضِّلُونَ …"
+          hint="أيّ عمود طوله ٤؟"
+          steps={[{ text: 'الموز', hl: ['p2'], kind: 'ans' }]}
+          chart={<Fruit />}
+        />
+      ),
+    },
+    {
+      sec: 'practice', min: 1,
+      notes: 'عمودان متساويان.',
+      content: (
+        <QuestionSlide
+          source={PRACTICE} n={8} time={30}
+          question="عَدَدُ الطُّلَّابِ الَّذِينَ يُفَضِّلُونَ التُّفَّاحَ يُسَاوِي عَدَدَ الطُّلَّابِ الَّذِينَ يُفَضِّلُونَ …"
+          hint="التفاح ٣. أيّ عمود آخر طوله ٣؟"
+          steps={[{ text: 'الفراولة', hl: ['p1', 'p3'], kind: 'ans' }]}
+          chart={<Fruit />}
+        />
+      ),
+    },
+    {
+      sec: 'practice', min: 1,
+      notes: 'المجموع.',
+      content: (
+        <QuestionSlide
+          source={PRACTICE} n={9} time={45}
+          question="عَدَدُ الطُّلَّابِ الَّذِينَ اسْتَجَابُوا لِلسُّؤَالِ …"
+          hint="أجمع الأعمدة الأربعة."
+          steps={[
+            { text: '٥ + ٣ + ٤ + ٣', hl: ['p0', 'p1', 'p2', 'p3'] },
+            { text: '١٥ طالبًا', kind: 'ans' },
+          ]}
+          chart={<Fruit />}
+        />
+      ),
+    },
+    {
+      sec: 'practice', min: 1,
+      notes: '٢٠ بدل ١٥: ٥ طلاب زيادة.',
+      content: (
+        <QuestionSlide
+          source={PRACTICE} n={10} tps
+          question="كَيْفَ سَيَتَغَيَّرُ هَذَا التَّمْثِيلُ إِذَا طُرِحَ السُّؤَالُ عَلَى ٢٠ طَالِبًا؟"
+          hint="كم طالبًا زيادة؟ أين نلوّن مربعاتهم؟"
+          steps={[{ text: 'يصيرُ عددُ الطلابِ ٢٠ بدلًا من ١٥، فتطولُ بعضُ الأعمدةِ، وقد يحتاجُ التمثيلُ إلى أكثرَ من ٥ خاناتٍ.', kind: 'ans' }]}
+          chart={<Fruit />}
+        />
+      ),
+    },
+
+    /* ================= ملف البيانات ١١–١٢ ================= */
+    {
+      sec: 'practice', min: 2,
+      notes: 'اقرأ ملف البيانات عن الخيول العربية، ثم السؤالين.',
+      content: (
+        <QuestionSlide
+          source={DATA} n={11} time={30}
+          intro="تَمْتَازُ الْخُيُولُ الْعَرَبِيَّةُ بِجَمَالِهَا عَنْ سَائِرِ الْخُيُولِ الأُخْرَى، فَمَنْظَرُهَا حَسَنٌ جَمِيلٌ، وَجِلْدُهَا رَقِيقٌ وَنَاعِمٌ، كَمَا تَمْتَازُ بِالصَّلَابَةِ وَسُرْعَتِهَا فِي الْعَدْوِ. أَسْتَعْمِلُ التَّمْثِيلَ الْمُجَاوِرَ، ثُمَّ أُجِيبُ عَنِ السُّؤَالَيْنِ الآتِيَيْنِ:"
+          question="مَا الْفَرَسُ الَّتِي حَصَلَتْ عَلَى ٦ أَصْوَاتٍ؟"
+          hint="أيّ عمود طوله ٦؟"
+          steps={[{ text: 'البرق', hl: ['p4'], kind: 'ans' }]}
+          chart={<Horses />}
+        />
+      ),
+    },
+    {
+      sec: 'practice', min: 1,
+      notes: 'عمودان متساويان.',
+      content: (
+        <QuestionSlide
+          source={DATA} n={12} time={30}
+          question="أَيُّ الْخُيُولِ حَصَلَتْ عَلَى عَدَدٍ مُتَسَاوٍ مِنَ الأَصْوَاتِ؟"
+          hint="أبحث عن عمودين لهما الطول نفسه."
+          steps={[{ text: 'الشهباء والعاصفة (صوتان لكل منهما)', hl: ['p1', 'p3'], kind: 'ans' }]}
+          chart={<Horses />}
+        />
+      ),
+    },
+
+    /* ================= الختام ================= */
+    {
+      sec: 'close', min: 1,
+      notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا.',
+      content: (
+        <>
+          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <MindMap
+            center={<>قراءة<br />الأعمدة</>}
+            items={[
+              { kind: 'rule', cap: 'أقرأ', text: 'أعلى العمود يقابل العدد.' },
+              { kind: 'ex', cap: 'أقارن', text: 'الأطول الأكثر، والأقصر الأقل.' },
+              { kind: 'qs', cap: 'متساويان', text: 'عمودان بالطول نفسه.' },
+              { kind: 'warn', cap: 'أحسب', text: 'المجموع بالجمع، و«يزيد» بالطرح.' },
+            ]}
+          />
+        </>
+      ),
+    },
+    {
+      sec: 'close', min: 2,
+      notes: 'تذكرة الخروج.',
+      content: (
+        <>
+          <SlideHead tag="تذكرة الخروج" kind="qs">ثلاثة أسئلة</SlideHead>
+          <Cols>
+            <Horses />
+            <div className="ticket">
+              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="كم صوتًا حصلت العنود؟" options={['٤', '٥', '٦']} answer="٥" /></Card>
+              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="ما الفرس الفائزة؟" options={['العنود', 'البرق', 'الأصيلة']} answer="البرق" /></Card>
+              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="كم يزيد البرق على الشهباء؟" options={['٢', '٤', '٨']} answer="٤" /></Card>
+            </div>
+          </Cols>
+        </>
+      ),
+    },
+    {
+      sec: 'close', min: 1,
+      notes: 'أعلن الفريق الفائز إن كانت في الحصة فرق، واشكر الطلاب.',
+      content: (
+        <>
+          <SlideHead tag="الختام" kind="ink">
+            <IfTeams>الفريق الفائز</IfTeams>
+            <IfTeams none>انتهى الدرس، شكرًا لكم</IfTeams>
+          </SlideHead>
+          <Stack>
+            <Winner />
+            <GoHomeButton />
+          </Stack>
+        </>
+      ),
+    },
+  ],
+});

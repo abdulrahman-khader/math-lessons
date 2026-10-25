@@ -24,10 +24,10 @@ const VOICE = env.ELEVENLABS_VOICE_ID ?? env.VOICE_ID;
 const MODEL = env.ELEVENLABS_MODEL ?? 'eleven_multilingual_v2';
 const API = 'https://api.elevenlabs.io/v1';
 
-// يرفع الصوت إلى نحو −١٢ LUFS: ضاغط يقرّب الهمس من الجهر، ثم loudnorm بسقف −١ dB فلا يتشوّه
+// يرفع الصوت إلى نحو −١١ LUFS: ضاغط يقرّب الهمس من الجهر، ثم تكبير ومحدِّد يمنع القصّ فلا يتشوّه
 function loud(file) {
   const tmp = file.replace(/\.mp3$/, '.tmp.mp3');
-  execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', file, '-af', 'acompressor=threshold=-24dB:ratio=3:attack=5:release=120,loudnorm=I=-12:TP=-1:LRA=7', '-ar', '44100', '-ac', '1', '-b:a', '64k', tmp]);
+  execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', file, '-af', 'acompressor=threshold=-30dB:ratio=4:attack=5:release=120,volume=26dB,alimiter=limit=0.8:attack=1:release=60:level=false', '-ar', '44100', '-ac', '1', '-b:a', '64k', tmp]);
   rmSync(file);
   writeFileSync(file, readFileSync(tmp));
   rmSync(tmp);

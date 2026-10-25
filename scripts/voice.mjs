@@ -11,6 +11,8 @@
 // الصوت من ELEVENLABS_VOICE_ID (أو VOICE_ID في .env.local).
 // نص القراءة: narration.json بجانب clip.tsx (جملة لكل سطر من captions، مشكولة) إن وُجد.
 // لا يُعاد توليد جملة لم يتغير نصها: الجمل المولَّدة مسجلة في voice/manifest.json.
+// كل ملف يُرفع صوته بـ ffmpeg (brew install ffmpeg) لسماعة اللابتوب في الفصل، ويُسجَّل loud في manifest.
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -21,6 +23,15 @@ const KEY = env.ELEVENLABS_API_KEY;
 const VOICE = env.ELEVENLABS_VOICE_ID ?? env.VOICE_ID;
 const MODEL = env.ELEVENLABS_MODEL ?? 'eleven_multilingual_v2';
 const API = 'https://api.elevenlabs.io/v1';
+
+// يرفع الصوت إلى نحو −١٢ LUFS: ضاغط يقرّب الهمس من الجهر، ثم loudnorm بسقف −١ dB فلا يتشوّه
+function loud(file) {
+  const tmp = file.replace(/\.mp3$/, '.tmp.mp3');
+  execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', file, '-af', 'acompressor=threshold=-24dB:ratio=3:attack=5:release=120,loudnorm=I=-12:TP=-1:LRA=7', '-ar', '44100', '-ac', '1', '-b:a', '64k', tmp]);
+  rmSync(file);
+  writeFileSync(file, readFileSync(tmp));
+  rmSync(tmp);
+}
 
 function readEnv(file) {
   if (!existsSync(file)) return {};
@@ -105,6 +116,10 @@ for (const lesson of lessons) {
     const hash = createHash('sha1').update(`${VOICE}|${MODEL}|${say}`).digest('hex').slice(0, 12);
     const file = `${String(i).padStart(2, '0')}-${hash}.mp3`;
     if (manifest[file] && existsSync(path.join(out, file))) {
+      if (!manifest[file].loud) {
+        loud(path.join(out, file));
+        manifest[file].loud = true;
+      }
       lines.push({ file, d: manifest[file].d });
       reused++;
       continue;
@@ -116,7 +131,8 @@ for (const lesson of lessons) {
     const ends = res.alignment?.character_end_times_seconds ?? [];
     const d = Math.round((ends.at(-1) ?? 0) * 100) / 100 + 0.15;
     writeFileSync(path.join(out, file), Buffer.from(res.audio_base64, 'base64'));
-    manifest[file] = { text: say, d };
+    loud(path.join(out, file));
+    manifest[file] = { text: say, d, loud: true };
     lines.push({ file, d });
     made++;
     console.log(`  ${lesson} [${i}] ${d.toFixed(1)}ث  ${say}`);

@@ -236,6 +236,8 @@ export function RemoteApp({ channel }: { channel: string }) {
         : link.relay
           ? 'متصل عبر الخادم الاحتياطي (أبطأ)' + (link.pending ? ' · يرسل…' : '')
           : 'يعيد الاتصال بالآيباد…' + (link.pending ? ' (الضغطات محفوظة)' : '');
+  /** آخر طالب خرج من العجلة ونجومه، إن كان من الفصل المختار */
+  const picked = st?.stars?.list.find(([n]) => n === st.wheelResult);
 
   return (
     <div className="remote">
@@ -373,17 +375,6 @@ export function RemoteApp({ channel }: { channel: string }) {
 
           <section className="rcard">
             <h2>عجلة الأسماء</h2>
-            {st.wheel && st.wheelResult && <p className="wres">{st.wheelResult}</p>}
-            {st.wheel && st.stars?.list.some(([n]) => n === st.wheelResult) && (
-              <div className="rtools rstarbtns">
-                <button className="rbtn rsup" onClick={() => send({ c: 'star', s: st.wheelResult, d: 1 })}>
-                  ⭐ نجمة
-                </button>
-                <button className="rbtn rsdown" onClick={() => send({ c: 'star', s: st.wheelResult, d: -1 })}>
-                  ✖ غلطة
-                </button>
-              </div>
-            )}
             {!!st.klasses?.length && (
               <div className="rtools">
                 {st.klasses.map((k) => (
@@ -411,6 +402,24 @@ export function RemoteApp({ channel }: { channel: string }) {
                 </button>
               )}
             </div>
+            {/* من خرج اسمه: نجمة أو غلطة هنا مباشرة، بلا نزول إلى قائمة نجم الأسبوع */}
+            {st.wheel && st.wheelResult && !picked && <p className="wres">{st.wheelResult}</p>}
+            {picked && (
+              <div className="rpicked">
+                <p className="wres">{picked[0]}</p>
+                <small>
+                  ⭐ {num(picked[1])} · ✖ {num(picked[2])} · المجموع {num(Math.max(0, picked[1] - picked[2]))}
+                </small>
+                <div className="rtools rstarbtns">
+                  <button className="rbtn rsup" onClick={() => send({ c: 'star', s: picked[0], d: 1 })}>
+                    ⭐ نجمة
+                  </button>
+                  <button className="rbtn rsdown" onClick={() => send({ c: 'star', s: picked[0], d: -1 })}>
+                    ✖ غلطة
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
 
           {st.stars && <RemoteStars stars={st.stars} send={send} />}

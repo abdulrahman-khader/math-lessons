@@ -791,6 +791,10 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .rsup { background: #fff6d6; color: #8a6200; }
 .rsdown { background: #fde4e4; color: var(--bad); }
 .rstarbtns .rbtn { flex: 1; font-size: 1.1rem; }
+.rpicked { display: flex; flex-direction: column; align-items: center; gap: .3rem; border: 3px solid #e8a400; border-radius: .8rem; background: #fffbea; padding: .5rem; }
+.rpicked small { color: var(--muted); font-weight: 700; }
+.rpicked .rstarbtns { align-self: stretch; }
+.rpicked .rbtn { min-height: 3.4rem; font-size: 1.3rem; }
 .wstar .sb { display: flex; align-items: center; justify-content: center; gap: .3em; }
 .rrank summary { font-weight: 800; cursor: pointer; }
 .rrank ol { list-style: none; margin: .4rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .25rem; }

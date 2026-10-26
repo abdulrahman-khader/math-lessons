@@ -60,7 +60,10 @@ export function weekLabel(start: number): string {
 
 export const isThursday = (t = Date.now()) => new Date(t).getDay() === THURSDAY;
 
-/** مجاميع طلاب الفصل في أسبوع، ورتبهم: الأعلى مجموعًا، وعند التساوي الأقل أغلاطًا */
+/** ترتيب الأسماء أبجديًا (ا ب ت ث …) */
+export const byName = (a: string, b: string) => a.localeCompare(b, 'ar');
+
+/** مجاميع طلاب الفصل في أسبوع مرتّبين أبجديًا، ورتبهم: الأعلى مجموعًا، وعند التساوي الأقل أغلاطًا */
 export function tally(events: StarEvent[], k: string, students: string[], from: number, to = nextWeek(from)): StarRow[] {
   const m = new Map(students.map((s) => [s, { stars: 0, mistakes: 0 }]));
   for (const e of events) {
@@ -70,7 +73,7 @@ export function tally(events: StarEvent[], k: string, students: string[], from: 
     if (e.d > 0) r.stars++;
     else r.mistakes++;
   }
-  return rankRows(students.map((name) => ({ name, ...m.get(name)! })));
+  return rankRows([...students].sort(byName).map((name) => ({ name, ...m.get(name)! })));
 }
 
 /** المجموع والمركز لكل طالب من نجومه وأغلاطه */

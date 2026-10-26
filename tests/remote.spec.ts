@@ -310,7 +310,20 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   await phone.locator('[aria-label="نجمة لـمحمد"]').click();
   await phone.locator('[aria-label="نجمة لـمحمد"]').click();
   await phone.locator('[aria-label="غلطة على محمد"]').click();
-  await expect(phone.locator('.rstar').first()).toContainText('المجموع ١');
+  // الأسماء أبجدية: خالد قبل محمد
+  await expect(phone.locator('.rstar b')).toHaveText(['خالد', 'محمد']);
+  await expect(phone.locator('.rstar', { hasText: 'محمد' })).toContainText('المجموع ١');
+  // بعد الدوران من الجوال: نجمة لمن خرج اسمه من تحت زر العجلة مباشرة
+  await phone.locator('.rbtn', { hasText: 'أدِر العجلة' }).click();
+  const who = phone.locator('.rpicked .wres');
+  await expect(who).toHaveText(/^(محمد|خالد)$/, { timeout: 15000 });
+  const name = (await who.textContent())!;
+  const before = name === 'محمد' ? 2 : 0;
+  await phone.locator('.rpicked .rsup').click();
+  await expect(phone.locator('.rpicked small')).toContainText(`⭐ ${'٠١٢٣'[before + 1]}`);
+  await expect(ipad.locator('.cheer-name')).toHaveText(name);
+  await phone.locator('.rbtn', { hasText: 'تراجع عن آخر ضغطة' }).click();
+  await phone.locator('.rbtn', { hasText: 'إغلاق العجلة' }).click();
   await phone.locator('.rbtn', { hasText: 'اعرض اللوحة على الشاشة' }).click();
   await expect(ipad.locator('.sbox')).toBeVisible();
   await ipad.locator('.sbox').getByRole('button', { name: 'هذا الأسبوع' }).click();

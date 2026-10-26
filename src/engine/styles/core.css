@@ -882,3 +882,13 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .cbags > * { grid-area: 1 / 1; }
 .cbags .cover.shown { display: block; }
 .dtally { display: flex; gap: .6em; align-items: center; justify-content: center; }
+
+/* إعلان النجمة */
+.cheer { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; background: #0e1a2f99; animation: fadein .25s ease; pointer-events: none; }
+.cheer-card { display: flex; flex-direction: column; align-items: center; gap: .15em; background: #fff6d6; color: var(--ink); border: 6px solid #e8a400; border-radius: .8em; padding: .5em 1.6em .7em; box-shadow: 0 12px 40px #0006; animation: pop .45s cubic-bezier(.2, 1.6, .4, 1); text-align: center; }
+.cheer-star { inline-size: 3.2em; block-size: 3.2em; color: #f5b400; animation: cheerspin 1s ease-out; filter: drop-shadow(0 4px 10px #e8a40088); }
+.cheer-star svg { inline-size: 100%; block-size: 100%; fill: currentColor; }
+.cheer-name { font-size: 2.6em; font-weight: 800; line-height: 1.3; }
+.cheer-msg { font-size: 1.6em; font-weight: 800; color: #b07800; }
+.cheer-week { font-size: 1em; font-weight: 700; opacity: .8; }
+@keyframes cheerspin { from { transform: rotate(-200deg) scale(.2); } }

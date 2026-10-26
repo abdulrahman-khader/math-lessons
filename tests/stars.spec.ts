@@ -103,6 +103,22 @@ test('لوحة النجوم: نجمة وغلطة ومجموع وتراجع، و�
   expect(errors).toEqual([]);
 });
 
+test('النجمة تُعلَن على الشاشة باسم الطالب، والغلطة لا تُعلَن', async ({ page }) => {
+  const errors: string[] = [];
+  await openWithClass(page, errors);
+  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  const box = page.locator('.sbox');
+  await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
+  await box.locator('[aria-label="غلطة على أحمد"]').click();
+  await expect(page.locator('.cheer')).toHaveCount(0);
+  await box.locator('[aria-label="نجمة لـخالد"]').click();
+  await box.locator('[aria-label="نجمة لـخالد"]').click();
+  await expect(page.locator('.cheer-name')).toHaveText('خالد');
+  await expect(page.locator('.cheer-week')).toContainText('٢');
+  await expect(page.locator('.cheer')).toHaveCount(0, { timeout: 5000 });
+  expect(errors).toEqual([]);
+});
+
 test('منصة نجوم الأسبوع الماضي مرتّبة، وتُكشف من المركز الأخير إلى الأول', async ({ page }) => {
   const errors: string[] = [];
   await openWithClass(page, errors);

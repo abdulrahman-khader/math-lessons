@@ -241,3 +241,26 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
     </div>
   );
 }
+
+/** إعلان على الشاشة حين يأخذ طالب نجمة (من اللوحة أو العجلة أو الجوال): نجمة كبيرة واسمه ونجومه هذا الأسبوع. الغلطة لا تُعلَن. لا يعترض الضغطات فتتوالى النجوم. */
+export function StarCheer({ cheer, klass, events, onDone }: { cheer: { name: string; n: number } | null; klass: Klass | undefined; events: StarEvent[]; onDone: () => void }) {
+  useEffect(() => {
+    if (!cheer) return;
+    const t = setTimeout(onDone, 2800);
+    return () => clearTimeout(t);
+  }, [cheer, onDone]);
+  if (!cheer || !klass) return null;
+  const row = tally(events, klass.id, klass.students, weekStart(Date.now())).find((r) => r.name === cheer.name);
+  return (
+    <div key={cheer.n} className="cheer" role="status">
+      <div className="cheer-card">
+        <div className="cheer-star">
+          <IconStar />
+        </div>
+        <div className="cheer-name">{cheer.name}</div>
+        <div className="cheer-msg">أخذ نجمة!</div>
+        {row && <div className="cheer-week">نجومه هذا الأسبوع: {num(row.stars)}</div>}
+      </div>
+    </div>
+  );
+}

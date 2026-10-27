@@ -49,6 +49,23 @@ function useTallies(id: string, len: number) {
   return [v, set] as const;
 }
 
+/**
+ * إجابة تُحسب من جدول يملؤه الصف: تتغير كلما تغيّرت الإشارات.
+ * f تأخذ الإشارات بترتيب الصفوف؛ قبل أي إشارة تظهر «أجمع البيانات أولًا».
+ */
+export function TallyAnswer({ id, rows, f }: { id: string; rows: number; f: (v: number[]) => ReactNode }) {
+  const [v] = useTallies(id, rows);
+  if (!v.some((x) => x > 0)) return <>نجمعُ البياناتِ أولًا.</>;
+  return <>{f(v)}</>;
+}
+
+/** أسماء الصفوف التي فيها أكثر (أو أقل) الإشارات: «الصيف» أو «الصيف والشتاء» عند التساوي */
+export function pickRows(v: number[], names: string[], most = true) {
+  const best = most ? Math.max(...v) : Math.min(...v);
+  const ns = names.filter((_, i) => v[i] === best);
+  return { names: ns.length > 1 ? ns.slice(0, -1).join('، ') + ' و' + ns[ns.length - 1] : ns[0], n: best, tie: ns.length > 1, count: ns.length };
+}
+
 export interface LiveRow {
   /** اسم الصف كما في الكتاب (يظهر في الجوال أيضًا) */
   name: string;

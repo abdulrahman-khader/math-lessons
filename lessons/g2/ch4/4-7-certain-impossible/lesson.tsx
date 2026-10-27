@@ -44,13 +44,34 @@ function CircleRow({ n, pick, items, ans }: { n: number; pick: string; items: Ba
 
 /** ألوان التلوين؛ ضغطة على المكعب تنقله إلى اللون التالي ثم تعيده رماديًا */
 const PAINT = [
-  { name: 'أحمر', c: C.red },
-  { name: 'أصفر', c: C.yellow },
-  { name: 'أخضر', c: C.green },
-  { name: 'أزرق', c: C.blue },
+  { name: 'أحمر', all: 'حمراء', c: C.red },
+  { name: 'أصفر', all: 'صفراء', c: C.yellow },
+  { name: 'أخضر', all: 'خضراء', c: C.green },
+  { name: 'أزرق', all: 'زرقاء', c: C.blue },
 ];
 
 interface ColorDef { n: number; pick: string; word: string; fill: string; total: number }
+
+/**
+ * الحكم على تلوين الطلاب: «أكيد» صحيح إن كانت المكعبات كلها بلون الاختيار،
+ * و«مستحيل» صحيح إن لُوِّنت كلها ولا مكعب منها بلون الاختيار.
+ */
+function verdict(cs: number[], pick: string, word: string) {
+  const p = PAINT.findIndex((x) => x.c === pick);
+  const { name, all } = PAINT[p];
+  if (cs.every((x) => x < 0)) return null;
+  if (word.startsWith('أَكِيد'))
+    return cs.every((x) => x === p)
+      ? { ok: true, text: `✓ صحيح: كل المكعبات ${all}، فاختيار ${name} أكيد.` }
+      : { ok: false, text: `✗ ليس بعد: ليكون الاختيار أكيدًا تكون كل المكعبات ${all}.` };
+  if (cs.some((x) => x === p)) return { ok: false, text: `✗ في الكيس مكعب ${name}، فاختياره ممكن لا مستحيل.` };
+  if (cs.some((x) => x < 0)) return { ok: false, text: `✗ ليس بعد: نلوّن كل المكعبات بألوان غير ${name}.` };
+  return { ok: true, text: `✓ صحيح: لا مكعب ${name} في الكيس، فاختياره مستحيل.` };
+}
+
+/** الحكم على تلوين الصف: يظهر وحده بمجرد أن يبدأ الطلاب التلوين، ويتغير مع كل تغيير */
+const ColorVerdict = ({ v }: { v: ReturnType<typeof verdict> }) =>
+  v && <b className={'cverdict' + (v.ok ? ' ok' : '')}>{v.text}</b>;
 
 /** عدد مكعبات كل لون ← مكعبات الكيس مرتّبة (-١ رمادي) */
 const fromCounts = (counts: number[], total: number) => {
@@ -103,8 +124,10 @@ function ColorPair({ qs }: { qs: ColorDef[] }) {
                   <button key={i} aria-label={`لوّن المكعب ${num(i + 1)}`} style={{ background: x < 0 ? C.gray : PAINT[x].c }} onClick={() => tap(q, i)} />
                 ))}
               </div>
-              <Step className="cover"><Bag items={[{ name: 'ملوّن', n: total, color: fill }]} shape="cube" size={170} /></Step>
+              {/* قبل أن يلوّن الصف: «التالي» يُظهر حل دليل المعلم فوق الكيس */}
+              {!verdict(cubes[q], pick, word) && <Step className="cover"><Bag items={[{ name: 'ملوّن', n: total, color: fill }]} shape="cube" size={170} /></Step>}
             </div>
+            <ColorVerdict v={verdict(cubes[q], pick, word)} />
           </div>
         </QCard>
       ))}

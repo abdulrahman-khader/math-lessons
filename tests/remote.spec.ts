@@ -352,6 +352,16 @@ test('جدول الإشارات الفارغ: الجوال يضيف الإشار
   await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
   await expect(board.locator('tbody tr').nth(2).locator('td').last()).toHaveText('٢');
   await expect(card).toContainText('عدد الإشارات كلها: ٣');
+  // الإجابات تُحسب من جدول الصف، وتتغير معه
+  const next = ipad.locator('section.slide.active button[aria-label="الخطوة التالية"]');
+  await next.click();
+  await next.click();
+  await expect(ipad.locator('section.slide.active .bans')).toHaveText(['الصيف (طالبان)', '١ + ٠ = ١']);
+  await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
+  await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
+  await expect(ipad.locator('section.slide.active .bans').first()).toHaveText('الشتاء (٣ طلابٍ)');
+  await board.locator('button[aria-label="احذف إشارة من الشِّتاءُ"]').click();
+  await board.locator('button[aria-label="احذف إشارة من الشِّتاءُ"]').click();
   // السؤالان ١ و٢ تحت الجدول نفسه كما في الكتاب، والإشارات تبقى بعد الانتقال والعودة
   await expect(ipad.locator('section.slide.active [data-qnum="2"]')).toBeVisible();
   await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();

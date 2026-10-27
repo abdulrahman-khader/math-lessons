@@ -1,6 +1,6 @@
 import {
-  BookGroup, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, LiveTally, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack,
-  Step, Tally, Winner, defineLesson, type Cell, type HlKey,
+  BookGroup, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, LiveTally, MCQ, TallyAnswer, pickRows, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack,
+  Step, Tally, Winner, defineLesson, num, type Cell, type HlKey,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -33,6 +33,21 @@ const Breakfast = () => (
   <LiveTally id="g2-4-1-breakfast" head="نَوْعُ الإِفْطَارِ" title="الإفطار المفضل"
     rows={[{ name: 'حليبٌ وبيضٌ' }, { name: 'حليبٌ وجبنٌ' }, { name: 'حليبٌ وعسلٌ' }]} />
 );
+/** الإجابات تُحسب من جدول الصف، فتتغير كلما تغيّرت الإشارات */
+const SEASON_NAMES = ['الشتاء', 'الربيع', 'الصيف', 'الخريف'];
+const BREAKFAST_NAMES = ['الحليب والبيض', 'الحليب والجبن', 'الحليب والعسل'];
+/** «طالب واحد»، «طالبان»، «٣ طلاب»، «١٢ طالبًا» */
+const students = (n: number) => (n === 0 ? 'لا أحد' : n === 1 ? 'طالبٌ واحدٌ' : n === 2 ? 'طالبان' : n <= 10 ? `${num(n)} طلابٍ` : `${num(n)} طالبًا`);
+const most = (id: string, names: string[]) => (
+  <TallyAnswer id={id} rows={names.length} f={(v) => {
+    const r = pickRows(v, names);
+    return <>{r.names} ({r.tie ? `${students(r.n)} لكلٍّ ${r.count === 2 ? "منهما" : "منها"}` : students(r.n)})</>;
+  }} />
+);
+const ANIMALS = ['الجمل', 'الحصان', 'القطة', 'العصفور'];
+const ANIMAL_ICONS = ['🐪', '🐎', '🐱', '🐦'];
+const row = (id: string, len: number, i: number) => <TallyAnswer id={id} rows={len} f={(v) => students(v[i])} />;
+
 const TRIP_LEFT: Row[] = [['نُزْهَةٌ بَرِّيَّةٌ', 7], ['زِيارةُ حديقةِ الحيواناتِ', 5], ['زِيارةُ المُتْحَفِ', 8]];
 const TRIP_RIGHT: Row[] = [['نُزْهَةٌ بَرِّيَّةٌ', 6], ['زِيارةُ حديقةِ الحيواناتِ', 5], ['زِيارةُ المُتْحَفِ', 3]];
 
@@ -171,12 +186,24 @@ export default defineLesson({
     /* ================= نجمع بيانات الصف ================= */
     {
       sec: 'elab', min: 5,
-      notes: 'نشاط: اسأل كل طالب عن حيوانه المفضل، وادعُ طالبًا يضغط + في الصف المناسب لكل إجابة. ثم اسأل: أيّ حيوان أكثر؟ كم طالبًا أجاب؟',
+      notes: 'نشاط: اسأل كل طالب عن حيوانه المفضل، وادعُ طالبًا يضغط + في الصف المناسب لكل إجابة. ثم اسأل: أيّ حيوان أكثر؟ كم طالبًا أجاب؟ «التالي» يُظهر الإجابة من جدول الصف.',
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">ما حيوانك المفضل؟</SlideHead>
-          <LiveTally id="g2-4-1-animals" head="الْحَيَوَانُ الْمُفَضَّلُ" title="الحيوان المفضل"
-            rows={[{ name: 'الجمل', label: '🐪 الجمل' }, { name: 'الحصان', label: '🐎 الحصان' }, { name: 'القطة', label: '🐱 القطة' }, { name: 'العصفور', label: '🐦 العصفور' }]} />
+          <Cols>
+            <LiveTally id="g2-4-1-animals" head="الْحَيَوَانُ الْمُفَضَّلُ" title="الحيوان المفضل"
+              rows={ANIMALS.map((a, i) => ({ name: a, label: `${ANIMAL_ICONS[i]} ${a}` }))} />
+            <QCol>
+              <p className="qtext">أيُّ حيوانٍ أكثرُ؟ وكم طالبًا أجابَ؟</p>
+              <Ctrls><NextButton /></Ctrls>
+              <Solution>
+                <Step kind="ans">{most('g2-4-1-animals', ANIMALS)}</Step>
+                <Step kind="ans">
+                  <TallyAnswer id="g2-4-1-animals" rows={4} f={(v) => `أجابَ ${students(v.reduce((a, b) => a + b, 0))}`} />
+                </Step>
+              </Solution>
+            </QCol>
+          </Cols>
         </>
       ),
     },
@@ -206,9 +233,9 @@ export default defineLesson({
           time={120}
           qs={[
             { n: 1, question: "مَا الْفَصْلُ الَّذِي يُفَضِّلُهُ أَكْثَرُ الطُّلَّابِ؟",
-              steps: [] },
+              steps: [{ text: most('g2-4-1-seasons', SEASON_NAMES), kind: 'ans' }] },
             { n: 2, question: "مَا عَدَدُ الطُّلَّابِ الَّذِينَ يُفَضِّلُونَ فَصْلَيِ الشِّتَاءِ وَالْخَرِيفِ؟ أَكْتُبُ جُمْلَةً عَدَدِيَّةً لِحَلِّ هَذَا السُّؤَالِ.",
-              steps: [] },
+              steps: [{ text: <TallyAnswer id="g2-4-1-seasons" rows={4} f={(v) => `${num(v[0])} + ${num(v[3])} = ${num(v[0] + v[3])}`} />, kind: 'ans' }] },
           ]}
           chart={<Seasons />}
         />
@@ -243,11 +270,11 @@ export default defineLesson({
           tps
           qs={[
             { n: 4, question: "كَمْ طَالِبًا يُفَضِّلُ الحَلِيبَ وَ البَيْضَ؟",
-              steps: [] },
+              steps: [{ text: row('g2-4-1-breakfast', 3, 0), kind: 'ans' }] },
             { n: 5, question: "كَمْ طَالِبًا يُفَضِّلُ الحَلِيبَ وَ الجُبْنَ؟",
-              steps: [] },
+              steps: [{ text: row('g2-4-1-breakfast', 3, 1), kind: 'ans' }] },
             { n: 6, question: "مَا الإِفْطَارُ الأَكْثَرُ تَفْضِيلًا لَدَى الطُّلَّابِ؟",
-              steps: [] },
+              steps: [{ text: most('g2-4-1-breakfast', BREAKFAST_NAMES), kind: 'ans' }] },
             { n: 7, question: "كَيْفَ يَتَغَيَّرُ الجَدْوَلُ إِذَا أُضِيفَ إِلَيْهِ إِفْطَارِي المُفَضَّلُ؟",
               steps: [{ text: 'تُزادُ إشارةٌ واحدةٌ في صفِّ إفطاري المفضَّلِ.', kind: 'ans' }] },
           ]}

@@ -74,7 +74,15 @@ function VoteExplorer() {
         </button>
       </Stack>
       <DataGrid title="الفاكهةُ المفضَّلةُ" head={['الفاكهةُ', 'الإشاراتُ']} tone="salmon" rows={FRUITS.map((f, i) => [f, { tally: n[i] }])} />
-      <DataGrid title="الفاكهةُ المفضَّلةُ" head={['الفاكهةُ', 'التَّكرارُ']} rows={[...FRUITS.map((f, i): Cell[] => [f, n[i]]), ['المجموعُ', total]]} />
+      <Stack>
+        <DataGrid title="الفاكهةُ المفضَّلةُ" head={['الفاكهةُ', 'التَّكرارُ']} rows={[...FRUITS.map((f, i): Cell[] => [f, n[i]]), ['المجموعُ', total]]} />
+        {/* تُحسب من تصويت الصف، وتتغير مع كل صوت */}
+        {total > 0 && (
+          <b className="votetop">
+            الأكثرُ تصويتًا: {FRUITS.filter((_, i) => n[i] === Math.max(...n)).join(' و')} ({num(Math.max(...n))})
+          </b>
+        )}
+      </Stack>
     </Cols>
   );
 }

@@ -1,5 +1,5 @@
 import {
-  Bag, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, LiveTally, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, SlideHead, Solution,
+  Bag, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, LiveTally, MCQ, TallyAnswer, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, SlideHead, Solution,
   Stack, Step, Tag, TimerButton, Winner, defineLesson, num, type BagItem,
 } from '@engine';
 import { IntroClip } from './clip';
@@ -227,7 +227,15 @@ export default defineLesson({
           source={CHECK} n={3} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="هَلْ تَتَّفِقُ النَّتَائِجُ الَّتِي حَصَلْتُ عَلَيْهَا فِي جَدْوَلِ الإِشَارَاتِ مَعَ إِجَابَتِي عَنِ السُّؤَالِ (١)؟ أَشْرَحُ."
           hint="أيّ لون له إشارات أكثر في جدولك؟"
-          steps={[]}
+          steps={[{
+            kind: 'ans',
+            // من نتائج تجربة الصف في السؤال ٢: الأخضر أولًا ثم الأحمر
+            text: <TallyAnswer id="g2-4-8-q2" rows={2} f={([g, r]) =>
+              g > r
+                ? `نعم؛ إشاراتُ الأخضرِ (${num(g)}) أكثرُ من إشاراتِ الأحمرِ (${num(r)})، وهذا يوافقُ أنَّ سحبَ الأخضرِ أكثرُ إمكانيةً.`
+                : `لا؛ خرجَ الأخضرُ ${num(g)} والأحمرُ ${num(r)}. المتوقَّعُ أن يكونَ الأخضرُ أكثرَ لأنَّ في الكيسِ ٤ خضراءَ و٢ حمراءَ فقط، لكنَّ نتائجَ التجربةِ قد تختلفُ.`
+            } />,
+          }]}
           chart={<DrawTally id="g2-4-8-q2" items={[{ name: 'أَخْضَرُ', n: 4, color: C.green }, { name: 'أَحْمَرُ', n: 2, color: C.red }]} />}
         />
       ),

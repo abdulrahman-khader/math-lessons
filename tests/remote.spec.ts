@@ -336,7 +336,7 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   expect(errors).toEqual([]);
 });
 
-test('جدول الإشارات الفارغ: الجوال يضيف الإشارات، وتبقى في السؤال التالي', async ({ browser }) => {
+test('جدول الإشارات الفارغ: الجوال يضيف الإشارات، وتبقى بعد الانتقال بين الشرائح', async ({ browser }) => {
   const tally = path.join(dist, 'g2-4-1-tally-chart.html');
   test.skip(!existsSync(tally), 'درس جدول الإشارات غير مبني');
   const { ipad, phone, errors } = await pair(browser, pathToFileURL(tally).href);
@@ -352,9 +352,11 @@ test('جدول الإشارات الفارغ: الجوال يضيف الإشار
   await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
   await expect(board.locator('tbody tr').nth(2).locator('td').last()).toHaveText('٢');
   await expect(card).toContainText('عدد الإشارات كلها: ٣');
-  // السؤال ٢ يعرض الجدول نفسه بإشاراته
-  await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
+  // السؤالان ١ و٢ تحت الجدول نفسه كما في الكتاب، والإشارات تبقى بعد الانتقال والعودة
   await expect(ipad.locator('section.slide.active [data-qnum="2"]')).toBeVisible();
+  await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
+  await phone.locator('.rslides button[aria-label="الشريحة السابقة"]').click();
+  await expect(ipad.locator('section.slide.active [data-qnum="1"]')).toBeVisible();
   await expect(ipad.locator('section.slide.active .ltally')).toContainText('عدد الإشارات كلها: ٣');
   await phone.locator('.rwidget .rbtn', { hasText: 'امسح الإشارات' }).click();
   await expect(ipad.locator('section.slide.active .ltally svg.tally')).toHaveCount(0);

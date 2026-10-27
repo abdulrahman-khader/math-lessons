@@ -22,7 +22,9 @@ export function Step({ hl, kind, className, style, children }: { hl?: readonly H
     if (shown && !first.current) ref.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
     first.current = false;
   }, [shown]);
-  const cls = ['step', group ? 'sstep' : '', kind ?? '', shown ? 'shown' : '', className ?? ''].filter(Boolean).join(' ');
+  // إجابة جملة طويلة: بخط أصغر من إجابة العدد القصيرة (التي تُكبَّر ليقرأها آخر الصف)
+  const wordy = kind === 'ans' && typeof children === 'string' && children.length > 28;
+  const cls = ['step', group ? 'sstep' : '', kind ?? '', wordy ? 'wordy' : '', shown ? 'shown' : '', className ?? ''].filter(Boolean).join(' ');
   return (
     <div ref={ref} className={cls} style={style}>
       {children}

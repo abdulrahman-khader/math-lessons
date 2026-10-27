@@ -1,6 +1,6 @@
 import {
-  Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, PicGraph, QCol, QuestionSlide, SlideHead, Solution,
-  Stack, Step, Winner, defineLesson, type PicRow,
+  BookGroup, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, PicGraph, QCol, QuestionSlide, SlideHead, Solution,
+  Stack, Step, Winner, defineLesson, type HlKey, type PicRow,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -274,56 +274,31 @@ export default defineLesson({
 
     /* ================= أحل المسألة ٥–٧ ================= */
     {
-      sec: 'practice', min: 2,
-      notes: '٩ طلاب في ٣ صور: كل صورة = ٣.',
+      sec: 'practice', min: 5,
+      notes: 'س٥: ٩ طلاب في ٣ صور: كل صورة = ٣. س٦: كل صورة = ٣ إشارات. س٧: ٤ صور × ٣.',
       content: (
-        <QuestionSlide
-          source={SOLVE} n={5} time={60}
-          question="اسْتِعْمَالُ الْبَيَانَاتِ: صَوَّتَ ٩ طُلَّابٍ لِمَادَّةِ الرِّيَاضِيَّاتِ. مَا الْمِفْتَاحُ الْمُنَاسِبُ لِتَمْثِيلِ ذَلِكَ الْعَدَدِ؟"
-          hint="كم صورة للرياضيات؟ ٩ موزّعة على هذه الصور."
-          steps={[
+        <BookGroup
+          source={SOLVE}
+          time={180}
+          qs={[
+            { n: 5, question: "اسْتِعْمَالُ الْبَيَانَاتِ: صَوَّتَ ٩ طُلَّابٍ لِمَادَّةِ الرِّيَاضِيَّاتِ. مَا الْمِفْتَاحُ الْمُنَاسِبُ لِتَمْثِيلِ ذَلِكَ الْعَدَدِ؟",
+              steps: [
             { text: 'للرياضيات ٣ صور تمثّل ٩ طلاب.', hl: ['p0'] },
             { text: 'الْمِفْتَاحُ: كُلُّ صُورَةٍ = ٣ اسْتِجَابَاتٍ؛ لأنَّ ٣ + ٣ + ٣ = ٩', kind: 'ans' },
-          ]}
-          chart={<Pics title="المَادَّةُ المُفَضَّلَةُ" rows={SUBJECTS} per={3} cells={4} keyText="المِفْتَاحُ: كُلُّ صُورَةٍ = …… اسْتِجَابَاتٍ" reveal={false} />}
-        />
-      ),
-    },
-    {
-      sec: 'practice', min: 2,
-      notes: 'كل صورة = ٣ إشارات.',
-      content: (
-        <QuestionSlide
-          source={SOLVE} n={6} time={90}
-          question="أُكْمِلُ جَدْوَلَ الإِشَارَاتِ."
-          hint="كل صورة = ٣. أعدّ الصور في كل صف."
-          steps={[
-            { text: 'الرياضيات ٣ صور ← ٩ إشارات', hl: ['p0'] },
-            { text: 'القراءة صورة واحدة ← ٣ إشارات', hl: ['p1'] },
-            { text: 'التربية البدنية ٤ صور ← ١٢ إشارة', hl: ['p2'], kind: 'ans' },
+          ] },
+            { n: 6, question: 'أُكْمِلُ جَدْوَلَ الإِشَارَاتِ.',
+              steps: [{ text: 'الرياضيات ٩، القراءة ٣، التربية البدنية ١٢', hl: ['v0', 'v1', 'v2'], kind: 'ans' }] },
+            { n: 7, question: 'كَمْ طَالِبًا اخْتَارَ التَّرْبِيَةَ الْبَدَنِيَّةَ؟',
+              steps: [{ text: '٣ + ٣ + ٣ + ٣ = ١٢ طالبًا', hl: ['p2'], kind: 'ans' }] },
           ]}
           chart={
             <Stack>
-              <Pics title="المَادَّةُ المُفَضَّلَةُ" rows={SUBJECTS} per={3} cells={4} keyText="المِفْتَاحُ: كُلُّ صُورَةٍ = ٣ اسْتِجَابَاتٍ" reveal={false} />
-              <Step><Tallies head="المَادَّةُ المُفَضَّلَةُ" rows={SUBJECTS} /></Step>
+              <Pics title="المَادَّةُ المُفَضَّلَةُ" rows={SUBJECTS} per={3} cells={4} keyText="المِفْتَاحُ: كُلُّ صُورَةٍ = …… اسْتِجَابَاتٍ" reveal={false} />
+              {/* جدول الكتاب الفارغ: إشاراته تظهر مع إجابة السؤال ٦ */}
+              <DataGrid tone="blue" head={['المَادَّةُ المُفَضَّلَةُ', 'الإشاراتُ']}
+                rows={SUBJECTS.map(([l, ic, n], i) => [`${ic} ${l}`, { tally: n, k: `v${i}` as HlKey }])} />
             </Stack>
           }
-        />
-      ),
-    },
-    {
-      sec: 'practice', min: 1,
-      notes: '٤ صور × ٣.',
-      content: (
-        <QuestionSlide
-          source={SOLVE} n={7} time={30}
-          question="كَمْ طَالِبًا اخْتَارَ التَّرْبِيَةَ الْبَدَنِيَّةَ؟"
-          hint="٤ صور، وكل صورة = ٣."
-          steps={[
-            { text: '٣ + ٣ + ٣ + ٣', hl: ['p2'] },
-            { text: '١٢ طالبًا', kind: 'ans' },
-          ]}
-          chart={<Pics title="المَادَّةُ المُفَضَّلَةُ" rows={SUBJECTS} per={3} cells={4} keyText="المِفْتَاحُ: كُلُّ صُورَةٍ = ٣ اسْتِجَابَاتٍ" reveal={false} />}
         />
       ),
     },

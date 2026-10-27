@@ -908,3 +908,31 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .paintbag { display: grid; grid-template-columns: repeat(4, 1.7em); gap: .3em; justify-self: center; align-self: center; font-size: .8em; padding: .6em .7em .7em; border: 3px solid #9aa7b8; border-radius: .5em .5em 1.4em 1.4em; background: #f6f8fb; }
 .paintbag button { font-size: inherit; inline-size: 1.7em; block-size: 1.7em; padding: 0; border: 2px solid var(--ink); border-radius: .2em; cursor: pointer; touch-action: manipulation; }
 .cbags:has(.paintbag) .cover.shown { background: var(--paper); justify-self: stretch; display: grid; place-items: center; }
+
+/* أسئلة بشكل الكتاب (الصف الثاني): رقم في مربع، والسؤال، والإجابة في فراغه */
+.bintro { margin: 0; font-size: 1em; font-weight: 800; line-height: 1.8; }
+.blist { display: flex; flex-direction: column; gap: .55em; }
+.bq { display: flex; align-items: flex-start; gap: .5em; }
+.bq > .qnum { margin-block-start: .25em; }
+.bqbody { display: flex; flex-direction: column-reverse; gap: .2em; min-inline-size: 0; flex: 1; }
+.bqbody > .qtext { margin: 0; }
+.bans { display: inline-block; min-inline-size: 3.5em; border-block-end: 4px dotted #7a8597; line-height: 1.4; vertical-align: baseline; }
+.bans:has(.step.shown) { border-block-end: 0; }
+.bans .step.ans.shown { display: inline; font-size: 1.5em; font-weight: 800; color: var(--good); animation: pop .3s ease; }
+.bwork { display: flex; flex-direction: column; gap: .15em; font-size: .8em; font-weight: 700; color: var(--muted); }
+.bwork .step.shown { border-inline-start: 4px solid var(--ex); padding-inline-start: .5em; }
+
+/* الإجابة أكبر في كل الدروس: يقرؤها من في آخر الصف */
+.step.sstep.ans { font-size: 1.3em; font-weight: 800; }
+.blank .step.bv.shown { font-size: 1.3em; }
+.bq > .tag { flex: none; margin-block-start: .2em; }
+.blist.many { gap: .35em; }
+.blist.many .bans .step.ans.shown { font-size: 1.25em; }
+.bans.wordy { display: inline; border: 0; }
+.bans.wordy .step.ans.shown, .blist.many .bans.wordy .step.ans.shown { font-size: 1em; }
+.bctrl { display: flex; flex-wrap: wrap; align-items: center; gap: .4em .6em; }
+.bctrl > * { flex: none; }
+.bctrl .tps button { font-size: .66em; padding: 0 .55em; }
+.blist.many .qtext { line-height: 1.55; }
+.step.sstep.ans.wordy { font-size: 1.05em; }
+.blank.box .step.bv.shown { font-size: 1.1em; }

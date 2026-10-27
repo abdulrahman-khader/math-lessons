@@ -15,6 +15,7 @@ import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnab
 import { TIMER_OFF, TimerWidget, fixView, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
 import { StarCheer, StarsModal } from './components/Stars';
+import { BookCtx } from './components/QuestionSlide';
 import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTimer, IconWheel } from './components/icons';
 
 const HOME_NOTES = 'رحّب بالطلاب، وقسّمهم إلى فرق وسمِّ كل فريق. اضغط «متابعة» إن كنت توقفت في حصة سابقة. الاختصارات: الأسهم للتنقل، المسافة للخطوة التالية، F لملء الشاشة.';
@@ -416,6 +417,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
 
   return (
     <EngineCtx.Provider value={engine}>
+      <BookCtx.Provider value={m.id.startsWith('g2-')}>
       <div id="app" ref={appRef} data-lesson={m.id} data-book-questions={m.bookQuestions}>
         <div id="stage" style={layout.flow ? undefined : { transform: `translate(-50%, -50%) scale(${layout.scale})` }}>
           <header id="hdr">
@@ -635,6 +637,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
           />
         </div>
       </div>
+      </BookCtx.Provider>
     </EngineCtx.Provider>
   );
 }

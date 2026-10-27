@@ -1,5 +1,5 @@
 import { test, expect, devices, type Browser, type Page } from '@playwright/test';
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { startPeerServer, startRelay } from './relay';
@@ -57,13 +57,13 @@ async function device(browser: Browser, dev: string, url: string) {
   return { page, errors };
 }
 
-async function pair(browser: Browser) {
-  const ipad = await device(browser, 'iPad Pro 11', href);
+async function pair(browser: Browser, url = href) {
+  const ipad = await device(browser, 'iPad Pro 11', url);
   await ipad.page.locator('button[aria-label="التحكم من الجوال"]').click();
   await ipad.page.locator('.rpanel button', { hasText: 'تشغيل' }).click();
   await expect(ipad.page.locator('.rstat')).toContainText('جاهز', { timeout: READY });
   const ch = await ipad.page.evaluate(() => localStorage.getItem('remote:channel'));
-  const phone = await device(browser, 'iPhone 13', `${href}#remote=${ch}`);
+  const phone = await device(browser, 'iPhone 13', `${url}#remote=${ch}`);
   // على بعض الأجهزة يتأخر أول عنوان اتصال ثانيتين أو أكثر، ومع تشغيل الفحوص معًا يطول التعارف
   await expect(phone.page.locator('.dot.ok')).toContainText('مباشرة', { timeout: 45000 });
   await expect(ipad.page.locator('.rstat')).toContainText('مباشرة', { timeout: 15000 });
@@ -333,5 +333,30 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   // منصة الأسبوع الماضي تُفتح من الجوال (فارغة هنا: النجوم كلها من هذا الأسبوع)
   await phone.locator('.rbtn', { hasText: 'منصة الأسبوع الماضي' }).click();
   await expect(ipad.locator('.sbox .sempty')).toContainText('لا نجوم');
+  expect(errors).toEqual([]);
+});
+
+test('جدول الإشارات الفارغ: الجوال يضيف الإشارات، وتبقى في السؤال التالي', async ({ browser }) => {
+  const tally = path.join(dist, 'g2-4-1-tally-chart.html');
+  test.skip(!existsSync(tally), 'درس جدول الإشارات غير مبني');
+  const { ipad, phone, errors } = await pair(browser, pathToFileURL(tally).href);
+  // إلى السؤال ١
+  const idx = await ipad.locator('section.slide').evaluateAll((els) => els.findIndex((e) => e.querySelector('[data-qnum="1"]')));
+  for (let i = 0; i < idx; i++) await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
+  await expect(ipad.locator('section.slide.active [data-qnum="1"]')).toBeVisible();
+  const board = ipad.locator('section.slide.active .ltally');
+  await expect(board.locator('svg.tally')).toHaveCount(0);
+  const card = phone.locator('.rwidget', { hasText: 'الفصل المفضل' });
+  await card.locator('button[aria-label="زيادة الصَّيْفُ"]').click();
+  await card.locator('button[aria-label="زيادة الصَّيْفُ"]').click();
+  await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
+  await expect(board.locator('tbody tr').nth(2).locator('td').last()).toHaveText('٢');
+  await expect(card).toContainText('عدد الإشارات كلها: ٣');
+  // السؤال ٢ يعرض الجدول نفسه بإشاراته
+  await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
+  await expect(ipad.locator('section.slide.active [data-qnum="2"]')).toBeVisible();
+  await expect(ipad.locator('section.slide.active .ltally')).toContainText('عدد الإشارات كلها: ٣');
+  await phone.locator('.rwidget .rbtn', { hasText: 'امسح الإشارات' }).click();
+  await expect(ipad.locator('section.slide.active .ltally svg.tally')).toHaveCount(0);
   expect(errors).toEqual([]);
 });

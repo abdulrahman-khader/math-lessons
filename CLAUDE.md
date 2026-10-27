@@ -36,6 +36,7 @@ tests/stars.spec.ts    star of the week: week boundary, ranking, board, wheel
 - Copy the closest existing lesson folder. Import everything from `'@engine'`.
 - Book questions use `<QuestionSlide source="تأكَّدْ · ص ٨٨" n={1} ... />`. Copy the question text **exactly** from the book, diacritics included. `meta.bookQuestions` must equal the number of questions in the book; a test checks that 1..N are all present, in order.
 - Solutions are `steps`. Each step can highlight parts of the chart with `hl` keys: `title`, `xaxis`, `yaxis`, `line`, `pts`, and per position `p{i}` (point/bar), `v{i}` (value badge), `x{i}` (x label), `g{i}` (vertical guide), `h{i}` (horizontal guide). Mark the answer `kind: 'ans'`. Do not add `kind: 'warn'` (common-mistake) steps; the teacher removed them.
+- When the book asks the class to collect data (a survey, or drawing cubes from a bag) and leaves the table empty, show it empty with `<LiveTally id=… head=… rows=… />`: the class fills it on the board or from the phone, tables with the same `id` share their marks across slides. Never fill in data from the solutions book, and give such questions `steps={[]}`. Question text is only what the book prints: no added instructions in brackets.
 - `MCQ`: `answer` must be one of `options` verbatim. TypeScript rejects anything else.
 - Chart values come from the book or the teacher's guide. `defineChart` throws if a value is off the axis or label/value counts differ.
 - Verify every calculation by hand before writing it into a step.

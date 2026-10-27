@@ -15,6 +15,7 @@ export { GridBars, type GridBar } from './components/GridBars';
 export { PicGraph, type PicRow } from './components/PicGraph';
 export { RuleTable, FnTable, type RuleCell } from './components/RuleTables';
 export { Counters, TenTowers, type CounterGroup } from './components/Counters';
+export { LiveTally, type LiveRow } from './components/LiveTally';
 export { Frac, Tally, DataGrid, HBars, Pie, Bag, chanceWord, type Cell, type Slice, type BagItem } from './components/DataViz';
 export { Clip, ClipCard, ClipTitle, Cube, Person, SvgEq, SvgFrac, CLIP_W, CLIP_H, tw, lerp, fade, ease, sector, type EqPart, type VoiceLine } from './components/Clip';
 export { useSlide } from './context';

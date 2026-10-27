@@ -896,3 +896,15 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .cheer-msg { font-size: 1.6em; font-weight: 800; color: #b07800; }
 .cheer-week { font-size: 1em; font-weight: 700; opacity: .8; }
 @keyframes cheerspin { from { transform: rotate(-200deg) scale(.2); } }
+
+/* جدول إشارات يملؤه الصف (LiveTally) */
+.ltally { display: flex; flex-direction: column; align-items: center; gap: .4em; }
+.ltname { display: flex; align-items: center; justify-content: space-between; gap: .4em; }
+.ltbtn { min-inline-size: 1.7em; min-block-size: 1.7em; border: 3px solid var(--good); border-radius: .4em; background: var(--ex-t); color: var(--good); font: inherit; font-weight: 800; line-height: 1; cursor: pointer; touch-action: manipulation; }
+.ltbtn.minus { border-color: var(--line); background: transparent; color: var(--muted); }
+.ltbtn:disabled { opacity: .3; cursor: default; }
+.ltmarks { min-inline-size: 5em; }
+.ltfoot { display: flex; align-items: center; gap: .6em; font-size: .8em; }
+.paintbag { display: grid; grid-template-columns: repeat(4, 1.7em); gap: .3em; justify-self: center; align-self: center; font-size: .8em; padding: .6em .7em .7em; border: 3px solid #9aa7b8; border-radius: .5em .5em 1.4em 1.4em; background: #f6f8fb; }
+.paintbag button { font-size: inherit; inline-size: 1.7em; block-size: 1.7em; padding: 0; border: 2px solid var(--ink); border-radius: .2em; cursor: pointer; touch-action: manipulation; }
+.cbags:has(.paintbag) .cover.shown { background: var(--paper); justify-self: stretch; display: grid; place-items: center; }

@@ -187,8 +187,7 @@ export default defineLesson({
       content: (
         <QuestionSlide
           source={CHECK} n={1} time={120}
-          intro={USE}
-          question="أُمَثِّلُ بِالصُّوَرِ بَيَانَاتِ الْحَيَوَانِ الْمُفَضَّلِ (الْمِفْتَاحُ: كُلُّ حَيَوَانٍ يُمَثِّلُ اسْتِجَابَتَيْنِ)."
+          question={USE}
           hint="كل صورة = ٢. كم مرة يدخل ٢ في كل عدد؟"
           steps={[
             { text: 'السمكة ١٠ ← ٥ صور', hl: ['v0'] },
@@ -234,8 +233,7 @@ export default defineLesson({
       content: (
         <QuestionSlide
           source={PRACTICE} n={3} time={120}
-          intro={USE}
-          question="أُمَثِّلُ بِالصُّوَرِ بَيَانَاتِ الْفَاكِهَةِ الْمُفَضَّلَةِ (الْمِفْتَاحُ: كُلُّ صُورَةٍ = اسْتِجَابَةٌ وَاحِدَةٌ)."
+          question={USE}
           hint="كل إشارة = صورة واحدة."
           steps={[
             { text: 'برتقال ٦ صور، عنب صورة واحدة', hl: ['v0', 'v1'] },
@@ -257,7 +255,7 @@ export default defineLesson({
       content: (
         <QuestionSlide
           source={PRACTICE} n={4} time={120}
-          question="أُمَثِّلُ بِالصُّوَرِ بَيَانَاتِ طَرِيقَةِ الذَّهَابِ إِلَى الْمَدْرَسَةِ (الْمِفْتَاحُ: كُلُّ صُورَةٍ = اسْتِجَابَتَيْنِ)."
+          question={USE}
           hint="أعدّ الإشارات أولًا، ثم أقسم على ٢."
           steps={[
             { text: 'العدد: الحافلة ٤، المشي ١٠، السيارة ٤' },

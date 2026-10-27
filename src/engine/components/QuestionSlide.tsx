@@ -28,6 +28,7 @@ interface Props {
   time?: number;
   /** يضيف أزرار فكّر – زاوج – شارك */
   tps?: boolean;
+  /** خطوات الحل؛ فارغة حين يجيب الصف من بياناته هو (جدول يملؤه الطلاب) */
   steps: StepDef[];
   /** الرسم في العمود المقابل */
   chart: ReactNode;
@@ -56,17 +57,19 @@ export function QuestionSlide({ source, n, tags, intro, question, long, hint, ti
           {tps && <ThinkPairShare />}
           <Ctrls>
             {hint && <HintButton />}
-            <NextButton />
+            {steps.length > 0 && <NextButton />}
             {time && <TimerButton sec={time} />}
           </Ctrls>
           {hint && <Hint>{hint}</Hint>}
-          <Solution>
-            {steps.map((s, i) => (
-              <Step key={i} hl={s.hl} kind={s.kind}>
-                {s.text}
-              </Step>
-            ))}
-          </Solution>
+          {steps.length > 0 && (
+            <Solution>
+              {steps.map((s, i) => (
+                <Step key={i} hl={s.hl} kind={s.kind}>
+                  {s.text}
+                </Step>
+              ))}
+            </Solution>
+          )}
         </QCol>
         {chart}
       </Cols>

@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import {
-  Bag, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, SlideHead, Solution,
-  Stack, Step, Tag, Tally, TimerButton, Winner, defineLesson, num, type BagItem,
+  Bag, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, LiveTally, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, SlideHead, Solution,
+  Stack, Step, Tag, TimerButton, Winner, defineLesson, num, type BagItem,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -18,50 +17,13 @@ const Cube = ({ c }: { c: string }) => (
   <span aria-hidden style={{ display: 'inline-block', width: '.9em', height: '.9em', background: c, border: '2px solid #13213b', borderRadius: '.15em', verticalAlign: 'middle', marginInline: '.15em' }} />
 );
 
-/** الخطوات كما في الكتاب */
-const Steps = () => (
-  <Card kind="ex" cap="الْخُطُوَاتُ">
-    <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, lineHeight: 1.7 }}>
-      <li>أَسْحَبُ مُكَعَّبًا.</li>
-      <li>أُسَجِّلُ اللَّوْنَ فِي جَدْوَلِ الإِشَارَاتِ.</li>
-      <li>أُعِيدُ الْمُكَعَّبَ إِلَى الْكِيسِ.</li>
-    </ol>
-  </Card>
-);
-
-/** تجربة السحب: كيس، وزر يسحب ويسجّل إشارة، وزر يسحب ١٠ مرات. السحب مع الإعادة كما في الكتاب. */
-function DrawTally({ items }: { items: BagItem[] }) {
-  const [n, setN] = useState(items.map(() => 0));
-  const [last, setLast] = useState(-1);
-  const total = n.reduce((a, b) => a + b, 0);
-  const all = items.reduce((a, b) => a + b.n, 0);
-  const pick = () => {
-    let r = Math.random() * all;
-    return items.findIndex((it) => (r -= it.n) < 0);
-  };
-  const draw = (k: number) => {
-    const next = [...n];
-    let l = -1;
-    for (let i = 0; i < k && next.reduce((a, b) => a + b, 0) < 10; i++) next[(l = pick())]++;
-    setN(next);
-    setLast(l);
-  };
+/** تجربة السحب كما في الكتاب: الطلاب يسحبون من كيس حقيقي ١٠ مرات، والمعلم يسجّل كل سحبة بإشارة (من الشاشة أو الجوال) */
+function DrawTally({ id, items }: { id: string; items: BagItem[] }) {
   return (
     <div className="dtally">
-      <Bag items={items} shape="cube" size={260} />
-      <Stack>
-        <DataGrid
-          tone="green"
-          head={['اللَّوْنُ', 'الإِشَارَاتُ']}
-          rows={items.map((it, i) => [{ node: <><Cube c={it.color} /> {it.name}</> }, { node: n[i] ? <Tally n={n[i]} /> : '' }])}
-        />
-        <b>سحبنا {num(total)} من ١٠ {last >= 0 && <>· آخر سحبة: <Cube c={items[last].color} /></>}</b>
-        <div className="row" style={{ gap: '.4em' }}>
-          <button className="btn primary" disabled={total >= 10} onClick={() => draw(1)}>اسحب مكعبًا</button>
-          <button className="btn" disabled={total >= 10} onClick={() => draw(10)}>اسحب حتى ١٠</button>
-          <button className="btn hide" onClick={() => (setN(items.map(() => 0)), setLast(-1))}>من جديد</button>
-        </div>
-      </Stack>
+      <Bag items={items} shape="cube" size={240} />
+      <LiveTally id={id} head="اللَّوْنُ" count={false} title="نتائج السحب"
+        rows={items.map((it) => ({ name: it.name, label: <><Cube c={it.color} /> {it.name}</> }))} />
     </div>
   );
 }
@@ -170,7 +132,11 @@ export default defineLesson({
                 <Step kind="ans">إِذَنْ إِمْكَانِيَّةُ سَحْبِ الأَحْمَرِ هِيَ <Mark>أَكْثَرُ إِمْكَانِيَّةً</Mark>.</Step>
               </Solution>
             </QCol>
-            <DrawTally items={[{ name: 'أَحْمَرُ', n: 4, color: '#e8436a' }, { name: 'أَخْضَرُ', n: 1, color: '#7cc14a' }]} />
+            {/* أقلام الكتاب وجدول إشاراته كما في ص ١٠٢ */}
+            <div className="dtally">
+              <Bag items={[{ name: 'أَحْمَرُ', n: 4, color: '#e8436a' }, { name: 'أَخْضَرُ', n: 1, color: '#7cc14a' }]} shape="cube" size={240} />
+              <DataGrid tone="green" head={['اللَّوْنُ', 'الإِشَارَاتُ']} rows={[['أَحْمَرُ', { tally: 7 }], ['أَخْضَرُ', { tally: 3 }]]} />
+            </div>
           </Cols>
         </>
       ),
@@ -233,7 +199,7 @@ export default defineLesson({
     /* ================= أتأكد ١–٢ ================= */
     {
       sec: 'check', min: 3,
-      notes: 'السؤال ١: المسافة تُحوِّط. السؤال ٢: تجربة؛ ادعُ طالبًا يسحب ١٠ مرات. النتائج تختلف كل مرة، والمتوقع أن يكون الأخضر أكثر.',
+      notes: 'السؤال ١: المسافة تُحوِّط. السؤال ٢: تجربة بكيس حقيقي فيه ٤ أخضر و٢ أحمر؛ ادعُ طالبًا يسحب ويعيد المكعب ١٠ مرات، واضغط + للون الذي يخرج.',
       content: (
         <>
           <div className="row bookrow"><Tag kind="qs">{CHECK}</Tag></div>
@@ -243,7 +209,7 @@ export default defineLesson({
             <QCard n={2}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '.3em', paddingInlineStart: '1.6em' }}>
                 <b>أَضَعُ ٤ <Cube c={C.green} /> وَ ٢ <Cube c={C.red} /> فِي كِيسٍ.</b>
-                <DrawTally items={[{ name: 'أَخْضَرُ', n: 4, color: C.green }, { name: 'أَحْمَرُ', n: 2, color: C.red }]} />
+                <DrawTally id="g2-4-8-q2" items={[{ name: 'أَخْضَرُ', n: 4, color: C.green }, { name: 'أَحْمَرُ', n: 2, color: C.red }]} />
               </div>
             </QCard>
           </Cols>
@@ -255,14 +221,14 @@ export default defineLesson({
     /* ================= أتأكد ٣ ================= */
     {
       sec: 'check', min: 1,
-      notes: 'أتحدث: قارن النتائج التي حصلتم عليها بإجابة السؤال ١.',
+      notes: 'أتحدث: قارن نتائج الصف في جدول السؤال ٢ بإجابة السؤال ١.',
       content: (
         <QuestionSlide
           source={CHECK} n={3} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="هَلْ تَتَّفِقُ النَّتَائِجُ الَّتِي حَصَلْتُ عَلَيْهَا فِي جَدْوَلِ الإِشَارَاتِ مَعَ إِجَابَتِي عَنِ السُّؤَالِ (١)؟ أَشْرَحُ."
           hint="أيّ لون له إشارات أكثر في جدولك؟"
-          steps={[{ text: 'نعم؛ إشاراتُ الأخضرِ أكثرُ من إشاراتِ الأحمرِ، وهذا يوافقُ أنَّ سحبَ الأخضرِ أكثرُ إمكانيةً.', kind: 'ans' }]}
-          chart={<Steps />}
+          steps={[]}
+          chart={<DrawTally id="g2-4-8-q2" items={[{ name: 'أَخْضَرُ', n: 4, color: C.green }, { name: 'أَحْمَرُ', n: 2, color: C.red }]} />}
         />
       ),
     },
@@ -285,29 +251,25 @@ export default defineLesson({
     },
 
     /* ================= أتدرب ٦–٧ ================= */
-    {
-      sec: 'practice', min: 3,
-      notes: 'تجربتان: ادعُ طالبين. النتائج تختلف، والمتوقع في ٦ أن يكون الأصفر أكثر، وفي ٧ أن يكون الأحمر أكثر قليلًا.',
+    ...[
+      { n: 6, id: 'g2-4-8-q6', a: 2, b: 6, note: 'تجربة: ادعُ طالبًا يسحب من كيس فيه ٢ أحمر و٦ أصفر، ويعيد المكعب كل مرة، واضغط + للون الذي يخرج حتى ١٠ سحبات.' },
+      { n: 7, id: 'g2-4-8-q7', a: 5, b: 4, note: 'تجربة: ادعُ طالبًا يسحب من كيس فيه ٥ أحمر و٤ أصفر، ويعيد المكعب كل مرة، واضغط + للون الذي يخرج حتى ١٠ سحبات.' },
+    ].map(({ n, id, a, b, note }) => ({
+      sec: 'practice' as const, min: 2,
+      notes: note,
       content: (
         <>
           <div className="row bookrow"><Tag kind="qs">{PRACTICE}</Tag></div>
-          <div className="qgrid two">
-            <QCard n={6}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '.3em', paddingInlineStart: '1.6em', fontSize: '.85em' }}>
-                <b>أَضَعُ ٢ <Cube c={C.red} /> وَ ٦ <Cube c={C.yellow} /> فِي كِيسٍ.</b>
-                <DrawTally items={[{ name: 'أَحْمَرُ', n: 2, color: C.red }, { name: 'أَصْفَرُ', n: 6, color: C.yellow }]} />
-              </div>
-            </QCard>
-            <QCard n={7}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '.3em', paddingInlineStart: '1.6em', fontSize: '.85em' }}>
-                <b>أَضَعُ ٥ <Cube c={C.red} /> وَ ٤ <Cube c={C.yellow} /> فِي كِيسٍ.</b>
-                <DrawTally items={[{ name: 'أَحْمَرُ', n: 5, color: C.red }, { name: 'أَصْفَرُ', n: 4, color: C.yellow }]} />
-              </div>
-            </QCard>
-          </div>
+          <p className="qtext" style={{ margin: 0, fontSize: '.8em' }}>{CIRCLE}</p>
+          <QCard n={n}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.3em', paddingInlineStart: '1.6em' }}>
+              <b>أَضَعُ {num(a)} <Cube c={C.red} /> وَ {num(b)} <Cube c={C.yellow} /> فِي كِيسٍ.</b>
+              <DrawTally id={id} items={[{ name: 'أَحْمَرُ', n: a, color: C.red }, { name: 'أَصْفَرُ', n: b, color: C.yellow }]} />
+            </div>
+          </QCard>
         </>
       ),
-    },
+    })),
 
     /* ================= أحل المسألة ٨ ================= */
     {

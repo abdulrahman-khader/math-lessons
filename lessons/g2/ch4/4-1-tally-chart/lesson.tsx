@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import {
-  Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack,
-  Step, Tally, Winner, defineLesson, num, type Cell, type HlKey,
+  Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, LiveTally, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack,
+  Step, Tally, Winner, defineLesson, type Cell, type HlKey,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -25,42 +24,15 @@ const TallyTable = ({ head, rows, reveal, tone = 'green', count = true }: { head
   />
 );
 
-/** لوحة إشارات تفاعلية: كل ضغطة على صف تضيف إشارة، والعدد يظهر بجانبها */
-function TallyMaker({ labels }: { labels: string[] }) {
-  const [n, setN] = useState(labels.map(() => 0));
-  const add = (i: number, d: number) => setN((v) => v.map((x, j) => (j === i ? Math.max(0, x + d) : x)));
-  const total = n.reduce((a, b) => a + b, 0);
-  return (
-    <div className="tmaker">
-      <table className="dgrid green">
-        <thead>
-          <tr><th>الإجابةُ</th><th>أضِفْ</th><th>إشاراتُ العدِّ</th><th>العددُ</th></tr>
-        </thead>
-        <tbody>
-          {labels.map((l, i) => (
-            <tr key={l}>
-              <td>{l}</td>
-              <td>
-                <span className="row" style={{ gap: '.3em', justifyContent: 'center' }}>
-                  <button className="btn" aria-label={`أضف إشارة إلى ${l}`} onClick={() => add(i, 1)}>+</button>
-                  <button className="btn hide" aria-label={`احذف إشارة من ${l}`} onClick={() => add(i, -1)}>−</button>
-                </span>
-              </td>
-              <td style={{ minWidth: '6em' }}>{n[i] > 0 && <Tally n={n[i]} />}</td>
-              <td>{num(n[i])}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <b>عدد الإجابات كلها: {num(total)}</b>
-      <button className="btn hide" onClick={() => setN(labels.map(() => 0))}>من جديد</button>
-    </div>
-  );
-}
-
-/** بيانات الكتاب لسؤال الفصل المفضّل وسؤال الإفطار (مثال من كتاب الحلول؛ في الصف يجمعها الطلاب بأنفسهم) */
-const SEASONS: Row[] = [['الشِّتاءُ', 3], ['الرَّبيعُ', 2], ['الصَّيْفُ', 4], ['الْخَريفُ', 1]];
-const BREAKFAST: Row[] = [['حليبٌ وبيضٌ', 4], ['حليبٌ وجبنٌ', 3], ['حليبٌ وعسلٌ', 3]];
+/** جدولا الكتاب الفارغان: يملؤهما الصف من إجابات زملائه (لا أعداد من عندنا) */
+const Seasons = () => (
+  <LiveTally id="g2-4-1-seasons" head="الْفَصْلُ الْمُفَضَّلُ" title="الفصل المفضل"
+    rows={[{ name: 'الشِّتاءُ' }, { name: 'الرَّبيعُ' }, { name: 'الصَّيْفُ' }, { name: 'الْخَريفُ' }]} />
+);
+const Breakfast = () => (
+  <LiveTally id="g2-4-1-breakfast" head="نَوْعُ الإِفْطَارِ" title="الإفطار المفضل"
+    rows={[{ name: 'حليبٌ وبيضٌ' }, { name: 'حليبٌ وجبنٌ' }, { name: 'حليبٌ وعسلٌ' }]} />
+);
 const TRIP_LEFT: Row[] = [['نُزْهَةٌ بَرِّيَّةٌ', 7], ['زِيارةُ حديقةِ الحيواناتِ', 5], ['زِيارةُ المُتْحَفِ', 8]];
 const TRIP_RIGHT: Row[] = [['نُزْهَةٌ بَرِّيَّةٌ', 6], ['زِيارةُ حديقةِ الحيواناتِ', 5], ['زِيارةُ المُتْحَفِ', 3]];
 
@@ -203,7 +175,8 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">ما حيوانك المفضل؟</SlideHead>
-          <TallyMaker labels={['🐪 الجمل', '🐎 الحصان', '🐱 القطة', '🐦 العصفور']} />
+          <LiveTally id="g2-4-1-animals" head="الْحَيَوَانُ الْمُفَضَّلُ" title="الحيوان المفضل"
+            rows={[{ name: 'الجمل', label: '🐪 الجمل' }, { name: 'الحصان', label: '🐎 الحصان' }, { name: 'القطة', label: '🐱 القطة' }, { name: 'العصفور', label: '🐦 العصفور' }]} />
         </>
       ),
     },
@@ -225,34 +198,28 @@ export default defineLesson({
     /* ================= أتأكد ١–٣ ================= */
     {
       sec: 'check', min: 2,
-      notes: 'اسأل عشرة طلاب فعلًا وسجّل الإجابات في جدول على السبورة. الأعداد هنا مثال من كتاب الحلول؛ استعمل بيانات صفك إن جمعتها.',
+      notes: 'اسأل عشرة طلاب فعلًا، واضغط + في صف الفصل الذي يختاره كل طالب (من الشاشة أو الجوال). ثم يجيب الصف من جدوله. الجدول نفسه في السؤال ٢.',
       content: (
         <QuestionSlide
           source={CHECK} n={1} time={60}
           intro="أَسْأَلُ عَشَرَةَ طُلَّابٍ عَنْ أَيِّ فُصُولِ السَّنَةِ الأَرْبَعَةِ هُوَ الْمُفَضَّلُ لَدَيْهِمْ، ثُمَّ أُسَجِّلُ الْبَيانَاتِ بِالإِشَارَاتِ؛ لأَسْتَعْمِلَهَا فِي الإِجَابَةِ عَنِ الأَسْئِلَةِ الآتِيَةِ:"
           question="مَا الْفَصْلُ الَّذِي يُفَضِّلُهُ أَكْثَرُ الطُّلَّابِ؟"
           hint="أبحث عن الصف الذي فيه أكثر الإشارات."
-          steps={[
-            { text: 'أكثر الإشارات في صف الصيف: ٤', hl: ['p2'] },
-            { text: 'الصَّيْفُ', kind: 'ans' },
-          ]}
-          chart={<TallyTable head="الْفَصْلُ الْمُفَضَّلُ" rows={SEASONS} />}
+          steps={[]}
+          chart={<Seasons />}
         />
       ),
     },
     {
       sec: 'check', min: 2,
-      notes: 'نجمع: الشتاء ٣ والخريف ١.',
+      notes: 'من جدول الصف: نجمع عدد الشتاء وعدد الخريف ونكتب الجملة العددية.',
       content: (
         <QuestionSlide
           source={CHECK} n={2} time={60}
           question="مَا عَدَدُ الطُّلَّابِ الَّذِينَ يُفَضِّلُونَ فَصْلَيِ الشِّتَاءِ وَالْخَرِيفِ؟ أَكْتُبُ جُمْلَةً عَدَدِيَّةً لِحَلِّ هَذَا السُّؤَالِ."
           hint="أجمع عدد طلاب الشتاء وعدد طلاب الخريف."
-          steps={[
-            { text: 'الشتاء ٣، والخريف ١', hl: ['p0', 'p3'] },
-            { text: '٣ + ١ = ٤', kind: 'ans' },
-          ]}
-          chart={<TallyTable head="الْفَصْلُ الْمُفَضَّلُ" rows={SEASONS} />}
+          steps={[]}
+          chart={<Seasons />}
         />
       ),
     },
@@ -268,7 +235,7 @@ export default defineLesson({
             { text: 'أُسجّلُ كلَّ إجابةٍ بإشارةٍ واحدةٍ، وأجمعُ كلَّ خمسِ إشاراتٍ معًا.' },
             { text: 'فيسهلُ عدُّ البياناتِ وترتيبُها ومقارنتُها بسرعةٍ.', kind: 'ans' },
           ]}
-          chart={<Card kind="ex" cap="خمس إشارات معًا"><div style={{ fontSize: '2.4em', textAlign: 'center' }}><Tally n={10} /></div></Card>}
+          chart={<Seasons />}
         />
       ),
     },
@@ -276,28 +243,28 @@ export default defineLesson({
     /* ================= أتدرب ٤–٧ ================= */
     {
       sec: 'practice', min: 2,
-      notes: 'الأعداد مثال من كتاب الحلول؛ يمكنك جمع بيانات صفك أولًا بلوحة «نعمل معًا».',
+      notes: 'اسأل عشرة طلاب عن إفطارهم المفضل، واضغط + في الصف المناسب لكل إجابة. الجدول نفسه في الأسئلة ٤–٧.',
       content: (
         <QuestionSlide
           source={PRACTICE} n={4} time={30}
           intro="أَسْأَلُ عَشَرَةَ طُلَّابٍ مَا وَجْبَةُ الإِفْطَارِ الْمُفَضَّلَةُ لَدَيْهِمْ؟ أَجْمَعُ الْبَيَانَاتِ حَوْلَ ذَلِكَ، ثُمَّ أَسْتَعْمِلُ الإِشَارَاتِ؛ لِأُسَجِّلَ تِلْكَ الْبَيَانَاتِ. أَسْتَعْمِلُ الْبَيَانَاتِ فِي الْجَدْوَلِ أَعْلَاهُ لِلإِجَابَةِ عَنِ الأَسْئِلَةِ الآتِيَةِ:"
           question="كَمْ طَالِبًا يُفَضِّلُ الحَلِيبَ وَ البَيْضَ؟"
           hint="أعدّ إشارات الصف الأول."
-          steps={[{ text: '٤ طلاب', hl: ['p0'], kind: 'ans' }]}
-          chart={<TallyTable head="نَوْعُ الإِفْطَارِ" rows={BREAKFAST} />}
+          steps={[]}
+          chart={<Breakfast />}
         />
       ),
     },
     {
       sec: 'practice', min: 1,
-      notes: 'الصف الثاني.',
+      notes: 'من جدول الصف: إشارات الصف الثاني.',
       content: (
         <QuestionSlide
           source={PRACTICE} n={5} time={30}
           question="كَمْ طَالِبًا يُفَضِّلُ الحَلِيبَ وَ الجُبْنَ؟"
           hint="أعدّ إشارات الصف الثاني."
-          steps={[{ text: '٣ طلاب', hl: ['p1'], kind: 'ans' }]}
-          chart={<TallyTable head="نَوْعُ الإِفْطَارِ" rows={BREAKFAST} />}
+          steps={[]}
+          chart={<Breakfast />}
         />
       ),
     },
@@ -309,24 +276,21 @@ export default defineLesson({
           source={PRACTICE} n={6} time={30}
           question="مَا الإِفْطَارُ الأَكْثَرُ تَفْضِيلًا لَدَى الطُّلَّابِ؟"
           hint="أيّ صف فيه أكثر الإشارات؟"
-          steps={[{ text: 'الحليبُ والبيضُ (٤ طلاب)', hl: ['p0'], kind: 'ans' }]}
-          chart={<TallyTable head="نَوْعُ الإِفْطَارِ" rows={BREAKFAST} />}
+          steps={[]}
+          chart={<Breakfast />}
         />
       ),
     },
     {
       sec: 'practice', min: 1,
-      notes: 'اسأل الطلاب عن إفطارهم، وأضف إشارة.',
+      notes: 'اسأل طالبًا عن إفطاره المفضل، واضغط + في صفه: الجدول يتغير أمام الطلاب.',
       content: (
         <QuestionSlide
           source={PRACTICE} n={7} tps
           question="كَيْفَ يَتَغَيَّرُ الجَدْوَلُ إِذَا أُضِيفَ إِلَيْهِ إِفْطَارِي المُفَضَّلُ؟"
           hint="ماذا أفعل بإجابة جديدة؟"
-          steps={[
-            { text: 'تُزادُ إشارةٌ واحدةٌ في صفِّ إفطاري المفضَّلِ.' },
-            { text: 'فيصيرُ عددُ الإجاباتِ كلِّها ١١ بدلَ ١٠.', kind: 'ans' },
-          ]}
-          chart={<TallyTable head="نَوْعُ الإِفْطَارِ" rows={BREAKFAST} />}
+          steps={[{ text: 'تُزادُ إشارةٌ واحدةٌ في صفِّ إفطاري المفضَّلِ.', kind: 'ans' }]}
+          chart={<Breakfast />}
         />
       ),
     },

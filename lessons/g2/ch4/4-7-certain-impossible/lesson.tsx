@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Bag, Card, Cols, Ctrls, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, SlideHead, Solution, Stack,
-  Step, Tag, TimerButton, Winner, defineLesson, type BagItem,
+  Step, Tag, TimerButton, Winner, defineLesson, num, useRemoteWidget, type BagItem,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -42,18 +42,73 @@ function CircleRow({ n, pick, items, ans }: { n: number; pick: string; items: Ba
   );
 }
 
-/** كيس للتلوين: مكعبات رمادية، والتلوين الصحيح يظهر عند الخطوة */
-function ColorQ({ n, pick, word, fill, total }: { n: number; pick: string; word: string; fill: string; total: number }) {
+/** ألوان التلوين؛ ضغطة على المكعب تنقله إلى اللون التالي ثم تعيده رماديًا */
+const PAINT = [
+  { name: 'أحمر', c: C.red },
+  { name: 'أصفر', c: C.yellow },
+  { name: 'أخضر', c: C.green },
+  { name: 'أزرق', c: C.blue },
+];
+
+interface ColorDef { n: number; pick: string; word: string; fill: string; total: number }
+
+/** عدد مكعبات كل لون ← مكعبات الكيس مرتّبة (-١ رمادي) */
+const fromCounts = (counts: number[], total: number) => {
+  const out: number[] = [];
+  counts.forEach((k, c) => out.push(...Array(k).fill(c)));
+  return [...out, ...Array(total - out.length).fill(-1)];
+};
+
+/**
+ * سؤالا «أُلَوِّنُ» في الشريحة: يلوّن الطلاب المكعبات بأنفسهم (ضغطة على المكعب، أو عدد كل لون من الجوال).
+ * حل دليل المعلم يبقى مخفيًا خلف «التالي».
+ */
+function ColorPair({ qs }: { qs: ColorDef[] }) {
+  const [cubes, setCubes] = useState(() => qs.map((q) => Array<number>(q.total).fill(-1)));
+  const counts = cubes.map((cs) => PAINT.map((_, c) => cs.filter((x) => x === c).length));
+  const tap = (q: number, i: number) =>
+    setCubes((all) => all.map((cs, j) => (j !== q ? cs : cs.map((x, k) => (k !== i ? x : x + 1 >= PAINT.length ? -1 : x + 1)))));
+  useRemoteWidget(
+    () => ({
+      title: 'تلوين المكعبات',
+      steppers: qs.flatMap((q, j) =>
+        PAINT.map((p, c) => ({
+          key: `${j}:${c}`,
+          label: `${num(q.n)} · ${p.name}`,
+          value: counts[j][c],
+          min: 0,
+          max: counts[j][c] + q.total - counts[j].reduce((a, b) => a + b, 0),
+          color: p.c,
+        })),
+      ),
+      buttons: [{ key: 'clear', label: 'امسح التلوين' }],
+    }),
+    (k, v) => {
+      if (k === 'clear') return setCubes(qs.map((q) => Array<number>(q.total).fill(-1)));
+      const [j, c] = k.split(':').map(Number);
+      if (v === undefined) return;
+      setCubes((all) => all.map((cs, x) => (x !== j ? cs : fromCounts(counts[j].map((n, y) => (y === c ? v : n)), qs[j].total))));
+    },
+    [cubes.map((cs) => cs.join()).join('|')],
+  );
   return (
-    <QCard n={n} className="ccard">
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.2em', paddingInlineStart: '1.6em' }}>
-        <b>اخْتِيَارُ <Cube c={pick} /> {word}</b>
-        <div className="cbags">
-          <Bag items={[{ name: 'فارغ', n: total, color: C.gray }]} shape="cube" size={170} />
-          <Step className="cover"><Bag items={[{ name: 'ملوّن', n: total, color: fill }]} shape="cube" size={170} /></Step>
-        </div>
-      </div>
-    </QCard>
+    <div className="qgrid two">
+      {qs.map(({ n, pick, word, fill, total }, q) => (
+        <QCard key={n} n={n} className="ccard">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.2em', paddingInlineStart: '1.6em' }}>
+            <b>اخْتِيَارُ <Cube c={pick} /> {word}</b>
+            <div className="cbags">
+              <div className="paintbag">
+                {cubes[q].map((x, i) => (
+                  <button key={i} aria-label={`لوّن المكعب ${num(i + 1)}`} style={{ background: x < 0 ? C.gray : PAINT[x].c }} onClick={() => tap(q, i)} />
+                ))}
+              </div>
+              <Step className="cover"><Bag items={[{ name: 'ملوّن', n: total, color: fill }]} shape="cube" size={170} /></Step>
+            </div>
+          </div>
+        </QCard>
+      ))}
+    </div>
   );
 }
 
@@ -235,15 +290,15 @@ export default defineLesson({
     /* ================= أتأكد ٣–٤ ================= */
     {
       sec: 'check', min: 2,
-      notes: 'إجابات متعددة صحيحة في ٤: أي لون غير الأصفر.',
+      notes: 'يلوّن الطلاب: ضغطة على المكعب تغيّر لونه (أو عدد كل لون من الجوال). في ٤ إجابات كثيرة صحيحة: أي لون غير الأصفر. «التالي» يُظهر حل دليل المعلم.',
       content: (
         <>
           <div className="row bookrow"><Tag kind="qs">{CHECK}</Tag></div>
           <p className="qtext" style={{ margin: 0 }}>{COLOR}</p>
-          <div className="qgrid two">
-            <ColorQ n={3} pick={C.red} word="أَكِيدٌ." fill={C.red} total={7} />
-            <ColorQ n={4} pick={C.yellow} word="مُسْتَحِيلٌ." fill={C.red} total={7} />
-          </div>
+          <ColorPair qs={[
+            { n: 3, pick: C.red, word: 'أَكِيدٌ.', fill: C.red, total: 7 },
+            { n: 4, pick: C.yellow, word: 'مُسْتَحِيلٌ.', fill: C.red, total: 7 },
+          ]} />
           <Ctrls><NextButton /><TimerButton sec={90} /></Ctrls>
         </>
       ),
@@ -285,15 +340,15 @@ export default defineLesson({
     /* ================= أتدرب ٩–١٠ ================= */
     {
       sec: 'practice', min: 2,
-      notes: 'في ١٠ أي لون غير الأزرق صحيح.',
+      notes: 'يلوّن الطلاب: ضغطة على المكعب تغيّر لونه (أو عدد كل لون من الجوال). في ١٠ أي لون غير الأزرق صحيح. «التالي» يُظهر حل دليل المعلم.',
       content: (
         <>
           <div className="row bookrow"><Tag kind="qs">{PRACTICE}</Tag></div>
           <p className="qtext" style={{ margin: 0 }}>{COLOR}</p>
-          <div className="qgrid two">
-            <ColorQ n={9} pick={C.green} word="أَكِيدٌ." fill={C.green} total={8} />
-            <ColorQ n={10} pick={C.blue} word="مُسْتَحِيلٌ." fill={C.red} total={8} />
-          </div>
+          <ColorPair qs={[
+            { n: 9, pick: C.green, word: 'أَكِيدٌ.', fill: C.green, total: 8 },
+            { n: 10, pick: C.blue, word: 'مُسْتَحِيلٌ.', fill: C.red, total: 8 },
+          ]} />
           <Ctrls><NextButton /><TimerButton sec={90} /></Ctrls>
         </>
       ),

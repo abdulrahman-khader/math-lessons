@@ -327,6 +327,7 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   await phone.locator('.rbtn', { hasText: 'اعرض اللوحة على الشاشة' }).click();
   await expect(ipad.locator('.sbox')).toBeVisible();
   await ipad.locator('.sbox').getByRole('button', { name: 'هذا الأسبوع' }).click();
+  await ipad.locator('.sbox').getByRole('button', { name: 'إظهار النجوم' }).click();
   await expect(ipad.locator('.scard', { hasText: 'محمد' }).locator('.stot')).toHaveText('١');
   await phone.locator('.rbtn', { hasText: 'تراجع عن آخر ضغطة' }).click();
   await expect(ipad.locator('.scard', { hasText: 'محمد' }).locator('.stot')).toHaveText('٢');

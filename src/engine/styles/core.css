@@ -939,3 +939,6 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .cverdict { font-size: .8em; font-weight: 800; color: var(--bad); text-align: center; }
 .cverdict.ok { color: var(--good); font-size: .95em; }
 .votetop { color: var(--good); font-size: .9em; text-align: center; }
+.psteps.many { gap: .3em; padding-inline: 0; }
+.psteps.many .pwho b { font-size: 1.1em; }
+.psteps.many .pwho small { font-size: .7em; }

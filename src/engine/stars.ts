@@ -86,8 +86,18 @@ export function rankRows(list: { name: string; stars: number; mistakes: number }
   return rows;
 }
 
-/** نجوم الأسبوع: أصحاب المراكز ١–٥ ممن مجموعهم فوق الصفر، مرتّبين (ستة أو سبعة إن تعادل بعضهم) */
-export const topRows = (rows: StarRow[]) => rows.filter((r) => r.rank <= TOP && r.total > 0).sort((a, b) => a.rank - b.rank);
+/**
+ * نجوم الأسبوع: أول خمسة طلاب ممن مجموعهم فوق الصفر، مرتّبين، ومعهم كل من تعادل مع الخامس
+ * (طالبان في الأول وستة في الثاني = ثمانية نجوم، ولا أحد بعدهم).
+ */
+export function topRows(rows: StarRow[]) {
+  const out: StarRow[] = [];
+  for (const r of rows.filter((x) => x.total > 0).sort((a, b) => a.rank - b.rank)) {
+    if (out.length >= TOP && r.rank !== out[out.length - 1].rank) break;
+    out.push(r);
+  }
+  return out;
+}
 
 /** بدايات الأسابيع السابقة التي فيها نجوم أو أغلاط لهذا الفصل، الأحدث أولًا */
 export function pastWeeks(events: StarEvent[], k: string, now = Date.now()): number[] {

@@ -613,7 +613,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             req={starsReq}
             onManage={() => setClassesOpen(true)}
           />
-          <StarCheer cheer={cheer} klass={klass} events={starEvents} onDone={endCheer} />
+          <StarCheer cheer={cheer} klass={klass} onDone={endCheer} />
           <ClassesModal open={classesOpen} onClose={() => setClassesOpen(false)} grade={grade} roster={roster} update={updateRoster} />
           <GroupsModal
             open={groupsOpen}

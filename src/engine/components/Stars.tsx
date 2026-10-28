@@ -20,7 +20,6 @@ interface Props {
 type Tab = 'week' | 'now' | 'podium' | 'archive';
 
 /** درجات المنصة من اليمين: الرابع، الثاني، الأول، الثالث، الخامس */
-const PODIUM = [4, 2, 1, 3, 5];
 
 /**
  * نجم الأسبوع: بطاقة لكل طالب بنجومه وأغلاطه ومجموعه أمام الطلاب، وزرّا ⭐ و✖.
@@ -168,15 +167,16 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
  */
 function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; label: string; soFar?: boolean; next?: number }) {
   const top = topRows(rows);
-  const steps = PODIUM.map((k) => ({ k, who: top.filter((r) => r.rank === k) })).filter((x) => x.who.length);
-  /** المراكز من الأدنى إلى الأعلى بترتيب الكشف */
-  const order = steps.map((x) => x.k).sort((a, b) => b - a);
+  /** عمود لكل طالب: الأول في الوسط، ثم يمينه ويساره بالتناوب (المتعادلون أعمدة متجاورة بالارتفاع نفسه) */
+  const cols: { r: StarRow; i: number }[] = [];
+  top.forEach((r, i) => (i % 2 ? cols.unshift({ r, i }) : cols.push({ r, i })));
+  /** عدد الأعمدة الظاهرة؛ الكشف من آخر طالب إلى الأول */
   const [shown, setShown] = useState(0);
-  const all = shown >= order.length;
+  const all = shown >= top.length;
   const reveal = () =>
     setShown((n) => {
-      if (n >= order.length) return n;
-      if (n + 1 === order.length) sEnd();
+      if (n >= top.length) return n;
+      if (n + 1 === top.length) sEnd();
       else sGood();
       return n + 1;
     });
@@ -194,10 +194,10 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [order.length]);
+  }, [top.length]);
 
   if (!top.length) return <p className="sempty">لا نجوم في أسبوع {label}.</p>;
-  const isShown = (k: number) => order.indexOf(k) < shown;
+  const isShown = (i: number) => i >= top.length - shown;
   return (
     <div className="podium">
       <div className="crow">
@@ -208,23 +208,21 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
         <button className="btn primary" disabled={all} onClick={reveal}>
           {shown ? 'أظهر التالي' : 'ابدأ من المركز الأخير'}
         </button>
-        <button className="btn" disabled={all} onClick={() => setShown(order.length)}>
+        <button className="btn" disabled={all} onClick={() => setShown(top.length)}>
           أظهر الكل
         </button>
       </div>
-      <div className="psteps" style={{ gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}>
-        {steps.map(({ k, who }) => (
-          <div key={k} className={`pstep p${k}` + (isShown(k) ? ' on' : '')}>
+      <div className={'psteps' + (top.length > 5 ? ' many' : '')} style={{ gridTemplateColumns: `repeat(${cols.length}, 1fr)` }}>
+        {cols.map(({ r, i }) => (
+          <div key={r.name} className={`pstep p${r.rank}` + (isShown(i) ? ' on' : '')}>
             <div className="pnames">
-              {isShown(k) ? (
-                who.map((r) => (
-                  <span key={r.name} className="pwho">
-                    <b>{r.name}</b>
-                    <small>
-                      المجموع {num(r.total)} — <IconStar /> {num(r.stars)} ✖ {num(r.mistakes)}
-                    </small>
-                  </span>
-                ))
+              {isShown(i) ? (
+                <span className="pwho">
+                  <b>{r.name}</b>
+                  <small>
+                    المجموع {num(r.total)} — <IconStar /> {num(r.stars)} ✖ {num(r.mistakes)}
+                  </small>
+                </span>
               ) : (
                 <span className="pwho hidden" aria-label="لم يظهر بعد">
                   <b>؟</b>
@@ -233,7 +231,7 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
             </div>
             <div className="pblock">
               <IconStar />
-              <span>{num(k)}</span>
+              <span>{num(r.rank)}</span>
             </div>
           </div>
         ))}
@@ -242,15 +240,14 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
   );
 }
 
-/** إعلان على الشاشة حين يأخذ طالب نجمة (من اللوحة أو العجلة أو الجوال): نجمة كبيرة واسمه ونجومه هذا الأسبوع. الغلطة لا تُعلَن. لا يعترض الضغطات فتتوالى النجوم. */
-export function StarCheer({ cheer, klass, events, onDone }: { cheer: { name: string; n: number } | null; klass: Klass | undefined; events: StarEvent[]; onDone: () => void }) {
+/** إعلان على الشاشة حين يأخذ طالب نجمة (من اللوحة أو العجلة أو الجوال): نجمة كبيرة واسمه، بلا عدد نجومه. الغلطة لا تُعلَن. لا يعترض الضغطات فتتوالى النجوم. */
+export function StarCheer({ cheer, klass, onDone }: { cheer: { name: string; n: number } | null; klass: Klass | undefined; onDone: () => void }) {
   useEffect(() => {
     if (!cheer) return;
     const t = setTimeout(onDone, 2800);
     return () => clearTimeout(t);
   }, [cheer, onDone]);
   if (!cheer || !klass) return null;
-  const row = tally(events, klass.id, klass.students, weekStart(Date.now())).find((r) => r.name === cheer.name);
   return (
     <div key={cheer.n} className="cheer" role="status">
       <div className="cheer-card">
@@ -259,7 +256,6 @@ export function StarCheer({ cheer, klass, events, onDone }: { cheer: { name: str
         </div>
         <div className="cheer-name">{cheer.name}</div>
         <div className="cheer-msg">أخذ نجمة!</div>
-        {row && <div className="cheer-week">نجومه هذا الأسبوع: {num(row.stars)}</div>}
       </div>
     </div>
   );

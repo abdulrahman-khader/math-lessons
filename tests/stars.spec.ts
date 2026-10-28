@@ -49,17 +49,29 @@ test('المجموع = النجوم − الأغلاط، والتعادل يتق
     ['خالد', 4],
     ['فهد', 5],
   ]);
-  // تعادل في الثاني: الذي بعدهما ثالث، فيصير النجوم ستة
+  // تعادل في الثاني: يكتمل الخمسة عند الرابع، فلا يدخل فهد الخامس
   give('سلطان', 7, 0);
-  const tied = topRows(tally(ev, 'a', ['سعد', 'علي', 'فهد', 'خالد', 'عمر', 'زياد', 'بدر', 'ماجد', 'ريان', 'سلطان'], from));
+  const names = ['سعد', 'علي', 'فهد', 'خالد', 'عمر', 'زياد', 'بدر', 'ماجد', 'ريان', 'سلطان'];
+  const tied = topRows(tally(ev, 'a', names, from));
   expect(tied.map((r) => [r.name, r.rank])).toEqual([
     ['سعد', 1],
     ['ريان', 2],
     ['سلطان', 2],
     ['علي', 3],
     ['خالد', 4],
-    ['فهد', 5],
   ]);
+  // طالبان في الأول وستة في الثاني: ثمانية نجوم فقط، ولا أحد في الثالث
+  const ev2: StarEvent[] = [];
+  const add = (s: string, n: number) => {
+    for (let i = 0; i < n; i++) ev2.push({ t: from + 1000 + i, k: 'a', s, d: 1 });
+  };
+  ['سعد', 'علي'].forEach((s) => add(s, 9));
+  ['فهد', 'خالد', 'عمر', 'زياد', 'بدر', 'ماجد'].forEach((s) => add(s, 5));
+  add('ريان', 3);
+  const eight = topRows(tally(ev2, 'a', names, from));
+  expect(eight).toHaveLength(8);
+  expect(eight.filter((r) => r.rank === 1)).toHaveLength(2);
+  expect(eight.filter((r) => r.rank === 2)).toHaveLength(6);
 });
 
 async function openWithClass(page: Page, errors: string[]) {
@@ -114,7 +126,7 @@ test('النجمة تُعلَن على الشاشة باسم الطالب، وا
   await box.locator('[aria-label="نجمة لـخالد"]').click();
   await box.locator('[aria-label="نجمة لـخالد"]').click();
   await expect(page.locator('.cheer-name')).toHaveText('خالد');
-  await expect(page.locator('.cheer-week')).toContainText('٢');
+  await expect(page.locator('.cheer-week')).toHaveCount(0); // بلا عدد النجوم
   await expect(page.locator('.cheer')).toHaveCount(0, { timeout: 5000 });
   expect(errors).toEqual([]);
 });
@@ -164,5 +176,40 @@ test('العجلة: نجمة لمن خرج اسمه تظهر في لوحة ال�
   await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
   await page.locator('.sbox').getByRole('button', { name: 'هذا الأسبوع' }).click();
   await expect(card(page, name).locator('.stot')).toHaveText('١');
+  expect(errors).toEqual([]);
+});
+
+test('المنصة: عمود لكل طالب، والمتعادلون بالمركز نفسه، وأول خمسة مع من تعادل معهم', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto(pathToFileURL(path.join(dist, file)).href);
+  const names = ['سعد', 'علي', 'فهد', 'خالد', 'عمر', 'زياد', 'بدر', 'ماجد', 'ريان'];
+  await page.evaluate((names) => {
+    localStorage.clear();
+    localStorage.setItem('classes', JSON.stringify({ grades: { g2: { last: 'k1', classes: [{ id: 'k1', name: 'الفصل الأول', students: names, team: {} }] } } }));
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - ((d.getDay() - 4 + 7) % 7) - 3); // من الأسبوع الماضي
+    const t = d.getTime() + 10 * 3600e3;
+    const ev: { t: number; k: string; s: string; d: number }[] = [];
+    const add = (s: string, n: number) => {
+      for (let i = 0; i < n; i++) ev.push({ t: t + ev.length, k: 'k1', s, d: 1 });
+    };
+    names.slice(0, 2).forEach((s) => add(s, 9)); // طالبان في الأول
+    names.slice(2, 8).forEach((s) => add(s, 5)); // ستة في الثاني
+    add(names[8], 3); // الثالث: لا يظهر
+    localStorage.setItem('stars', JSON.stringify({ events: ev }));
+  }, names);
+  await page.reload();
+  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  await page.locator('.sbox').getByRole('button', { name: 'نجوم الأسبوع الماضي' }).click();
+  await expect(page.locator('.pstep')).toHaveCount(8);
+  await page.getByRole('button', { name: 'ابدأ من المركز الأخير' }).click();
+  await expect(page.locator('.pstep.on')).toHaveCount(1);
+  await page.getByRole('button', { name: 'أظهر الكل' }).click();
+  await expect(page.locator('.pstep.p1.on')).toHaveCount(2);
+  await expect(page.locator('.pstep.p2.on')).toHaveCount(6);
+  await expect(page.locator('.pstep.p3')).toHaveCount(0);
+  await expect(page.locator('.pwho b', { hasText: 'ريان' })).toHaveCount(0);
   expect(errors).toEqual([]);
 });

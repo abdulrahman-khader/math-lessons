@@ -14,7 +14,7 @@ import { RemotePanel } from './components/RemotePanel';
 import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
 import { TIMER_OFF, TimerWidget, fixView, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
-import { StarCheer, StarsModal } from './components/Stars';
+import { StarCheer, StarsModal, type Cheer } from './components/Stars';
 import { BookCtx } from './components/QuestionSlide';
 import { IconFull, IconHome, IconReset, IconNextRtl, IconPen, IconPhone, IconPrevRtl, IconSound, IconStar, IconTimer, IconWheel } from './components/icons';
 
@@ -59,12 +59,12 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const { events: starEvents, add: addStarEvent, undo: undoStar } = useStars();
   const [starsOpen, setStarsOpen] = useState(false);
   const [starsReq, setStarsReq] = useState<{ n: number; a: 'podium' | 'next' }>({ n: 0, a: 'next' });
-  const [cheer, setCheer] = useState<{ name: string; n: number } | null>(null);
+  const [cheer, setCheer] = useState<Cheer | null>(null);
   const endCheer = useCallback(() => setCheer(null), []);
   const giveStar = (name: string, d: 1 | -1) => {
     if (!klass?.students.includes(name)) return;
     addStarEvent(klass.id, name, d);
-    if (d > 0) setCheer((c) => ({ name, n: (c?.n ?? 0) + 1 }));
+    setCheer((c) => ({ name, d, n: (c?.n ?? 0) + 1 }));
     if (d > 0) sGood();
     else sBad();
   };

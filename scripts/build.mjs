@@ -6,7 +6,7 @@ import { build } from 'vite';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { root, findLessons, pickLessons, outName, readMeta } from './lessons.mjs';
-import { lessonConfig } from '../vite.config.mjs';
+import { lessonConfig, starsConfig } from '../vite.config.mjs';
 
 const dist = path.join(root, 'dist');
 mkdirSync(dist, { recursive: true });
@@ -22,6 +22,13 @@ for (const lesson of pickLessons(process.argv[2])) {
   const out = path.join(dist, outName(lesson));
   writeFileSync(out, html);
   console.log(`✓ ${lesson} → dist/${outName(lesson)} (${(statSync(out).size / 1024).toFixed(0)} KB)`);
+}
+// صفحة نجم الأسبوع: تُفتح من قائمة الدروس دون درس
+{
+  const tmp = path.join(root, '.lesson-build', '_stars');
+  await build(starsConfig(tmp));
+  copyFileSync(path.join(tmp, 'stars.html'), path.join(dist, 'stars.html'));
+  console.log('✓ dist/stars.html (نجم الأسبوع)');
 }
 rmSync(path.join(root, '.lesson-build'), { recursive: true, force: true });
 
@@ -121,11 +128,18 @@ h3 { font-weight: 700; font-size: 1.15rem; color: var(--muted); margin: 18px 0 1
 .t { display: flex; flex-direction: column; min-width: 0; }
 .t b { font-family: var(--display); font-weight: 800; font-size: 1.3rem; line-height: 1.3; }
 .t small { color: var(--muted); font-weight: 700; font-size: .85rem; }
+.stars { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 14px; margin: 0 0 18px; padding: 14px 18px; background: #fff6d6; border: 3px solid #e8a400; border-radius: 14px; color: inherit; text-decoration: none; }
+.stars span { grid-row: span 2; font-size: 2.4rem; line-height: 1; color: #e8a400; }
+.stars b { font-family: var(--display); font-weight: 800; font-size: 1.5rem; line-height: 1.3; }
+.stars small { color: var(--muted); font-weight: 700; }
+.stars:hover { border-color: var(--ink); }
+.stars:focus-visible { outline: 4px solid #e0590b; outline-offset: 3px; }
 </style>
 </head>
 <body>
 <header><div class="in"><b>دروس الرياضيات التفاعلية</b><span>عروض تفاعلية للسبورة الذكية</span></div></header>
 <main>
+<a class="stars" href="stars.html"><span>★</span><b>نجم الأسبوع</b><small>النجوم والترتيب والعجلة لكل فصولك</small></a>
 <p class="tip">افتح الدرس ثم اضغط F لملء الشاشة. للعمل دون إنترنت احفظ صفحة الدرس (Ctrl+S): كل درس ملف واحد.</p>
 <div id="picker">
 <h2 class="ask">اختر الصف</h2>

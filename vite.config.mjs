@@ -47,4 +47,14 @@ export function lessonConfig(lessonDir, outDir) {
   };
 }
 
+/**
+ * صفحة نجم الأسبوع (stars.html): المحرك نفسه دون درس.
+ * @param {string} outDir
+ * @returns {import('vite').InlineConfig}
+ */
+export function starsConfig(outDir) {
+  const c = lessonConfig('g4/ch3/3-4-line-graphs', outDir);
+  return { ...c, build: { ...c.build, rollupOptions: { input: path.join(root, 'stars.html') } } };
+}
+
 export default defineConfig(lessonConfig(process.env.LESSON ?? 'g4/ch3/3-4-line-graphs'));

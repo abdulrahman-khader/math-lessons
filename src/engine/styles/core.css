@@ -942,3 +942,19 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .psteps.many { gap: .3em; padding-inline: 0; }
 .psteps.many .pwho b { font-size: 1.1em; }
 .psteps.many .pwho small { font-size: .7em; }
+
+/* إعلان الغلطة: مثل النجمة بالأحمر */
+.cheer.bad .cheer-card { background: #fde4e4; border-color: var(--bad); }
+.cheer.bad .cheer-msg { color: var(--bad); }
+.cheer-x { display: grid; place-items: center; inline-size: 100%; block-size: 100%; font-size: 2.4em; font-weight: 800; line-height: 1; color: var(--bad); }
+.cheer.bad .cheer-star { animation: shake .4s 2; filter: none; }
+/* نجم الأسبوع: الأعداد مخفية حتى يُظهرها المعلم */
+.stot.hid { background: var(--line); color: var(--muted); }
+.sshow { border-color: #e8a400; color: #8a6200; }
+.sshow.sel { background: #e8a400; border-color: #e8a400; color: #fff; }
+/* صفحة نجم الأسبوع (stars.html) */
+#app[data-page="stars"] a.ib { text-decoration: none; }
+.spick { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: .35em; padding: .35em .8em; background: var(--paper); border-block-end: 3px solid var(--line); font-size: .75em; }
+.spick .sgap { margin-inline-start: .8em; }
+.sidle { position: absolute; inset: 0; display: grid; place-items: center; }
+.sidle .btn { font-size: 1em; min-height: 2.6em; }

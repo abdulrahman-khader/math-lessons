@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 
 // يفحص كل درس مبني في dist/. شغّل `npm run build` أولًا (npm test يفعل ذلك).
 const dist = path.resolve(process.cwd(), 'dist');
-const files = readdirSync(dist).filter((f) => f.endsWith('.html') && f !== 'index.html');
+const files = readdirSync(dist).filter((f) => f.endsWith('.html') && f !== 'index.html' && f !== 'stars.html');
 
 async function open(page: Page, file: string, errors: string[]) {
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));

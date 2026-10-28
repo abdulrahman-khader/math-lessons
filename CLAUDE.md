@@ -18,6 +18,7 @@ Playwright drives the **installed Chrome** (`channel: 'chrome'`). Windows blocks
 src/engine/            shared engine, imported as '@engine'
   LessonApp.tsx        stage, header, footer, navigation, keyboard, teams, saved state
   stars.ts             star of the week: star/mistake log shared by all lessons, week Thursday–Wednesday, ranks
+  StarsApp.tsx         dist/stars.html (entry stars.html → stars-main.tsx): star of the week from the lesson index, no lesson needed
   context.tsx          slide scope: step reveal order, highlight keys, hint state
   components/          Chart, DragChart, TrendExplorer, QuestionSlide, MCQ, Steps, Layout, Wheel, Timer, Pen, Home, Clip
   styles/core.css      all styles (logical properties only)
@@ -56,6 +57,10 @@ tests/stars.spec.ts    star of the week: week boundary, ranking, board, wheel
 - **Canvas text** sets `ctx.direction = 'rtl'` explicitly (see Wheel).
 - **Keyboard**: ← next, → previous. Directional icons (`IconPrevRtl`/`IconNextRtl`) are drawn for RTL.
 - **New libraries**: before adding one, check whether it renders text, assumes LTR for layout, keyboard or animation, or formats numbers. If it does any of these and can't be configured, wrap it or build the piece ourselves.
+
+## Star of the week
+
+Every star or mistake is announced on screen (`StarCheer`, red for a mistake). The board opens with the counts hidden (`؟`) every time; the teacher shows them with «إظهار النجوم». `npm run build` also builds `dist/stars.html`, linked from the top of `dist/index.html`: grade, class, board, wheel and class editing without opening a lesson. Classes and stars live in one localStorage for the whole site, so the page and the lessons share them.
 
 ## Phone remote
 

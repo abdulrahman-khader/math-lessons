@@ -13,6 +13,8 @@ interface Props {
   onStar: (name: string, d: 1 | -1) => void;
   onUndo: () => void;
   onManage: () => void;
+  /** ما يُقال حين لم يُختر فصل */
+  noKlass?: string;
   /** أوامر الجوال: يزداد n مع كل أمر؛ podium يفتح منصة الأسبوع الماضي، وnext يُظهر المركز التالي */
   req?: { n: number; a: 'podium' | 'next' };
 }
@@ -25,13 +27,18 @@ type Tab = 'week' | 'now' | 'podium' | 'archive';
  * نجم الأسبوع: بطاقة لكل طالب بنجومه وأغلاطه ومجموعه أمام الطلاب، وزرّا ⭐ و✖.
  * يوم الخميس تُفتح على منصة نجوم الأسبوع الذي انتهى أمس.
  */
-export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onManage, req }: Props) {
+export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onManage, noKlass = 'اختر فصلًا في الصفحة الأولى من الدرس، فتظهر بطاقات طلابه هنا.', req }: Props) {
   const [tab, setTab] = useState<Tab>('week');
   /** آخر بطاقة تغيّرت، لوميضها: ذهبي للنجمة وأحمر للغلطة */
   const [flash, setFlash] = useState<{ name: string; d: 1 | -1; n: number } | null>(null);
   const [arch, setArch] = useState(0);
+  /** الأعداد مخفية عند كل فتح، ولا تظهر للطلاب إلا إذا أظهرها المعلم */
+  const [shown, setShown] = useState(false);
   useEffect(() => {
-    if (open) setTab(isThursday() ? 'podium' : 'week');
+    if (open) {
+      setTab(isThursday() ? 'podium' : 'week');
+      setShown(false);
+    }
   }, [open]);
   /** يزداد مع كل «أظهر التالي» من الجوال، فتكشف المنصة المفتوحة مركزًا */
   const [nextReq, setNextReq] = useState(0);
@@ -81,6 +88,11 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
               <button className={'btn' + (tab === 'archive' ? ' sel' : '')} onClick={() => setTab('archive')} disabled={weeks.length < 2}>
                 الأرشيف
               </button>
+              {tab === 'week' && (
+                <button className={'btn sshow' + (shown ? ' sel' : '')} aria-pressed={shown} onClick={() => setShown((x) => !x)}>
+                  {shown ? 'إخفاء النجوم' : 'إظهار النجوم'}
+                </button>
+              )}
             </>
           )}
           <button className="btn hide" onClick={onClose}>
@@ -90,7 +102,7 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
 
         {!klass ? (
           <div className="sempty">
-            <p>اختر فصلًا في الصفحة الأولى من الدرس، فتظهر بطاقات طلابه هنا.</p>
+            <p>{noKlass}</p>
             <button className="btn primary" onClick={onManage}>
               أضف فصولك وأسماء الطلاب
             </button>
@@ -105,7 +117,7 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
         ) : tab === 'week' ? (
           <>
             <p className="swk">
-              {weekLabel(cur)} — المجموع = النجوم − الأغلاط
+              {weekLabel(cur)} — {shown ? 'المجموع = النجوم − الأغلاط' : 'النجوم مخفية'}
             </p>
             <div className="sgrid">
               {rows.map((r) => (
@@ -116,15 +128,17 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
                   </button>
                   <span className="smid">
                     <b className="sname">{r.name}</b>
-                    <span className="scount">
-                      <span className="st">
-                        <IconStar /> {num(r.stars)}
+                    {shown && (
+                      <span className="scount">
+                        <span className="st">
+                          <IconStar /> {num(r.stars)}
+                        </span>
+                        <span className="mi">✖ {num(r.mistakes)}</span>
                       </span>
-                      <span className="mi">✖ {num(r.mistakes)}</span>
-                    </span>
+                    )}
                   </span>
-                  <span className="stot" title="المجموع">
-                    {num(r.total)}
+                  <span className={'stot' + (shown ? '' : ' hid')} title="المجموع">
+                    {shown ? num(r.total) : '؟'}
                   </span>
                   <button className="sb down" aria-label={`غلطة على ${r.name}`} onClick={() => give(r.name, -1)}>
                     ✖
@@ -240,22 +254,29 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
   );
 }
 
-/** إعلان على الشاشة حين يأخذ طالب نجمة (من اللوحة أو العجلة أو الجوال): نجمة كبيرة واسمه، بلا عدد نجومه. الغلطة لا تُعلَن. لا يعترض الضغطات فتتوالى النجوم. */
-export function StarCheer({ cheer, klass, onDone }: { cheer: { name: string; n: number } | null; klass: Klass | undefined; onDone: () => void }) {
+/** إعلان على الشاشة: d = ١ نجمة، و−١ غلطة */
+export interface Cheer {
+  name: string;
+  d: 1 | -1;
+  /** يزداد مع كل ضغطة فيُعاد الإعلان حتى للطالب نفسه */
+  n: number;
+}
+
+/** إعلان على الشاشة حين يأخذ طالب نجمة أو غلطة (من اللوحة أو العجلة أو الجوال): الرمز كبيرًا واسمه، بلا عدد نجومه. لا يعترض الضغطات فتتوالى الإعلانات. */
+export function StarCheer({ cheer, klass, onDone }: { cheer: Cheer | null; klass: Klass | undefined; onDone: () => void }) {
   useEffect(() => {
     if (!cheer) return;
     const t = setTimeout(onDone, 2800);
     return () => clearTimeout(t);
   }, [cheer, onDone]);
   if (!cheer || !klass) return null;
+  const bad = cheer.d < 0;
   return (
-    <div key={cheer.n} className="cheer" role="status">
+    <div key={cheer.n} className={'cheer' + (bad ? ' bad' : '')} role="status">
       <div className="cheer-card">
-        <div className="cheer-star">
-          <IconStar />
-        </div>
+        <div className="cheer-star">{bad ? <span className="cheer-x">✖</span> : <IconStar />}</div>
         <div className="cheer-name">{cheer.name}</div>
-        <div className="cheer-msg">أخذ نجمة!</div>
+        <div className="cheer-msg">{bad ? 'أخذ غلطة' : 'أخذ نجمة!'}</div>
       </div>
     </div>
   );

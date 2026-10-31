@@ -129,7 +129,7 @@ test('النجمة والغلطة تُعلنان على الشاشة باسم ا
   await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
   await box.locator('[aria-label="غلطة على أحمد"]').click();
   await expect(page.locator('.cheer.bad .cheer-name')).toHaveText('أحمد');
-  await expect(page.locator('.cheer-msg')).toHaveText('أخذ غلطة');
+  await expect(page.locator('.cheer.bad .cheer-msg')).toHaveCount(0); // الاسم وحده، بلا كلمة «غلطة»
   await box.locator('[aria-label="نجمة لـخالد"]').click();
   await expect(page.locator('.cheer.bad')).toHaveCount(0);
   await box.locator('[aria-label="نجمة لـخالد"]').click();
@@ -170,21 +170,18 @@ test('منصة نجوم الأسبوع الماضي مرتّبة، وتُكشف 
   expect(errors).toEqual([]);
 });
 
-test('العجلة: نجمة لمن خرج اسمه تظهر في لوحة النجوم', async ({ page }) => {
+test('العجلة على شاشة الفصل: الاسم الفائز كبير، وتُغلق بلمسة خارجها', async ({ page }) => {
   const errors: string[] = [];
   await openWithClass(page, errors);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('button', { name: 'عجلة الأسماء' }).click();
-  await page.getByRole('button', { name: 'أدِر العجلة' }).click();
-  await expect(page.locator('.wstar .sb.up')).toBeVisible();
-  const name = (await page.locator('#wres').textContent())!;
-  await page.locator('.wstar .sb.up').click();
-  await expect(page.locator('.wgiven')).toHaveText('+١');
-  await page.getByRole('button', { name: 'إغلاق' }).click();
-  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
-  await page.locator('.sbox').getByRole('button', { name: 'هذا الأسبوع' }).click();
-  await page.locator('.sbox').getByRole('button', { name: 'إظهار النجوم' }).click();
-  await expect(card(page, name).locator('.stot')).toHaveText('١');
+  const wheel = page.getByRole('dialog', { name: 'عجلة الأسماء' });
+  await expect(wheel.locator('.wname')).toHaveText('؟');
+  await wheel.getByRole('button', { name: 'أدِر العجلة' }).click();
+  await expect(wheel.locator('.wname.done')).toBeVisible();
+  expect(['محمد', 'أحمد', 'خالد']).toContain(await wheel.locator('.wname').textContent());
+  await wheel.click({ position: { x: 5, y: 5 } });
+  await expect(wheel).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 

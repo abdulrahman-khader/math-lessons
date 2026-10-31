@@ -386,7 +386,7 @@ export default defineLesson({
       notes: 'أكتب: الحل العكسي. ابدأ من ٤٤ واعكس كل عملية.',
       content: (
         <QuestionSlide
-          source={SOLVE} n={9} tps tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
+          source={SOLVE} n={9} tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
           question="العددَ الذِي إذَا أضفتَ إليهِ ٨، وطرحْتَ ١٠ منَ المجموعِ، ثمَّ ضاعفتَ الفرقَ فَحصلْتَ علَى ٤٤، وَضِّحْ إجابَتكَ."
           hint="ابدأ من ٤٤ وارجع: المضاعفة عكسها القسمة على ٢."
           steps={[

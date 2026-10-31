@@ -4,7 +4,7 @@ import { ClassesModal } from './components/Classes';
 import { IconFull, IconHome, IconStar, IconWheel } from './components/icons';
 import { StarCheer, StarsModal, type Cheer } from './components/Stars';
 import { WheelModal } from './components/Wheel';
-import { sBad, sGood } from './sound';
+import { sBad, sStar } from './sound';
 import { useStars } from './stars';
 
 const GRADE_KEY = 'stars:grade';
@@ -66,7 +66,7 @@ export function StarsApp() {
     if (!klass?.students.includes(name)) return;
     add(klass.id, name, d);
     setCheer((c) => ({ name, d, n: (c?.n ?? 0) + 1 }));
-    if (d > 0) sGood();
+    if (d > 0) sStar();
     else sBad();
   };
   const fullscreen = () => {
@@ -146,8 +146,6 @@ export function StarsApp() {
             picked={picked}
             onPick={(n) => setPicked((p) => [...p, n])}
             onRestore={() => setPicked([])}
-            onManage={() => setClassesOpen(true)}
-            onStar={giveStar}
           />
           <StarCheer cheer={cheer} klass={klass} onDone={endCheer} />
           <ClassesModal open={classesOpen} onClose={() => setClassesOpen(false)} grade={grade} roster={roster} update={update} />

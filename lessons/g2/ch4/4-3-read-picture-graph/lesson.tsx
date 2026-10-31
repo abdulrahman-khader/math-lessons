@@ -191,7 +191,6 @@ export default defineLesson({
           source={CHECK}
           intro={USE_ABOVE}
           time={210}
-          tps
           qs={[
             { n: 1, question: "مَا عَدَدُ أَنْوَاعِ الْخَضْرَوَاتِ الْمَعْرُوضَةِ؟",
               steps: [{ text: '٤ أنواع', hl: ['p0', 'p1', 'p2', 'p3'], kind: 'ans' }] },
@@ -224,7 +223,7 @@ export default defineLesson({
       notes: 'أتحدث: اقبل كل إجابة معقولة.',
       content: (
         <QuestionSlide
-          source={CHECK} n={7} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
+          source={CHECK} n={7} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="مَنْ يُمْكِنُهُ أَنْ يَسْتَفِيدَ مِنْ تِلْكَ الْمَعْلُومَاتِ؟"
           hint="من يبيع الخضراوات أو يطبخها؟"
           steps={[{ text: 'بائعُ الخضارِ وصاحبُ المطعمِ؛ ليعرفا الأصنافَ الأكثرَ تفضيلًا فيوفّراها.', kind: 'ans' }]}
@@ -242,7 +241,6 @@ export default defineLesson({
           source={PRACTICE}
           intro={USE}
           time={120}
-          tps
           qs={[
             { n: 8, question: "كَمْ طَالِبًا يَلْعَبُ كُرَةَ الْقَدَمِ؟",
               steps: [
@@ -276,7 +274,7 @@ export default defineLesson({
       notes: 'أصحح الخطأ: ٧؟ ربما عدّ الصور مع صورة التسمية، أو لم يستعمل المفتاح.',
       content: (
         <QuestionSlide
-          source={HOT} n={12} tps tags={[{ kind: 'warn', text: 'أُصَحِّحُ الْخَطَأَ' }]}
+          source={HOT} n={12} tags={[{ kind: 'warn', text: 'أُصَحِّحُ الْخَطَأَ' }]}
           question="أَجَابَ جَمَالٌ عَنِ السُّؤَالِ الثَّامِنِ بِالْعَدَدِ ٧. لِمَاذَا كَانَتْ إِجَابَةُ جَمَالٍ غَيْرَ صَحِيحَةٍ؟ أُصَحِّحُ الإِجَابَةَ."
           hint="هل استعمل جمال المفتاح؟"
           steps={[

@@ -68,7 +68,32 @@ async function pair(browser: Browser, url = href) {
   await expect(phone.page.locator('.dot.ok')).toContainText('مباشرة', { timeout: 45000 });
   await expect(ipad.page.locator('.rstat')).toContainText('مباشرة', { timeout: 15000 });
   await ipad.page.locator('.rpanel button', { hasText: 'إغلاق' }).click();
+  // الجوال يبدأ بصفحة إعداد الحصة
+  await phone.page.getByRole('button', { name: 'ابدأ الدرس' }).click();
   return { ipad: ipad.page, phone: phone.page, errors: [...ipad.errors, ...phone.errors] };
+}
+
+/** لوحة أداة في الجوال (الفرق، العجلة، النجوم، المؤقت، الشرائح) */
+async function sheet(phone: Page, name: string) {
+  await phone.locator('.r2tools button', { hasText: name }).click();
+  await expect(phone.locator('.r2panel')).toBeVisible();
+}
+async function closeSheet(phone: Page) {
+  await phone.locator('.r2panel .r2x').click();
+  await expect(phone.locator('.r2panel')).toHaveCount(0);
+}
+/** عدد الأقسام، والانتقال إلى أول شريحة في القسم k من لوحة الشرائح */
+async function sectionCount(phone: Page) {
+  await sheet(phone, 'الشرائح');
+  const n = await phone.locator('.r2secgrp').count();
+  await closeSheet(phone);
+  return n;
+}
+async function gotoSection(phone: Page, k: number | string) {
+  await sheet(phone, 'الشرائح');
+  const grp = typeof k === 'number' ? phone.locator('.r2secgrp').nth(k) : phone.locator('.r2secgrp', { has: phone.locator('h3', { hasText: k }) });
+  await grp.locator('button').first().click();
+  await expect(phone.locator('.r2panel')).toHaveCount(0);
 }
 
 const activeIndex = (p: Page) => p.locator('section.slide.active').getAttribute('data-index');
@@ -83,9 +108,10 @@ test('الجوال يتصل مباشرة عبر PeerJS ولا يستهلك ntfy'
 
   for (let k = 0; k < 6; k++) await phone.locator('.rnav .next').click();
   await expect.poll(() => activeIndex(ipad)).not.toBe('0');
-  await phone.locator('.rpresets .rbtn').first().click();
+  await sheet(phone, 'المؤقت');
+  await phone.locator('.rpresets .r2btn').first().click();
   await expect(ipad.locator('#timerw.show')).toBeVisible();
-  await phone.locator('.rtimer .rbtn', { hasText: 'إغلاق المؤقت' }).click();
+  await phone.locator('.rtimer .r2btn', { hasText: 'إغلاق المؤقت' }).click();
   await expect(ipad.locator('#timerw')).toHaveCount(0);
 
   expect(relay.posts.length, 'كل الأوامر والحالات عبر القناة المباشرة').toBe(afterHandshake);
@@ -95,10 +121,10 @@ test('الجوال يتصل مباشرة عبر PeerJS ولا يستهلك ntfy'
 test('أسئلة الاختيار تظهر على الجوال وتُجاب منه', async ({ browser }) => {
   const { ipad, phone, errors } = await pair(browser);
   // أول قسم فيه سؤال اختيار: ننتقل بالأقسام حتى يظهر سؤال على الآيباد
-  const secs = await phone.locator('.rsecs .rbtn').count();
+  const secs = await sectionCount(phone);
   let found = false;
   for (let k = 0; k < secs && !found; k++) {
-    await phone.locator('.rsecs .rbtn').nth(k).click();
+    await gotoSection(phone, k);
     await ipad.waitForTimeout(400);
     found = (await ipad.locator('section.slide.active .mcq').count()) > 0;
   }
@@ -134,6 +160,7 @@ test('إن تعذّر الاتصال المباشر يعمل التحكم عبر
   const phone = await ctx.newPage();
   await phone.goto(`${href}#remote=${ch}`);
   await expect(phone.locator('.dot.ok')).toContainText('الخادم', { timeout: 45000 });
+  await phone.getByRole('button', { name: 'ابدأ الدرس' }).click();
   await phone.locator('.rnav .next').click();
   await expect.poll(() => activeIndex(ipad.page)).toBe('1');
 });
@@ -158,11 +185,13 @@ test('حين يصل خادم الربط حدّه اليومي يظهر تنبي�
 
 test('الجوال يغيّر مكان المؤقت وحجمه على الآيباد', async ({ browser }) => {
   const { ipad, phone, errors } = await pair(browser);
-  await phone.locator('.rpresets .rbtn').nth(1).click();
+  await sheet(phone, 'المؤقت');
+  await phone.locator('.rpresets .r2btn').nth(1).click();
   const timer = ipad.locator('#timerw');
   await expect(timer).toBeVisible();
   const w0 = (await timer.boundingBox())!.width;
-  await phone.locator('.rtview .rbtn', { hasText: 'تكبير' }).click();
+  await phone.locator('.r2fold', { hasText: 'مكان المؤقت وحجمه' }).click();
+  await phone.locator('.rtview .r2btn', { hasText: 'تكبير' }).click();
   await expect.poll(async () => (await timer.boundingBox())!.width).toBeGreaterThan(w0 * 1.1);
   // الخانة الأولى في الشبكة = أعلى يسار الشاشة
   await phone.locator('.rspots button').first().click();
@@ -176,10 +205,10 @@ test('الجوال يغيّر مكان المؤقت وحجمه على الآيب
 test('الجوال يتحكم بمستكشف الحقائق المترابطة', async ({ browser }) => {
   const { ipad, phone, errors } = await pair(browser);
   // ننتقل بالأقسام حتى يظهر المستكشف (إن كان في الدرس)
-  const secs = await phone.locator('.rsecs .rbtn').count();
+  const secs = await sectionCount(phone);
   let found = false;
   for (let k = 0; k < secs && !found; k++) {
-    await phone.locator('.rsecs .rbtn').nth(k).click();
+    await gotoSection(phone, k);
     await ipad.waitForTimeout(400);
     found = (await ipad.locator('section.slide.active .ffam').count()) > 0;
   }
@@ -200,7 +229,7 @@ test('الجوال يوقف مقطع فكرة الدرس ويشغّله', async 
   const { ipad, phone, errors } = await pair(browser);
   let found = false;
   // المقطع آخر شرائح الشرح: نذهب إلى قسم الشرح ثم نتقدّم حتى نصل إليه
-  await phone.locator('.rsecs .rbtn', { hasText: 'الشرح' }).click();
+  await gotoSection(phone, 'الشرح');
   await ipad.waitForTimeout(400);
   for (let k = 0; k < 30 && !found; k++) {
     await phone.locator('.rnav .next').click();
@@ -246,7 +275,7 @@ test('سهما الجوال: الخطوات أولًا ثم الشريحة ال�
   }
   expect(found).toBe(true);
   const slide = await activeIndex(ipad);
-  await expect(phone.locator('.rnav .rcount b')).toContainText('١ /');
+  await expect(phone.locator('.r2steps small')).toContainText('١ من');
   // السهم الأيمن يُخفي الخطوة أولًا ويبقى في الشريحة
   await phone.locator('.rnav .prev').click();
   await expect(ipad.locator('section.slide.active .step.shown')).toHaveCount(0);
@@ -290,10 +319,10 @@ test('زرّا الشرائح في الجوال يتجاوزان الخطوات'
   }
   expect(found).toBe(true);
   const at = Number(await activeIndex(ipad));
-  await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
+  await phone.locator('.rnav button[aria-label="الشريحة التالية"]').click();
   await expect.poll(() => activeIndex(ipad)).toBe(String(at + 1));
-  await phone.locator('.rslides button[aria-label="الشريحة السابقة"]').click();
-  await phone.locator('.rslides button[aria-label="الشريحة السابقة"]').click();
+  await phone.locator('.rnav button[aria-label="الشريحة السابقة"]').click();
+  await phone.locator('.rnav button[aria-label="الشريحة السابقة"]').click();
   await expect.poll(() => activeIndex(ipad)).toBe(String(at - 1));
   expect(errors).toEqual([]);
 });
@@ -302,37 +331,58 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   const { ipad, phone, errors } = await pair(browser);
   // فصل يُضاف بعد فتح الدرس، كما لو كتبه المعلم من «تعديل الفصول»
   await ipad.evaluate(() => {
-    localStorage.setItem('classes', JSON.stringify({ grades: { g4: { classes: [{ id: 'k1', name: 'الفصل الأول', students: ['محمد', 'خالد'], team: {} }] } } }));
+    localStorage.setItem('classes', JSON.stringify({ grades: { g4: { classes: [{ id: 'k1', name: 'الفصل الأول', students: ['محمد', 'خالد'], team: { محمد: 0, خالد: 1 } }] } } }));
     window.dispatchEvent(new Event('classes-changed'));
   });
-  await phone.locator('.rbtn', { hasText: 'الفصل الأول' }).click();
+  await sheet(phone, 'العجلة');
+  await phone.locator('.r2seg', { hasText: 'الفصل الأول' }).click();
+  // من يدخل العجلة: فريق واحد فقط
+  await phone.locator('.r2seg', { hasText: 'الكل' }).click();
+  await closeSheet(phone);
+  await sheet(phone, 'النجوم');
   await expect(phone.locator('.rstar')).toHaveCount(2);
   await phone.locator('[aria-label="نجمة لـمحمد"]').click();
   await phone.locator('[aria-label="نجمة لـمحمد"]').click();
   await phone.locator('[aria-label="غلطة على محمد"]').click();
   // الأسماء أبجدية: خالد قبل محمد
   await expect(phone.locator('.rstar b')).toHaveText(['خالد', 'محمد']);
-  await expect(phone.locator('.rstar', { hasText: 'محمد' })).toContainText('المجموع ١');
+  await expect(phone.locator('.rstar', { hasText: 'محمد' }).locator('.r2cnt.star')).toHaveText('★٢');
+  await expect(phone.locator('.rstar', { hasText: 'محمد' }).locator('.r2cnt.bad')).toHaveText('✕١');
+  await closeSheet(phone);
   // بعد الدوران من الجوال: نجمة لمن خرج اسمه من تحت زر العجلة مباشرة
-  await phone.locator('.rbtn', { hasText: 'أدِر العجلة' }).click();
+  await sheet(phone, 'العجلة');
+  const team0 = (await phone.locator('.r2seg').filter({ hasNotText: /الكل|الفصل/ }).first().textContent())!;
+  await phone.locator('.r2seg', { hasText: team0 }).click();
+  await phone.locator('.r2btn', { hasText: 'أدِر العجلة' }).click();
+  // الشاشة: العجلة والاسم فقط، على طلاب الفريق المختار
+  await expect(ipad.locator('.wheel2')).toHaveAttribute('data-pool', '1');
+  await expect(ipad.locator('.wheel2 button')).toHaveCount(0);
   const who = phone.locator('.rpicked .wres');
-  await expect(who).toHaveText(/^(محمد|خالد)$/, { timeout: 15000 });
+  await expect(who).toHaveText('محمد', { timeout: 15000 });
   const name = (await who.textContent())!;
   const before = name === 'محمد' ? 2 : 0;
-  await phone.locator('.rpicked .rsup').click();
-  await expect(phone.locator('.rpicked small')).toContainText(`⭐ ${'٠١٢٣'[before + 1]}`);
+  await phone.locator('.r2btn.rsup').click();
+  await expect(phone.locator('.rpicked small').last()).toContainText(`★ ${'٠١٢٣'[before + 1]}`);
   await expect(ipad.locator('.cheer-name')).toHaveText(name);
-  await phone.locator('.rbtn', { hasText: 'تراجع عن آخر ضغطة' }).click();
-  await phone.locator('.rbtn', { hasText: 'إغلاق العجلة' }).click();
-  await phone.locator('.rbtn', { hasText: 'اعرض اللوحة على الشاشة' }).click();
+  await phone.locator('.r2btn', { hasText: 'إغلاق العجلة' }).click();
+  await closeSheet(phone);
+  // حذف النجمة التي أُعطيت للتو: من صف الطالب في لوحة النجوم
+  await sheet(phone, 'النجوم');
+  await phone.locator('.rstar', { hasText: name }).locator('.r2name').click();
+  await phone.locator(`[aria-label="احذف نجمة من ${name}"]`).click();
+  await expect(phone.locator('.rstar', { hasText: name }).locator('.r2cnt.star')).toHaveText(`★${'٠١٢٣'[before]}`);
+  await phone.locator('.r2line .r2btn', { hasText: 'إظهار' }).click();
   await expect(ipad.locator('.sbox')).toBeVisible();
   await ipad.locator('.sbox').getByRole('button', { name: 'هذا الأسبوع' }).click();
   await ipad.locator('.sbox').getByRole('button', { name: 'إظهار النجوم' }).click();
   await expect(ipad.locator('.scard', { hasText: 'محمد' }).locator('.stot')).toHaveText('١');
-  await phone.locator('.rbtn', { hasText: 'تراجع عن آخر ضغطة' }).click();
+  // حذف غلطة محمد يرفع مجموعه
+  if (name !== 'محمد') await phone.locator('.rstar', { hasText: 'محمد' }).locator('.r2name').click();
+  await phone.locator('[aria-label="احذف غلطة من محمد"]').click();
   await expect(ipad.locator('.scard', { hasText: 'محمد' }).locator('.stot')).toHaveText('٢');
   // منصة الأسبوع الماضي تُفتح من الجوال (فارغة هنا: النجوم كلها من هذا الأسبوع)
-  await phone.locator('.rbtn', { hasText: 'منصة الأسبوع الماضي' }).click();
+  await phone.locator('.r2fold', { hasText: 'منصة الأسبوع الماضي' }).click();
+  await phone.locator('.r2btn', { hasText: 'افتح المنصة' }).click();
   await expect(ipad.locator('.sbox .sempty')).toContainText('لا نجوم');
   expect(errors).toEqual([]);
 });
@@ -343,7 +393,7 @@ test('جدول الإشارات الفارغ: الجوال يضيف الإشار
   const { ipad, phone, errors } = await pair(browser, pathToFileURL(tally).href);
   // إلى السؤال ١
   const idx = await ipad.locator('section.slide').evaluateAll((els) => els.findIndex((e) => e.querySelector('[data-qnum="1"]')));
-  for (let i = 0; i < idx; i++) await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
+  for (let i = 0; i < idx; i++) await phone.locator('.rnav button[aria-label="الشريحة التالية"]').click();
   await expect(ipad.locator('section.slide.active [data-qnum="1"]')).toBeVisible();
   const board = ipad.locator('section.slide.active .ltally');
   await expect(board.locator('svg.tally')).toHaveCount(0);
@@ -365,8 +415,8 @@ test('جدول الإشارات الفارغ: الجوال يضيف الإشار
   await board.locator('button[aria-label="احذف إشارة من الشِّتاءُ"]').click();
   // السؤالان ١ و٢ تحت الجدول نفسه كما في الكتاب، والإشارات تبقى بعد الانتقال والعودة
   await expect(ipad.locator('section.slide.active [data-qnum="2"]')).toBeVisible();
-  await phone.locator('.rslides button[aria-label="الشريحة التالية"]').click();
-  await phone.locator('.rslides button[aria-label="الشريحة السابقة"]').click();
+  await phone.locator('.rnav button[aria-label="الشريحة التالية"]').click();
+  await phone.locator('.rnav button[aria-label="الشريحة السابقة"]').click();
   await expect(ipad.locator('section.slide.active [data-qnum="1"]')).toBeVisible();
   await expect(ipad.locator('section.slide.active .ltally')).toContainText('عدد الإشارات كلها: ٣');
   await phone.locator('.rwidget .rbtn', { hasText: 'امسح الإشارات' }).click();

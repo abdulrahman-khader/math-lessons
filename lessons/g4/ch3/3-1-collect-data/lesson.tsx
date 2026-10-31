@@ -610,7 +610,7 @@ export default defineLesson({
       notes: 'مسألة مفتوحة: اقبل كل إجابة معقولة. اعرض الجدولين جنبًا إلى جنب للمقارنة.',
       content: (
         <QuestionSlide
-          source={HOT} n={13} tps
+          source={HOT} n={13}
           question={
             <>
               <b style={{ color: 'var(--ex)' }}>مسألةٌ مفتوحةٌ:</b> مَا أوجُهُ التشابُهِ والاختلافِ بينَ الجدولِ التِّكراريِّ ولوحةِ الإشاراتِ؟

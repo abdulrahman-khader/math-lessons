@@ -10,6 +10,7 @@ import '@fontsource/noto-naskh-arabic/600.css';
 import '@fontsource/noto-naskh-arabic/700.css';
 import './styles/core.css';
 import './styles/v2.css';
+import './styles/remote2.css';
 import lesson from '@lesson';
 import { LessonApp } from './LessonApp';
 import { RemoteApp } from './RemoteApp';

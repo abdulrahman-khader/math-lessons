@@ -69,27 +69,26 @@ test('التوزيع على الفرق والعجلة على الفصل دون �
   await groups.getByRole('button', { name: 'تم' }).click();
   await expect(home(page).getByRole('button', { name: 'توزيع الطلاب (١/٦)' })).toBeVisible();
 
-  // العجلة: باقٍ ٦ من ٦، وبعد كل دورة ينقص اسم ولا يتكرر
+  // العجلة على شاشة الفصل: العجلة والاسم فقط، تدور بلمسها، ولا يتكرر اسم
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('button', { name: 'عجلة الأسماء' }).click();
   const wheel = page.getByRole('dialog', { name: 'عجلة الأسماء' });
-  await expect(wheel.locator('.wklass')).toContainText('باقٍ ٦ من ٦');
+  await expect(wheel).toHaveAttribute('data-left', '6');
+  await expect(wheel.locator('button')).toHaveCount(0);
   const seen = new Set<string>();
   for (let i = 0; i < 6; i++) {
-    await wheel.getByRole('button', { name: 'أدِر العجلة' }).click();
-    await expect(wheel.locator('#wres')).not.toHaveText('…');
-    const name = (await wheel.locator('#wres').textContent())!;
+    // لمس العجلة، أو المسافة، أو Enter
+    if (i === 0) await wheel.getByRole('button', { name: 'أدِر العجلة' }).click();
+    else await page.keyboard.press(i % 2 ? 'Space' : 'Enter');
+    await expect(wheel).toHaveAttribute('data-left', String(5 - i));
+    const name = (await wheel.locator('.wname').textContent())!;
     expect(NAMES).toContain(name);
     expect(seen.has(name)).toBe(false);
     seen.add(name);
-    await expect(wheel.locator('.wklass')).toContainText(`باقٍ ${'٥٤٣٢١٠'[i]} من ٦`);
   }
-  await wheel.getByRole('button', { name: 'أرجع كل الأسماء (٦)' }).click();
-  await expect(wheel.locator('.wklass')).toContainText('باقٍ ٦ من ٦');
-
-  // فلتر الفريق: الفريق الأول فيه أحمد فقط
-  await wheel.locator('.wteams').getByRole('button').nth(1).click();
-  await expect(wheel.locator('.wklass')).toContainText('باقٍ ١ من ١');
-  await wheel.getByRole('button', { name: 'أدِر العجلة' }).click();
-  await expect(wheel.locator('#wres')).toHaveText('أحمد');
+  // خرجت كل الأسماء: لمس العجلة يعيدها
+  await wheel.getByRole('button', { name: 'أرجع كل الأسماء' }).click();
+  await expect(wheel).toHaveAttribute('data-left', '6');
+  await page.keyboard.press('Escape');
+  await expect(wheel).toHaveCount(0);
 });

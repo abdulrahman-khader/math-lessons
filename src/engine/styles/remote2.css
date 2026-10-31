@@ -1,0 +1,208 @@
+/*
+ * شاشة الجوال بلغة التصميم الجديد: خط النسخ، رأس بشريط فاتح وخط تحته، شارة القسم بلونه،
+ * بطاقات رمادية بلا إطار، والأخضر للإجابة وحدها. في الأسفل قرب الإبهام صف الأدوات ثم الأسهم.
+ * اللوحات والاختيارات والطيّ والمربعات من Base UI، بأشكالنا.
+ */
+.remote.r2, .r2vp, .r2back {
+  --ink: #0b1226; --muted: #1f2a3d; --soft: #4a5568; --band: #eceff4; --band-line: #c3c8d1; --tile: #f1f2f5;
+  --ans: #067a3a; --ans-t: #dcefe3; --bad: #b3341a; --bad-t: #f8e2dc; --late: #8a5a00; --late-t: #fbf0d9;
+  --sec: #3d4652; --sec-t: #b9c0cb;
+  --body: "Noto Naskh Arabic", "Geeza Pro", serif;
+}
+.remote.r2 {
+  max-width: 34rem; gap: 14px; padding: 0 16px calc(214px + env(safe-area-inset-bottom, 0px));
+  background: #fff; color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.7;
+}
+.remote.r2[data-sec="engage"] { --sec: #c62a1c; --sec-t: #e8a59d; }
+.remote.r2[data-sec="explore"] { --sec: #d97300; --sec-t: #f0c38c; }
+.remote.r2[data-sec="explain"] { --sec: #1554b8; --sec-t: #a1bce6; }
+.remote.r2[data-sec="elab"] { --sec: #0f7c85; --sec-t: #99cdd2; }
+.remote.r2[data-sec="check"] { --sec: #5a1f9e; --sec-t: #c3aae6; }
+.remote.r2[data-sec="practice"] { --sec: #b8226a; --sec-t: #e6a4c4; }
+.remote.r2[data-sec="hot"] { --sec: #7e4a26; --sec-t: #d6b49c; }
+.remote.r2[data-sec="close"] { --sec: #a87000; --sec-t: #e2c584; }
+body.remote-body:has(.remote.r2) { background: #fff; }
+.remote.r2 button { font-family: var(--body); }
+
+/* الرأس: شريط فاتح بخط تحته، بعرض الشاشة */
+.remote.r2 .rhead { flex-direction: row; align-items: center; flex-wrap: nowrap; gap: 10px; margin-inline: -16px; padding: 10px 16px; border-radius: 0; background: var(--band); border-block-end: 3px solid var(--band-line); color: var(--ink); }
+.remote.r2 .r2sec { display: inline-flex; align-items: center; height: 36px; padding: 5px 14px 0; line-height: 1; border-radius: 999px; background: var(--sec); color: #fff; font-size: 16px; font-weight: 700; white-space: nowrap; }
+.remote.r2 .rhead .dot { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: var(--soft); opacity: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.remote.r2 .rhead .dot::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-inline-end: 6px; border-radius: 50%; background: var(--band-line); vertical-align: 1px; }
+.remote.r2 .rhead .dot.ok { color: var(--ans); }
+.remote.r2 .rhead .dot.ok::before { background: var(--ans); }
+.r2icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border: 0; border-radius: 12px; background: #fff; color: var(--ink); cursor: pointer; }
+.r2icon svg { width: 24px; height: 24px; }
+.remote.r2 .rhead .r2icon { background: none; }
+
+.remote.r2 .r2title { display: flex; align-items: center; gap: 8px; }
+.remote.r2 .r2title h1 { flex: 1; margin: 0; font-size: 22px; font-weight: 700; line-height: 1.5; }
+.remote.r2 .r2title .r2icon { background: var(--tile); }
+
+.r2confirm { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 16px; background: var(--tile); }
+.r2confirm p { margin: 0; font-size: 16px; font-weight: 600; }
+
+.r2pace { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 14px 6px; border-radius: 12px; background: var(--ans-t); color: var(--ans); font-size: 16px; font-weight: 700; }
+.r2pace small { font-size: 14px; font-weight: 600; }
+.r2pace.late { background: var(--late-t); color: var(--late); }
+
+.r2steps { display: flex; align-items: center; gap: 4px; }
+.r2steps i { flex: 1; height: 8px; border-radius: 4px; background: var(--sec-t); opacity: .55; }
+.r2steps i.on { background: var(--sec); opacity: 1; }
+.r2steps small { margin-inline-start: 8px; font-size: 14px; font-weight: 600; color: var(--soft); white-space: nowrap; }
+
+.r2next { padding: 10px 14px; border-radius: 16px; background: var(--ans-t); color: var(--ans); }
+.r2next small { font-size: 14px; font-weight: 600; }
+.r2next p { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.6; }
+
+.remote.r2 .rcard { padding: 12px 14px; border: 0; border-radius: 16px; background: var(--tile); box-shadow: none; }
+.remote.r2 .rcard h2 { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--sec); }
+.remote.r2 .rcard h2 small { color: var(--soft); font-weight: 600; }
+.remote.r2 .notes p { margin: 0; font-size: 17px; }
+
+/* الأسفل: صف الأدوات ثم الأسهم، ثابتان قرب الإبهام */
+.r2foot { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 20; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); background: #fff; border-block-start: 3px solid var(--band); }
+.r2foot > * { width: 100%; max-width: 34rem; margin-inline: auto; }
+.r2tools { display: flex; gap: 6px; }
+.r2tools button { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; height: 62px; padding-block-end: 4px; border: 0; border-radius: 14px; background: var(--tile); color: var(--soft); font-size: 13px; font-weight: 600; line-height: 1.4; cursor: pointer; overflow: hidden; }
+.r2tools button svg { width: 24px; height: 24px; color: var(--ink); }
+.r2tools button::after { content: ""; position: absolute; inset: auto 0 0; height: 4px; background: transparent; }
+.r2tools button.on::after { background: var(--ink); }
+.remote.r2 .rnav { display: flex; gap: 6px; height: 84px; margin: 0; }
+.remote.r2 .rnav button { display: grid; place-items: center; width: 58px; flex: none; min-height: 0; height: 100%; padding: 0; border: 0; border-radius: 18px; background: var(--tile); color: var(--ink); cursor: pointer; }
+.remote.r2 .rnav button svg { width: 28px; height: 28px; }
+.remote.r2 .rnav .next { flex: 1; width: auto; background: var(--ink); color: #fff; }
+.remote.r2 .rnav .next svg { width: 44px; height: 44px; }
+.remote.r2 .rnav button:disabled { opacity: .3; }
+
+/* اللوحات (Base UI Drawer) */
+.r2back { position: fixed; inset: 0; z-index: 40; background: #0b1226; opacity: calc(.4 * (1 - var(--drawer-swipe-progress, 0))); transition: opacity .35s cubic-bezier(.32, .72, 0, 1); }
+.r2back[data-starting-style], .r2back[data-ending-style] { opacity: 0; }
+.r2vp { position: fixed; inset: 0; z-index: 41; display: flex; align-items: flex-end; justify-content: center; }
+.r2panel button { font-family: var(--body); }
+.r2panel { width: 100%; max-width: 34rem; max-height: 88vh; overflow-y: auto; overscroll-behavior: contain; padding: 8px 16px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 24px 24px 0 0; background: #fff; color: var(--ink); font-family: var(--body); line-height: 1.7; outline: 0; transform: translateY(var(--drawer-swipe-movement-y, 0)); transition: transform .35s cubic-bezier(.32, .72, 0, 1); }
+.r2panel[data-starting-style], .r2panel[data-ending-style] { transform: translateY(100%); }
+.r2panel[data-swiping] { transition-duration: 0s; user-select: none; }
+@media (prefers-reduced-motion: reduce) { .r2back, .r2panel { transition: none; } }
+.r2grip { display: block; width: 44px; height: 5px; margin: 0 auto 8px; border-radius: 3px; background: var(--band-line); }
+.r2content > header { display: flex; align-items: center; justify-content: space-between; margin-block-end: 12px; }
+.r2ttl { margin: 0; font-size: 22px; font-weight: 700; }
+.r2x { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--tile); color: var(--soft); font-size: 16px; cursor: pointer; }
+.r2body { display: flex; flex-direction: column; gap: 10px; }
+
+/* الأزرار والعناصر داخل اللوحات */
+.r2btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 50px; padding: 5px 16px 2px; border: 0; border-radius: 14px; background: var(--tile); color: var(--ink); font-size: 17px; font-weight: 600; line-height: 1.3; cursor: pointer; }
+.r2btn.on { background: var(--ink); color: #fff; }
+.r2btn:disabled { opacity: .35; }
+.r2pri { background: var(--ink); color: #fff; min-height: 58px; font-size: 19px; font-weight: 700; }
+.r2danger { background: var(--bad-t); color: var(--bad); }
+.r2grow { flex: 1; }
+.r2row { display: flex; gap: 8px; }
+.r2row > .r2btn { flex: 1; }
+.r2line { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 8px 8px 14px; border-radius: 14px; background: var(--tile); font-size: 17px; font-weight: 600; }
+.r2line .r2btn { min-height: 42px; background: #fff; font-size: 15px; }
+.r2note { margin: 0; font-size: 15px; color: var(--soft); }
+.r2link { align-self: flex-start; border: 0; background: none; padding: 4px 0; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; font-size: 16px; font-weight: 600; cursor: pointer; }
+.r2sq { display: grid; place-items: center; flex: none; width: 46px; height: 44px; border: 0; border-radius: 12px; background: #fff; color: var(--soft); font-size: 20px; cursor: pointer; }
+.r2sq:disabled { opacity: .3; }
+.r2sq.star { color: #a87000; }
+.r2sq.bad { color: var(--bad); }
+
+/* الطيّ (Base UI Collapsible) */
+.r2more { border-radius: 14px; background: var(--tile); }
+.r2fold { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 50px; padding: 4px 14px 0; border: 0; background: none; color: var(--ink); font-size: 17px; font-weight: 600; text-align: start; cursor: pointer; }
+.r2fold small { color: var(--soft); font-weight: 600; }
+.r2fold svg { width: 20px; height: 20px; color: var(--soft); transition: transform .15s; }
+.r2fold[data-panel-open] svg { transform: rotate(180deg); }
+.r2fpanel { display: flex; flex-direction: column; gap: 10px; padding: 0 14px 14px; }
+.r2chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.r2chip { padding: 6px 14px 3px; border: 0; border-radius: 999px; background: #fff; color: var(--ink); font-size: 16px; font-weight: 500; cursor: pointer; }
+
+/* مربع الاختيار (Base UI Checkbox) */
+.r2check { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 14px 0; border-radius: 14px; background: var(--tile); font-size: 17px; font-weight: 600; cursor: pointer; }
+.r2box { display: grid; place-items: center; flex: none; width: 26px; height: 26px; margin-block-start: -4px; padding: 0; border: 2px solid var(--band-line); border-radius: 7px; background: #fff; color: #fff; cursor: pointer; }
+.r2box[data-checked] { border-color: var(--ink); background: var(--ink); }
+.r2tick { display: flex; }
+.r2tick[data-unchecked] { display: none; }
+.r2tick svg { width: 16px; height: 16px; }
+
+/* اختيار واحد (Base UI ToggleGroup) */
+.r2segs { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--tile); }
+.r2seg { flex: 1; min-height: 46px; padding-block-start: 4px; border: 0; border-radius: 11px; background: none; color: var(--soft); font-size: 17px; font-weight: 600; cursor: pointer; }
+.r2seg[data-pressed] { background: #fff; color: var(--ink); font-weight: 700; box-shadow: 0 0 0 2px var(--ink); }
+
+/* الفرق: − في البداية، والاسم والنقاط، و+ في النهاية */
+.remote.r2 .rteam, .r2panel .rteam { display: flex; align-items: center; gap: 10px; padding: 8px; border: 0; border-radius: 16px; background: var(--tile); color: var(--tc); font-size: 19px; font-weight: 700; }
+.r2panel .rteam span { flex: 1; padding-block-start: 4px; }
+.r2panel .rteam b { font-size: 26px; padding-block-start: 4px; }
+.r2plus { display: grid; place-items: center; width: 68px; height: 54px; border: 0; border-radius: 14px; background: var(--tc); color: #fff; font-size: 30px; cursor: pointer; }
+
+/* النجوم */
+.r2panel .rstar { display: block; padding: 6px 8px; border: 0; border-radius: 14px; background: var(--tile); }
+.r2srow { display: flex; align-items: center; gap: 6px; }
+.r2name { flex: 1; text-align: start; border: 0; background: none; padding: 8px 6px 4px; color: var(--ink); font-size: 18px; cursor: pointer; }
+.r2name b { font-weight: 600; }
+.r2name[data-panel-open] b { text-decoration: underline; text-underline-offset: 6px; }
+.r2cnt { min-width: 38px; font-size: 15px; font-weight: 700; }
+.r2cnt.star { color: #a87000; }
+.r2cnt.bad { color: var(--bad); }
+.r2undo { display: flex; flex-direction: column; gap: 6px; margin: 6px 6px 2px; padding-block-start: 8px; border-block-start: 2px solid #fff; font-size: 16px; }
+.r2undo > div { display: flex; align-items: center; justify-content: space-between; }
+
+/* العجلة */
+.r2panel .rpicked { text-align: center; padding-block: 4px; }
+.r2panel .rpicked .wres { margin: 0; font-size: 38px; font-weight: 700; line-height: 1.5; }
+.r2panel .rpicked small { color: var(--soft); font-size: 15px; }
+
+/* المؤقت */
+.r2clock { margin: 0; text-align: center; font-size: 60px; font-weight: 700; line-height: 1.3; }
+.r2clock.end { color: var(--bad); }
+.r2panel .rtimer { display: flex; flex-direction: column; gap: 10px; }
+.r2panel .rpresets { display: flex; gap: 6px; }
+.r2panel .rpresets .r2btn { flex: 1; padding-inline: 4px; }
+.r2panel .rspots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.r2panel .rspots button { height: 34px; border: 0; border-radius: 8px; background: #fff; cursor: pointer; }
+.r2panel .rspots button.on { background: var(--ink); }
+
+/* الشرائح */
+.r2slides { display: flex; flex-direction: column; gap: 14px; }
+.r2secgrp { display: flex; flex-direction: column; gap: 4px; }
+.r2secgrp h3 { margin: 0 0 2px; font-size: 14px; font-weight: 700; color: var(--soft); }
+.r2secgrp button { display: flex; align-items: baseline; gap: 12px; padding: 10px 14px 6px; border: 0; border-radius: 12px; background: var(--tile); color: var(--ink); text-align: start; font-size: 17px; font-weight: 500; cursor: pointer; }
+.r2secgrp button small { min-width: 24px; color: var(--soft); font-weight: 600; }
+.r2secgrp button.here { background: var(--ink); color: #fff; font-weight: 700; }
+.r2secgrp button.here small { color: #fff; }
+
+/* صفحة الإعداد */
+.r2setup { display: flex; flex-direction: column; gap: 18px; }
+.r2setup > header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+.r2setup > header small { color: var(--soft); font-size: 15px; }
+.r2setup section { display: flex; flex-direction: column; gap: 8px; }
+.r2setup h2 { margin: 0; font-size: 15px; font-weight: 700; color: var(--soft); }
+.r2time { position: relative; display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 4px 14px; border-radius: 14px; background: var(--tile); }
+/* حقل الوقت الأصلي يكتب الأرقام بالإنجليزية: نخفيه فوق الوقت العربي ليبقى اللمس يفتح منتقي الوقت */
+.r2time input { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; opacity: 0; border: 0; cursor: pointer; }
+.r2time b { font-size: 28px; font-weight: 700; }
+.r2time span { color: var(--soft); font-size: 18px; font-weight: 600; }
+.r2tname { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 0 14px; border-radius: 14px; background: var(--tile); }
+.r2tname i { width: 14px; height: 14px; border-radius: 50%; background: var(--tc); }
+.r2tname input { flex: 1; min-width: 0; border: 0; background: none; font: 600 18px/1.5 var(--body); color: var(--ink); }
+.r2tname small { color: var(--soft); font-size: 14px; }
+.r2start { margin-block-start: 6px; min-height: 62px; font-size: 21px; }
+.r2group { padding: 12px 14px; border-radius: 14px; background: var(--tile); }
+.r2group b { display: block; margin-block-end: 8px; color: var(--tc, var(--soft)); font-size: 17px; }
+.r2group b small { color: var(--soft); font-weight: 600; }
+
+.remote.r2 .rwarn { margin: 0; padding: 10px 14px; border: 0; border-radius: 14px; background: var(--late-t); color: var(--late); font-size: 15px; }
+
+/* تحييد أشكال الجوال القديمة داخل اللوحات الجديدة */
+.r2panel .rteam { grid-template-columns: none; }
+.r2panel .rteam span { text-align: start; font-size: 19px; font-weight: 700; }
+.r2panel .rteam .r2sq { min-height: 0; background: #fff; color: var(--soft); font-size: 22px; font-weight: 600; }
+.r2panel .rteam .r2plus { min-height: 0; background: var(--tc); color: #fff; font-size: 30px; font-weight: 600; }
+.r2panel .rstar { grid-template-columns: none; }
+.r2panel .rstar button { min-height: 0; font-weight: 600; }
+.r2panel .rstar .r2sq { font-size: 20px; }
+.r2panel .rstar .r2name { font-size: 18px; }
+.r2panel .rpicked { display: block; gap: 0; border: 0; border-radius: 16px; background: var(--tile); padding: 10px 14px; }
+.r2panel .wres { font-family: var(--body); font-weight: 700; color: var(--ink); }

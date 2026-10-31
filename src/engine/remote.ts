@@ -86,6 +86,20 @@ export type RemoteCmd =
   | { c: 'stars'; open: boolean }
   | { c: 'star'; s: string; d: number }
   | { c: 'starUndo' }
+  /** يحذف آخر نجمة (d=١) أو آخر غلطة (d=−١) لطالب في هذا الأسبوع */
+  | { c: 'starRemove'; s: string; d: number }
+  /** يُرجع طالبًا واحدًا إلى العجلة */
+  | { c: 'wheelReturn'; s: string }
+  /** هل يخرج الاسم من العجلة بعد ظهوره */
+  | { c: 'wheelRemove'; on: boolean }
+  /** من يدخل العجلة: -١ الفصل كله، أو رقم فريق */
+  | { c: 'wheelTeam'; t: number }
+  /** إعداد الحصة: عدد الفرق (٠ = بدون)، واسم فريق، وتوزيع الطلاب، ونقل طالب، وعرض الفرق على الشاشة */
+  | { c: 'teamsN'; n: number }
+  | { c: 'teamName'; i: number; name: string }
+  | { c: 'teamsShuffle' }
+  | { c: 'teamMove'; s: string; team: number }
+  | { c: 'teamsShow'; open: boolean }
   /** منصة النجوم للتقديم: تفتحها على الأسبوع الماضي، أو تُظهر المركز التالي */
   | { c: 'podium'; a: 'open' | 'next' }
   | { c: 'chart'; i: number; v: number }
@@ -98,6 +112,8 @@ export type RemoteCmd =
   | { c: 'mcqAward'; k: number; team: number }
   | { c: 'timer'; a: 'start'; sec: number }
   | { c: 'timer'; a: 'toggle' | 'close' }
+  /** يزيد المؤقت أو ينقصه (ثوانٍ) */
+  | { c: 'timer'; a: 'add'; sec: number }
   /** مكان المؤقت وحجمه: s الحجم، وax وay من −١ إلى ١ (٠ = الوسط) */
   | { c: 'timerView'; v: { s?: number; ax?: number; ay?: number } };
 
@@ -176,6 +192,20 @@ export interface RemoteState {
   family?: RemoteFamily | null;
   widget?: RemoteWidget | null;
   mcqs: RemoteMcq[];
+  /** نص الخطوة التالية التي ستظهر على الشاشة، ليعرف المعلم ما سيظهر قبل أن يضغط */
+  upNext?: string;
+  /** عناوين الشرائح ورقم قسم كل منها في sections؛ تُرسل حين تتسع الرسالة، والجوال يحتفظ بآخر نسخة */
+  slides?: [title: string, sec: number][];
+  /** الدقائق المقترحة لكل شريحة، ليحسب الجوال الوقت إلى نهاية الحصة */
+  mins?: number[];
+  /** فريق كل طالب في stars.list بالترتيب نفسه (−١ بلا فريق) */
+  teamOf?: number[];
+  /** من خرجوا من العجلة في هذه الحصة، وهل يخرج الاسم بعد ظهوره */
+  wheelOut?: string[];
+  wheelRemove?: boolean;
+  wheelTeam?: number;
+  /** الفرق ظاهرة على الشاشة */
+  teamsShown?: boolean;
   /** المؤقت. لا تُرسل الحالة كل ثانية: الجوال يعدّ تنازليًا وحده من آخر حالة وصلته */
   timer: { show: boolean; run: boolean; left: number; view?: { s: number; ax: number; ay: number } };
 }

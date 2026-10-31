@@ -198,7 +198,7 @@ export default defineLesson({
       notes: 'أتحدث: اطلب من طالبين أن يشرحا.',
       content: (
         <QuestionSlide
-          source={CHECK} n={2} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
+          source={CHECK} n={2} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="مَا وَجْهُ الاخْتِلَافِ بَيْنَ التَّمْثِيلِ بِالأَعْمِدَةِ وَالتَّمْثِيلِ بِالصُّوَرِ؟"
           hint="ماذا يمثّل المربع؟ وماذا تمثّل الصورة؟"
           steps={[
@@ -261,7 +261,7 @@ export default defineLesson({
       notes: 'أكتب: كل طالب يكتب جملتين.',
       content: (
         <QuestionSlide
-          source={PRACTICE} n={5} tps tags={[{ kind: 'warn', text: 'أكتُبُ' }]}
+          source={PRACTICE} n={5} tags={[{ kind: 'warn', text: 'أكتُبُ' }]}
           question="لِمَاذَا أَحْتَاجُ إِلَى تَمْثِيلِ الْبَيَانَاتِ فِي أَعْمِدَةٍ بَدَلًا مِنْ جَدْوَلِ الإِشَارَاتِ؟"
           hint="انظر إلى التمثيل: كيف تعرف الأكثر بسرعة؟"
           steps={[

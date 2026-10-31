@@ -333,7 +333,7 @@ export default defineLesson({
       notes: 'أتحدث.',
       content: (
         <QuestionSlide
-          source={CHECK} n={5} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
+          source={CHECK} n={5} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question={<>يَحْوِي كِيسٌ مُكَعَّبَاتٍ <Cube c={C.red} /> وَمُكَعَّبَاتٍ <Cube c={C.green} />. فَهَلِ اخْتِيَارُ مُكَعَّبٍ <Cube c={C.yellow} /> يَكُونُ أَكِيدًا أَوْ مُسْتَحِيلًا؟ أَشْرَحُ.</>}
           hint="هل في الكيس مكعب أصفر؟"
           steps={[{ text: 'مُسْتَحِيلٌ؛ لِأَنَّ الْكِيسَ لَا يَحْوِي أَيَّ مُكَعَّبٍ أَصْفَرَ.', kind: 'ans' }]}
@@ -383,7 +383,7 @@ export default defineLesson({
       notes: 'التفكير الرياضي: ليس أكيدًا ولا مستحيلًا. نتعلم ذلك في الدرس القادم.',
       content: (
         <QuestionSlide
-          source={HOT} n={11} tps tags={[{ kind: 'warn', text: 'التَّفْكِيرُ الرِّيَاضِيُّ' }]}
+          source={HOT} n={11} tags={[{ kind: 'warn', text: 'التَّفْكِيرُ الرِّيَاضِيُّ' }]}
           question={<>وَضَعَ سُعُودٌ ٤ <Cube c={C.yellow} /> وَ ٤ <Cube c={C.green} /> فِي كِيسٍ. هَلِ اخْتِيَارُ <Cube c={C.yellow} /> أَكِيدٌ؟ أَشْرَحُ.</>}
           hint="هل كل المكعبات صفراء؟"
           steps={[

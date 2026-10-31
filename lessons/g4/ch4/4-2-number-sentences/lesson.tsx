@@ -1,6 +1,6 @@
 import {
   Blank, Card, Cols, Counters, Ctrls, Eq, GoHomeButton, HBars, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide,
-  Sentence, SlideHead, Solution, Stack, Step, Tag, TenTowers, ThinkPairShare, TimerButton, Winner, defineLesson,
+  Sentence, SlideHead, Solution, Stack, Step, Tag, TenTowers, TimerButton, Winner, defineLesson,
   type CounterGroup, type Token,
 } from '@engine';
 import { IntroClip } from './clip';
@@ -152,14 +152,13 @@ export default defineLesson({
     /* ================= استعد ================= */
     {
       sec: 'explore', min: 2,
-      notes: 'فكّر – زاوج – شارك: اكتب كل زوج جملة عددية. لا تعرض الحل؛ سنعود إليه في مثال ١ بالرسم والكلمات.',
+      notes: 'اكتب كل زوج جملة عددية. لا تعرض الحل؛ سنعود إليه في مثال ١ بالرسم والكلمات.',
       content: (
         <>
           <SlideHead tag={READY} kind="qs">الخروف وأمّه</SlideHead>
           <Cols>
             <QCol>
               <p className="qtext">يزنُ خروفٌ صغيرٌ ١٢ كيلُوجرامًا، بينَما يصلُ وزنُ أُمِّهِ حواليْ ٥٠ كيلُوجرامًا. اُكْتُبْ جُملةً عددِيَّةً تُبيِّنُ الفرقَ بينَ الوزنينِ.</p>
-              <ThinkPairShare />
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>«الفرق» يعني أن نطرح الوزن الأصغر من الأكبر.</Step>
@@ -392,7 +391,7 @@ export default defineLesson({
       notes: 'تحدّث: اقبل كل مسألة فيها ثلاثة أعداد أو أكثر، واطلب من صاحبها كتابة الجملة على السبورة.',
       content: (
         <QuestionSlide
-          source={CHECK} n={7} tps tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
+          source={CHECK} n={7} tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
           question="صِفْ مسألةً مِنْ واقِعِ الحياةِ تتضمَّنُ جُملةً عددِيَّةً مِنْ عِدَّةِ أعدادٍ."
           hint="فكّر في أشياء من عدة أنواع تجمعها، مثل أدواتك المدرسية."
           steps={[
@@ -538,7 +537,7 @@ export default defineLesson({
       notes: 'مسألة مفتوحة: إجابات كثيرة صحيحة. المهم أن يكون الطرفان متساويين. اطلب من ٣ طلاب إجابات مختلفة.',
       content: (
         <QuestionSlide
-          source={HOT} n={19} tps tags={[{ kind: 'warn', text: 'مسألةٌ مفتوحةٌ' }]}
+          source={HOT} n={19} tags={[{ kind: 'warn', text: 'مسألةٌ مفتوحةٌ' }]}
           question={<>أَكْمِلِ الجملةَ العدديَّةَ بعددَيْنِ مُختلِفَيْنِ لِتُكوِّنَ جُملةً صحيحةً:</>}
           hint="اختر ناتجًا واحدًا للطرفين، مثل ٣٤٤، ثم احسب العددين."
           steps={[
@@ -581,7 +580,7 @@ export default defineLesson({
       notes: 'أكتب: كل طالب يكتب مسألة في دفتره، ثم يحلّها. اقرأ اثنتين.',
       content: (
         <QuestionSlide
-          source={HOT} n={21} tps tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
+          source={HOT} n={21} tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
           question="مسألةً تتضمَّنُ الجُملةَ العددِيَّةَ: ٤٨ + □ = ٥٥. ثُمَّ حُلَّهَا."
           hint="ابدأ بـ «مع … ٤٨ ريالًا …»: كم يلزمه ليصبح معه ٥٥؟"
           steps={[

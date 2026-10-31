@@ -206,16 +206,55 @@ body.flow #timerw { position: fixed; }
 #timerw button { min-height: 2.3em; min-width: 2.3em; border-radius: .45em; border: 2px solid #ffffff55; background: #ffffff1a; color: #fff; font-size: .7em; font-weight: 800; cursor: pointer; padding: 0 .55em; touch-action: manipulation; }
 
 /* ===== العجلة ===== */
+/* شاشة الفصل: العجلة والاسم فقط بشكل التصميم الجديد، والتحكم من الجوال أو بلمس العجلة */
+.wheel2 { position: absolute; inset: 0; z-index: 20; container-type: size; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 3%; padding-block: 1.5%; padding-inline: 5% 3%; background: #fff; color: #13213b; font-family: "Noto Naskh Arabic", "Geeza Pro", Tajawal, Tahoma, serif; }
+.wheel2 canvas { block-size: 96cqb; inline-size: 96cqb; max-inline-size: 58cqi; max-block-size: 58cqi; cursor: pointer; touch-action: manipulation; }
+.wheel2 canvas:focus-visible { outline: 4px solid #13213b; outline-offset: 8px; border-radius: 50%; }
+.wname { margin: 0; text-align: center; font-size: min(15cqb, 9cqi); font-weight: 700; line-height: 1.5; color: #c3cad6; overflow-wrap: anywhere; }
+.wname.moving { color: #7b8698; }
+.wname.done { color: #13213b; }
+.wname.done span { display: inline-block; animation: wpop .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes wpop { from { transform: scale(.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .wname.done span { animation: none; } }
+.sr-only { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ===== إعلان النجمة والغلطة: الشاشة كلها، بشكل التصميم الجديد ===== */
+.cheer { position: absolute; inset: 0; z-index: 40; container-type: size; display: grid; place-items: center; overflow: hidden; background: #fff; color: #13213b; font-family: "Noto Naskh Arabic", "Geeza Pro", Tajawal, Tahoma, serif; pointer-events: none; animation: cheerin .25s ease-out, cheerout .4s ease-in 3.6s forwards; }
+.cheer.bad { animation: cheerin .2s ease-out, cheerout .3s ease-in 2.1s forwards; }
+@keyframes cheerin { from { opacity: 0; } }
+@keyframes cheerout { to { opacity: 0; } }
+.cheer-confetti { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; z-index: 2; }
+/* أشعة ذهبية تدور خلف النجمة */
+.cheer-rays { position: absolute; inset: -320%; z-index: -1; border-radius: 50%; background: repeating-conic-gradient(#ffd43b55 0 7.5deg, transparent 7.5deg 22.5deg); mask-image: radial-gradient(circle, #000 0, #000 10%, transparent 42%); animation: raysin .8s cubic-bezier(.2, 1, .3, 1) both, raysspin 14s linear infinite; }
+@keyframes raysin { from { transform: scale(.2); opacity: 0; } }
+@keyframes raysspin { to { rotate: 1turn; } }
+.cheer-card { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.cheer-star { position: relative; inline-size: 40cqmin; block-size: 40cqmin; display: grid; place-items: center; }
+.cheer-svg { inline-size: 100%; block-size: 100%; fill: #f5b400; stroke: #e8a400; stroke-width: .6; stroke-linejoin: round; animation: starin .9s cubic-bezier(.25, 1.7, .45, 1) both, starbeat 1.2s ease-in-out 1s infinite; }
+@keyframes starin { 0% { transform: scale(0) rotate(-220deg); } 100% { transform: none; } }
+@keyframes starbeat { 50% { transform: scale(1.07); } }
+/* موجة تتسع من النجمة لحظة وصولها */
+.cheer-ring { position: absolute; inset: 15%; border-radius: 50%; border: 1.4cqmin solid #f5b400; opacity: 0; animation: ring .9s ease-out .35s; }
+@keyframes ring { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(2.4); opacity: 0; } }
+.cheer-msg { margin-block-start: 1cqb; font-size: 6cqb; font-weight: 700; line-height: 1.4; color: #b07800; animation: up .5s ease-out .45s both; }
+.cheer-name { font-size: 15cqb; font-weight: 700; line-height: 1.35; animation: namein .6s cubic-bezier(.25, 1.6, .45, 1) .55s both; }
+@keyframes up { from { opacity: 0; transform: translateY(40%); } }
+@keyframes namein { from { opacity: 0; transform: translateY(30%) scale(.7); } }
+/* الغلطة: هادئة، بلا قصاصات */
+.cheer.bad .cheer-star { inline-size: 28cqmin; block-size: 28cqmin; }
+.cheer-x { inline-size: 100%; block-size: 100%; animation: xin .35s cubic-bezier(.3, 1.5, .5, 1) both, shake .35s ease-in-out .35s 2; }
+.cheer-x circle { fill: #ffe3e3; stroke: #e03131; stroke-width: 5; }
+.cheer-x path { stroke: #e03131; stroke-width: 9; stroke-linecap: round; fill: none; }
+@keyframes xin { from { transform: scale(.3); opacity: 0; } }
+.cheer.bad .cheer-name { margin-block-start: 2cqb; font-size: 12cqb; animation: up .4s ease-out .25s both; }
+@media (prefers-reduced-motion: reduce) {
+  .cheer * { animation: none !important; }
+  .cheer-ring { display: none; }
+}
+
 .modal { position: absolute; inset: 0; z-index: 20; background: #0e1a2fcc; display: none; align-items: center; justify-content: center; }
 .modal.show { display: flex; }
 .mbox { background: var(--paper); border-radius: .7em; padding: .6em .9em; display: grid; grid-template-columns: auto 1fr; gap: .9em; max-width: 92%; max-height: 92%; overflow: auto; }
-#wheelc { width: 12.5em; height: 12.5em; display: block; }
-.wside { display: flex; flex-direction: column; gap: .45em; min-width: 0; font-size: .75em; }
-#wres { font-family: var(--display); font-size: 2.1em; font-weight: 800; color: var(--hl); min-height: 1.3em; line-height: 1.2; }
-#wnames { font: inherit; font-size: .85em; width: 13em; height: 6.5em; border: 3px solid var(--line); border-radius: .4em; padding: .3em; resize: vertical; }
-.wwrap { position: relative; }
-/* المؤشر في أعلى منتصف العجلة */
-.wwrap::after { content: ""; position: absolute; top: -.15em; inset-inline: 0; margin-inline: auto; width: 0; height: 0; border: .55em solid transparent; border-top: 1em solid var(--ink); }
 
 /* ===== الاستكشاف ===== */
 .readout { display: flex; flex-direction: column; gap: .25em; font-size: .72em; font-weight: 800; }
@@ -237,9 +276,6 @@ body.flow #timerw { position: fixed; }
 table.data { border-collapse: collapse; font-size: .8em; font-weight: 700; background: var(--paper); }
 table.data td, table.data th { border: 3px solid var(--ink); padding: .15em .6em; text-align: center; }
 table.data th { background: var(--rule-t); }
-.tps { display: flex; gap: .45em; flex-wrap: wrap; }
-.tps button { min-height: 2.1em; font-size: .72em; font-weight: 800; border: 3px solid var(--qs); border-radius: .45em; background: var(--paper); color: var(--qs); cursor: pointer; padding: 0 .8em; }
-.tps button.on { background: var(--qs); color: #fff; }
 .mind { position: relative; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto auto; gap: .5em .9em; flex: 1; align-items: center; }
 .mind .ctr { grid-column: 2; grid-row: 2; text-align: center; background: var(--ink); color: #fff; border-radius: 1em; padding: .5em; font-family: var(--display); font-weight: 800; font-size: 1.25em; z-index: 1; }
 .mind .card { z-index: 1; font-size: .78em; font-weight: 700; }
@@ -708,8 +744,6 @@ table.dgrid.horiz td { min-width: 1.8em; padding: .3em .4em; }
 .gcols { display: grid; gap: .5em; align-items: start; max-height: 26em; overflow: auto; }
 .gcol { display: flex; flex-direction: column; gap: .3em; border: 3px dashed var(--line); border-radius: .5em; padding: .4em; min-height: 6em; }
 .gname { font: inherit; font-weight: 700; padding: .25em .5em; border: 3px solid var(--line); border-radius: .4em; background: var(--paper); cursor: pointer; text-align: start; touch-action: manipulation; }
-.wklass { margin: 0; font-weight: 700; }
-.wteams .btn { border-width: 3px; }
 body.flow .cbox, body.flow .gbox { width: auto; }
 body.flow .gcols { grid-template-columns: 1fr 1fr !important; }
 
@@ -757,7 +791,6 @@ body.flow .gcols { grid-template-columns: 1fr 1fr !important; }
 .p3 .pblock { height: 5.1em; background: #b0703a; }
 .p4 .pblock { height: 4.1em; background: #3f7fc4; }
 .p5 .pblock { height: 3.3em; background: #2f9e6a; }
-.wstar { display: grid; grid-template-columns: 1fr 1fr; gap: .35em; }
 body.flow .sbox { width: auto; }
 body.flow .psteps { padding-inline: 0; }
 
@@ -781,8 +814,6 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 @keyframes bagout { from { transform: translate(var(--dx), var(--dy)) scale(.7); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .bag .bag-out { animation: none; } }
 .ball-dot { display: inline-block; inline-size: .9em; block-size: .9em; border-radius: 50%; border: 2px solid var(--ink); vertical-align: -.1em; margin-inline-end: .3em; }
-.wgiven { grid-column: 1 / -1; text-align: center; font-family: var(--display); font-size: 1.6em; font-weight: 800; }
-.wgiven.up { color: #8a6200; } .wgiven.down { color: var(--bad); }
 .rstar { display: grid; grid-template-columns: 3.2rem 1fr 3.2rem; align-items: center; gap: .5rem; border: 2px solid var(--line); border-radius: .7rem; padding: .3rem; }
 .rstar span { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .rstar b { font-size: 1.1rem; }
@@ -795,7 +826,6 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .rpicked small { color: var(--muted); font-weight: 700; }
 .rpicked .rstarbtns { align-self: stretch; }
 .rpicked .rbtn { min-height: 3.4rem; font-size: 1.3rem; }
-.wstar .sb { display: flex; align-items: center; justify-content: center; gap: .3em; }
 .rrank summary { font-weight: 800; cursor: pointer; }
 .rrank ol { list-style: none; margin: .4rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .25rem; }
 .rrank li { display: flex; align-items: baseline; gap: .5rem; font-weight: 700; }
@@ -888,14 +918,6 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .dtally { display: flex; gap: .6em; align-items: center; justify-content: center; }
 
 /* إعلان النجمة */
-.cheer { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; background: #0e1a2f99; animation: fadein .25s ease; pointer-events: none; }
-.cheer-card { display: flex; flex-direction: column; align-items: center; gap: .15em; background: #fff6d6; color: var(--ink); border: 6px solid #e8a400; border-radius: .8em; padding: .5em 1.6em .7em; box-shadow: 0 12px 40px #0006; animation: pop .45s cubic-bezier(.2, 1.6, .4, 1); text-align: center; }
-.cheer-star { inline-size: 3.2em; block-size: 3.2em; color: #f5b400; animation: cheerspin 1s ease-out; filter: drop-shadow(0 4px 10px #e8a40088); }
-.cheer-star svg { inline-size: 100%; block-size: 100%; fill: currentColor; }
-.cheer-name { font-size: 2.6em; font-weight: 800; line-height: 1.3; }
-.cheer-msg { font-size: 1.6em; font-weight: 800; color: #b07800; }
-.cheer-week { font-size: 1em; font-weight: 700; opacity: .8; }
-@keyframes cheerspin { from { transform: rotate(-200deg) scale(.2); } }
 
 /* جدول إشارات يملؤه الصف (LiveTally) */
 .ltally { display: flex; flex-direction: column; align-items: center; gap: .4em; }
@@ -932,7 +954,6 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .bans.wordy .step.ans.shown, .blist.many .bans.wordy .step.ans.shown { font-size: 1em; }
 .bctrl { display: flex; flex-wrap: wrap; align-items: center; gap: .4em .6em; }
 .bctrl > * { flex: none; }
-.bctrl .tps button { font-size: .66em; padding: 0 .55em; }
 .blist.many .qtext { line-height: 1.55; }
 .step.sstep.ans.wordy { font-size: 1.05em; }
 .blank.box .step.bv.shown { font-size: 1.1em; }
@@ -944,10 +965,6 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .psteps.many .pwho small { font-size: .7em; }
 
 /* إعلان الغلطة: مثل النجمة بالأحمر */
-.cheer.bad .cheer-card { background: #fde4e4; border-color: var(--bad); }
-.cheer.bad .cheer-msg { color: var(--bad); }
-.cheer-x { display: grid; place-items: center; inline-size: 100%; block-size: 100%; font-size: 2.4em; font-weight: 800; line-height: 1; color: var(--bad); }
-.cheer.bad .cheer-star { animation: shake .4s 2; filter: none; }
 /* نجم الأسبوع: الأعداد مخفية حتى يُظهرها المعلم */
 .stot.hid { background: var(--line); color: var(--muted); }
 .sshow { border-color: #e8a400; color: #8a6200; }
@@ -958,3 +975,12 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .spick .sgap { margin-inline-start: .8em; }
 .sidle { position: absolute; inset: 0; display: grid; place-items: center; }
 .sidle .btn { font-size: 1em; min-height: 2.6em; }
+
+/* الفرق وطلابها على الشاشة (من صفحة إعداد الحصة في الجوال) */
+.teamsboard { position: absolute; inset: 0; z-index: 50; display: grid; place-items: center; padding: 40px; background: #0b122666; }
+.teamsboard .tbin { width: 100%; max-height: 100%; overflow: auto; padding: 28px 32px; border-radius: 20px; background: #fff; color: var(--ink); }
+.teamsboard h2 { margin: 0 0 18px; font-size: 44px; font-weight: 700; }
+.teamsboard h2 small { font-size: 26px; font-weight: 500; color: var(--muted); margin-inline-start: 12px; }
+.teamsboard .tbcols { display: grid; gap: 18px; }
+.teamsboard .tbcol { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; border-radius: 16px; background: #f3f4f7; border-block-start: 10px solid var(--tc); font-size: 30px; line-height: 1.5; }
+.teamsboard .tbcol b { margin-block-end: 6px; font-size: 34px; font-weight: 700; color: var(--tc); }

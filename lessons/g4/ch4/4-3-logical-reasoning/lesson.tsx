@@ -276,10 +276,10 @@ export default defineLesson({
     /* ================= حلل الخطة ١–٤ ================= */
     {
       sec: 'check', min: 2,
-      notes: 'فكّر – زاوج – شارك. جرّب مع الطلاب: احذف «محمد أقصر من سعود»؛ هل نعرف أين يقف سعود؟',
+      notes: 'جرّب مع الطلاب: احذف «محمد أقصر من سعود»؛ هل نعرف أين يقف سعود؟',
       content: (
         <QuestionSlide
-          source={ANALYZE} n={1} tps
+          source={ANALYZE} n={1}
           intro={ANALYZE_INTRO}
           question="هلْ ستتغيَّرُ النتيجةُ لو نقصتْ إحدَى مُعطياتِ المسألةِ؟ اِشرحْ إجابَتكَ."
           hint="احذف معلومة واحدة، وحاول أن ترتّب الخمسة."
@@ -296,7 +296,7 @@ export default defineLesson({
       notes: 'اسأل: هل في المسألة أعداد نجمعها أو نطرحها؟ (لا، فيها مقارنات).',
       content: (
         <QuestionSlide
-          source={ANALYZE} n={2} tps
+          source={ANALYZE} n={2}
           question="وَضِّحْ لماذا كانتْ هذهِ الخُطَّةُ مناسبةً لحلِّ هذهِ المسألةِ."
           hint="ما نوع المعلومات في المسألة: أعداد أم مقارنات؟"
           steps={[
@@ -346,7 +346,7 @@ export default defineLesson({
       notes: 'اقبل: رسم أعمدة أطوال، أو التخمين والتحقق. ناقش: أيها أسرع؟',
       content: (
         <QuestionSlide
-          source={ANALYZE} n={4} tps
+          source={ANALYZE} n={4}
           question="هلْ يُمكِنُ أنْ تَستعمِلَ خُطَّةً أُخرَى لحلِّ هذهِ المسألةِ؟ اِشْرَحْ إجابَتكَ."
           hint="هل يمكن أن نرسم؟ هل يمكن أن نخمّن ثم نتحقق؟"
           steps={[
@@ -506,7 +506,7 @@ export default defineLesson({
       notes: 'أكتب: يكتب الطالب خطوتين على الأقل: الطرح أولًا، ثم البحث المنطقي عن الأعداد المختلفة.',
       content: (
         <QuestionSlide
-          source={PRACTICE} n={11} tps tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
+          source={PRACTICE} n={11} tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
           question="كيفَ يمكنُكَ حلُّ المسألةِ رَقْمِ ١٠ باستعمالِ خُطَّةِ الاستدلالِ المنطقيِّ؟"
           hint="ما أول شيء نعرفه؟ وما الشرط الذي يحدد الأعداد؟"
           steps={[

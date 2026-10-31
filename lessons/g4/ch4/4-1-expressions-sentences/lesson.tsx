@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import {
   Card, Cols, Counters, Ctrls, Eq, GoHomeButton, HBars, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide,
-  Sentence, SlideHead, Solution, Stack, Step, Tag, ThinkPairShare, TimerButton, Winner, defineLesson, type HlKey, type Token,
+  Sentence, SlideHead, Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson, type HlKey, type Token,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -137,14 +137,13 @@ export default defineLesson({
     /* ================= استعد ================= */
     {
       sec: 'explore', min: 3,
-      notes: 'فكّر – زاوج – شارك: ماذا تمثّل ١٦ − ٣؟ بعد المشاركة اضغط المسافة. ركّز على أن ١٦ − ٣ «تمثّل» عددًا (الباقي) دون أن نكتب الناتج.',
+      notes: 'ماذا تمثّل ١٦ − ٣؟ بعد المشاركة اضغط المسافة. ركّز على أن ١٦ − ٣ «تمثّل» عددًا (الباقي) دون أن نكتب الناتج.',
       content: (
         <>
           <SlideHead tag={READY} kind="qs">تفاحات هند</SlideHead>
           <Cols>
             <QCol>
               <p className="qtext">في السَّلَّةِ ١٦ تُفَّاحةً. أكلتْ منهَا هندُ ٣ تُفاحاتٍ. العِبارةُ <Eq>١٦ - ٣</Eq> تُمثِّلُ عددَ التُّفَّاحاتِ المُتبقِّيةِ.</p>
-              <ThinkPairShare />
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step><Eq>١٦</Eq> عددُ التفاحاتِ كلِّها.</Step>
@@ -181,7 +180,6 @@ export default defineLesson({
               </div>
             </Card>
           </Cols>
-          <ThinkPairShare />
           <Ctrls><NextButton /></Ctrls>
           <Step><Card kind="ex" cap="لاحظ">في المجموعتين أعدادٌ وعملياتٌ، لكنّ الثانية فيها <b>إشارة</b>: = أو &gt; أو &lt;.</Card></Step>
         </>
@@ -399,7 +397,7 @@ export default defineLesson({
       notes: 'تحدّث: اطلب من طالبين أن يشرحا بلغتهما، ثم اعرض الإجابة.',
       content: (
         <QuestionSlide
-          source={CHECK} n={9} tps tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
+          source={CHECK} n={9} tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
           question="مَا الفرقُ بينَ العِبارةِ العددِيَّةِ والجُملةِ العدديَّةِ؟"
           hint="تذكّر المجموعتين: ماذا كان في الثانية ولم يكن في الأولى؟"
           steps={[
@@ -578,7 +576,7 @@ export default defineLesson({
       notes: 'تحدٍّ: قد يكتب الطلاب عبارات مختلفة (٢٩ − ١٦ و١٣ مثلًا). اقبل كل مقارنة صحيحة.',
       content: (
         <QuestionSlide
-          source={HOT} n={23} tps tags={[{ kind: 'warn', text: 'تَحَدٍّ' }]}
+          source={HOT} n={23} tags={[{ kind: 'warn', text: 'تَحَدٍّ' }]}
           question="اِستعمِلِ الأعدادَ ١٣ وَ ١٦ وَ ٢٩ في كتابةِ عبارتينِ عدديتينِ، ثُمَّ قارِنْ بينَ العِبارتينِ مستعملًا (>، <، =)."
           hint="لاحظ: ١٣ + ١٦ تساوي أحد الأعداد الثلاثة."
           steps={[
@@ -616,7 +614,7 @@ export default defineLesson({
       notes: 'أكتب: كل طالب يكتب مسألة في دفتره، ثم اقرأ اثنتين أو ثلاثًا. تأكد أن المسألة فيها طرح وأن الجملة فيها =.',
       content: (
         <QuestionSlide
-          source={HOT} n={25} tps tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
+          source={HOT} n={25} tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
           question="مَسألةً مِنْ واقعِ الحَياةِ تمثلُ جملةً عدديةً مستعملًا الطرحَ."
           hint="فكّر في شيء معك، ثم أعطيت أو أنفقت أو أكلت جزءًا منه."
           steps={[

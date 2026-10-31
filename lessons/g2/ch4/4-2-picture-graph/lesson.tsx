@@ -209,7 +209,7 @@ export default defineLesson({
       notes: 'أتحدث: اطلب من طالبين أن يشرحا.',
       content: (
         <QuestionSlide
-          source={CHECK} n={2} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
+          source={CHECK} n={2} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="كَيْفَ أُفَرِّقُ بَيْنَ التَّمْثِيلِ بِالصُّوَرِ وَجَدْوَلِ الإِشَارَاتِ؟"
           hint="ماذا تمثّل الإشارة؟ وماذا تمثّل الصورة؟"
           steps={[

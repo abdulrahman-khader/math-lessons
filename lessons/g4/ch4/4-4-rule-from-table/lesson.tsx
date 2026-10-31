@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Blank, Card, Cols, RuleTable, Ctrls, Eq, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, Sentence, SlideHead,
-  Solution, Stack, Step, Tag, ThinkPairShare, TimerButton, Winner, defineLesson, num, type Token,
+  Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson, num, type Token,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -131,14 +131,13 @@ export default defineLesson({
     /* ================= استعد ================= */
     {
       sec: 'explore', min: 3,
-      notes: 'فكّر – زاوج – شارك. إن توفرت أقلام فليكوّن الطلاب مثلثين أمامهم. ثم اضغط المسافة.',
+      notes: 'إن توفرت أقلام فليكوّن الطلاب مثلثين أمامهم. ثم اضغط المسافة.',
       content: (
         <>
           <SlideHead tag={READY} kind="qs">مثلثات يزيد</SlideHead>
           <Cols>
             <QCol>
               <p className="qtext">يكوِّنُ يَزيدُ ٥ مثلَّثاتٍ منفصلةٍ باستعمالِ الأقلامِ. إذَا استعملَ ٣ أقلامٍ للمثلثِ الأوَّلِ وَ ٣ أقلامٍ أُخرى للمُثلَّثِ الثَّانِي، فكمْ قلمًا يحتاجُ لِتكْوينِ ٥ مُثلَّثاتٍ؟</p>
-              <ThinkPairShare />
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>كل مثلث يحتاج ٣ أقلام.</Step>
@@ -331,7 +330,7 @@ export default defineLesson({
       notes: 'تحدّث: اسأل: كيف نعرف الحد العاشر في ٣، ٦، ٩ دون أن نكتب كل الحدود؟',
       content: (
         <QuestionSlide
-          source={CHECK} n={3} tps tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
+          source={CHECK} n={3} tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
           question="اِشْرَحْ كيفَ يمكنُ لعمليةِ الضَّربِ أنْ تُساعدَكَ على توْسِعَةِ نمطٍ مَا."
           hint="ماذا يحدث عندما يزيد النمط بالمقدار نفسه كل مرة؟"
           steps={[
@@ -423,7 +422,7 @@ export default defineLesson({
       notes: 'تحدٍّ: إجابات كثيرة صحيحة. اطلب من كل زوج قاعدة ضرب مختلفة.',
       content: (
         <QuestionSlide
-          source={HOT} n={8} tps tags={[{ kind: 'warn', text: 'تَحَدٍّ' }]}
+          source={HOT} n={8} tags={[{ kind: 'warn', text: 'تَحَدٍّ' }]}
           question="كَوِّنْ جدولًا يستعملُ قاعدةَ ضَرْبٍ، ثمَّ اكْتُبْ أزواجَ المُدخَلاتِ والمُخرَجاتِ."
           hint="اختر عددًا تضرب فيه، ثم جرّب مدخلات."
           steps={[
@@ -455,7 +454,7 @@ export default defineLesson({
       notes: 'أكتب: كل طالب يكتب خطوات في دفتره، ثم اقرأ إجابتين.',
       content: (
         <QuestionSlide
-          source={HOT} n={10} tps tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
+          source={HOT} n={10} tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
           question="كيفَ تكتشفُ القاعدةَ مِن جدولٍ."
           hint="ماذا أفعل بكل مدخلة ومخرجتها؟"
           steps={[

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from 'react';
+import { useContext, useEffect, useId, useLayoutEffect, useRef, type CSSProperties, type ReactNode, type Ref } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { GroupCtx, useEngine, useSlide, useV2 } from '../context';
 import { sAns } from '../sound';
@@ -148,35 +148,6 @@ export function TimerButton({ sec }: { sec: number }) {
     <button className="btn timer" onClick={() => startTimer(sec)}>
       مؤقت {duration(sec)}
     </button>
-  );
-}
-
-/** فكّر – زاوج – شارك: كل زر يشغّل مؤقته */
-export function ThinkPairShare({ think = 60, pair = 60 }: { think?: number; pair?: number }) {
-  const { startTimer } = useEngine();
-  const [on, setOn] = useState(-1);
-  // التصميم الجديد: أدوات المعلم ليست على السبورة؛ المؤقت من الجوال أو قائمة الأدوات
-  if (useV2()) return null;
-  const items = [
-    { label: `فكّر · ${duration(think)}`, sec: think },
-    { label: `زاوج · ${duration(pair)}`, sec: pair },
-    { label: 'شارك', sec: 0 },
-  ];
-  return (
-    <div className="tps">
-      {items.map((it, i) => (
-        <button
-          key={i}
-          className={on === i ? 'on' : ''}
-          onClick={() => {
-            setOn(i);
-            if (it.sec) startTimer(it.sec);
-          }}
-        >
-          {it.label}
-        </button>
-      ))}
-    </div>
   );
 }
 

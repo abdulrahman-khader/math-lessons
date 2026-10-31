@@ -1,6 +1,6 @@
 import {
   Card, Cols, Ctrls, Eq, FnTable, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, RuleTable, SlideHead,
-  Solution, Stack, Step, Tag, ThinkPairShare, TimerButton, Winner, defineLesson,
+  Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -109,14 +109,13 @@ export default defineLesson({
     /* ================= استعد ================= */
     {
       sec: 'explore', min: 3,
-      notes: 'فكّر – زاوج – شارك: يحسب كل زوج المبالغ الأربعة. اسأل: ماذا فعلنا بكل مبلغ؟ (أضفنا ٥).',
+      notes: 'يحسب كل زوج المبالغ الأربعة. اسأل: ماذا فعلنا بكل مبلغ؟ (أضفنا ٥).',
       content: (
         <>
           <SlideHead tag={READY} kind="qs">حسابات التوفير</SlideHead>
           <Cols>
             <QCol>
               <p className="qtext">يُبيِّنُ الجدولُ المُجاوِرُ المبالغَ الَّتي وَفَّرَتْهَا أربعُ فَتيَات. فإذا حَصلَتْ كلُّ فتاةٍ على ٥ ريالاتٍ إضافةً لما معَها، فكمْ يُصبحُ المبلغُ معَ كلٍّ منهنَّ؟</p>
-              <ThinkPairShare />
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>نضيف ٥ إلى كل مبلغ.</Step>
@@ -330,7 +329,7 @@ export default defineLesson({
       notes: 'تحدّث: اطلب من طالبين أن يشرحا، ثم اعرض الإجابة.',
       content: (
         <QuestionSlide
-          source={CHECK} n={4} tps tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
+          source={CHECK} n={4} tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
           question="كيفَ يُساعدُك جدولُ الدَّالَّةِ لِتكْتَشِفَ النَّمطَ؟ وَضِّحْ إجابَتَكَ."
           hint="ماذا ترى عندما تكون كل مدخلة بجانب مخرجتها؟"
           steps={[
@@ -476,7 +475,7 @@ export default defineLesson({
       notes: 'مسألة مفتوحة: كل طالب يختار مدخلاته.',
       content: (
         <QuestionSlide
-          source={HOT} n={13} tps tags={[{ kind: 'warn', text: 'مسألةٌ مفتوحةٌ' }]}
+          source={HOT} n={13} tags={[{ kind: 'warn', text: 'مسألةٌ مفتوحةٌ' }]}
           question="أَنْشِئْ جدولَ دَالَّةٍ للقاعدةِ « أَضِفْ ٥»."
           hint="اختر أي أربعة أعداد مدخلات، وأضف ٥ إلى كل منها."
           steps={[{ text: 'مثال: المدخلات ١، ٢، ٣، ٤ ، والمخرجات ٦، ٧، ٨، ٩', kind: 'ans' }]}
@@ -515,7 +514,7 @@ export default defineLesson({
       notes: 'أكتب: اقرأ مسألتين من الطلاب وتحقق أن القاعدة +١٠.',
       content: (
         <QuestionSlide
-          source={HOT} n={15} tps tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
+          source={HOT} n={15} tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
           question="مَسألةً من واقعِ الحَياةِ لقاعدةِ الدَّالَّةِ المُمَثَّلَةِ بالجدولِ المُجاورِ. ثمَّ أَوْجِدْ قاعدةَ الدَّالَّةِ."
           hint="ما الفرق بين كل مدخلة ومخرجتها؟"
           steps={[

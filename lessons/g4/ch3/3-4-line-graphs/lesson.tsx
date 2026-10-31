@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Card, Chart, Cols, Ctrls, DataTable, DragChart, Eq, GoHomeButton, Hint, HintButton, IfTeams, MCQ, Mark, MindMap,
-  NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step, ThinkPairShare, TrendExplorer, Winner, defineLesson,
+  NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step, TrendExplorer, Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
 import * as C from './charts';
@@ -176,17 +176,16 @@ export default defineLesson({
       ),
     },
 
-    /* ================= استعد · فكّر زاوج شارك ================= */
+    /* ================= استعد ================= */
     {
       sec: 'explore', min: 3,
-      notes: 'فكّر – زاوج – شارك: دقيقة تفكير فردي بصمت، دقيقة نقاش مع الزميل، ثم يشارك زوجان. بعد المشاركة اضغط المسافة لإظهار الإجابة خطوة خطوة.',
+      notes: 'امنح الطلاب دقيقة للتفكير، ثم اسمع إجابتين. بعدها اضغط المسافة لإظهار الإجابة خطوة خطوة.',
       content: (
         <>
           <SlideHead tag="اسْتَعِدَّ · ص ٨٧" kind="qs">درجات الحرارة في مدينة الرياض</SlideHead>
           <Cols>
             <QCol>
               <p className="qtext">يُوضِّحُ الرَّسمُ البيانيُّ دَرجاتِ الحَرارةِ مِن يَومِ السَّبتِ إلَى يَومِ الجُمعةِ في مَدينةِ الرِّياضِ. صِفْ كَيفَ تَغيَّرتْ دَرجاتُ الحَرارةِ خِلالَ هذَا الأُسبوعِ.</p>
-              <ThinkPairShare />
               <Ctrls><HintButton /><NextButton /></Ctrls>
               <Hint>تتبّع الخط بإصبعك من اليسار إلى اليمين: أين يصعد؟ أين يهبط؟</Hint>
               <Solution>
@@ -539,10 +538,10 @@ export default defineLesson({
     },
     {
       sec: 'hot', min: 2,
-      notes: 'فكّر – زاوج – شارك: كل طالب يكتب جملتين، ثم يقارن مع زميله، ثم يشارك زوجان. ركّز على كلمة «فسّر»: لماذا؟ لأن الخط أفقي/صاعد.',
+      notes: 'كل طالب يكتب جملتين، ثم اسمع بعضها. ركّز على كلمة «فسّر»: لماذا؟ لأن الخط أفقي/صاعد.',
       content: (
         <QuestionSlide
-          source={HOT} n={12} tps tags={[{ kind: 'warn', text: 'أكتُبُ' }]}
+          source={HOT} n={12} tags={[{ kind: 'warn', text: 'أكتُبُ' }]}
           question="باسْتِخدامِ التَّمثيلِ بالخُطُوطِ المُجاورِ اكتُبْ جُملتَينِ تَصِفُ هَذِهِ البَيانَاتِ، فسِّرْ إجابَتَكَ."
           hint="صِف الجزء الأول من الخط (من أ إلى ب)، ثم الجزء الثاني (من ب إلى د)."
           steps={[

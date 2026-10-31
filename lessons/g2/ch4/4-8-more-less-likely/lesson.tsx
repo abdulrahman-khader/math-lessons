@@ -224,7 +224,7 @@ export default defineLesson({
       notes: 'أتحدث: قارن نتائج الصف في جدول السؤال ٢ بإجابة السؤال ١.',
       content: (
         <QuestionSlide
-          source={CHECK} n={3} tps tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
+          source={CHECK} n={3} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="هَلْ تَتَّفِقُ النَّتَائِجُ الَّتِي حَصَلْتُ عَلَيْهَا فِي جَدْوَلِ الإِشَارَاتِ مَعَ إِجَابَتِي عَنِ السُّؤَالِ (١)؟ أَشْرَحُ."
           hint="أيّ لون له إشارات أكثر في جدولك؟"
           steps={[{
@@ -285,7 +285,7 @@ export default defineLesson({
       notes: 'التفكير المنطقي: العددان متساويان، فلا أحد أكثر إمكانية.',
       content: (
         <QuestionSlide
-          source={SOLVE} n={8} tps tags={[{ kind: 'warn', text: 'التَّفْكِيرُ الْمَنْطِقِيُّ' }]}
+          source={SOLVE} n={8} tags={[{ kind: 'warn', text: 'التَّفْكِيرُ الْمَنْطِقِيُّ' }]}
           question={<>وَضَعَتْ لَيْلَى ٥ <Cube c={C.purple} /> وَ ٥ <Cube c={C.green} /> فِي كِيسٍ. أَيُّهُمَا إِمْكَانِيَّةُ حُدُوثِهِ أَكْثَرُ مِنَ الآخَرِ: سَحْبُ <Cube c={C.purple} /> أَمْ <Cube c={C.green} />؟ أُوَضِّحُ إِجَابَتِي.</>}
           hint="قارن العددين."
           steps={[

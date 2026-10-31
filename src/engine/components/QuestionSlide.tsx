@@ -4,7 +4,7 @@ import { IconBook } from './V2Chrome';
 import { num } from '../digits';
 import type { HlKey } from '../types';
 import { Cols, QCol, Tag, type Kind } from './Layout';
-import { Ctrls, Hint, HintButton, NextButton, Solution, Step, ThinkPairShare, TimerButton } from './Steps';
+import { Ctrls, Hint, HintButton, NextButton, Solution, Step, TimerButton } from './Steps';
 
 export interface StepDef {
   text: ReactNode;
@@ -30,8 +30,6 @@ interface Props {
   hint?: ReactNode;
   /** ثواني مؤقت الحل الفردي */
   time?: number;
-  /** يضيف أزرار فكّر – زاوج – شارك */
-  tps?: boolean;
   /** خطوات الحل؛ فارغة حين يجيب الصف من بياناته هو (جدول يملؤه الطلاب) */
   steps: StepDef[];
   /** الرسم في العمود المقابل */
@@ -118,13 +116,12 @@ interface GroupProps {
   qs: BookQ[];
   hint?: ReactNode;
   time?: number;
-  tps?: boolean;
   chart?: ReactNode;
   children?: ReactNode;
 }
 
 /** أسئلة متتالية من الكتاب على رسم واحد، مرتّبة كما في الصفحة؛ «التالي» يكتب الإجابات واحدة واحدة */
-export function BookGroup({ source, tags, intro, qs, hint, time, tps, chart, children }: GroupProps) {
+export function BookGroup({ source, tags, intro, qs, hint, time, chart, children }: GroupProps) {
   const body = (
     <QCol>
       {intro && <p className="bintro">{intro}</p>}
@@ -140,7 +137,6 @@ export function BookGroup({ source, tags, intro, qs, hint, time, tps, chart, chi
           <NextButton />
           {time && <TimerButton sec={time} />}
         </Ctrls>
-        {tps && <ThinkPairShare />}
       </div>
       {hint && <Hint>{hint}</Hint>}
     </QCol>
@@ -168,12 +164,12 @@ export function BookGroup({ source, tags, intro, qs, hint, time, tps, chart, chi
 }
 
 /** شريحة سؤال من الكتاب: السؤال، تلميح، حل بالخطوات يبرز أجزاء الرسم، وتنبيه الخطأ الشائع. */
-export function QuestionSlide({ source, n, tags, intro, question, long, hint, time, tps, steps, chart, children }: Props) {
+export function QuestionSlide({ source, n, tags, intro, question, long, hint, time, steps, chart, children }: Props) {
   const v2 = useV2();
-  if (v2) return <QuestionV2 {...{ source, n, tags, intro, question, long, hint, tps, steps, chart }}>{children}</QuestionV2>;
+  if (v2) return <QuestionV2 {...{ source, n, tags, intro, question, long, hint, steps, chart }}>{children}</QuestionV2>;
   if (useContext(BookCtx))
     return (
-      <BookGroup source={source} tags={tags} intro={intro} qs={[{ n, question, steps, long }]} hint={hint} time={time} tps={tps} chart={chart}>
+      <BookGroup source={source} tags={tags} intro={intro} qs={[{ n, question, steps, long }]} hint={hint} time={time} chart={chart}>
         {children}
       </BookGroup>
     );
@@ -193,7 +189,6 @@ export function QuestionSlide({ source, n, tags, intro, question, long, hint, ti
           {intro && <p className="intro">{intro}</p>}
           <p className={'qtext' + (long ? ' long' : '')}>{question}</p>
           {children}
-          {tps && <ThinkPairShare />}
           <Ctrls>
             {hint && <HintButton />}
             {steps.length > 0 && <NextButton />}
@@ -223,7 +218,7 @@ const pageOf = (source: string) => source.split(/[·،]/).map((x) => x.trim()).f
  * التصميم الجديد: رقم السؤال وصفحة الكتاب، ثم السؤال، ثم صناديق الإجابة ظاهرة من البداية.
  * لا أزرار على السبورة: الخطوات والتلميح والمؤقت من الجوال (أو المسافة وH ولوحة المفاتيح).
  */
-function QuestionV2({ source, n, tags, intro, question, long, hint, tps, steps, chart, children }: Omit<Props, 'time'>) {
+function QuestionV2({ source, n, tags, intro, question, long, hint, steps, chart, children }: Omit<Props, 'time'>) {
   return (
     <>
       <div className="v2qh" data-qnum={n}>
@@ -243,7 +238,6 @@ function QuestionV2({ source, n, tags, intro, question, long, hint, tps, steps, 
           {intro && <p className="intro">{intro}</p>}
           <p className={'qtext' + (long ? ' long' : '')}>{question}</p>
           {children}
-          {tps && <ThinkPairShare />}
           {hint && <Hint>{hint}</Hint>}
           {steps.length > 0 && (
             <Solution>

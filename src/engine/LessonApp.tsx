@@ -6,7 +6,7 @@ import { SECTION_NAMES, TEAM_COLORS, V2_TEAM_COLORS } from './sections';
 import { sBad, setMuted, sGood, sStar } from './sound';
 import { useStars, tally, weekStart } from './stars';
 import { useSaved } from './store';
-import { classesOf, gradeOf, setClass, setGrade, useRoster } from './classes';
+import { classesOf, gradeOf, setClass, setGrade, shuffleTeams, useRoster, type Klass } from './classes';
 import { ClassesModal, GroupsModal } from './components/Classes';
 import type { Lesson, SectionKey, SlideDef } from './types';
 import { Home } from './components/Home';
@@ -48,6 +48,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   /** أسماء خرجت من العجلة في هذه الحصة فلا تتكرر */
   const [picked, setPicked] = useState<string[]>([]);
   const [teamFilter, setTeamFilter] = useState(-1);
+  /** يخرج الاسم من العجلة بعد ظهوره (مع الفصل) */
+  const [wheelRemove, setWheelRemove] = useState(true);
+  /** الفرق وطلابها ظاهرة على الشاشة (من صفحة إعداد الحصة في الجوال) */
+  const [teamsShown, setTeamsShown] = useState(false);
   const [classesOpen, setClassesOpen] = useState(false);
   const [groupsOpen, setGroupsOpen] = useState(false);
   const chooseKlass = (id: string) => {
@@ -57,7 +61,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     updateRoster((r) => setGrade(r, grade, (g) => ({ ...g, last: id })));
   };
   /* نجم الأسبوع: مشترك بين كل الدروس، لطلاب الفصل المختار */
-  const { events: starEvents, add: addStarEvent, undo: undoStar } = useStars();
+  const { events: starEvents, add: addStarEvent, undo: undoStar, remove: removeStar } = useStars();
   const [starsOpen, setStarsOpen] = useState(false);
   const [starsReq, setStarsReq] = useState<{ n: number; a: 'podium' | 'next' }>({ n: 0, a: 'next' });
   const [cheer, setCheer] = useState<Cheer | null>(null);
@@ -214,6 +218,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         setSlideTick((t) => t + 1);
         break;
       case 'next':
+        setTeamsShown(false);
         if (!api?.reveal()) goto(cur + 1);
         break;
       case 'prev':
@@ -259,6 +264,33 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'starUndo':
         if (klass) undoStar(klass.id);
         break;
+      case 'starRemove':
+        if (klass?.students.includes(c.s)) removeStar(klass.id, c.s, c.d > 0 ? 1 : -1);
+        break;
+      case 'wheelReturn':
+        setPicked((p) => p.filter((n) => n !== c.s));
+        break;
+      case 'wheelRemove':
+        setWheelRemove(!!c.on);
+        break;
+      case 'wheelTeam':
+        if (c.t >= -1 && c.t < st.nTeams) setTeamFilter(c.t);
+        break;
+      case 'teamsN':
+        if (c.n >= 0 && c.n <= 4) patch({ nTeams: Math.round(c.n) });
+        break;
+      case 'teamName':
+        if (c.i >= 0 && c.i < 4 && typeof c.name === 'string') patch((x) => ({ names: x.names.map((n, i) => (i === c.i ? c.name.trim().slice(0, 24) || n : n)) }));
+        break;
+      case 'teamsShuffle':
+        if (klass && st.nTeams > 0) updateRoster((r) => setClass(r, grade, klass.id, (k) => ({ ...k, team: shuffleTeams(k.students, st.nTeams) })));
+        break;
+      case 'teamMove':
+        if (klass?.students.includes(c.s) && c.team >= 0 && c.team < st.nTeams) updateRoster((r) => setClass(r, grade, klass.id, (k) => ({ ...k, team: { ...k.team, [c.s]: c.team } })));
+        break;
+      case 'teamsShow':
+        setTeamsShown(!!c.open);
+        break;
       case 'spin':
         setWheelOpen(true);
         setSpinReq((n) => n + 1);
@@ -284,6 +316,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'timer':
         if (c.a === 'start') {
           if (c.sec > 0 && c.sec <= 3600) startTimer(Math.round(c.sec));
+        } else if (c.a === 'add') {
+          const d = Math.round(c.sec);
+          if (Number.isFinite(d)) setTimer((x) => ({ ...x, show: true, left: Math.min(3600, Math.max(0, x.left + d)) }));
         } else if (c.a === 'toggle') setTimer((x) => (x.left > 0 ? { ...x, show: true, run: !x.run } : x));
         else setTimer((x) => ({ ...x, show: false, run: false }));
         break;
@@ -336,7 +371,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         min: sl.min,
         steps: [info.shown, info.total],
         hasHint: !!active?.querySelector('.btn.hint, .hintbox'),
-        teams: Array.from({ length: st.nTeams }, (_, i) => ({ name: st.names[i], score: st.scores[i], color: TEAM_COLORS[i] })),
+        teams: Array.from({ length: st.nTeams }, (_, i) => ({ name: st.names[i], score: st.scores[i], color: (v2 ? V2_TEAM_COLORS : TEAM_COLORS)[i] })),
         sections: sections.map((o) => ({ name: SECTION_NAMES[o.k], first: o.first })),
         wheel: wheelOpen,
         wheelResult,
@@ -351,15 +386,24 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         widget: slideApis.current[cur]?.widget()?.get() ?? null,
         mcqs: (slideApis.current[cur]?.mcqs() ?? []).map((m) => m.get()),
         timer: { show: timerNow.current.show, run: timerNow.current.run, left: timerNow.current.left, view: st.timerView },
+        upNext: upNextText(active),
+        mins: slides.map((x) => x.min),
+        wheelOut: picked,
+        wheelRemove,
+        wheelTeam: teamFilter,
+        teamsShown,
       };
+      if (klass && state.stars) state.teamOf = state.stars.list.map(([n]) => (n in klass.team && klass.team[n] < st.nTeams ? klass.team[n] : -1));
+      state.slides = slideTitles(mainRef.current, slides.length).map((t, i) => [t, sections.findIndex((o) => i >= o.first && i <= o.last)] as [string, number]);
       // خادم الرسائل يقبل ٤ ك.ب للرسالة: تُقصَّر الملاحظات إن لزم
       const size = () => new Blob([JSON.stringify({ state })]).size;
+      if (size() > 3800) delete state.slides;
       while (size() > 3800 && state.notes.length > 40) state.notes = state.notes.slice(0, Math.floor(state.notes.length * 0.7)) + '…';
       linkRef.current?.send(state);
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -651,15 +695,13 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             onResult={setWheelResult}
             klass={klass}
             nTeams={st.nTeams}
-            teamNames={st.names}
             teamFilter={teamFilter}
-            onTeamFilter={setTeamFilter}
             picked={picked}
             onPick={(n) => setPicked((p) => [...p, n])}
             onRestore={() => setPicked([])}
-            onManage={() => setClassesOpen(true)}
-            onStar={giveStar}
+            remove={wheelRemove}
           />
+          {teamsShown && klass && st.nTeams > 0 && <TeamsBoard klass={klass} names={st.names.slice(0, st.nTeams)} colors={v2 ? V2_TEAM_COLORS : TEAM_COLORS} onClose={() => setTeamsShown(false)} />}
           <StarsModal
             open={starsOpen}
             onClose={() => setStarsOpen(false)}
@@ -697,5 +739,51 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       </BookCtx.Provider>
       </V2Ctx.Provider>
     </EngineCtx.Provider>
+  );
+}
+
+/** نص الخطوة التالية في الشريحة كما سيظهر، للجوال */
+function upNextText(active: Element | null | undefined): string | undefined {
+  const step = active?.querySelector('.step:not(.shown)');
+  if (!step) return undefined;
+  const clean = (t?: string | null) => (t ?? '').replace(/\s+/g, ' ').trim();
+  const label = clean(step.closest('.aslotrow')?.querySelector('.alabel')?.textContent);
+  const text = clean(step.classList.contains('aslot') ? step.querySelector('.aval')?.textContent : step.textContent);
+  const t = (step.classList.contains('ans') ? (label || 'الإجابة') + ': ' : '') + text;
+  return t.length > 70 ? t.slice(0, 68) + '…' : t || undefined;
+}
+
+/** عنوان كل شريحة كما يظهر فيها، لقائمة الشرائح في الجوال */
+function slideTitles(main: Element | null, n: number): string[] {
+  return Array.from({ length: n }, (_, i) => {
+    if (i === 0) return 'البداية';
+    const el = main?.querySelector(`section.slide[data-index="${i}"]`);
+    const t = (el?.querySelector('h2, .qhead, .v2qh')?.textContent ?? '').replace(/\s+/g, ' ').trim();
+    return t.length > 32 ? t.slice(0, 30) + '…' : t;
+  });
+}
+
+/** الفرق وطلابها على الشاشة: عمود لكل فريق بلونه */
+function TeamsBoard({ klass, names, colors, onClose }: { klass: Klass; names: string[]; colors: string[]; onClose: () => void }) {
+  return (
+    <div className="teamsboard" role="dialog" aria-label="فرق اليوم" onClick={onClose}>
+      <div className="tbin">
+        <h2>
+          فرق اليوم <small>{klass.name}</small>
+        </h2>
+        <div className="tbcols" style={{ gridTemplateColumns: `repeat(${names.length}, 1fr)` }}>
+          {names.map((n, i) => (
+            <div key={i} className="tbcol" style={{ '--tc': colors[i] } as React.CSSProperties}>
+              <b>{n}</b>
+              {klass.students
+                .filter((s) => klass.team[s] === i)
+                .map((s) => (
+                  <span key={s}>{s}</span>
+                ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

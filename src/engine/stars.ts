@@ -155,7 +155,18 @@ export function useStars() {
     setEvents(next);
     save(next);
   }, []);
-  return { events, add, undo };
+  /** يحذف آخر نجمة (d=١) أو آخر غلطة (d=−١) لطالب في هذا الأسبوع */
+  const remove = useCallback((k: string, who: string, d: 1 | -1) => {
+    const all = load();
+    const from = weekStart(Date.now());
+    let i = all.length - 1;
+    while (i >= 0 && !(all[i].k === k && all[i].s === who && all[i].d === d && all[i].t >= from)) i--;
+    if (i < 0) return;
+    const next = all.filter((_, j) => j !== i);
+    setEvents(next);
+    save(next);
+  }, []);
+  return { events, add, undo, remove };
 }
 
 /** آخر ضغطة في الفصل خلال هذا الأسبوع، لزر «تراجع» */

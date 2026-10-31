@@ -1,6 +1,6 @@
 import {
   Card, Cols, Ctrls, Eq, FnTable, GoHomeButton, IfTeams, MCQ, MindMap, NextButton, QCard, QCol, QuestionSlide, RuleTable, Sentence, SlideHead,
-  Solution, Stack, Step, Tag, ThinkPairShare, TimerButton, Winner, defineLesson, type Token,
+  Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson, type Token,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -100,14 +100,13 @@ export default defineLesson({
     /* ================= استعد ================= */
     {
       sec: 'explore', min: 3,
-      notes: 'فكّر – زاوج – شارك: ما النمط؟ كلما زاد متر زادت المخرجة ١٠٠.',
+      notes: 'ما النمط؟ كلما زاد متر زادت المخرجة ١٠٠.',
       content: (
         <>
           <SlideHead tag={READY} kind="qs">قارب الصيد</SlideHead>
           <Cols>
             <QCol>
               <p className="qtext">اشترَى سعيدٌ قاربَ صيدٍ جديدًا طولُهُ ٥ أمتارٍ، وأرادَ أن يعرفَ طولَهُ بالسنتمتراتِ فأنْشأَ الجدولَ المجاورَ. مَا النمطُ الذِي تلاحظُهُ فِي المُدخلاتِ والمُخرجاتِ؟</p>
-              <ThinkPairShare />
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>كلّما زادت المدخلة مترًا زادت المخرجة ١٠٠ سم.</Step>
@@ -289,7 +288,7 @@ export default defineLesson({
       notes: 'تحدّث: اعرض مدخلة واحدة ٤ مع مخرجتين مختلفتين لتبيّن أننا نحتاج المخرجات.',
       content: (
         <QuestionSlide
-          source={CHECK} n={3} tps tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
+          source={CHECK} n={3} tags={[{ kind: 'warn', text: 'تَحَدَّثْ' }]}
           question="هلْ تستطيعُ أنْ تُحدِّدَ قاعدةَ الدَّالَّةِ بِمُجرَّدِ النَّظرِ إلى المُدخلاتِ فقطْ؟ بيِّنِ السَّببَ."
           hint="المدخلات نفسها ١، ٢، ٣ قد تكون لأي قاعدة."
           steps={[
@@ -411,7 +410,7 @@ export default defineLesson({
       notes: 'مسألة مفتوحة: كل طالب يختار زوجين.',
       content: (
         <QuestionSlide
-          source={HOT} n={10} tps tags={[{ kind: 'warn', text: 'مسألةٌ مفتوحةٌ' }]}
+          source={HOT} n={10} tags={[{ kind: 'warn', text: 'مسألةٌ مفتوحةٌ' }]}
           question="أُذْكُرْ زَوْجَيْنِ من المُدخَلاتِ والمُخرَجاتِ لقاعدةِ الدَّالَّةِ ٢ × △ = ○ ."
           hint="اختر أي عدد، واضربه في ٢."
           steps={[{ text: 'مثال: ٣ ← ٦ و ٧ ← ١٤ (المخرجة ضعف المدخلة)', kind: 'ans' }]}
@@ -424,7 +423,7 @@ export default defineLesson({
       notes: 'تحدٍّ: القاعدة من عمليتين. جرّب ÷٥ أولًا: ١٥ ÷ ٥ = ٣، ينقص ١.',
       content: (
         <QuestionSlide
-          source={HOT} n={11} tps tags={[{ kind: 'warn', text: 'تَحَدٍّ' }]}
+          source={HOT} n={11} tags={[{ kind: 'warn', text: 'تَحَدٍّ' }]}
           question="أَوْجِدْ قاعدةَ الدَّالَّةِ في الجدولِ المجاورِ."
           hint="لا تكفي عملية واحدة. جرّب القسمة على ٥ ثم انظر ماذا ينقص."
           steps={[
@@ -441,7 +440,7 @@ export default defineLesson({
       notes: 'العملية العكسية للجمع هي الطرح.',
       content: (
         <QuestionSlide
-          source={HOT} n={12} tps tags={[{ kind: 'warn', text: 'الحسُّ العدديُّ' }]}
+          source={HOT} n={12} tags={[{ kind: 'warn', text: 'الحسُّ العدديُّ' }]}
           question="إذا كانتْ قِيمةُ المُخرَجةِ في قاعدةِ الدَّالَّةِ △ + ٣ هيَ ٨ فكيفَ تجدُ قيمةَ △ ؟"
           hint="ما العملية العكسية للجمع؟"
           steps={[
@@ -457,7 +456,7 @@ export default defineLesson({
       notes: 'أكتب: اقرأ مسألتين من الطلاب.',
       content: (
         <QuestionSlide
-          source={HOT} n={13} tps tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
+          source={HOT} n={13} tags={[{ kind: 'warn', text: 'أُكْتُبْ' }]}
           question="مَسألةً من واقعِ الحَياةِ يُمكنُكَ حلُّهَا باستعمالِ جدولِ الدَّوالِّ (جداولِ الضَّربِ أو القِسمةِ)."
           hint="فكّر في أشياء متساوية في علب أو أكياس."
           steps={[

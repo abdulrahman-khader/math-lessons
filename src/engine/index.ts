@@ -7,7 +7,7 @@ export { DragChart } from './components/DragChart';
 export { TrendExplorer, type Challenge } from './components/TrendExplorer';
 export { MCQ } from './components/MCQ';
 export { QuestionSlide, BookGroup, BookCtx, type StepDef, type BookQ } from './components/QuestionSlide';
-export { Step, Solution, NextButton, HintButton, Hint, TimerButton, ThinkPairShare, Ctrls } from './components/Steps';
+export { Step, Solution, NextButton, HintButton, Hint, TimerButton, Ctrls } from './components/Steps';
 export { Tag, SlideHead, Cols, Stack, QCol, Card, Mark, Eq, DataTable, MindMap, Winner, IfTeams, GoHomeButton, QCard, NumMark, type Kind } from './components/Layout';
 export { CubeTrain, Blank, FactLine, VSum, FactFamily, CUBE, type CubePart, type ItemShape } from './components/Cubes';
 export { NumberLine, HopExplorer, Domino, Sentence, FactTriangle, GuessCheck, PairPick, Towers, useRemoteWidget, type Jump, type Token } from './components/Primary';

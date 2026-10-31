@@ -263,20 +263,96 @@ export interface Cheer {
 }
 
 /** إعلان على الشاشة حين يأخذ طالب نجمة أو غلطة (من اللوحة أو العجلة أو الجوال): الرمز كبيرًا واسمه، بلا عدد نجومه. لا يعترض الضغطات فتتوالى الإعلانات. */
+/** قصاصات ملوّنة تنطلق من الزاويتين السفليتين ثم تتساقط. رسم على Canvas، وتُترك مع «تقليل الحركة» */
+function Confetti() {
+  const cv = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = cv.current;
+    const x = c?.getContext('2d');
+    if (!c || !x || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const W = (c.width = c.clientWidth * 2);
+    const H = (c.height = c.clientHeight * 2);
+    const COLORS = ['#f5b400', '#ffd43b', '#f08c00', '#1c7ed6', '#2f9e44', '#e64980', '#7048e8', '#13213b'];
+    type P = { x: number; y: number; vx: number; vy: number; r: number; vr: number; w: number; h: number; c: string; round: boolean; delay: number };
+    const ps: P[] = [];
+    const burst = (n: number, x0: number, dir: number, delay: number) => {
+      for (let i = 0; i < n; i++) {
+        const a = (-Math.PI / 2) + dir * (0.15 + Math.random() * 0.55);
+        const v = (0.022 + Math.random() * 0.02) * H;
+        ps.push({ x: x0, y: H + 10, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, w: 10 + Math.random() * 12, h: 6 + Math.random() * 8, c: COLORS[i % COLORS.length], round: Math.random() < 0.3, delay });
+      }
+    };
+    burst(110, 0, 1, 250);
+    burst(110, W, -1, 250);
+    // مطر خفيف من الأعلى
+    for (let i = 0; i < 70; i++) ps.push({ x: Math.random() * W, y: -20 - Math.random() * H * 0.4, vx: (Math.random() - 0.5) * 4, vy: 2 + Math.random() * 4, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, w: 10 + Math.random() * 10, h: 6 + Math.random() * 6, c: COLORS[i % COLORS.length], round: Math.random() < 0.3, delay: 700 });
+    const t0 = performance.now();
+    let last = t0;
+    let raf = 0;
+    const f = (t: number) => {
+      const dt = Math.min(2, (t - last) / 16.7);
+      last = t;
+      x.clearRect(0, 0, W, H);
+      const fade = Math.max(0, Math.min(1, (3700 - (t - t0)) / 500));
+      x.globalAlpha = fade;
+      for (const p of ps) {
+        if (t - t0 < p.delay) continue;
+        p.vy += 0.55 * dt;
+        p.vx *= Math.pow(0.985, dt);
+        p.vy = Math.min(p.vy, 9 + p.w * 0.25);
+        p.x += p.vx * dt + Math.sin((t + p.w * 90) / 260) * 1.2;
+        p.y += p.vy * dt;
+        p.r += p.vr * dt;
+        if (p.y > H + 40) continue;
+        x.save();
+        x.translate(p.x, p.y);
+        x.rotate(p.r);
+        x.scale(1, Math.cos(p.r * 1.7));
+        x.fillStyle = p.c;
+        if (p.round) {
+          x.beginPath();
+          x.arc(0, 0, p.h * 0.7, 0, 2 * Math.PI);
+          x.fill();
+        } else x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        x.restore();
+      }
+      if (t - t0 < 4200) raf = requestAnimationFrame(f);
+    };
+    raf = requestAnimationFrame(f);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return <canvas ref={cv} className="cheer-confetti" aria-hidden="true" />;
+}
+
+/** إعلان نجمة (احتفال بقصاصات) أو غلطة (هادئ) على الشاشة كلها، باسم الطالب */
 export function StarCheer({ cheer, klass, onDone }: { cheer: Cheer | null; klass: Klass | undefined; onDone: () => void }) {
+  const bad = !!cheer && cheer.d < 0;
   useEffect(() => {
     if (!cheer) return;
-    const t = setTimeout(onDone, 2800);
+    const t = setTimeout(onDone, bad ? 2400 : 4000);
     return () => clearTimeout(t);
-  }, [cheer, onDone]);
+  }, [cheer, onDone, bad]);
   if (!cheer || !klass) return null;
-  const bad = cheer.d < 0;
   return (
-    <div key={cheer.n} className={'cheer' + (bad ? ' bad' : '')} role="status">
+    <div key={cheer.n} className={'cheer' + (bad ? ' bad' : ' good')} role="status">
+      {!bad && <Confetti />}
       <div className="cheer-card">
-        <div className="cheer-star">{bad ? <span className="cheer-x">✖</span> : <IconStar />}</div>
+        <div className="cheer-star" aria-hidden="true">
+          {!bad && <span className="cheer-rays" />}
+          {!bad && <span className="cheer-ring" />}
+          {bad ? (
+            <svg viewBox="0 0 100 100" className="cheer-x">
+              <circle cx="50" cy="50" r="46" />
+              <path d="M34 34 L66 66 M66 34 L34 66" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" className="cheer-svg">
+              <path d="M12 2.2l2.95 6.2 6.8.86-5 4.7 1.28 6.74L12 17.4l-6.03 3.3 1.28-6.74-5-4.7 6.8-.86z" />
+            </svg>
+          )}
+        </div>
+        {!bad && <div className="cheer-msg">نجمة جديدة</div>}
         <div className="cheer-name">{cheer.name}</div>
-        <div className="cheer-msg">{bad ? 'أخذ غلطة' : 'أخذ نجمة!'}</div>
       </div>
     </div>
   );

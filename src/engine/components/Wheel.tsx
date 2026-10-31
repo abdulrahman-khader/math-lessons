@@ -1,12 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { digits, num } from '../digits';
 import type { Klass } from '../classes';
-import { TEAM_COLORS } from '../sections';
-import { sGood } from '../sound';
-import { IconStar } from './icons';
+import { sClick, sGood } from '../sound';
 
-const COLORS = ['#a5d8ff', '#b2f2bb', '#ffd8a8', '#d0bfff', '#ffec99', '#99e9f2', '#fcc2d7', '#c0eb75'];
 const DEFAULT_NAMES = Array.from({ length: 25 }, (_, i) => 'رقم ' + digits(i + 1)).join('\n');
+const FONT = '"Noto Naskh Arabic", "Geeza Pro", Tajawal, Tahoma, serif';
+const INK = '#13213b';
+/** الشرائح بلونين متناوبين، والفائز وحده ملوّن */
+const SLICE = ['#ffffff', '#e3e8ef', '#f0f3f7'];
+/* مع عدد فردي تلتقي الشريحتان الأولى والأخيرة: الأخيرة بلون ثالث بينهما */
+const WIN = '#f08c00';
+const DIM = '#f1f3f6';
+const DIM_TEXT = '#a7b0bd';
+/** المؤشر على يسار العجلة، مقابل الاسم */
+const POINTER = Math.PI;
+const SIZE = 1000;
 
 interface Props {
   open: boolean;
@@ -20,31 +28,30 @@ interface Props {
   /** الفصل المختار: العجلة تدور على طلابه بدل النص */
   klass?: Klass;
   nTeams?: number;
-  teamNames?: string[];
-  /** -١ الفصل كله، أو رقم فريق */
+  /** -١ الفصل كله، أو رقم فريق (يختاره المعلم من الجوال) */
   teamFilter?: number;
-  onTeamFilter?: (t: number) => void;
   /** من خرجت أسماؤهم في هذه الحصة (لا تتكرر) */
   picked?: string[];
   onPick?: (name: string) => void;
   onRestore?: () => void;
-  onManage?: () => void;
-  /** نجمة (+١) أو غلطة (−١) لمن خرج اسمه، في نجم الأسبوع */
-  onStar?: (name: string, d: 1 | -1) => void;
+  /** هل يخرج الاسم بعد ظهوره. يُتحكم به من الجوال */
+  remove?: boolean;
 }
 
-/** عجلة أسماء عشوائية. النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة. */
-export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamNames = [], teamFilter = -1, onTeamFilter, picked = [], onPick, onRestore, onManage, onStar }: Props) {
+/**
+ * عجلة الأسماء على شاشة الفصل: العجلة والاسم فقط، بلا أزرار ولا أرقام يراها الطلاب.
+ * المعلم يديرها من الجوال، أو يلمس العجلة (أو المسافة)، ويغلقها بلمسة خارجها أو Esc.
+ * النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة.
+ */
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState('—');
-  /** ما أُعطي لصاحب الاسم الخارج من نجوم وأغلاط، يُعرض تحت الأزرار ويُمحى مع الدورة التالية */
-  const [given, setGiven] = useState(0);
-  const [removeFree, setRemoveFree] = useState(false);
-  /** مع الفصل: الاسم الذي يخرج لا يعود حتى يُضغط «أرجع الأسماء» */
-  const [removeClass, setRemoveClass] = useState(true);
-  const remove = klass ? removeClass : removeFree;
+  /** الاسم تحت السهم أثناء الدوران، ثم الفائز */
+  const [live, setLive] = useState('');
+  /** بعد التوقف: الأسماء كما كانت والفائز بينها، فلا تتحرك الشرائح حين يخرج اسمه */
+  const shown = useRef<{ list: string[]; win: number } | null>(null);
+  const remove = removeProp ?? !!klass;
   const text = names || DEFAULT_NAMES;
   const hasTeams = !!klass && nTeams > 0 && Object.values(klass.team).some((t) => t < nTeams);
   const filter = hasTeams ? teamFilter : -1;
@@ -55,7 +62,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
         .split('\n')
         .map((s) => s.trim())
         .filter(Boolean);
-  const emptyMsg = klass && pool.length ? 'خرجت كل الأسماء' : 'أضف أسماء';
+  const emptyMsg = klass && pool.length ? 'خرجت كل الأسماء' : 'لا أسماء';
   const emptyRef = useRef(emptyMsg);
   emptyRef.current = emptyMsg;
   const listRef = useRef(list);
@@ -65,86 +72,140 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
     const c = cv.current;
     const x = c?.getContext('2d');
     if (!c || !x) return;
-    const N = listRef.current;
-    const R = 290;
-    const C = 300;
-    x.clearRect(0, 0, 600, 600);
+    const N = shown.current?.list ?? listRef.current;
+    const win = shown.current?.win ?? -1;
+    const C = SIZE / 2;
+    const R = C - 62;
+    x.clearRect(0, 0, SIZE, SIZE);
     x.direction = 'rtl';
+    x.textBaseline = 'middle';
     if (!N.length) {
-      x.fillStyle = '#13213b';
-      x.font = 'bold 32px Tajawal, Tahoma';
+      x.beginPath();
+      x.arc(C, C, R, 0, 2 * Math.PI);
+      x.fillStyle = DIM;
+      x.fill();
+      x.fillStyle = DIM_TEXT;
+      x.font = `700 56px ${FONT}`;
       x.textAlign = 'center';
       x.fillText(emptyRef.current, C, C);
       return;
     }
     const a = (2 * Math.PI) / N.length;
+    const size = N.length > 26 ? 36 : N.length > 16 ? 44 : N.length > 10 ? 52 : 60;
     N.forEach((n, i) => {
       const s = ang.current + i * a;
+      const isWin = i === win;
       x.beginPath();
       x.moveTo(C, C);
       x.arc(C, C, R, s, s + a);
       x.closePath();
-      x.fillStyle = COLORS[i % COLORS.length];
+      x.fillStyle = isWin ? WIN : win >= 0 ? DIM : N.length % 2 && i === N.length - 1 ? SLICE[2] : SLICE[i % 2];
       x.fill();
-      x.strokeStyle = '#13213b';
-      x.lineWidth = 2;
+      x.strokeStyle = '#ffffff';
+      x.lineWidth = 3;
       x.stroke();
       x.save();
       x.translate(C, C);
       const mid = s + a / 2;
       x.rotate(mid);
-      x.fillStyle = '#13213b';
-      x.font = `bold ${N.length > 18 ? 20 : 26}px Tajawal, Tahoma`;
+      x.fillStyle = isWin ? '#ffffff' : win >= 0 ? DIM_TEXT : INK;
+      x.font = `700 ${isWin ? size + 6 : size}px ${FONT}`;
       // الاسم يمتد من قرب الحافة الخارجية نحو المركز. في النصف الأيسر يُقلب نصف دورة حتى لا يُقرأ مقلوبًا.
       // في RTL تعني «start» الحافة اليمنى و«end» اليسرى.
-      const c = Math.cos(mid);
-      if (c < 0) {
+      if (Math.cos(mid) < 0) {
         x.rotate(Math.PI);
         x.textAlign = 'end';
-        x.fillText(n, -(R - 16), 8);
+        x.fillText(n, -(R - 28), 2);
       } else {
         x.textAlign = 'start';
-        x.fillText(n, R - 16, 8);
+        x.fillText(n, R - 28, 2);
       }
       x.restore();
     });
     x.beginPath();
-    x.arc(C, C, 34, 0, 2 * Math.PI);
-    x.fillStyle = '#13213b';
+    x.arc(C, C, R, 0, 2 * Math.PI);
+    x.strokeStyle = INK;
+    x.lineWidth = 12;
+    x.stroke();
+    x.beginPath();
+    x.arc(C, C, 46, 0, 2 * Math.PI);
+    x.fillStyle = INK;
+    x.fill();
+    // السهم خارج الحافة اليسرى يشير إلى الداخل
+    const px = C - R;
+    x.beginPath();
+    x.moveTo(px + 22, C);
+    x.lineTo(px - 52, C - 34);
+    x.lineTo(px - 52, C + 34);
+    x.closePath();
+    x.fillStyle = INK;
     x.fill();
   }, []);
 
+  /* الفصل أو الفريق تغيّر، أو أُرجعت أسماء: تُرسم القائمة الجديدة */
+  const key = (klass?.id ?? '') + '|' + filter + '|' + list.join('\n');
+  const lastKey = useRef(key);
   useEffect(() => {
-    if (open) draw();
-  }, [open, list.join('\n'), emptyMsg, draw]);
+    if (!open) return;
+    const win = shown.current && shown.current.list[shown.current.win];
+    // خروج الفائز وحده لا يمحو الرسمة الحالية
+    if (lastKey.current !== key && !(win && !list.includes(win) && shown.current!.list.filter((n) => n !== win).join('\n') === list.join('\n'))) {
+      shown.current = null;
+      if (!spinning) setLive('');
+    }
+    lastKey.current = key;
+    draw();
+  }, [open, key, emptyMsg, draw]);
+
+  useEffect(() => {
+    if (open) return;
+    shown.current = null;
+    setLive('');
+  }, [open]);
 
   const spin = () => {
+    if (spinning) return;
     const N = list;
-    if (!N.length || spinning) return;
+    if (!N.length) {
+      if (klass && picked.length) onRestore?.();
+      return;
+    }
+    shown.current = null;
     setSpinning(true);
-    setGiven(0);
-    setResult('…');
     onResult?.('…');
     const a = (2 * Math.PI) / N.length;
     const pick = Math.floor(Math.random() * N.length);
-    // المؤشر في الأعلى (زاوية -π/2)
-    const target = -Math.PI / 2 - (pick * a + a / 2);
+    const target = POINTER - (pick * a + a / 2);
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const start = ang.current;
-    const delta = ((((target - start) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI));
+    const delta = (((target - start) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
     const total = delta + (reduce ? 0 : 2 * Math.PI * 5);
-    const dur = reduce ? 1 : 3200;
+    const dur = reduce ? 1 : 4200;
     const t0 = performance.now();
+    const under = () => N[Math.floor((((POINTER - ang.current) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) / a) % N.length];
+    let last = under();
+    let lastClick = 0;
     const f = (t: number) => {
       const p = Math.min(1, (t - t0) / dur);
-      ang.current = start + total * (1 - Math.pow(1 - p, 3));
+      ang.current = start + total * (1 - Math.pow(1 - p, 4));
       draw();
+      const now = under();
+      if (now !== last) {
+        last = now;
+        setLive(now);
+        if (t - lastClick > 45) {
+          lastClick = t;
+          sClick();
+        }
+      }
       if (p < 1) return void requestAnimationFrame(f);
+      shown.current = { list: N, win: pick };
+      draw();
       setSpinning(false);
-      setResult(N[pick]);
+      setLive(N[pick]);
       onResult?.(N[pick]);
       sGood();
-      if (remove) setTimeout(() => (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n'))), 900);
+      if (remove) (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n')));
     };
     requestAnimationFrame(f);
   };
@@ -155,80 +216,32 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
     lastSpin.current = spinReq;
   }, [spinReq, open]);
 
+  const spinRef = useRef(spin);
+  spinRef.current = spin;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.code === 'Space' || e.key === 'Enter') {
+        e.preventDefault();
+        spinRef.current();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
+  const done = !spinning && !!shown.current;
   return (
-    <div className="modal show" role="dialog" aria-label="عجلة الأسماء" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="mbox">
-        <div className="wwrap">
-          <canvas ref={cv} id="wheelc" width={600} height={600} />
-        </div>
-        <div className="wside">
-          <h3>من سيجيب؟</h3>
-          <div id="wres">{result}</div>
-          {klass && onStar && !spinning && klass.students.includes(result) && (
-            <div className="wstar">
-              <button className="sb up" aria-label={`نجمة لـ${result}`} onClick={() => (onStar(result, 1), setGiven((g) => g + 1))}>
-                <IconStar /> نجمة
-              </button>
-              <button className="sb down" aria-label={`غلطة على ${result}`} onClick={() => (onStar(result, -1), setGiven((g) => g - 1))}>
-                ✖ غلطة
-              </button>
-              {given !== 0 && <b className={'wgiven ' + (given > 0 ? 'up' : 'down')}>{given > 0 ? `+${num(given)}` : `−${num(-given)}`}</b>}
-            </div>
-          )}
-          <button className="btn primary" onClick={spin}>
-            أدِر العجلة
-          </button>
-          <label className="row" style={{ fontWeight: 700 }}>
-            <input
-              type="checkbox"
-              checked={remove}
-              onChange={(e) => (klass ? setRemoveClass : setRemoveFree)(e.target.checked)}
-              style={{ width: '1.3em', height: '1.3em' }}
-            />{' '}
-            {klass ? 'لا يتكرر الاسم في الحصة' : 'احذف الاسم بعد اختياره'}
-          </label>
-          {klass ? (
-            <>
-              <p className="wklass">
-                <b>{klass.name}</b> · باقٍ {num(list.length)} من {num(pool.length)}
-              </p>
-              {hasTeams && (
-                <div className="row wteams">
-                  <button className={'btn' + (filter < 0 ? ' sel' : '')} onClick={() => onTeamFilter?.(-1)}>
-                    الكل
-                  </button>
-                  {teamNames.slice(0, nTeams).map((t, i) => (
-                    <button key={i} className={'btn' + (filter === i ? ' sel' : '')} style={{ borderColor: TEAM_COLORS[i] }} onClick={() => onTeamFilter?.(i)}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {picked.length > 0 && (
-                <button className="btn" onClick={onRestore}>
-                  أرجع كل الأسماء ({num(picked.length)})
-                </button>
-              )}
-            </>
-          ) : (
-            <>
-              <label htmlFor="wnames" style={{ fontWeight: 800 }}>
-                الأسماء (اسم في كل سطر):
-              </label>
-              <textarea id="wnames" value={text} onChange={(e) => onNames(e.target.value)} />
-            </>
-          )}
-          {onManage && (
-            <button className="btn" onClick={onManage}>
-              {klass ? 'تعديل أسماء الفصول' : 'أسماء فصولي'}
-            </button>
-          )}
-          <button className="btn hide" onClick={onClose}>
-            إغلاق
-          </button>
-        </div>
-      </div>
+    <div className="wheel2" role="dialog" aria-label="عجلة الأسماء" data-left={list.length} data-pool={klass ? pool.length : list.length} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <canvas ref={cv} width={SIZE} height={SIZE} role="button" tabIndex={0} aria-label={list.length ? 'أدِر العجلة' : 'أرجع كل الأسماء'} onClick={spin} />
+      <p className={'wname' + (done ? ' done' : spinning ? ' moving' : '')} aria-live="polite" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <span key={done ? live : 'x'}>{live || '؟'}</span>
+      </p>
+      <span className="sr-only">
+        باقٍ {num(list.length)} من {num(klass ? pool.length : list.length)}
+      </span>
     </div>
   );
 }

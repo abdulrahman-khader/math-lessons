@@ -23,7 +23,7 @@ for (const lesson of pickLessons(filter)) {
     await page.close();
     continue;
   }
-  for (let i = 0; i < idx; i++) await page.keyboard.press('ArrowLeft');
+  for (let i = 0; i < idx; i++) await page.keyboard.press('PageDown');
   const clip = page.locator('section.slide.active .clip');
   const dur = Number(await clip.locator('.clip-track').getAttribute('aria-valuemax'));
   const list = secs.length ? secs.map(Number) : Array.from({ length: Math.floor(dur / 5) + 1 }, (_, k) => k * 5);

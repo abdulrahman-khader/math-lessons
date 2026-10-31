@@ -1,5 +1,6 @@
 import { digits, num } from '../digits';
-import { SECTION_NAMES, TEAM_COLORS } from '../sections';
+import { useV2 } from '../context';
+import { SECTION_NAMES, TEAM_COLORS, V2_TEAM_COLORS } from '../sections';
 import type { Klass } from '../classes';
 import type { Lesson, SectionKey } from '../types';
 import { Card, Tag } from './Layout';
@@ -26,6 +27,7 @@ interface Props {
 export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTeams, setName, resetScores, classes, klass, setKlass, onManage, onGroups }: Props) {
   const placed = klass ? klass.students.filter((s) => (klass.team[s] ?? 99) < nTeams).length : 0;
   const m = lesson.meta;
+  const v2 = useV2();
   return (
     <div className="home">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '.45em' }}>
@@ -38,7 +40,8 @@ export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTea
           <h1 className={m.title.length > 30 ? 'long' : undefined}>{m.title}</h1>
         </div>
         <p className="lead">
-          {m.subject} · {m.grade} · {m.source} · {num(m.minutes)} دقيقة
+          {/* «·» تشبه الصفر بخط النسخ (التصميم الجديد) فالفاصل هناك «،» */}
+          {[m.subject, m.grade, m.source, `${num(m.minutes)} دقيقة`].join(v2 ? '، ' : ' · ')}
         </p>
         <Card kind="rule" cap="فكرة الدرس">
           {m.idea}
@@ -83,7 +86,7 @@ export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTea
               <input
                 key={i}
                 value={n}
-                style={{ borderColor: TEAM_COLORS[i] }}
+                style={{ borderColor: (v2 ? V2_TEAM_COLORS : TEAM_COLORS)[i] }}
                 aria-label={'اسم الفريق ' + digits(i + 1)}
                 onChange={(e) => setName(i, e.target.value || 'فريق ' + digits(i + 1))}
               />
@@ -97,7 +100,7 @@ export function Home({ lesson, sections, goto, resumeFrom, nTeams, names, setTea
           {sections
             .filter((s) => s.k !== 'start')
             .map((s) => (
-              <button key={s.k} className="tile" onClick={() => goto(s.first)}>
+              <button key={s.k} className="tile" data-sec={s.k} onClick={() => goto(s.first)}>
                 {SECTION_NAMES[s.k]}
                 <small>{lesson.sectionDesc[s.k] ?? ''}</small>
               </button>

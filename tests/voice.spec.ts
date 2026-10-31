@@ -23,7 +23,7 @@ test('أول تشغيل للمقطع يقرأ الجملة الأولى حتى �
   });
   await page.goto(pathToFileURL(file).href);
   const idx = await page.locator('section.slide').evaluateAll((els) => els.findIndex((e) => e.querySelector('.clip')));
-  for (let i = 0; i < idx; i++) await page.keyboard.press('ArrowLeft');
+  for (let i = 0; i < idx; i++) await page.keyboard.press('PageDown');
   await page.locator('section.slide.active .clip-big').click();
   // الجملة الأولى نحو ثلاث ثوانٍ: تنتهي بـ ended لا بإيقاف مبكر
   await expect.poll(() => page.evaluate(() => (window as unknown as { __voice: string[] }).__voice.slice(0, 3)), { timeout: 8000 }).toEqual(['playing', 'pause', 'ended']);

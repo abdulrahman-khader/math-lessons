@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { EngineCtx, SlideScope, type EngineApi, type SlideApi } from './context';
+import { EngineCtx, SlideScope, V2Ctx, type EngineApi, type SlideApi } from './context';
+import { TimerPill, V2Header, V2Progress } from './components/V2Chrome';
 import { num } from './digits';
-import { SECTION_NAMES, TEAM_COLORS } from './sections';
-import { sBad, setMuted, sGood } from './sound';
+import { SECTION_NAMES, TEAM_COLORS, V2_TEAM_COLORS } from './sections';
+import { sBad, setMuted, sGood, sStar } from './sound';
 import { useStars, tally, weekStart } from './stars';
 import { useSaved } from './store';
 import { classesOf, gradeOf, setClass, setGrade, useRoster } from './classes';
@@ -65,7 +66,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     if (!klass?.students.includes(name)) return;
     addStarEvent(klass.id, name, d);
     setCheer((c) => ({ name, d, n: (c?.n ?? 0) + 1 }));
-    if (d > 0) sGood();
+    if (d > 0) sStar();
     else sBad();
   };
   const [pen, setPen] = useState(false);
@@ -76,6 +77,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [lessonGen, setLessonGen] = useState(0);
   /** قائمة الإعادة: مغلقة، أو مفتوحة، أو تنتظر تأكيد إعادة الدرس كاملًا */
   const [resetMenu, setResetMenu] = useState<'closed' | 'open' | 'confirm'>('closed');
+  /** المسرح: قائمة الأدوات في التصميم الجديد تُرسم داخله حتى تكبر وتصغر معه */
+  const stageRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const slideApis = useRef<(SlideApi | null)[]>([]);
@@ -95,9 +98,11 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [slideTick, setSlideTick] = useState(0);
   /** لا يُعاد رسم التطبيق مع كل خطوة إلا إذا كان جوال متصلًا ينتظر الحالة */
   const remoteLive = useRef(false);
+  /** التصميم الجديد يعرض خطوات الشريحة في شريط التقدّم، فيحتاج التحديث دائمًا */
+  const v2 = lesson.meta.design === 'v2';
   const slideChanged = useCallback(() => {
-    if (remoteLive.current) setSlideTick((t) => t + 1);
-  }, []);
+    if (remoteLive.current || v2) setSlideTick((t) => t + 1);
+  }, [v2]);
   const linkRef = useRef<ReturnType<typeof hostLink> | null>(null);
   const onCmdRef = useRef<(c: RemoteCmd) => void>(() => {});
 
@@ -330,7 +335,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         notes: sl.notes.slice(0, 900),
         min: sl.min,
         steps: [info.shown, info.total],
-        hasHint: !!active?.querySelector('.btn.hint'),
+        hasHint: !!active?.querySelector('.btn.hint, .hintbox'),
         teams: Array.from({ length: st.nTeams }, (_, i) => ({ name: st.names[i], score: st.scores[i], color: TEAM_COLORS[i] })),
         sections: sections.map((o) => ({ name: SECTION_NAMES[o.k], first: o.first })),
         wheel: wheelOpen,
@@ -366,6 +371,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     const onKey = (e: KeyboardEvent) => {
       const tg = (e.target as HTMLElement).tagName;
       if (tg === 'INPUT' || tg === 'TEXTAREA') return;
+      // قائمة الأدوات أو نافذة التأكيد مفتوحة: الأسهم والمفاتيح لها
+      if ((e.target as HTMLElement).closest?.('[role="menu"], [role="alertdialog"]')) return;
       if (remotePanel) {
         if (e.key === 'Escape') setRemotePanel(false);
         return;
@@ -389,16 +396,22 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         if (e.key === 'Escape') setStarsOpen(false);
         return;
       }
+      // التصميم الجديد: السهمان يمشيان في الخطوات ثم ينتقلان إلى الشريحة المجاورة (كزر «التالي» في الجوال وجهاز العرض)،
+      // و⌘ أو Ctrl مع السهم (أو Page Up/Down) ينقل شريحة كاملة
+      const whole = !v2 || e.metaKey || e.ctrlKey;
       if (e.key === 'ArrowLeft' || e.key === 'PageDown') {
         e.preventDefault();
-        goto(cur + 1);
+        if (e.key === 'PageDown' || whole || !slideApis.current[cur]?.reveal()) goto(cur + 1);
       } else if (e.key === 'ArrowRight' || e.key === 'PageUp') {
         e.preventDefault();
-        goto(cur - 1);
+        if (e.key === 'PageUp' || whole || !slideApis.current[cur]?.unreveal()) goto(cur - 1);
       } else if (e.code === 'Space') {
         e.preventDefault();
         (document.activeElement as HTMLElement | null)?.blur?.();
         slideApis.current[cur]?.reveal();
+      } else if (e.code === 'KeyH') {
+        e.preventDefault();
+        slideApis.current[cur]?.toggleHint();
       } else if (e.code === 'KeyF') {
         e.preventDefault();
         fullscreen();
@@ -409,18 +422,134 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [cur, wheelOpen, starsOpen, classesOpen, groupsOpen, resetMenu, remotePanel, goto, resetSlide]);
+  }, [cur, wheelOpen, starsOpen, classesOpen, groupsOpen, resetMenu, remotePanel, goto, resetSlide, v2]);
 
   const s = slides[cur];
   const m = lesson.meta;
   const toolBtn = (on: boolean) => 'ib' + (on ? ' on' : '');
+  const toolsEl = (
+    <div className="tools">
+    {v2 && (
+      <button className="ib" title="قائمة الدروس" aria-label="الصفحة الرئيسية: قائمة الدروس" onClick={goHome}>
+        <IconHome />
+        <span className="lbl">الرئيسية</span>
+      </button>
+    )}
+      <span className="rmenu">
+        <button
+          className={toolBtn(resetMenu !== 'closed')}
+          title="إعادة"
+          aria-label="إعادة"
+          aria-expanded={resetMenu !== 'closed'}
+          onClick={() => setResetMenu((x) => (x === 'closed' ? 'open' : 'closed'))}
+        >
+          <IconReset />
+          <span className="lbl">إعادة</span>
+        </button>
+        {resetMenu !== 'closed' && (
+          <>
+            <span className="rback" onClick={() => setResetMenu('closed')} />
+            <span className="rpop" role="menu">
+              {resetMenu === 'open' ? (
+                <>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      resetSlide();
+                      setResetMenu('closed');
+                    }}
+                  >
+                    إعادة هذه الشريحة <small>(R)</small>
+                  </button>
+                  <button role="menuitem" className="all" onClick={() => setResetMenu('confirm')}>
+                    إعادة الدرس كاملًا
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="q">تُمحى كل الإجابات والرسوم ونقاط الفرق، ويعود الدرس إلى البداية. متأكد؟</span>
+                  <button role="menuitem" className="all" onClick={resetLesson}>
+                    نعم، أعد الدرس
+                  </button>
+                  <button role="menuitem" onClick={() => setResetMenu('closed')}>
+                    إلغاء
+                  </button>
+                </>
+              )}
+            </span>
+          </>
+        )}
+      </span>
+      <button className={toolBtn(pen)} title="قلم الرسم" aria-label="قلم الرسم" onClick={() => setPen(!pen)}>
+        <IconPen />
+        <span className="lbl">قلم</span>
+      </button>
+      <button
+        className={toolBtn(timer.show)}
+        title="المؤقت"
+        aria-label="المؤقت"
+        onClick={() => setTimer((x) => (x.show ? { ...x, show: false, run: false } : { ...x, show: true, run: false, left: 60 }))}
+      >
+        <IconTimer />
+        <span className="lbl">مؤقت</span>
+      </button>
+      <button className="ib" title="عجلة الأسماء" aria-label="عجلة الأسماء" onClick={() => setWheelOpen(true)}>
+        <IconWheel />
+        <span className="lbl">العجلة</span>
+      </button>
+      <button className={toolBtn(starsOpen)} title="نجم الأسبوع" aria-label="نجم الأسبوع" onClick={() => setStarsOpen(true)}>
+        <IconStar />
+        <span className="lbl">النجوم</span>
+      </button>
+      <button className={toolBtn(st.muted)} title={st.muted ? 'تشغيل الصوت' : 'كتم الصوت'} aria-label="كتم الصوت" onClick={() => patch({ muted: !st.muted })}>
+        <IconSound muted={st.muted} />
+      </button>
+      <button className={toolBtn(remoteOn)} title="التحكم من الجوال" aria-label="التحكم من الجوال" onClick={() => setRemotePanel(true)}>
+        <IconPhone />
+        <span className="lbl">الجوال</span>
+      </button>
+      <button className="ib" title="ملء الشاشة (F)" aria-label="ملء الشاشة" onClick={fullscreen}>
+        <IconFull />
+        <span className="lbl">ملء الشاشة</span>
+      </button>
+    </div>
+  );
 
   return (
     <EngineCtx.Provider value={engine}>
+      <V2Ctx.Provider value={v2}>
       <BookCtx.Provider value={m.id.startsWith('g2-')}>
-      <div id="app" ref={appRef} data-lesson={m.id} data-book-questions={m.bookQuestions}>
-        <div id="stage" style={layout.flow ? undefined : { transform: `translate(-50%, -50%) scale(${layout.scale})` }}>
-          <header id="hdr">
+      <div id="app" ref={appRef} data-lesson={m.id} data-design={m.design} data-book-questions={m.bookQuestions}>
+        <div id="stage" ref={stageRef} style={layout.flow ? undefined : { transform: `translate(-50%, -50%) scale(${layout.scale})` }}>
+          <header id="hdr" className={v2 ? 'v2' : undefined}>
+            {v2 ? (
+              <V2Header
+                sec={s.sec}
+                title={m.shortTitle}
+                teams={Array.from({ length: st.nTeams }, (_, i) => ({ name: st.names[i], score: st.scores[i], color: V2_TEAM_COLORS[i] }))}
+                onScore={(i) => addScore(i, 1)}
+                phone={remoteOn ? (online && phoneSeen ? 'on' : 'off') : null}
+                timer={<TimerPill t={timer} set={setTimer} />}
+                menu={{
+                  home: goHome,
+                  fullscreen,
+                  pen,
+                  togglePen: () => setPen(!pen),
+                  timer: timer.show,
+                  toggleTimer: () => setTimer((x) => (x.show ? { ...x, show: false, run: false } : { ...x, show: true, run: false, left: 60 })),
+                  wheel: () => setWheelOpen(true),
+                  stars: () => setStarsOpen(true),
+                  muted: st.muted,
+                  toggleMute: () => patch({ muted: !st.muted }),
+                  phone: remoteOn,
+                  openPhone: () => setRemotePanel(true),
+                  resetSlide,
+                  resetLesson,
+                  container: stageRef,
+                }}
+              />
+            ) : (
+            <>
             <button className="ib" title="قائمة الدروس" aria-label="الصفحة الرئيسية: قائمة الدروس" onClick={goHome}>
               <IconHome />
               <span className="lbl">الرئيسية</span>
@@ -433,85 +562,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             </div>
             <span id="secChip">{SECTION_NAMES[s.sec]}</span>
             <span className="sp" />
-            <div className="tools">
-              <span className="rmenu">
-                <button
-                  className={toolBtn(resetMenu !== 'closed')}
-                  title="إعادة"
-                  aria-label="إعادة"
-                  aria-expanded={resetMenu !== 'closed'}
-                  onClick={() => setResetMenu((x) => (x === 'closed' ? 'open' : 'closed'))}
-                >
-                  <IconReset />
-                  <span className="lbl">إعادة</span>
-                </button>
-                {resetMenu !== 'closed' && (
-                  <>
-                    <span className="rback" onClick={() => setResetMenu('closed')} />
-                    <span className="rpop" role="menu">
-                      {resetMenu === 'open' ? (
-                        <>
-                          <button
-                            role="menuitem"
-                            onClick={() => {
-                              resetSlide();
-                              setResetMenu('closed');
-                            }}
-                          >
-                            إعادة هذه الشريحة <small>(R)</small>
-                          </button>
-                          <button role="menuitem" className="all" onClick={() => setResetMenu('confirm')}>
-                            إعادة الدرس كاملًا
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <span className="q">تُمحى كل الإجابات والرسوم ونقاط الفرق، ويعود الدرس إلى البداية. متأكد؟</span>
-                          <button role="menuitem" className="all" onClick={resetLesson}>
-                            نعم، أعد الدرس
-                          </button>
-                          <button role="menuitem" onClick={() => setResetMenu('closed')}>
-                            إلغاء
-                          </button>
-                        </>
-                      )}
-                    </span>
-                  </>
-                )}
-              </span>
-              <button className={toolBtn(pen)} title="قلم الرسم" aria-label="قلم الرسم" onClick={() => setPen(!pen)}>
-                <IconPen />
-                <span className="lbl">قلم</span>
-              </button>
-              <button
-                className={toolBtn(timer.show)}
-                title="المؤقت"
-                aria-label="المؤقت"
-                onClick={() => setTimer((x) => (x.show ? { ...x, show: false, run: false } : { ...x, show: true, run: false, left: 60 }))}
-              >
-                <IconTimer />
-                <span className="lbl">مؤقت</span>
-              </button>
-              <button className="ib" title="عجلة الأسماء" aria-label="عجلة الأسماء" onClick={() => setWheelOpen(true)}>
-                <IconWheel />
-                <span className="lbl">العجلة</span>
-              </button>
-              <button className={toolBtn(starsOpen)} title="نجم الأسبوع" aria-label="نجم الأسبوع" onClick={() => setStarsOpen(true)}>
-                <IconStar />
-                <span className="lbl">النجوم</span>
-              </button>
-              <button className={toolBtn(st.muted)} title={st.muted ? 'تشغيل الصوت' : 'كتم الصوت'} aria-label="كتم الصوت" onClick={() => patch({ muted: !st.muted })}>
-                <IconSound muted={st.muted} />
-              </button>
-              <button className={toolBtn(remoteOn)} title="التحكم من الجوال" aria-label="التحكم من الجوال" onClick={() => setRemotePanel(true)}>
-                <IconPhone />
-                <span className="lbl">الجوال</span>
-              </button>
-              <button className="ib" title="ملء الشاشة (F)" aria-label="ملء الشاشة" onClick={fullscreen}>
-                <IconFull />
-                <span className="lbl">ملء الشاشة</span>
-              </button>
-            </div>
+            {toolsEl}
+            </>
+            )}
           </header>
 
           <main id="main" ref={mainRef}>
@@ -542,10 +595,13 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
               </section>
             ))}
             <Pen key={lessonGen} active={pen} onClose={() => setPen(false)} slide={cur} resetCount={resets[cur] ?? 0} layoutKey={`${layout.flow}-${layout.scale}`} main={mainRef} />
-            <TimerWidget t={timer} set={setTimer} view={st.timerView} onView={(v) => patch({ timerView: fixView(v) })} />
+            {!v2 && <TimerWidget t={timer} set={setTimer} view={st.timerView} onView={(v) => patch({ timerView: fixView(v) })} />}
           </main>
 
 
+          {v2 ? (
+            <V2Progress sections={sections} cur={cur} steps={slideApis.current[cur]?.info() ?? { shown: 0, total: 0 }} goto={goto} />
+          ) : (
           <footer id="ftr">
             <button className="btn nav" aria-label="الشريحة السابقة" disabled={cur === 0} onClick={() => goto(cur - 1)}>
               <IconPrevRtl />
@@ -589,6 +645,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
               <IconNextRtl />
             </button>
           </footer>
+          )}
 
           <WheelModal open={wheelOpen} onClose={() => setWheelOpen(false)} names={st.wheel} onNames={(w) => patch({ wheel: w })} spinReq={spinReq}
             onResult={setWheelResult}
@@ -638,6 +695,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         </div>
       </div>
       </BookCtx.Provider>
+      </V2Ctx.Provider>
     </EngineCtx.Provider>
   );
 }

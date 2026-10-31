@@ -19,10 +19,21 @@ async function open(page: Page, file: string, errors: string[]) {
 
 const slideCount = (page: Page) => page.locator('section.slide').count();
 
+/** التصميم الجديد (v2): لا أزرار على السبورة، والأدوات داخل قائمة ⋯ في الرأس */
+const isV2 = async (page: Page) => (await page.locator('#app[data-design="v2"]').count()) > 0;
+/** أداة من الشريط (التصميم القديم) أو من قائمة ⋯ (التصميم الجديد) */
+async function tool(page: Page, name: string, v2Name = name) {
+  if (await isV2(page)) {
+    await page.locator('.v2dots').click();
+    return page.getByRole('menuitem', { name: v2Name, exact: true });
+  }
+  return page.locator(`button[aria-label="${name}"]`);
+}
+
 async function goTo(page: Page, i: number) {
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.keyboard.press('Home');
-  for (let k = 0; k < i; k++) await page.keyboard.press('ArrowLeft');
+  for (let k = 0; k < i; k++) await page.keyboard.press('PageDown');
   const slide = page.locator('section.slide.active');
   await expect(slide).toHaveAttribute('data-index', String(i));
   return slide;
@@ -32,7 +43,11 @@ async function goTo(page: Page, i: number) {
 async function eachState(page: Page, i: number, check: (state: string) => Promise<void>) {
   const slide = await goTo(page, i);
   const hint = slide.locator('.btn.hint');
-  if (await hint.count()) {
+  if ((await isV2(page)) && (await slide.locator('.hintbox').count())) {
+    await page.keyboard.press('h');
+    await page.waitForTimeout(350);
+    await check('التلميح مفتوح');
+  } else if (await hint.count()) {
     await hint.first().click();
     await page.waitForTimeout(350);
     await check('التلميح مفتوح');
@@ -132,10 +147,17 @@ for (const file of files) {
       expect(touched).toBeGreaterThan(0);
       await page.locator('.team button[aria-label="إضافة نقطة"]').first().click();
       await expect(page.locator('.team .tn').first()).toContainText('١');
-      await page.locator('.rmenu > button').click();
-      await page.locator('.rpop button', { hasText: 'إعادة الدرس كاملًا' }).click();
-      await page.locator('.rpop button', { hasText: 'نعم، أعد الدرس' }).click();
-      await expect(page.locator('.rpop')).toHaveCount(0);
+      if (await isV2(page)) {
+        await (await tool(page, 'إعادة')).click();
+        await page.getByRole('menuitem', { name: 'إعادة الدرس كاملًا…' }).click();
+        await page.getByRole('button', { name: 'نعم، أعد الدرس' }).click();
+        await expect(page.getByRole('alertdialog')).toHaveCount(0);
+      } else {
+        await page.locator('.rmenu > button').click();
+        await page.locator('.rpop button', { hasText: 'إعادة الدرس كاملًا' }).click();
+        await page.locator('.rpop button', { hasText: 'نعم، أعد الدرس' }).click();
+        await expect(page.locator('.rpop')).toHaveCount(0);
+      }
       await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', '0');
       await expect(page.locator('.step.shown')).toHaveCount(0);
       await expect(page.locator('.team .tn').first()).toContainText('٠');
@@ -145,7 +167,7 @@ for (const file of files) {
     test('نافذة ربط الجوال تعرض رمز QR بلا أرقام لاتينية', async ({ page }) => {
       await page.route('https://ntfy.sh/**', (r) => r.abort());
       await open(page, file, []);
-      await page.locator('button[aria-label="التحكم من الجوال"]').click();
+      await (await tool(page, 'التحكم من الجوال')).click();
       await page.locator('.rpanel button', { hasText: 'تشغيل' }).click();
       await expect(page.locator('.rpanel svg.qr path')).toHaveCount(1);
       const ch = await page.evaluate(() => localStorage.getItem('remote:channel'));
@@ -188,6 +210,7 @@ for (const file of files) {
     test('المؤقت يُسحب ويُكبَّر ويبقى مكانه بعد إعادة الفتح', async ({ page }) => {
       await page.setViewportSize({ width: 1600, height: 900 });
       await open(page, file, []);
+      test.skip(await isV2(page), 'التصميم الجديد: المؤقت شارة في الرأس لا تُسحب');
       await page.locator('button[aria-label="المؤقت"]').click();
       const timer = page.locator('#timerw');
       await expect(timer).toBeVisible();
@@ -239,10 +262,59 @@ for (const file of files) {
       });
     }
 
+    test('التصميم الجديد: السهمان يمشيان في الخطوات، و⌘/Ctrl مع السهم ينقل شريحة كاملة', async ({ page }) => {
+      await open(page, file, []);
+      test.skip(!(await isV2(page)), 'للتصميم الجديد فقط');
+      const n = await slideCount(page);
+      let i = 1;
+      while (i < n && (await page.locator(`section.slide[data-index="${i}"] .step`).count()) < 2) i++;
+      const slide = await goTo(page, i);
+      await page.keyboard.press('ArrowLeft');
+      await expect(slide).toHaveClass(/active/);
+      await expect(slide.locator('.step.shown')).toHaveCount(1);
+      await page.keyboard.press('ArrowRight');
+      await expect(slide.locator('.step.shown')).toHaveCount(0);
+      await expect(slide).toHaveClass(/active/);
+      await page.keyboard.press('ArrowRight');
+      await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', String(i - 1));
+      await page.keyboard.press('Control+ArrowLeft');
+      await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', String(i));
+      await page.keyboard.press('Meta+ArrowLeft');
+      await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', String(i + 1));
+    });
+
+    test('التصميم الجديد: لا شيء يتحرك عند إظهار الخطوات (الهيكل بحجم المحتوى نفسه)', async ({ page }) => {
+      await page.setViewportSize({ width: 1600, height: 900 });
+      await open(page, file, []);
+      test.skip(!(await isV2(page)), 'للتصميم الجديد فقط');
+      const rects = () =>
+        page.evaluate(() =>
+          [...document.querySelectorAll('section.slide.active .step, section.slide.active .blank.box, section.slide.active .mcq .fb')].map((e) => {
+            const r = e.getBoundingClientRect();
+            return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)];
+          }),
+        );
+      const n = await slideCount(page);
+      const moved: string[] = [];
+      for (let i = 1; i < n; i++) {
+        await goTo(page, i);
+        await page.waitForTimeout(400); // الشريحة تدخل بحركة ٦px؛ نقيس بعد أن تستقر
+        const before = await rects();
+        for (let k = 0; k < 20; k++) await page.keyboard.press('Space');
+        await page.waitForTimeout(600);
+        const after = await rects();
+        before.forEach((x, j) => {
+          if (after[j] && x.some((v, q) => Math.abs(v - after[j][q]) > 1)) moved.push(`الشريحة ${i + 1}، العنصر ${j + 1}: ${x.join(',')} ← ${after[j].join(',')}`);
+        });
+      }
+      expect(moved).toEqual([]);
+    });
+
     test('زر الرئيسية يعمل دون اتصال (يعود إلى أول شريحة)', async ({ page }) => {
       await open(page, file, []);
       await goTo(page, 3);
-      await page.locator('#hdr .ib').first().click();
+      if (await isV2(page)) await (await tool(page, 'الرئيسية')).click();
+      else await page.locator('#hdr .ib').first().click();
       await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', '0');
     });
 

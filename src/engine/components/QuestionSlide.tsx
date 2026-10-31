@@ -1,4 +1,6 @@
 import { Fragment, createContext, useContext, type ReactNode } from 'react';
+import { useV2 } from '../context';
+import { IconBook } from './V2Chrome';
 import { num } from '../digits';
 import type { HlKey } from '../types';
 import { Cols, QCol, Tag, type Kind } from './Layout';
@@ -9,6 +11,8 @@ export interface StepDef {
   hl?: readonly HlKey[];
   /** ans = الإجابة (خلفية خضراء) · warn = خطأ شائع */
   kind?: 'ans' | 'warn';
+  /** التصميم الجديد: اسم الإجابة بجانب صندوقها حين يطلب السؤال أكثر من إجابة («العبارةُ العدديَّةُ») */
+  label?: ReactNode;
 }
 
 interface Props {
@@ -165,6 +169,8 @@ export function BookGroup({ source, tags, intro, qs, hint, time, tps, chart, chi
 
 /** شريحة سؤال من الكتاب: السؤال، تلميح، حل بالخطوات يبرز أجزاء الرسم، وتنبيه الخطأ الشائع. */
 export function QuestionSlide({ source, n, tags, intro, question, long, hint, time, tps, steps, chart, children }: Props) {
+  const v2 = useV2();
+  if (v2) return <QuestionV2 {...{ source, n, tags, intro, question, long, hint, tps, steps, chart }}>{children}</QuestionV2>;
   if (useContext(BookCtx))
     return (
       <BookGroup source={source} tags={tags} intro={intro} qs={[{ n, question, steps, long }]} hint={hint} time={time} tps={tps} chart={chart}>
@@ -198,6 +204,51 @@ export function QuestionSlide({ source, n, tags, intro, question, long, hint, ti
             <Solution>
               {steps.map((s, i) => (
                 <Step key={i} hl={s.hl} kind={s.kind}>
+                  {s.text}
+                </Step>
+              ))}
+            </Solution>
+          )}
+        </QCol>
+        {chart}
+      </Cols>
+    </>
+  );
+}
+
+/** صفحة الكتاب من نص المصدر: «تأكَّدْ · ص ١٠٨» ← «ص ١٠٨» */
+const pageOf = (source: string) => source.split(/[·،]/).map((x) => x.trim()).find((x) => x.startsWith('ص')) ?? source;
+
+/**
+ * التصميم الجديد: رقم السؤال وصفحة الكتاب، ثم السؤال، ثم صناديق الإجابة ظاهرة من البداية.
+ * لا أزرار على السبورة: الخطوات والتلميح والمؤقت من الجوال (أو المسافة وH ولوحة المفاتيح).
+ */
+function QuestionV2({ source, n, tags, intro, question, long, hint, tps, steps, chart, children }: Omit<Props, 'time'>) {
+  return (
+    <>
+      <div className="v2qh" data-qnum={n}>
+        <span className="qnum">{num(n)}</span>
+        <span className="pg">
+          <IconBook />
+          {pageOf(source)}
+        </span>
+        {tags?.map((t, i) => (
+          <Tag key={i} kind={t.kind}>
+            {t.text}
+          </Tag>
+        ))}
+      </div>
+      <Cols>
+        <QCol>
+          {intro && <p className="intro">{intro}</p>}
+          <p className={'qtext' + (long ? ' long' : '')}>{question}</p>
+          {children}
+          {tps && <ThinkPairShare />}
+          {hint && <Hint>{hint}</Hint>}
+          {steps.length > 0 && (
+            <Solution>
+              {steps.map((s, i) => (
+                <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
                   {s.text}
                 </Step>
               ))}

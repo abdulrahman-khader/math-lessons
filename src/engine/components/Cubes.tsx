@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { useSlide } from '../context';
+import { useSlide, useV2 } from '../context';
 import { num } from '../digits';
 import type { HlKey } from '../types';
 import { Eq } from './Layout';
@@ -154,13 +154,32 @@ export function CubeTrain({ parts, shape = 'cube', size = 46, k = 0, take = [0, 
 /** مربع فارغ يظهر فيه الناتج عند «الخطوة التالية»، بترتيبه في الصفحة. */
 /** box: مربع كما في الكتاب حين يرسم □؛ وإلا سطر نقاط «......» في دروس الصف الثاني */
 /** خانة تمتلئ عند الخطوة التالية: عدد، أو إشارة عملية (+ أو −) */
-export function Blank({ v, hl, box }: { v: number | string; hl?: readonly HlKey[]; box?: boolean }) {
+/** empty: خانة السؤال كما في الكتاب، تبقى فارغة؛ والإجابة في مكانها تحت الحل */
+export function Blank({ v, hl, box, empty }: { v: number | string; hl?: readonly HlKey[]; box?: boolean; empty?: boolean }) {
+  const v2 = useV2();
+  // التصميم الجديد: + و− مرسومتان، لأن خط النسخ يرفعهما عن وسط الدائرة
+  const shown = v2 && (v === '+' || v === '−') ? <OpSign op={v} /> : typeof v === 'number' ? num(v) : v;
+  if (empty)
+    return (
+      <span className={'blank empty' + (box ? ' box' : '')}>
+        <span className="bv" aria-hidden="true">{shown}</span>
+      </span>
+    );
   return (
     <span className={'blank' + (box ? ' box' : '')}>
       <Step hl={hl} className="bv">
-        {typeof v === 'number' ? num(v) : v}
+        {shown}
       </Step>
     </span>
+  );
+}
+
+/** إشارة الجمع أو الطرح مرسومة في وسط خانتها تمامًا */
+function OpSign({ op }: { op: '+' | '−' }) {
+  return (
+    <svg className="opsign" viewBox="0 0 24 24" role="img" aria-label={op}>
+      <path d={op === '+' ? 'M5 12h14M12 5v14' : 'M5 12h14'} fill="none" stroke="currentColor" strokeWidth={3.4} strokeLinecap="round" />
+    </svg>
   );
 }
 

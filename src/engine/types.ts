@@ -22,6 +22,8 @@ export interface LessonMeta {
   idea: string;
   /** عدد أسئلة الكتاب في الدرس. الاختبارات تتحقق أن كل سؤال من ١ إلى هذا العدد موجود. */
   bookQuestions: number;
+  /** v2: التصميم الجديد (رأس بلا أزرار، شريط تقدّم، صناديق إجابة). يُجرَّب على درس واحد قبل تعميمه. */
+  design?: 'v2';
 }
 
 export interface SlideDef {
@@ -44,7 +46,7 @@ export function defineLesson(l: Lesson): Lesson {
   const check = (s: string, where: string) => {
     if (hasWesternDigits(s)) throw new Error(`أرقام غربية في ${where}: "${s}". اكتبها بالأرقام الهندية-العربية.`);
   };
-  Object.entries(l.meta).forEach(([k, v]) => typeof v === 'string' && k !== 'id' && check(v, `meta.${k}`));
+  Object.entries(l.meta).forEach(([k, v]) => typeof v === 'string' && k !== 'id' && k !== 'design' && check(v, `meta.${k}`));
   l.slides.forEach((s, i) => check(s.notes, `ملاحظات الشريحة ${i + 1}`));
   return l;
 }
@@ -112,4 +114,6 @@ export type HlKey =
   | `v${number}` // بطاقة القيمة
   | `x${number}` // تسمية المحور الأفقي
   | `g${number}` // دليل رأسي من النقطة إلى المحور الأفقي
-  | `h${number}`; // دليل أفقي من النقطة إلى المحور الرأسي
+  | `h${number}` // دليل أفقي من النقطة إلى المحور الرأسي
+  | `n${number}` // مجموعة قطع العدّ i (التصميم الجديد: تُبرز مع الخطوة الحالية)
+  | 'nx'; // القطع المشطوبة

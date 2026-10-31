@@ -1,4 +1,5 @@
-import { useSlide } from '../context';
+import type React from 'react';
+import { useSlide, useV2 } from '../context';
 
 /* ---------- قطع العدّ وأبراج العشرات: نماذج الجمع والطرح في دروس الجمل العددية ---------- */
 
@@ -10,13 +11,19 @@ export interface CounterGroup {
   face?: boolean;
 }
 
-const DARK: Record<string, string> = { '#ffd43b': '#e0a800', '#e8372b': '#a3160d', '#4f9be0': '#1d5fa3', '#4fae3a': '#2c7a1c' };
+const DARK: Record<string, string> = {
+  '#ffd43b': '#e0a800', '#e8372b': '#a3160d', '#4f9be0': '#1d5fa3', '#4fae3a': '#2c7a1c',
+  '#f4c430': '#a67c00', '#d8342c': '#8e1a14', '#ffffff': '#4a5a73', '#2e9a4e': '#196130',
+};
 
 /**
  * مجموعات من قطع العدّ؛ الأولى يمينًا كما تُقرأ الجملة. آخر crossed قطعة في آخر مجموعة عليها ×،
  * أو تُشطب عند خطوة فيها hl ‹x{k}› إن أُعطي k.
  */
-export function Counters({ groups, crossed = 0, size = 46, cols, k }: { groups: CounterGroup[]; crossed?: number; size?: number; cols?: number; k?: number }) {
+export function Counters(props: { groups: CounterGroup[]; crossed?: number; size?: number; cols?: number; k?: number; max?: number; rows?: boolean }) {
+  const v2 = useV2();
+  if (v2) return <CountersV2 {...props} />;
+  const { groups, crossed = 0, size = 46, cols, k } = props;
   const { activeHl } = useSlide();
   const cross = k === undefined || activeHl.has(`x${k}`) ? crossed : 0;
   return (
@@ -51,6 +58,57 @@ export function Counters({ groups, crossed = 0, size = 46, cols, k }: { groups: 
               })}
             </svg>
             {g.label && <b>{g.label}</b>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * التصميم الجديد: القطع تملأ عرض اللوحة (حتى max بكسل للقطعة)، بلون محايد إلا إن كان اللون هو البيانات،
+ * والأولى يمينًا. ما تتحدث عنه الخطوة الحالية (hl ‹n{i}› لمجموعة، ‹nx› للمشطوبة) على خلفية القلم الفسفوري، والباقي باهت.
+ * rows: مجموعة في كل سطر، التسمية يمينها، والقطع بالحجم نفسه في كل الأسطر (cols قطعة في السطر).
+ */
+function CountersV2({ groups, crossed = 0, cols, k, max = 100, rows }: { groups: CounterGroup[]; crossed?: number; cols?: number; k?: number; max?: number; rows?: boolean }) {
+  const { activeHl, nowHl } = useSlide();
+  const cross = k === undefined || activeHl.has(`x${k}`) ? crossed : 0;
+  const focus = [...nowHl].some((h) => /^n(\d+|x)$/.test(h));
+  const S = 100;
+  const lineCols = cols ?? 8;
+  return (
+    <div className={'counters v2c' + (rows ? ' rows' : '') + (focus ? ' focus' : '')}>
+      {groups.map((g, gi) => {
+        const c = rows ? lineCols : Math.min(g.n, cols ?? (g.n > 16 ? 10 : g.n > 8 ? 5 : 4));
+        const used = Math.min(g.n, c);
+        const lines = Math.ceil(g.n / c);
+        const fill = g.color ?? '#cfd8e6';
+        const stroke = DARK[fill] ?? '#4a5a73';
+        const last = gi === groups.length - 1;
+        const on = nowHl.has(`n${gi}`);
+        const xOn = last && nowHl.has('nx');
+        const w = used * S;
+        const style: React.CSSProperties = rows ? { width: `${(used / c) * 100}%` } : { flex: `${used} 1 0`, maxWidth: used * max };
+        return (
+          <div key={gi} className={'cgroup' + (on ? ' on' : '')} style={rows ? undefined : style}>
+            {rows && g.label && <b>{g.label}</b>}
+            <svg viewBox={`0 0 ${w} ${lines * S}`} style={rows ? style : undefined} aria-hidden>
+              {Array.from({ length: g.n }, (_, i) => {
+                // الأولى يمينًا كما تُقرأ
+                const cx = w - ((i % c) * S + S / 2);
+                const cy = Math.floor(i / c) * S + S / 2;
+                const x = last && i >= g.n - cross;
+                const lit = on || (xOn && x);
+                return (
+                  <g key={i} className={lit ? 'lit' : ''}>
+                    {xOn && x && <rect x={cx - S / 2} y={cy - S / 2} width={S} height={S} className="hlbg" />}
+                    <circle cx={cx} cy={cy} r={S * 0.4} fill={fill} stroke={stroke} strokeWidth={6} />
+                    {x && <path d={`M${cx - S * 0.26},${cy - S * 0.26} L${cx + S * 0.26},${cy + S * 0.26} M${cx + S * 0.26},${cy - S * 0.26} L${cx - S * 0.26},${cy + S * 0.26}`} stroke="#0b1226" strokeWidth={10} strokeLinecap="round" />}
+                  </g>
+                );
+              })}
+            </svg>
+            {!rows && g.label && <b>{g.label}</b>}
           </div>
         );
       })}

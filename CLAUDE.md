@@ -1,6 +1,6 @@
 # Math lessons — Claude guide
 
-Interactive smartboard presentations for Saudi elementary math lessons (Arabic, RTL). One shared engine in `src/engine/`, one content file per lesson in `lessons/`. Each lesson builds into **one offline HTML file** in `dist/`, which the teacher opens on the classroom smartboard or carries on a USB stick.
+Interactive smartboard presentations for Saudi elementary math lessons (Arabic, RTL). One shared engine in `src/engine/`, one content file per lesson in `lessons/`. Each lesson builds into one HTML file in `dist/`, published on GitHub Pages. The teacher runs it in a current browser on their Mac, projected over HDMI with a fast connection: offline use and old smartboard browsers are not requirements.
 
 ## Commands
 
@@ -45,6 +45,28 @@ tests/stars.spec.ts    star of the week: week boundary, ranking, board, wheel
 - Every lesson has a **lesson idea clip** (`clip.tsx` → `IntroClip`) as the last slide of the explain section (after the rule and the book's worked example, before «نعمل معًا»), under `<SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>`, with `sec: 'explain'`. It confirms the explanation with its **own** example: never the book's numbers, and never data from the lesson's engage, explore or book questions, so it repeats or gives away nothing. It runs 35–55 s, and is a pure function of time: `<Clip duration captions scene={(t) => …} />`, drawn in a 1400×520 SVG with the helpers `tw`, `fade`, `lerp`, `ClipTitle`, `SvgEq` (equations laid out right to left), `Cube`, `Person`, `ClipCard`, `SvgFrac`, `sector`. Captions mark emphasis with `**…**`. It starts only when the teacher presses play (big button on the scene, the bar, or the phone), pauses when the teacher leaves the slide, and the phone remote gets play/pause/restart automatically. Review it with `npm run clip-shots`.
 - Narrated clips: `narration.json` next to `clip.tsx` holds the spoken text for each caption (fully diacritized, numbers and symbols as words). `npm run voice -- --voiced` generates the mp3s into `voice/` with ElevenLabs (key and voice in `.env.local`, never committed) and wires `voice={voice}` into the clip; only changed sentences are regenerated. Each mp3 is made louder with ffmpeg (`brew install ffmpeg`) for laptop speakers, marked `loud` in `manifest.json`. The clip waits for a sentence to finish before moving to the next caption. Voiced lessons are listed in `VOICED` in `scripts/voice.mjs`.
 - Each slide's `notes` are teacher notes, shown in teacher mode. `min` is suggested minutes; the slides should add up to roughly the lesson length.
+
+## Writing the content
+
+The book's own text (questions, intro lines, «أتحدث» prompts) is copied exactly and never edited. Everything we write ourselves (steps, hints, answers, labels, feedback, teacher notes) follows these rules.
+
+- **Diacritics.** Grade 2: everything students read is fully diacritized, like the book. Grade 4: diacritize every word a child could misread (case endings on nouns in answers, shadda, tanwin). Teacher notes need none.
+- **Voice.** Steps and hints speak as the class solving together: first person plural («نقرأُ، نجمعُ، نطرحُ»). Never commands to one child («ابدأ، اقرأ، ابحث»). A hint is best a question that points at the idea: «ماذا تعني كلمةُ «المجموع»؟», not the method spelled out.
+- **One idea per step**, short enough to read at a glance (about 6 words, one line). Order: read from the picture or chart → choose the operation and say why → the equation in `<Eq>` → the answer.
+- **The answer is only the answer.** It answers exactly what the question asks, in the question's words: «الفراولةُ», «٢١ طالبًا». No reasons, no brackets; the reason goes in the step before it. A number answer always carries its unit, with correct Arabic counting (١ طالبٌ، ٢ طالبانِ، ٣–١٠ طلابٍ، ١١+ طالبًا).
+- **Every part the question asks for is an answer.** If it asks for an expression and a sentence, both steps are `kind: 'ans'`, so both fill an answer box.
+- **Explain/talk questions** («أتحدث», «كيف…», «لماذا…») have no single answer: give a short model answer, at most two lines, as a sample the class can compare with, not as the only correct wording.
+- **Feedback says why.** Right: name the reason («صحيحٌ! لا توجدُ إشارةُ =»). Wrong: kind and specific about what to look at («ليست جملةً: ابحثْ عن إشارةِ =»), never just «خطأ».
+- **Labels and captions** are nouns, not sentences («العبارةُ العدديَّةُ», «البقراتُ»); no punctuation at the end.
+- **Words a child knows.** Use the book's own terms for math ideas (عبارة عددية، تمثيل بالأعمدة، إشارات العدّ) and everyday words for the rest. No new terms the book has not taught yet.
+- **Arabic punctuation**: «،» «؛» «؟» and «…» quotes; no English commas or question marks.
+- **Teacher notes** (`notes`) are for the teacher only: what to ask, what mistake to watch for, how to use the board. One or two sentences.
+
+## Motion and sound
+
+- **Motion** (the `motion` package) is used where it beats CSS: the answer filling its box (spring pop), cards that need an exit animation (star/mistake card), layout changes (star ranking, podium) and slide changes. Simple fades, the progress fill and hover states stay in CSS. Motion's `x` is physical: go through the shared RTL helper so "forward" moves toward the left. Everything respects `prefers-reduced-motion`.
+- **One motion style everywhere**: a short springy pop for answers, a quick fade-up for steps, nothing decorative.
+- **Sound** (`sound.ts`, generated tones, mutable) only for moments the class should look up: an answer revealed, a multiple-choice right/wrong, a star or mistake, the timer's last seconds and its end. No sound on ordinary steps or slide changes; the same moment always makes the same sound.
 
 ## Arabic / RTL rules (enforced)
 

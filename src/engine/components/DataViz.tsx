@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useSlide } from '../context';
+import { useSlide, useV2 } from '../context';
 import { num } from '../digits';
 import type { HlKey } from '../types';
 
@@ -147,8 +147,15 @@ interface HBarsProps {
 }
 
 /** تمثيل بالأعمدة الأفقية: المحور الأفقي من اليسار إلى اليمين كما في الكتاب */
+/** مستطيل مستدير من جهة نهايته فقط (يمين العمود) */
+function endRounded(x: number, y: number, w: number, h: number, r: number) {
+  const k = Math.min(r, h / 2, w);
+  return `M${x} ${y}H${x + w - k}A${k} ${k} 0 0 1 ${x + w} ${y + k}V${y + h - k}A${k} ${k} 0 0 1 ${x + w - k} ${y + h}H${x}Z`;
+}
+
 export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, color = '#8bc34a', ends }: HBarsProps) {
-  const { activeHl } = useSlide();
+  const { activeHl, nowHl } = useSlide();
+  const v2 = useV2();
   const on = (k: string) => (activeHl.has(k) ? ' on' : '');
   const W = 760;
   const H = 440;
@@ -164,6 +171,11 @@ export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, c
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="cs hbars" role="img" aria-label={title ?? 'تمثيل بالأعمدة'}>
       <rect className="plot" x={m.l} y={m.t} width={pw} height={ph} />
+      {/* التصميم الجديد: صف العمود الذي تذكره الخطوة الحالية على خلفية القلم الفسفوري */}
+      {v2 &&
+        labels.map((_, i) =>
+          nowHl.has(`p${i}`) ? <rect key={`hl${i}`} className="rowhl" x={yTitle ? 46 : 8} y={Y(i) - ph / n / 2 + 3} width={W - (yTitle ? 54 : 16)} height={ph / n - 6} rx={12} /> : null,
+        )}
       {ticks.map((v) => (
         <line key={`g${v}`} className="gl" x1={X(v)} x2={X(v)} y1={m.t} y2={m.t + ph} />
       ))}
@@ -177,11 +189,16 @@ export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, c
       {labels.map((L, i) => (
         <g key={i}>
           <line className={'guide' + on(`g${i}`)} x1={X(values[i])} x2={X(values[i])} y1={Y(i)} y2={m.t + ph} />
-          <rect className={'bar' + on(`p${i}`)} x={m.l} y={Y(i) - bh / 2} width={X(values[i]) - m.l} height={bh} style={activeHl.has(`p${i}`) ? undefined : { fill: color }} />
+          {v2 ? (
+            // التصميم الجديد: كل الأعمدة بلون واحد محايد، مستديرة من طرفها فقط لا من جهة المحور
+            <path className="bar" d={endRounded(m.l, Y(i) - bh / 2, X(values[i]) - m.l, bh, 10)} />
+          ) : (
+            <rect className={'bar' + on(`p${i}`)} x={m.l} y={Y(i) - bh / 2} width={X(values[i]) - m.l} height={bh} style={activeHl.has(`p${i}`) ? undefined : { fill: color }} />
+          )}
           <text className={'xl' + on(`p${i}`)} x={m.l - 12} y={Y(i)} textAnchor="end" dominantBaseline="middle">
             {L}
           </text>
-          {ends && (
+          {(ends || v2) && (
             <text className={'hv' + on(`v${i}`)} x={X(values[i]) + 10} y={Y(i)} dominantBaseline="middle">
               {num(values[i])}
             </text>
@@ -205,7 +222,7 @@ export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, c
           {yTitle}
         </text>
       )}
-      {labels.map((_, i) => {
+      {!v2 && labels.map((_, i) => {
         const t = num(values[i]);
         const w = t.length * 14 + 26;
         return (

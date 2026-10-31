@@ -13,3 +13,6 @@ export const SECTION_NAMES: Record<SectionKey, string> = {
 };
 
 export const TEAM_COLORS = ['#0a58b0', '#1b7a3d', '#b04306', '#6b34a6'];
+
+/** ألوان الفرق في التصميم الجديد: بلا أخضر، فالأخضر للإجابة وحدها */
+export const V2_TEAM_COLORS = ['#1554b8', '#d24a0c', '#7a2fb0', '#a87000'];

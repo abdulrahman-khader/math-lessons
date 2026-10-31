@@ -1,0 +1,411 @@
+/*
+ * التصميم الجديد (meta.design === 'v2'): يُجرَّب على درس واحد قبل تعميمه، ولا يمسّ الدروس الأخرى.
+ * عارض ضعيف الإضاءة: خلفية بيضاء، حبر داكن، ألوان مشبعة بتعبئة كاملة، وخطوط سميكة.
+ * لون لكل وظيفة: الحبر للنص، لون القسم لرقم السؤال وشارة القسم وشريط التقدّم، والأخضر للإجابة وحدها.
+ * خط النسخ يترك فراغًا كبيرًا تحت السطر لعلامات الكسر، فالنص في الأشكال الصغيرة يُنزَّل قليلًا (padding-top) ليتوسّط بصريًا.
+ */
+#app[data-design="v2"] {
+  --ink: #0b1226; --muted: #1f2a3d; --line: #3d4652; --band: #eceff4; --band-line: #c3c8d1;
+  --ans: #067a3a; --bad: #b3341a; --good: #067a3a;
+  /* الأخضر للإجابة وحدها: بطاقات «المثال» ووسومه بالفيروزي */
+  --ex: #0f7c85; --ex-t: #dcf0f1; --rule: #1554b8; --rule-t: #e3ecfa; --qs: #5a1f9e; --qs-t: #ece3f8;
+  --sec: #5a1f9e; --sec-t: #c3aae6;
+  --display: "Noto Naskh Arabic", "Geeza Pro", serif;
+  --body: "Noto Naskh Arabic", "Geeza Pro", serif;
+}
+#app[data-design="v2"] [data-sec="start"] { --sec: #3d4652; --sec-t: #b9c0cb; }
+#app[data-design="v2"] [data-sec="engage"] { --sec: #c62a1c; --sec-t: #e8a59d; }
+#app[data-design="v2"] [data-sec="explore"] { --sec: #d97300; --sec-t: #f0c38c; }
+#app[data-design="v2"] [data-sec="explain"] { --sec: #1554b8; --sec-t: #a1bce6; }
+#app[data-design="v2"] [data-sec="elab"] { --sec: #0f7c85; --sec-t: #99cdd2; }
+#app[data-design="v2"] [data-sec="check"] { --sec: #5a1f9e; --sec-t: #c3aae6; }
+#app[data-design="v2"] [data-sec="practice"] { --sec: #b8226a; --sec-t: #e6a4c4; }
+#app[data-design="v2"] [data-sec="hot"] { --sec: #7e4a26; --sec-t: #d6b49c; }
+#app[data-design="v2"] [data-sec="close"] { --sec: #a87000; --sec-t: #e2c584; }
+
+#app[data-design="v2"] #stage { background: #fff; color: var(--ink); font-family: var(--body); line-height: 1.7; }
+
+/* ===== الرأس: شريط فاتح بخط تحته ===== */
+#app[data-design="v2"] #hdr.v2 { position: relative; height: 68px; min-height: 0; padding: 0 28px; gap: 18px; background: var(--band); border-block-end: 3px solid var(--band-line); color: var(--ink); }
+.v2sec { display: inline-flex; align-items: center; height: 46px; padding: 6px 20px 0; line-height: 1; border-radius: 999px; background: var(--sec); color: #fff; font-size: 26px; font-weight: 700; white-space: nowrap; }
+.v2title { font-size: 22px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#app[data-design="v2"] #teams { display: flex; gap: 14px; }
+#app[data-design="v2"] .team { border: 3px solid var(--band-line); border-radius: 999px; background: #fff; font-size: 26px; overflow: visible; }
+#app[data-design="v2"] .team button { display: flex; align-items: center; width: auto; min-height: 0; height: 44px; padding-block: 0; padding-inline: 4px 18px; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 700; line-height: 1; cursor: pointer; }
+#app[data-design="v2"] .team .tn { display: flex; align-items: center; gap: 10px; padding: 0; }
+#app[data-design="v2"] .team .tn b { display: grid; place-items: center; min-width: 36px; height: 36px; padding: 5px 7px 0; border-radius: 999px; background: var(--tc); color: #fff; font-size: 26px; }
+.v2phone { display: grid; place-items: center; width: 40px; height: 40px; color: var(--muted); opacity: .45; }
+.v2phone svg { width: 26px; height: 26px; }
+.v2phone.off { opacity: 1; border-radius: 50%; background: var(--bad); color: #fff; }
+.v2menu { position: relative; display: inline-flex; }
+.v2dots { display: grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: 12px; background: none; color: var(--ink); opacity: .45; cursor: pointer; }
+.v2dots[aria-expanded="true"] { opacity: 1; background: #fff; }
+.v2dots svg { width: 26px; height: 26px; }
+/* قائمة الأدوات: الأزرار القديمة نفسها، بخط داكن على أبيض */
+.v2tools { position: absolute; inset-block-start: calc(100% + 10px); inset-inline-end: 0; z-index: 30; padding: 10px; border-radius: 16px; background: #fff; box-shadow: 0 12px 32px #0b122633, 0 0 0 3px var(--band-line); }
+#hdr .v2tools .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#app[data-design="v2"] .v2tools .ib { justify-content: flex-start; height: 56px; min-width: 200px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--band); color: var(--ink); font-size: 22px; font-weight: 600; }
+#app[data-design="v2"] .v2tools .ib .lbl { display: inline; }
+#app[data-design="v2"] .v2tools .ib.on { background: var(--sec); color: #fff; }
+#app[data-design="v2"] .v2tools .rmenu { display: flex; }
+#app[data-design="v2"] .v2tools .rmenu > .ib { flex: 1; }
+#app[data-design="v2"] .v2tools .rpop { color: var(--ink); }
+
+/* المؤقت في وسط الرأس */
+#v2timer { position: absolute; top: 6px; inset-inline: 0; margin-inline: auto; width: fit-content; height: 56px; display: flex; align-items: center; gap: 12px; padding: 6px 26px 0 18px; border: 0; border-radius: 999px; background: var(--ink); color: #fff; font: 700 42px/1 var(--body); cursor: pointer; }
+#v2timer svg { width: 36px; height: 36px; margin-top: -6px; }
+#v2timer.paused { opacity: .7; }
+#v2timer.done { animation: v2flash .5s 6 alternate; }
+@keyframes v2flash { to { background: var(--bad); } }
+
+/* ===== منطقة الشرائح ===== */
+#app[data-design="v2"] .slide { padding: 16px 28px 46px; gap: 14px; }
+#app[data-design="v2"] h2 { font-weight: 700; line-height: 1.6; }
+
+/* ===== شريط التقدّم ===== */
+#v2prog { position: absolute; inset-inline: 28px; bottom: 6px; z-index: 4; height: 24px; display: flex; align-items: center; gap: 2px; }
+#v2prog > button { flex: 1; min-width: 0; height: 16px; padding: 0; border: 0; border-radius: 0; background: var(--sec-t); cursor: pointer; }
+#v2prog > button.done { background: var(--sec); }
+#v2prog > :first-child { border-start-start-radius: 8px; border-end-start-radius: 8px; }
+#v2prog > :last-child { border-start-end-radius: 8px; border-end-end-radius: 8px; }
+#v2prog > .now { flex: 3; min-width: 0; display: flex; gap: 2px; height: 26px; padding: 3px; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 2px var(--ink); }
+#v2prog > .now i { flex: 1; border-radius: 3px; background: var(--sec-t); transition: background .25s; }
+#v2prog > .now i.done { background: var(--sec); }
+
+/* ===== السؤال ===== */
+.v2qh { display: flex; align-items: center; gap: 16px; }
+#app[data-design="v2"] .qnum { width: 52px; height: 52px; padding-top: 5px; background: var(--sec); color: #fff; font-size: 30px; font-weight: 700; line-height: 1; box-shadow: none; }
+#app[data-design="v2"] .v2qh .pg { display: inline-flex; align-items: center; gap: 10px; font-size: 32px; font-weight: 600; color: var(--ink); }
+#app[data-design="v2"] .v2qh .pg svg { width: 34px; height: 34px; color: var(--muted); }
+#app[data-design="v2"] .intro { border: 0; padding: 0; font-size: 28px; font-weight: 600; line-height: 1.75; color: var(--muted); }
+#app[data-design="v2"] .qtext { font-size: 46px; font-weight: 700; line-height: 1.8; }
+#app[data-design="v2"] .qtext.long { font-size: 40px; }
+#app[data-design="v2"] .qcol { gap: 10px; }
+
+/* خطوات العمل: سطر هادئ؛ الإجابة صندوق */
+#app[data-design="v2"] .sol { gap: 10px; }
+#app[data-design="v2"] .step.sstep { padding: 0; border: 0; background: none; color: var(--muted); font-size: 35px; font-weight: 600; line-height: 1.6; }
+.aslotrow { display: flex; align-items: center; gap: 24px; }
+.alabel { flex: none; min-width: 230px; font-size: 30px; font-weight: 600; color: var(--ink); }
+#app[data-design="v2"] .step.aslot { display: flex; align-self: flex-start; align-items: center; min-width: 360px; min-height: 104px; padding: 4px 32px 0; border-radius: 18px; font-size: 72px; font-weight: 600; line-height: 1.2; }
+#app[data-design="v2"] .step.aslot.off { border: 6px dashed var(--line); color: var(--line); font-size: 56px; font-weight: 700; }
+#app[data-design="v2"] .step.aslot.on { border: 6px solid var(--ans); background: var(--ans); color: #fff; }
+#app[data-design="v2"] .step.aslot.mid { font-size: 58px; }
+#app[data-design="v2"] .step.aslot.mid2 { font-size: 46px; }
+#app[data-design="v2"] .step.aslot.long { font-size: 36px; line-height: 1.6; padding-block: 10px; }
+/* لا أزرار على السبورة: الخطوات والتلميح والمؤقت من الجوال أو لوحة المفاتيح */
+#app[data-design="v2"] .slide .ctrls { display: none; }
+.aval { display: inline-block; }
+
+/* التلميح */
+#app[data-design="v2"] .hintbox { width: fit-content; padding: 12px 22px; border: 5px solid #a86c00; border-radius: 16px; background: #ffe594; color: #3d2800; font-size: 34px; font-weight: 700; }
+
+/* ===== اختيار من متعدد ===== */
+#app[data-design="v2"] .mcq .mq { font-size: 40px; font-weight: 700; }
+#app[data-design="v2"] .mcq .opts { gap: 18px; }
+#app[data-design="v2"] .mcq .opts button { display: inline-flex; align-items: center; justify-content: center; gap: 14px; min-width: 180px; min-height: 96px; padding: 4px 28px 0; border: 6px solid #a3aab6; border-radius: 18px; background: #fff; color: var(--ink); font-size: 42px; font-weight: 600; }
+#app[data-design="v2"] .mcq .opts button.right { background: var(--ans); border-color: var(--ans); color: #fff; }
+#app[data-design="v2"] .mcq .opts button.wrong { background: var(--bad); border-color: var(--bad); color: #fff; text-decoration: line-through; text-decoration-thickness: 4px; }
+.omark { width: 42px; height: 42px; flex: none; }
+#app[data-design="v2"] .mcq .opts button.sym { min-width: 140px; font-size: 64px; font-weight: 700; }
+#app[data-design="v2"] .mcq .fb { font-size: 32px; font-weight: 700; }
+/* تسميات الصور: بحبر داكن وحجم يُقرأ من آخر الصف */
+#app[data-design="v2"] .cgroup b { font-size: 30px; font-weight: 600; color: var(--ink); }
+#app[data-design="v2"] .mcq .fb.ok { color: var(--ans); }
+#app[data-design="v2"] .mcq .fb.no { color: var(--bad); }
+
+@media (prefers-reduced-motion: reduce) { #v2timer.done { animation: none; background: var(--bad); } }
+
+/* الجوال (تدفق بدل التحجيم) */
+body.flow #app[data-design="v2"] #hdr.v2 { height: auto; flex-wrap: wrap; padding-block: 8px; }
+body.flow #app[data-design="v2"] #v2timer { position: static; margin: 0; }
+body.flow #app[data-design="v2"] #v2prog { position: sticky; }
+body.flow #app[data-design="v2"] .step.aslot { min-width: 0; }
+body.flow .aslotrow { flex-wrap: wrap; }
+body.flow .alabel { min-width: 0; }
+/* تذكرة الخروج: ثلاثة أسئلة في شريحة واحدة، بأزرار أصغر قليلًا */
+#app[data-design="v2"] .ticket .mcq .mq { font-size: 30px; }
+#app[data-design="v2"] .ticket .mcq .opts button { min-height: 64px; min-width: 120px; padding: 2px 20px 0; border-width: 4px; font-size: 30px; }
+#app[data-design="v2"] .ticket .mcq .opts button.sym { font-size: 44px; }
+#app[data-design="v2"] .ticket .mcq .fb { font-size: 24px; min-height: 0; }
+#app[data-design="v2"] .ticket .card { padding-block: 6px; }
+/* الصندوق الفارغ يبقى «؟» كبيرًا مهما كان طول الإجابة التي ستملؤه */
+#app[data-design="v2"] .step.aslot.off.mid, #app[data-design="v2"] .step.aslot.off.mid2, #app[data-design="v2"] .step.aslot.off.long { font-size: 56px; line-height: 1.2; padding-block: 4px 0; }
+
+/* =====================================================================
+ * القوالب: نظام واحد لكل الشرائح.
+ * خمسة أحجام فقط: ٤٦ عنوان/سؤال · ٣٥ نص · ٢٨ تسمية · ٢٤ صغير · والإجابة ٧٢ تصغر مع الطول.
+ * الصف الأول في الموضع نفسه دائمًا، ولوحة الصورة يسارًا بعرض ٦٠٠، وبطاقة واحدة، وصندوق إجابة واحد.
+ * ===================================================================== */
+#app[data-design="v2"] { --t-title: 46px; --t-body: 35px; --t-label: 28px; --t-small: 24px; }
+#app[data-design="v2"] [data-sec="explain"], #app[data-design="v2"] .card.rule { --sec-w: #e9f0fb; }
+#app[data-design="v2"] .slide { font-size: var(--t-body); }
+
+/* الصف الأول: وسم القسم وعنوان الشريحة، أو رقم السؤال والصفحة، بالارتفاع نفسه */
+#app[data-design="v2"] .slide > .row:first-child, #app[data-design="v2"] .v2qh { min-height: 56px; flex: none; gap: 16px; }
+#app[data-design="v2"] .slide > .row:first-child > .tag { height: 44px; padding: 6px 18px 0; line-height: 1; border-radius: 999px; background: color-mix(in srgb, var(--sec) 12%, #fff); color: var(--sec); font-size: var(--t-small); font-weight: 700; }
+#app[data-design="v2"] .slide > .row:first-child > h2 { font-size: var(--t-title); line-height: 1.4; }
+#app[data-design="v2"] .bookrow .tag { height: 44px; padding: 6px 18px 0; line-height: 1; border-radius: 999px; background: color-mix(in srgb, var(--sec) 12%, #fff); color: var(--sec); font-size: var(--t-small); font-weight: 700; }
+
+/* عمودان: النص يمينًا ولوحة الصورة يسارًا بعرض ثابت؛ المتساويان للمقارنة */
+#app[data-design="v2"] .cols { grid-template-columns: 1fr 600px; gap: 40px; align-items: start; }
+#app[data-design="v2"] .cols.even { grid-template-columns: 1fr 1fr; gap: 32px; }
+#app[data-design="v2"] .cols > :nth-child(2):not(.qcol) { justify-self: center; }
+#app[data-design="v2"] .qtext { margin: 0; }
+
+/* الصور: قطع العدّ تملأ اللوحة، وتسميتها ٢٨ بحبر داكن */
+#app[data-design="v2"] .counters { font-size: 44px; gap: 40px; }
+#app[data-design="v2"] .cgroup { gap: 12px; }
+#app[data-design="v2"] .cgroup b { font-size: var(--t-label); }
+
+/* البطاقة الواحدة: لون القسم الفاتح، تسمية صغيرة فوق، ونص ٣٥؛ بلا إطار ملوّن */
+#app[data-design="v2"] .card { border: 0; border-radius: 18px; padding: 16px 24px 20px; background: #f5f6f8; font-size: var(--t-body); font-weight: 600; line-height: 1.6; }
+#app[data-design="v2"] .card.rule { background: #e9f0fb; }
+#app[data-design="v2"] .card.ex { background: #e5f3f4; }
+#app[data-design="v2"] .card.qs { background: #f1ebf9; }
+#app[data-design="v2"] .card.warn { background: #fdf1e3; }
+#app[data-design="v2"] .card .cap { font-size: var(--t-small); font-weight: 700; margin-block-end: 4px; }
+#app[data-design="v2"] .card.ex .cap { color: #0f7c85; }
+#app[data-design="v2"] .card.warn .cap { color: #b05e00; }
+#app[data-design="v2"] mark { padding: 0 .2em; border-radius: 6px; background: #ffe594; }
+/* الجمل العددية داخل البطاقات والأمثلة: ٤٠ */
+#app[data-design="v2"] .fline, #app[data-design="v2"] .sent { font-size: 40px; font-weight: 700; }
+#app[data-design="v2"] .flines { gap: 12px; }
+#app[data-design="v2"] .card .row { gap: 40px; justify-content: flex-start !important; }
+
+/* خانة العملية المفقودة: صندوق الإجابة الصغير نفسه («؟» حتى تُكشف) */
+#app[data-design="v2"] .blank.box { min-width: 64px; min-height: 64px; border: 4px dashed var(--line); border-radius: 12px; background: #fff; vertical-align: middle; }
+#app[data-design="v2"] .blank.box:not(:has(.step.shown))::before { content: "؟"; color: var(--line); font-size: .9em; font-weight: 700; }
+#app[data-design="v2"] .blank.box:has(.step.shown) { border: 4px solid var(--ans); background: var(--ans); }
+#app[data-design="v2"] .blank.box .step.bv.shown { color: #fff; font-size: 1em; font-weight: 700; }
+
+/* المجموعة: بطاقات متطابقة تملأ الشريحة؛ الرقم ٤٠، الجملة ٥٢، والتحقق ٢٨ */
+#app[data-design="v2"] .slide:has(> .qgrid) > .qgrid { flex: 1; grid-auto-rows: 1fr; gap: 20px; font-size: var(--t-body) !important; }
+#app[data-design="v2"] .qcard { border: 0; border-radius: 18px; background: #f5f6f8; padding: 16px 20px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 12px; }
+#app[data-design="v2"] .qcard > .qnum { position: static; width: 40px; height: 40px; padding-top: 4px; font-size: 24px; }
+#app[data-design="v2"] .qcard .flines { padding: 0; gap: 12px; }
+#app[data-design="v2"] .qgrid .qcard .fline { font-size: 52px; }
+#app[data-design="v2"] .qgrid .qcard .step:not(.bv) { font-size: var(--t-label); }
+#app[data-design="v2"] .qgrid .qcard .step:not(.bv) span { font-size: inherit !important; color: var(--muted) !important; }
+/* بطاقات أسئلة الرسم (مثلجات): السؤال ٢٨ وصندوق إجابة صغير */
+#app[data-design="v2"] .iceq { justify-content: flex-start; }
+#app[data-design="v2"] .iceq .qtext { font-size: var(--t-label) !important; line-height: 1.6; }
+#app[data-design="v2"] .iceq > div { padding: 0 !important; gap: 8px !important; }
+#app[data-design="v2"] .iceq .step.sstep { font-size: var(--t-label); }
+#app[data-design="v2"] .qcard .step.aslot { min-width: 140px; min-height: 72px; padding: 3px 20px 0; border-width: 5px; border-radius: 14px; font-size: 44px; }
+#app[data-design="v2"] .qcard .step.aslot.off { font-size: 40px; }
+
+/* الملخص: أربع بطاقات */
+#app[data-design="v2"] .v2mind { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: none; gap: 24px; align-content: start; flex: none; }
+#app[data-design="v2"] .v2mind .card { font-size: var(--t-body); }
+
+/* تذكرة الخروج: ثلاث بطاقات أسئلة */
+#app[data-design="v2"] .ticket { gap: 16px; }
+#app[data-design="v2"] .ticket .lvl { font-size: var(--t-small); color: var(--sec); }
+
+/* الغلاف */
+#app[data-design="v2"] .home { grid-template-columns: 1fr 600px; gap: 40px; }
+#app[data-design="v2"] .home h1 { font-size: 72px; line-height: 1.35; }
+#app[data-design="v2"] .home h1.long { font-size: 60px; }
+#app[data-design="v2"] .home .num { height: 52px; padding: 6px 22px 0; line-height: 1; border-radius: 999px; background: var(--sec); font-size: 30px; display: inline-flex; align-items: center; }
+#app[data-design="v2"] .home .lead { font-size: var(--t-label); color: var(--muted); }
+#app[data-design="v2"] .home h3 { font-size: var(--t-label); color: var(--muted); }
+#app[data-design="v2"] .home .tiles { gap: 16px; }
+#app[data-design="v2"] .home .tile { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; border: 0; border-radius: 16px; background: #f5f6f8; padding-block: 14px; padding-inline: 36px 20px; font-size: 30px; font-weight: 700; line-height: 1.35; }
+#app[data-design="v2"] .home .tile::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 12px; border-start-start-radius: 16px; border-end-start-radius: 16px; background: var(--sec); }
+#app[data-design="v2"] .home .tile small { font-size: 22px; font-weight: 500; }
+#app[data-design="v2"] .home .teamset { font-size: var(--t-small); }
+
+/* ===== لا انزياح بعد كل خطوة: الخطوة المخفية تحجز مكانها هيكلًا رماديًا بشكلها ===== */
+#app[data-design="v2"] .step:not(.shown):not(.aslot):not(.bv):not(.ring):not(.cd):not(.rulev):not(.inl) { display: block; border-radius: 12px; background: #eceef2; color: transparent; }
+/* سطر نصي: الهيكل بعرض النص، والسطر الظاهر بالعرض نفسه */
+#app[data-design="v2"] .step.sstep:not(.shown):not(.aslot) { width: fit-content; max-width: 100%; }
+#app[data-design="v2"] .step:not(.shown):not(.aslot):not(.bv):not(.ring):not(.cd):not(.rulev):not(.inl) * { visibility: hidden; }
+#app[data-design="v2"] .step.shown:not(.aslot) { animation: fadein .25s ease; }
+
+/* التلميح فوق المحتوى في أسفل عمود النص، فلا يدفع شيئًا */
+#app[data-design="v2"] .slide { position: absolute; }
+#app[data-design="v2"] .hintbox { position: absolute; inset-inline-start: 28px; bottom: 56px; z-index: 6; max-width: 900px; box-shadow: 0 12px 30px #0b122633; }
+/* أزرار منح النجوم أدوات معلم: من الجوال لا على السبورة */
+#app[data-design="v2"] .award { display: none; }
+#app[data-design="v2"] .mcq .fb { min-height: 1.6em; }
+/* الرسوم تملأ لوحة الصورة (٦٠٠)، وخطوطها وأرقامها كبيرة */
+#app[data-design="v2"] .cols > svg.cs, #app[data-design="v2"] .cols > .chart { width: 600px; height: auto; justify-self: stretch; }
+#app[data-design="v2"] .cs .yl, #app[data-design="v2"] .cs .xl { font-size: 26px; }
+#app[data-design="v2"] .cs .ct { font-size: 30px; }
+#app[data-design="v2"] .cs .at { font-size: 24px; fill: var(--muted); }
+/* مجموعة من ستة في عمودين: الجملة ٤٤ حتى تتسع ثلاثة صفوف */
+#app[data-design="v2"] .qgrid.two .qcard .fline { font-size: 44px; }
+#app[data-design="v2"] .qgrid.two .qcard { padding-block: 10px; gap: 6px; }
+/* ستة أسئلة في عمودين مع التحقق تحت كل جملة: أضيق قليلًا حتى تتسع الصفوف الثلاثة */
+#app[data-design="v2"] .slide:has(> .qgrid.two) > .qgrid { gap: 12px; }
+#app[data-design="v2"] .qgrid.two .qcard .fline { font-size: 40px; }
+#app[data-design="v2"] .qgrid.two .qcard .step:not(.bv) { font-size: var(--t-small); }
+#app[data-design="v2"] .qgrid.two .qcard .blank.box { min-width: 56px; min-height: 56px; }
+
+/* ===== تلميع ===== */
+/* أمثلة القاعدة أكبر */
+#app[data-design="v2"] .card .row .sent, #app[data-design="v2"] .card .row .fline { font-size: 48px; }
+#app[data-design="v2"] .card .row { margin-block: 12px 0 !important; }
+/* قائمة الأهداف */
+#app[data-design="v2"] .card ol { font-size: var(--t-body) !important; font-weight: 600 !important; line-height: 1.8 !important; }
+
+/* الأزرار الصغيرة الباقية (إعداد الفصل والفرق في الغلاف): رقاقات هادئة */
+#app[data-design="v2"] .btn { min-height: 48px; padding: 4px 18px 0; border: 2px solid var(--band-line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 22px; font-weight: 600; }
+#app[data-design="v2"] .btn.sel, #app[data-design="v2"] .btn.primary { border-color: var(--ink); background: var(--ink); color: #fff; }
+#app[data-design="v2"] .btn.hide { color: var(--muted); }
+
+/* الغلاف: العنوان والفكرة يمينًا، وأقسام الحصة يسارًا تملأ الارتفاع، والإعداد صغير في الأسفل */
+#app[data-design="v2"] .slide[data-index="0"] { padding-block-end: 46px; }
+#app[data-design="v2"] .home { height: 100%; align-items: stretch; }
+#app[data-design="v2"] .home > div { min-height: 0; }
+#app[data-design="v2"] .home > div:first-child { gap: 16px !important; }
+#app[data-design="v2"] .home .tag.ink { padding: 0; background: none; color: var(--muted); font-size: var(--t-small); font-weight: 600; }
+#app[data-design="v2"] .home .num { margin-block-end: 8px; }
+#app[data-design="v2"] .home .card { margin-block-start: 8px; }
+#app[data-design="v2"] .home .teamset { margin-block-start: auto; gap: 10px; color: var(--muted); }
+#app[data-design="v2"] .home .teamset b { font-weight: 600; }
+#app[data-design="v2"] .home .teamset input { height: 48px; min-height: 0; padding: 4px 14px 0; border: 2px solid var(--band-line); border-inline-start-width: 8px; border-radius: 12px; font-size: 22px; }
+#app[data-design="v2"] .home > div:last-child { gap: 12px !important; }
+#app[data-design="v2"] .home .tiles { flex: 1; grid-auto-rows: 1fr; }
+#app[data-design="v2"] .home .tile { min-height: 0; }
+/* المحتوى يبدأ من الأعلى ويتتابع نزولًا؛ العمودان بطول محتواهما */
+#app[data-design="v2"] .slide:not(:has(> .qgrid)) > .cols { flex: 0 0 auto; }
+/* المقارنة: العمودان متساويان ويمتدان بعرضهما كاملًا */
+#app[data-design="v2"] .cols.even > :nth-child(n) { justify-self: stretch; }
+
+/* الصندوق الفارغ بحجم إجابته تمامًا: الإجابة مخفية فيه، و«؟» فوقها في الوسط */
+#app[data-design="v2"] .step.aslot { position: relative; }
+#app[data-design="v2"] .step.aslot.off { font-size: 72px; font-weight: 600; color: var(--line); }
+#app[data-design="v2"] .step.aslot.off.mid { font-size: 58px; }
+#app[data-design="v2"] .step.aslot.off.mid2 { font-size: 46px; }
+#app[data-design="v2"] .step.aslot.off.long { font-size: 36px; line-height: 1.6; padding-block: 10px; }
+#app[data-design="v2"] .qcard .step.aslot.off { font-size: 44px; }
+#app[data-design="v2"] .step.aslot.off .aval { visibility: hidden; }
+#app[data-design="v2"] .step.aslot .aq { position: absolute; inset: 0; display: grid; place-items: center; padding-top: 6px; font-size: 56px; font-weight: 700; line-height: 1; }
+#app[data-design="v2"] .qcard .step.aslot .aq { font-size: 40px; }
+/* توسيط عمودي بصري (خط النسخ يترك فراغًا تحت السطر): قِيس كل عنصر ثم صُحّح */
+#app[data-design="v2"] .v2sec { padding-top: 13px; }
+/* القيمة تنزل بصريًا دون أن يتغير حجم الصندوق (الفارغ والممتلئ بالحجم نفسه) */
+#app[data-design="v2"] .step.aslot .aval { position: relative; top: 6px; }
+/* الخطوة الظاهرة بعرض هيكلها نفسه */
+#app[data-design="v2"] .step.sstep.shown { width: fit-content; max-width: 100%; }
+#app[data-design="v2"] .slide > .row:first-child > .tag, #app[data-design="v2"] .bookrow .tag { padding-top: 0; }
+/* خانة العملية الصغيرة: العملية مرسومة مخفية فيها، و«؟» فوقها في الوسط؛ فالخانة بالحجم نفسه فارغةً وممتلئةً */
+#app[data-design="v2"] .blank.box { position: relative; }
+#app[data-design="v2"] .blank.box .step.bv:not(.shown) { display: inline; visibility: hidden; font-size: 1em; font-weight: 700; }
+#app[data-design="v2"] .blank.box:not(:has(.step.shown))::before { position: absolute; inset: 0; display: grid; place-items: center; padding-top: 4px; font-size: .8em; line-height: 1; }
+
+/* خانة السؤال الفارغة (مثال ٢): تبقى «؟» بحجم الإشارة، والإجابة في صندوقها تحت الحل */
+#app[data-design="v2"] .blank.empty .bv { visibility: hidden; font-weight: 700; }
+
+/* العدد في خطوة «ماذا يعني»: كتلة قلم فسفوري بلون القسم */
+#app[data-design="v2"] .nmark { display: inline-block; min-width: 1.9em; margin-inline-end: 12px; padding: 10px 8px 0; border-radius: 10px; background: var(--sec-t); color: var(--ink); font-size: 1.15em; font-weight: 700; line-height: 1.1; text-align: center; }
+
+/* تسمية الإجابة: لسان ملتصق بأعلى الصندوق، والصندوق لا يضيق عنه */
+#app[data-design="v2"] .aslotrow { display: inline-grid; justify-items: start; align-self: flex-start; gap: 0; }
+#app[data-design="v2"] .aslotrow > .step.aslot { justify-self: stretch; justify-content: center; border-start-start-radius: 0; }
+#app[data-design="v2"] .aslotrow > .alabel { min-width: 0; padding: 8px 22px 2px; border-radius: 14px 14px 0 0; background: #e3e6ec; color: var(--ink); font-size: var(--t-label); font-weight: 700; line-height: 1.4; }
+#app[data-design="v2"] .aslotrow:has(.aslot.on) > .alabel { background: #d7ecdf; color: var(--ans); }
+#app[data-design="v2"] .qcard .aslotrow > .alabel { padding: 6px 16px 0; font-size: var(--t-small); }
+
+/* قطع العدّ: تملأ عرض اللوحة، والخطوة الحالية تُبرز ما تتحدث عنه بلون القلم الفسفوري والباقي باهت */
+#app[data-design="v2"] .counters.v2c { display: flex; flex-wrap: nowrap; justify-content: flex-start; align-items: flex-start; gap: 32px; width: 100%; font-size: inherit; }
+#app[data-design="v2"] .v2c .cgroup { gap: 10px; padding: 12px; border-radius: 14px; transition: background .2s, opacity .2s; }
+#app[data-design="v2"] .v2c .cgroup svg { display: block; width: 100%; height: auto; overflow: visible; }
+#app[data-design="v2"] .v2c .cgroup b { font-size: var(--t-label); font-weight: 700; color: var(--ink); }
+#app[data-design="v2"] .v2c .cgroup.on { background: var(--sec-t); }
+#app[data-design="v2"] .v2c .hlbg { fill: var(--sec-t); }
+#app[data-design="v2"] .v2c.focus .cgroup:not(.on) g:not(.lit) { opacity: .45; }
+#app[data-design="v2"] .v2c.focus .cgroup:not(.on):not(:has(.lit)) b { opacity: .45; }
+#app[data-design="v2"] .counters.v2c.rows { flex-direction: column; gap: 14px; }
+#app[data-design="v2"] .v2c.rows .cgroup { display: grid; grid-template-columns: 140px 1fr; align-items: center; justify-items: start; width: 100%; padding-block: 4px; }
+#app[data-design="v2"] .v2c.rows .cgroup svg { grid-column: 2; justify-self: start; }
+/* داخل البطاقة كل شيء في وسطها، فالقطع تتوسط مثل الجمل تحتها */
+#app[data-design="v2"] .card .counters.v2c { justify-content: center; }
+
+/* خانة العملية في الجملة: دائرة رمادية كما في الكتاب، تمتلئ بالأخضر مع الإشارة */
+#app[data-design="v2"] .sent .blank.box { width: 1.3em; min-width: 0; height: 1.3em; min-height: 0; border: 4px solid #9aa3b2; border-radius: 50%; background: #e3e6ec; }
+#app[data-design="v2"] .sent .blank.box:has(.step.shown) { border-color: var(--ans); background: var(--ans); }
+
+/* بطاقة «أكتب العملية»: الرقم في أعلاها، والجملة في وسط شريط أبيض، والتحقق في الوسط تحته */
+#app[data-design="v2"] .qcard.opq { justify-content: flex-start; align-items: stretch; gap: 14px; }
+#app[data-design="v2"] .qcard.opq .flines { align-items: center; gap: 14px; }
+#app[data-design="v2"] .qcard.opq .strip { align-self: stretch; display: flex; justify-content: center; padding: 18px 10px 14px; border-radius: 14px; background: #fff; }
+/* ثلاثة أسطر من البطاقات (١٣–١٨): الرقم في سطره كما في «تأكّد»، والمسافات أضيق حتى تتسع الشريحة */
+#app[data-design="v2"] .qgrid.two .qcard.opq { padding-block: 8px 6px; gap: 4px; }
+#app[data-design="v2"] .qgrid.two .qcard.opq > .qnum { width: 34px; height: 34px; font-size: 20px; }
+#app[data-design="v2"] .qgrid.two .qcard.opq .strip { padding: 8px 10px 4px; }
+#app[data-design="v2"] .qgrid.two .qcard.opq .flines { gap: 4px; }
+#app[data-design="v2"] .blank .opsign { display: block; width: .7em; height: .7em; }
+#app[data-design="v2"] .blank.box .step.bv.shown:has(.opsign) { display: grid; place-items: center; }
+
+/* الخيارات: بطاقات رمادية بشريط في أسفلها؛ الاختيار يلوّن الشريط ويصبغ البطاقة، وعلامة صغيرة في زاويتها */
+#app[data-design="v2"] .mcq .opts button { position: relative; min-height: 104px; padding: 8px 30px 14px; border: 0; border-radius: 16px; background: #f1f2f5; overflow: hidden; }
+#app[data-design="v2"] .mcq .opts button::after { content: ""; position: absolute; inset: auto 0 0; height: 10px; background: #c9ced8; }
+#app[data-design="v2"] .mcq .opts button.right { background: #dcefe3; color: var(--ans); font-weight: 700; }
+#app[data-design="v2"] .mcq .opts button[class~="right"]::after { background: var(--ans); }
+#app[data-design="v2"] .mcq .opts button.wrong { background: #f8e2dc; color: var(--bad); text-decoration: line-through; text-decoration-thickness: 3px; }
+#app[data-design="v2"] .mcq .opts button.wrong::after { background: var(--bad); }
+#app[data-design="v2"] .mcq .opts button .omark { position: absolute; inset-block-start: 10px; inset-inline-end: 10px; width: 28px; height: 28px; margin: 0; }
+#app[data-design="v2"] .ticket .mcq .opts button { min-height: 72px; padding: 4px 20px 10px; border: 0; }
+#app[data-design="v2"] .ticket .mcq .opts button::after { height: 7px; }
+#app[data-design="v2"] .ticket .mcq .opts button .omark { width: 20px; height: 20px; inset-block-start: 6px; inset-inline-end: 6px; }
+#app[data-design="v2"] .mcq .opts button { padding-inline: 42px; }
+
+/* التمثيل بالأعمدة الأفقية: أعمدة محايدة متساوية، والقيمة كبيرة في نهاية كل عمود، وشبكة فاتحة */
+#app[data-design="v2"] .hbars .bar { fill: #5b6b84; stroke: none; }
+#app[data-design="v2"] .hbars .gl { stroke: #e3e6ec; stroke-width: 2; }
+#app[data-design="v2"] .hbars .xl, #app[data-design="v2"] .hbars .xl.on { font-size: 36px; font-weight: 700; fill: var(--ink); }
+#app[data-design="v2"] .hbars .yl { font-size: 30px; font-weight: 600; fill: var(--muted); }
+#app[data-design="v2"] .hbars .ct { font-size: 36px; }
+#app[data-design="v2"] .hbars .at { font-size: 30px; }
+#app[data-design="v2"] .hbars .hv, #app[data-design="v2"] .hbars .hv.on { font-size: 42px; font-weight: 700; fill: var(--ink); }
+#app[data-design="v2"] .hbars .guide { display: none; }
+
+/* العمود الذي تتحدث عنه الخطوة الحالية: على خلفية القلم الفسفوري، ولا يبهت غيره */
+#app[data-design="v2"] .hbars .rowhl { fill: var(--sec-t); }
+
+/* بطاقة الخروج: بيضاء بإطار رمادي خفيف، فالخيارات الرمادية واضحة عليها، ولا لون نوع البطاقة */
+#app[data-design="v2"] .ticket .card { background: #fff; box-shadow: inset 0 0 0 3px #e3e6ec; }
+#app[data-design="v2"] .ticket .lvl { color: var(--muted); }
+
+/* أمثلة القاعدة: كل مثال في بطاقة بيضاء مستقلة، فلا تختلط أعداد مثال بأعداد الذي بجانبه */
+#app[data-design="v2"] .row.examples { justify-content: flex-start; flex-wrap: wrap; gap: 20px; margin-block: 14px 4px; }
+#app[data-design="v2"] .row.examples .sent { padding: 12px 28px 6px; border-radius: 14px; background: #fff; }
+
+/* قائمة الإعادة داخل قائمة الأدوات: تنفتح تحت زرها بعرض القائمة كلها، لا تطفو خارجها */
+#app[data-design="v2"] .v2tools .rmenu:has(.rpop) { grid-column: 1 / -1; flex-direction: column; gap: 8px; }
+#app[data-design="v2"] .v2tools .rmenu .ib.on { background: var(--ink); color: #fff; }
+#app[data-design="v2"] .v2tools .rpop { position: static; min-width: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: none; gap: 8px; font-size: 22px; }
+#app[data-design="v2"] .v2tools .rpop button { min-height: 56px; padding: 6px 16px 0; border: 0; border-radius: 12px; background: var(--band); font-weight: 600; }
+#app[data-design="v2"] .v2tools .rpop button.all { background: #f8e2dc; color: var(--bad); }
+#app[data-design="v2"] .v2tools .rpop .q { max-width: none; font-weight: 600; }
+#app[data-design="v2"] .v2tools .rmenu:has(.rpop) > .ib { flex: none; height: 56px; }
+
+/* قائمة الأدوات (Base UI): قائمة واحدة بمجموعات، بيضاء، بخط داكن، وعنصر مضاء عند المرور أو بالأسهم */
+#app[data-design="v2"] .v2mpos { z-index: 60; outline: 0; }
+#app[data-design="v2"] .v2mpop { min-width: 300px; padding: 8px; border-radius: 16px; background: #fff; color: var(--ink); box-shadow: 0 16px 40px #0b122638, 0 0 0 2px var(--band-line); outline: 0; transform-origin: var(--transform-origin); transition: opacity .12s, transform .12s; }
+#app[data-design="v2"] .v2mpop[data-starting-style], #app[data-design="v2"] .v2mpop[data-ending-style] { opacity: 0; transform: scale(.97); }
+#app[data-design="v2"] .v2mi { display: flex; align-items: center; gap: 14px; height: 54px; padding-inline: 14px; border-radius: 10px; font-size: 22px; font-weight: 600; cursor: pointer; outline: 0; user-select: none; }
+#app[data-design="v2"] .v2mi .ico { display: grid; place-items: center; width: 28px; height: 28px; color: var(--muted); }
+#app[data-design="v2"] .v2mi .ico svg { width: 26px; height: 26px; }
+#app[data-design="v2"] .v2mi .lbl { flex: 1; padding-top: 4px; }
+#app[data-design="v2"] .v2mi kbd { padding: 2px 8px 0; border-radius: 6px; background: var(--band); font: 600 16px/1.6 var(--body); color: var(--muted); }
+#app[data-design="v2"] .v2mi .state { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--band-line); }
+#app[data-design="v2"] .v2mi .state.on { background: var(--ans); box-shadow: none; }
+#app[data-design="v2"] .v2mi .more { font-size: 28px; line-height: 1; color: var(--muted); }
+#app[data-design="v2"] .v2mi[data-highlighted], #app[data-design="v2"] .v2mi[data-popup-open] { background: var(--band); }
+#app[data-design="v2"] .v2mi.danger, #app[data-design="v2"] .v2mi.danger .ico { color: var(--bad); }
+#app[data-design="v2"] .v2mi.danger[data-highlighted] { background: #f8e2dc; }
+#app[data-design="v2"] .v2msep { height: 2px; margin: 6px 8px; background: var(--band); }
+#app[data-design="v2"] .v2dots[data-popup-open] { opacity: 1; background: #fff; }
+
+/* تأكيد إعادة الدرس */
+#app[data-design="v2"] .v2dback { position: fixed; inset: 0; z-index: 70; background: #0b122655; }
+#app[data-design="v2"] .v2dlg { position: fixed; z-index: 71; inset-block-start: 50%; inset-inline-start: 50%; translate: 50% -50%; width: 560px; padding: 28px 30px 24px; border-radius: 20px; background: #fff; color: var(--ink); box-shadow: 0 24px 60px #0b122640; }
+#app[data-design="v2"] .v2dlg .ttl { margin: 0 0 8px; font-size: 32px; font-weight: 700; }
+#app[data-design="v2"] .v2dlg .desc { margin: 0 0 22px; font-size: 24px; line-height: 1.7; color: var(--muted); }
+#app[data-design="v2"] .v2dlg .acts { display: flex; gap: 12px; justify-content: flex-start; }
+#app[data-design="v2"] .v2dlg .btn { height: 56px; padding: 6px 24px 0; border: 0; border-radius: 12px; background: var(--band); color: var(--ink); font: 600 22px/1 var(--body); cursor: pointer; }
+#app[data-design="v2"] .v2dlg .btn.danger { background: var(--bad); color: #fff; }

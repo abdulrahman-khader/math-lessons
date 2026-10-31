@@ -19,7 +19,7 @@ for (const lesson of pickLessons(filter)) {
   await page.evaluate(() => document.fonts.ready);
   const n = await page.locator('section.slide').count();
   for (let i = 0; i < n; i++) {
-    if (i > 0) await page.keyboard.press('ArrowLeft');
+    if (i > 0) await page.keyboard.press('PageDown');
     if (only.length && !only.includes(String(i + 1))) continue;
     for (let k = 0; k < 15; k++) await page.keyboard.press('Space');
     await page.waitForTimeout(400);

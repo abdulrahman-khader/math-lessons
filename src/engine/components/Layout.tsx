@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { useEngine } from '../context';
+import { useEngine, useV2 } from '../context';
 import { num } from '../digits';
 
 /** لون ثابت لكل نوع محتوى: القاعدة أزرق، المثال أخضر، التنبيه برتقالي، السؤال بنفسجي */
@@ -48,6 +48,9 @@ export function Card({ kind, cap, style, className, children }: { kind: Exclude<
 
 export const Mark = ({ children }: { children: ReactNode }) => <mark>{children}</mark>;
 
+/** عدد في أول خطوة «ماذا يعني هذا العدد»: يُبرز كخط القلم الفسفوري، بلا نقطتين بعده */
+export const NumMark = ({ children }: { children: ReactNode }) => <b className="nmark">{children}</b>;
+
 /** معادلة: تُعزل اتجاهيًا فتُقرأ من اليمين كما في الكتاب: ١٥٠ − ١٢٥ = ٢٥ */
 export const Eq = ({ children }: { children: ReactNode }) => <span className="eq">{children}</span>;
 
@@ -77,6 +80,17 @@ export function MindMap({ center, items }: { center: ReactNode; items: [MindItem
     { gridColumn: 1, gridRow: 3 },
     { gridColumn: 3, gridRow: 3 },
   ];
+  // التصميم الجديد: الملخص أربع بطاقات بنمط البطاقة الواحد، بلا خطوط ولا مربع داكن في الوسط (عنوان الشريحة يحمل الفكرة)
+  if (useV2())
+    return (
+      <div className="mind v2mind">
+        {items.map((it, i) => (
+          <Card key={i} kind={it.kind} cap={it.cap}>
+            {it.text}
+          </Card>
+        ))}
+      </div>
+    );
   return (
     <div className="mind">
       <svg className="links" viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true">

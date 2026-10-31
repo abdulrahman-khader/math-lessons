@@ -45,6 +45,10 @@ export interface EngineApi {
 
 export const EngineCtx = createContext<EngineApi | null>(null);
 
+/** الدرس بالتصميم الجديد (meta.design === 'v2') */
+export const V2Ctx = createContext(false);
+export const useV2 = () => useContext(V2Ctx);
+
 export function useEngine(): EngineApi {
   const e = useContext(EngineCtx);
   if (!e) throw new Error('useEngine خارج LessonApp');
@@ -81,6 +85,8 @@ interface SlideState extends SlideApi {
   isGroupOpen: (group: string) => boolean;
   /** مفاتيح الإبراز للخطوات الظاهرة، يقرؤها كل رسم في الشريحة */
   activeHl: ReadonlySet<string>;
+  /** مفاتيح الإبراز لآخر خطوة ظهرت وحدها: ما تتحدث عنه الخطوة الآن */
+  nowHl: ReadonlySet<string>;
   hintOpen: boolean;
   /** عدد الخطوات الظاهرة ومجموعها، لتعطيل أسهم الخطوات عند الطرفين */
   shownCount: number;
@@ -195,6 +201,7 @@ export function SlideScope({ index, children }: { index: number; children: React
   const value = useMemo<SlideState>(() => {
     const metas = shown.map((id) => steps.current.get(id)).filter((m): m is StepMeta => !!m);
     const activeHl = new Set(metas.flatMap((m) => m.hl));
+    const nowHl = new Set(metas.at(-1)?.hl ?? []);
     const groups = new Set(metas.map((m) => m.group).filter(Boolean));
     return {
       reveal,
@@ -206,6 +213,7 @@ export function SlideScope({ index, children }: { index: number; children: React
       isShown: (id) => shown.includes(id),
       isGroupOpen: (g) => groups.has(g),
       activeHl,
+      nowHl,
       hintOpen,
       toggleHint,
       info,

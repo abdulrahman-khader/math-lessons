@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { useEngine, useSlide } from '../context';
+import { useEngine, useSlide, useV2 } from '../context';
 import { TEAM_COLORS } from '../sections';
 import { sBad, sGood } from '../sound';
 
@@ -10,12 +10,23 @@ interface Props<O extends readonly string[]> {
   answer: O[number];
   /** يعرض أزرار منح نجمة للفرق بعد الإجابة الصحيحة */
   award?: boolean;
+  /** سبب الصواب يظهر بعد الإجابة الصحيحة: «صحيحٌ! لا توجدُ إشارةُ =» */
+  why?: ReactNode;
+  /** تلميح لطيف بعد الخطأ: ماذا ينظر إليه الطالب */
+  whyNot?: ReactNode;
 }
 
+const Mark = ({ ok }: { ok: boolean }) => (
+  <svg className="omark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={ok ? 'M5 12.5l4.5 4.5L19 7.5' : 'M6 6l12 12M18 6L6 18'} />
+  </svg>
+);
+
 /** اختيار من متعدد: الخطأ يهتز ويسمح بالمحاولة، والصواب يقفل السؤال. */
-export function MCQ<const O extends readonly string[]>({ q, options, answer, award = false }: Props<O>) {
+export function MCQ<const O extends readonly string[]>({ q, options, answer, award = false, why, whyNot }: Props<O>) {
   if (!options.includes(answer)) throw new Error(`الإجابة «${answer}» ليست من الخيارات`);
   const eng = useEngine();
+  const v2 = useV2();
   const [right, setRight] = useState(false);
   const [wrong, setWrong] = useState<{ o: string; n: number } | null>(null);
   const [awarded, setAwarded] = useState(false);
@@ -70,14 +81,16 @@ export function MCQ<const O extends readonly string[]>({ q, options, answer, awa
           <button
             // تغيير المفتاح يعيد تشغيل حركة الاهتزاز عند كل خطأ
             key={o + (wrong?.o === o ? wrong.n : '')}
-            className={right && o === answer ? 'right' : wrong?.o === o && !right ? 'wrong' : ''}
+            className={[right && o === answer ? 'right' : wrong?.o === o && !right ? 'wrong' : '', v2 && o.length <= 2 ? 'sym' : ''].filter(Boolean).join(' ')}
             onClick={() => choose(o)}
           >
             {o}
+            {v2 && right && o === answer && <Mark ok />}
+            {v2 && !right && wrong?.o === o && <Mark ok={false} />}
           </button>
         ))}
       </div>
-      <div className={'fb' + (right ? ' ok' : wrong ? ' no' : '')}>{right ? 'صح ✓ أحسنت!' : wrong ? 'حاول مرة ثانية' : ''}</div>
+      <div className={'fb' + (right ? ' ok' : wrong ? ' no' : '')}>{right ? (why ?? 'صح ✓ أحسنت!') : wrong ? (whyNot ?? 'حاول مرة ثانية') : ''}</div>
       {canAward && (
         <div className="award">
           امنح نجمة:

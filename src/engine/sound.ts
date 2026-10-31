@@ -34,3 +34,9 @@ function tone(freqs: number[], dur = 0.12) {
 export const sGood = () => tone([660, 880], 0.13);
 export const sBad = () => tone([300], 0.18);
 export const sEnd = () => tone([523, 659, 784, 1046], 0.18);
+/** كشف إجابة: رنّة قصيرة ناعمة، هي نفسها في كل مرة */
+export const sAns = () => tone([784, 1175], 0.11);
+/** نجمة لطالب: لمعة صاعدة */
+export const sStar = () => tone([988, 1319, 1760], 0.09);
+/** آخر ثوانٍ في المؤقت: طقة هادئة */
+export const sTick = () => tone([1200], 0.04);

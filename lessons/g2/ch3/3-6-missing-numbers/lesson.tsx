@@ -1,122 +1,33 @@
-import { useState } from 'react';
 import {
-  Card, Cols, Ctrls, Domino, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, Sentence, SlideHead,
-  Solution, Stack, Step, Tag, TimerButton, VSum, Winner, defineLesson, num, useRemoteWidget, type Token,
+  BookLabel, BookSource, Card, Cols, CubeBox, Definition, Domino, DominoCard, DominoLinesCard, ExitTicket, Goals, GoHomeButton, Grid, IfTeams,
+  Intro, Mark, MCQ, MindMap, MissingExplorer, QCol, QText, QuestionSlide, Sentence, SentenceCard, SlideHead, Solution, Stack, Step, SumCard,
+  Winner, defineLesson, type Token,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const CHECK = 'أتأكَّدُ · ص ٧٤';
-const PRACTICE = 'أتدرَّبُ · ص ٧٤–٧٥';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٧٥';
+const CHECK = 'أتأكَّدُ، ص ٧٤';
+const PRACTICE = 'أتدرَّبُ، ص ٧٤–٧٥';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٧٥';
 const FIND_DOTS = 'أَجِدُ الْعَدَدَ الْمَفْقُودَ فِي جُمْلَةِ الْجَمْعِ مُسْتَعِينًا بِرَسْمِ النِّقَاطِ:';
 const FIND = 'أَجِدُ الْعَدَدَ الْمَفْقُودَ فِي جُمْلَةِ الْجَمْعِ:';
 
-/** مستكشف: المجموع والعدد المعروف، ثم يظهر النصف المخفي من الدومينو */
-function MissingExplorer() {
-  const [total, setTotal] = useState(13);
-  const [known, setKnown] = useState(8);
-  const [open, setOpen] = useState(false);
-  const missing = total - known;
-  const setT = (v: number) => {
-    const t = Math.max(1, Math.min(18, v));
-    setTotal(t);
-    // نصف الدومينو يتسع لـ ٩ نقاط على الأكثر
-    setKnown((k) => Math.max(t - 9, Math.min(k, t, 9)));
-    setOpen(false);
-  };
-  const setK = (v: number) => {
-    setKnown(Math.max(Math.max(0, total - 9), Math.min(9, total, v)));
-    setOpen(false);
-  };
-  useRemoteWidget(
-    () => ({
-      title: 'الدومينو',
-      info: `${num(known)} + ${open ? num(missing) : '□'} = ${num(total)}`,
-      steppers: [
-        { key: 't', label: 'المجموع', value: total, min: 1, max: 18 },
-        { key: 'k', label: 'النقاط الظاهرة', value: known, min: Math.max(0, total - 9), max: Math.min(9, total) },
-      ],
-      buttons: [{ key: 'open', label: open ? 'أخفِ النصف' : 'أظهر النصف المخفي', on: open }],
-    }),
-    (k, v) => {
-      if (k === 't' && v !== undefined) setT(v);
-      else if (k === 'k' && v !== undefined) setK(v);
-      else if (k === 'open') setOpen((o) => !o);
-    },
-    [total, known, open],
-  );
-  const stepper = (label: string, v: number, set: (v: number) => void, lo: number, hi: number) => (
-    <div className="ffstep">
-      <span>{label}</span>
-      <button aria-label={`إنقاص ${label}`} disabled={v <= lo} onClick={() => set(v - 1)}>
-        −
-      </button>
-      <b>{num(v)}</b>
-      <button aria-label={`زيادة ${label}`} disabled={v >= hi} onClick={() => set(v + 1)}>
-        +
-      </button>
-    </div>
-  );
-  return (
-    <Cols style={{ gridTemplateColumns: '1fr 1.2fr', alignItems: 'center' }}>
-      <div className="chart cubebox">
-        <Domino known={known} missing={missing} show={open} />
-      </div>
-      <Stack>
-        {stepper('المجموع', total, setT, 1, 18)}
-        {stepper('النقاط الظاهرة', known, setK, Math.max(0, total - 9), Math.min(9, total))}
-        <button className="btn step-btn" onClick={() => setOpen((o) => !o)}>
-          {open ? 'أخفِ النصف' : 'أظهر النصف المخفي'}
-        </button>
-        <div className="flines">
-          {open && <Sentence t={[total, '−', known, '=', missing]} big />}
-          <span className="hopx-eq done">
-            <span className="eq">
-              {num(known)} + {open ? num(missing) : '□'} = {num(total)}
-            </span>
-          </span>
-        </div>
-      </Stack>
-    </Cols>
-  );
-}
-
-/** سؤال دومينو من أتأكد: يظهر النصف المخفي مع أول ناتج */
-function DominoQ({ n, known, total }: { n: number; known: number; total: number }) {
-  const m = total - known;
-  return (
-    <QCard n={n} className="dcard">
-      <Domino known={known} missing={m} k={n} />
-      <div className="flines two72">
-        <Sentence t={[known, '+', { box: true, b: m, hl: [`p${n}`] }, '=', total]} />
-        <Sentence t={[total, '−', known, '=', { box: true, b: m }]} />
-      </div>
-    </QCard>
-  );
-}
-
 /** سؤال من أتدرب بجملتين */
-const Two = (n: number, a: Token[], b: Token[]) => (
-  <QCard key={n} n={n}>
-    <div className="flines">
-      <Sentence t={a} />
-      <Sentence t={b} />
-    </div>
-  </QCard>
-);
+const Two = (n: number, a: Token[], b: Token[]) => <SentenceCard key={n} n={n} lines={[a, b]} />;
+const SUGGESTED = 'إِجَابَةٌ مُقْتَرَحَةٌ';
 
 export default defineLesson({
   meta: {
     id: 'g2-3-6-missing-numbers',
+    design: 'v2',
     code: '٣-٦',
     title: 'الأَعْدَادُ الْمَفْقُودَةُ',
     shortTitle: 'الأعداد المفقودة',
     subject: 'الرياضيات',
     grade: 'الصف الثاني الابتدائي',
     chapter: 'الفصل الثالث: طرائق الطرح',
-    source: 'الجزء الأول · ص ٧٤–٧٥',
+    source: 'الجزء الأول، ص ٧٤–٧٥',
     minutes: 45,
     idea: 'أَجِدُ عَدَدًا مَفْقُودًا فِي جُمْلَةِ جَمْعٍ مُسْتَعْمِلًا حَقَائِقَ الطَّرْحِ الْمُرْتَبِطَةَ بِهَا.',
     bookQuestions: 15,
@@ -124,12 +35,12 @@ export default defineLesson({
   sectionDesc: {
     engage: 'مراجعة الحقائق المترابطة',
     explore: 'الدومينو المخفي',
-    explain: 'القاعدة · أستعد',
-    elab: 'نعمل معًا · من واقع الحياة',
+    explain: 'القاعدة، أستعد',
+    elab: 'نعمل معًا، من واقع الحياة',
     check: 'الأسئلة ١–٥',
     practice: 'الأسئلة ٦–١٤',
     hot: 'السؤال ١٥',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -147,11 +58,13 @@ export default defineLesson({
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أجد العدد المفقود في جملة جمع.</li>
-                <li>أستعمل حقيقة الطرح المرتبطة.</li>
-                <li>أتحقق من إجابتي بالجمع.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أَجِدُ الْعَدَدَ الْمَفْقُودَ فِي جُمْلَةِ جَمْعٍ.',
+                  'أَسْتَعْمِلُ حَقِيقَةَ الطَّرْحِ الْمُرْتَبِطَةَ.',
+                  'أَتَحَقَّقُ مِنْ إِجَابَتِي بِالْجَمْعِ.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -164,16 +77,16 @@ export default defineLesson({
       notes: 'ربط بالدرس ٣-٥ (العلاقة بين الجمع والطرح). اختر طالبًا بالعجلة لكل سؤال.',
       content: (
         <>
-          <SlideHead tag="تذكّر · الدرس ٣-٥" kind="ink">الجمع عكس الطرح</SlideHead>
+          <SlideHead tag="تذكّر، الدرس ٣-٥" kind="ink">الجمع عكس الطرح</SlideHead>
           <Cols even>
             <Card kind="qs">
-              <MCQ q="٦ + ٧ = ١٣، إذن ١٣ − ٦ = ؟" options={['٦', '٧', '١٩']} answer="٧" award />
+              <MCQ q="٦ + ٧ = ١٣، إِذَنْ ١٣ − ٦ = ؟" options={['٦', '٧', '١٩']} answer="٧" award />
             </Card>
             <Card kind="qs">
-              <MCQ q="أيّ جملة طرح مرتبطة بـ ٨ + ٤ = ١٢؟" options={['١٢ − ٤ = ٨', '٨ − ٤ = ٤', '١٢ + ٤ = ١٦']} answer="١٢ − ٤ = ٨" award />
+              <MCQ q="أَيُّ جُمْلَةِ طَرْحٍ مُرْتَبِطَةٌ بِـ ٨ + ٤ = ١٢؟" options={['١٢ − ٤ = ٨', '٨ − ٤ = ٤', '١٢ + ٤ = ١٦']} answer="١٢ − ٤ = ٨" award />
             </Card>
           </Cols>
-          <Card kind="rule" cap="لغز">في قطعة الدومينو ٩ نقاط ظاهرة، والنصف الآخر مخفي. مجموع النقاط ١٥. كم نقطة مخفية؟</Card>
+          <Card kind="rule" cap="لُغْزٌ">فِي قِطْعَةِ الدُّومِينُو ٩ نِقَاطٍ ظَاهِرَةٍ، وَالنِّصْفُ الْآخَرُ مَخْفِيٌّ. مَجْمُوعُ النِّقَاطِ ١٥. كَمْ نُقْطَةً مَخْفِيَّةً؟</Card>
         </>
       ),
     },
@@ -185,9 +98,9 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">الدومينو المخفي</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>اختر المجموع وعدد النقاط الظاهرة. خمّن كم نقطة في النصف المخفي، ثم أظهره.</p>
+          <Intro>نَخْتَارُ الْمَجْمُوعَ وَعَدَدَ النِّقَاطِ الظَّاهِرَةِ، وَنُخَمِّنُ كَمْ نُقْطَةً فِي النِّصْفِ الْمَخْفِيِّ، ثُمَّ نُظْهِرُهُ.</Intro>
           <MissingExplorer />
-          <Card kind="rule" cap="لاحظ">العدد المفقود = المجموع − العدد المعروف.</Card>
+          <Card kind="rule" cap="نُلَاحِظُ">الْعَدَدُ الْمَفْقُودُ = الْمَجْمُوعُ − الْعَدَدُ الْمَعْرُوفُ.</Card>
         </>
       ),
     },
@@ -199,14 +112,14 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="القاعدة" kind="rule">أجد العدد المفقود</SlideHead>
-          <Card kind="rule" style={{ fontSize: '1.05em', fontWeight: 700, lineHeight: 1.8 }}>
+          <Definition kind="rule">
             أَجِدُ <Mark>الْعَدَدَ الْمَفْقُودَ</Mark> فِي جُمْلَةِ الْجَمْعِ مُسْتَعْمِلًا حَقِيقَةَ الطَّرْحِ الْمُرْتَبِطَةَ بِهَا.
-          </Card>
+          </Definition>
           <Cols even>
-            <Card kind="ex" cap="جملة الجمع">
+            <Card kind="ex" cap="جُمْلَةُ الْجَمْعِ">
               <Sentence t={[9, '+', { box: true, b: 6 }, '=', 15]} big />
             </Card>
-            <Card kind="ex" cap="حقيقة الطرح المرتبطة">
+            <Card kind="ex" cap="حَقِيقَةُ الطَّرْحِ الْمُرْتَبِطَةُ">
               <Sentence t={[15, '−', 9, '=', 6]} big />
             </Card>
           </Cols>
@@ -214,31 +127,28 @@ export default defineLesson({
       ),
     },
 
-    /* ================= أستعد · مثال الكتاب ================= */
+    /* ================= أستعد، مثال الكتاب ================= */
     {
       sec: 'explain', min: 3,
       notes: 'أنا أعمل: «العدد ٩ هو أحد العددين المضافين، لكن العدد الآخر مفقود. أفكّر: ١٥ − ٩ = ٦».',
       content: (
         <>
-          <SlideHead tag="أستعد · ص ٧٤" kind="ex">العدد المفقود</SlideHead>
+          <SlideHead tag="أستعد، ص ٧٤" kind="ex">العدد المفقود</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">أَجِدُ الْعَدَدَ الْمَفْقُودَ فِي جُمْلَةِ الْجَمْعِ مُسْتَعْمِلًا حَقِيقَةَ الطَّرْحِ الْمُرْتَبِطَةَ بِهَا.</p>
+              <QText>أَجِدُ الْعَدَدَ الْمَفْقُودَ فِي جُمْلَةِ الْجَمْعِ مُسْتَعْمِلًا حَقِيقَةَ الطَّرْحِ الْمُرْتَبِطَةَ بِهَا.</QText>
               <Sentence t={[9, '+', { box: true, b: 6, hl: ['p0'] }, '=', 15]} big />
-              <Ctrls>
-                <NextButton />
-              </Ctrls>
               <Solution>
-                <Step>الْعَدَدُ ٩ هُوَ أَحَدُ الْعَدَدَيْنِ الْمُضَافَيْنِ فِي جُمْلَةِ الْجَمْعِ، لَكِنَّ الْعَدَدَ الآخَرَ مَفْقُودٌ.</Step>
+                <Step>نَعْرِفُ ٩، وَالْعَدَدُ الْآخَرُ مَفْقُودٌ.</Step>
                 <Step>
-                  أُفَكِّرُ: <Sentence t={[15, '−', 9, '=', 6]} />
+                  نُفَكِّرُ: <Sentence t={[15, '−', 9, '=', 6]} />
                 </Step>
-                <Step kind="ans">٦ هُوَ الْعَدَدُ الْمَفْقُودُ فِي جُمْلَةِ الْجَمْعِ.</Step>
+                <Step kind="ans" label="الْعَدَدُ الْمَفْقُودُ">٦</Step>
               </Solution>
             </QCol>
-            <div className="chart cubebox">
+            <CubeBox>
               <Domino known={9} missing={6} />
-            </div>
+            </CubeBox>
           </Cols>
         </>
       ),
@@ -263,11 +173,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">ما العدد المفقود؟</SlideHead>
-          <Stack>
+          <QCol>
             <MCQ q="أ) ٧ + □ = ١٢. أَيُّ حَقِيقَةٍ تُسَاعِدُنِي؟" options={['١٢ − ٧ = ٥', '١٢ + ٧ = ١٩', '٧ − ٥ = ٢']} answer="١٢ − ٧ = ٥" award />
             <MCQ q="ب) □ + ٨ = ١٧. مَا الْعَدَدُ الْمَفْقُودُ؟" options={['٧', '٩', '٢٥']} answer="٩" award />
             <MCQ q="ج) ٦ + □ = ٦. مَا الْعَدَدُ الْمَفْقُودُ؟" options={['٠', '١', '٦']} answer="٠" award />
-          </Stack>
+          </QCol>
         </>
       ),
     },
@@ -281,21 +191,18 @@ export default defineLesson({
           <SlideHead tag="من واقع الحياة" kind="ex">كرات الملعب</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">فِي سَلَّةِ الْمَلْعَبِ ١٤ كُرَةً، مِنْهَا ٨ كُرَاتٍ حَمْرَاءُ وَالْبَاقِي زَرْقَاءُ. كَمْ كُرَةً زَرْقَاءَ؟</p>
-              <Sentence t={[8, '+', { box: true, b: 6, hl: ['p0'] }, '=', 14]} big />
+              <QText>فِي سَلَّةِ الْمَلْعَبِ ١٤ كُرَةً، مِنْهَا ٨ كُرَاتٍ حَمْرَاءُ وَالْبَاقِي زَرْقَاءُ. كَمْ كُرَةً زَرْقَاءَ؟</QText>
               <MCQ options={['٥', '٦', '٢٢']} answer="٦" award />
-              <Ctrls>
-                <NextButton label="كيف أفكّر؟" />
-              </Ctrls>
               <Solution>
-                <Step kind="ans">
+                <Step hl={['p0']}>
                   <Sentence t={[14, '−', 8, '=', 6]} />
                 </Step>
+                <Step kind="ans" label="الْكُرَاتُ الزَّرْقَاءُ">٦ كُرَاتٍ</Step>
               </Solution>
             </QCol>
-            <div className="chart cubebox">
+            <CubeBox>
               <Domino known={8} missing={6} />
-            </div>
+            </CubeBox>
           </Cols>
         </>
       ),
@@ -307,25 +214,19 @@ export default defineLesson({
       notes: 'مع أول ناتج في كل سؤال يظهر النصف المخفي من الدومينو. اطلب من الطلاب عدّ النقاط للتحقق.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{CHECK}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{FIND_DOTS}</p>
-          <div className="qgrid two book">
-            <DominoQ n={1} known={8} total={14} />
-            <DominoQ n={2} known={5} total={11} />
-            <DominoQ n={3} known={4} total={8} />
-            <DominoQ n={4} known={7} total={15} />
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={120} />
-          </Ctrls>
+          <BookSource>{CHECK}</BookSource>
+          <QText>{FIND_DOTS}</QText>
+          <Grid cols={2}>
+            <DominoCard n={1} known={8} total={14} />
+            <DominoCard n={2} known={5} total={11} />
+            <DominoCard n={3} known={4} total={8} />
+            <DominoCard n={4} known={7} total={15} />
+          </Grid>
         </>
       ),
     },
 
-    /* ================= أتأكد ٥ · أتحدث ================= */
+    /* ================= أتأكد ٥، أتحدث ================= */
     {
       sec: 'check', min: 2,
       notes: 'أتحدث: اطلب من طالبين أن يشرحا، ثم اعرض الخطوات.',
@@ -333,87 +234,59 @@ export default defineLesson({
         <QuestionSlide
           source={CHECK} n={5} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="كَيْفَ أَجِدُ الْعَدَدَ الْمَفْقُودَ فِي جُمْلَةِ الْجَمْعِ ٥ + □ = ١٣؟"
-          hint="أي حقيقة طرح مرتبطة بهذه الجملة؟"
+          hint="أَيُّ حَقِيقَةِ طَرْحٍ مُرْتَبِطَةٌ بِهَذِهِ الْجُمْلَةِ؟"
           steps={[
-            { text: 'أعرف المجموع ١٣ وأحد العددين ٥.' },
-            { text: <>أستعمل حقيقة الطرح المرتبطة: <Sentence t={[13, '−', 5, '=', 8]} /></>, hl: ['p0'] },
-            { text: 'العدد المفقود ٨، لأن ٥ + ٨ = ١٣', kind: 'ans' },
+            { text: 'نَعْرِفُ الْمَجْمُوعَ ١٣، وَأَحَدَ الْعَدَدَيْنِ ٥.' },
+            { text: <Sentence t={[13, '−', 5, '=', 8]} />, hl: ['p0'] },
+            { text: 'نَطْرَحُ الْمَعْرُوفَ مِنَ الْمَجْمُوعِ، فَنَجِدُ ٨.', kind: 'ans', label: SUGGESTED },
           ]}
           chart={
-            <div className="chart cubebox">
+            <CubeBox>
               <Domino known={5} missing={8} />
-            </div>
+            </CubeBox>
           }
         />
       ),
     },
 
-    /* ================= أتدرب ٦–١٠ · كما في ص ٧٤–٧٥ ================= */
+    /* ================= أتدرب ٦–١٠، كما في ص ٧٤–٧٥ ================= */
     {
       sec: 'practice', min: 5,
       notes: 'كما في الكتاب: في كل سؤال جملة طرح ثم جملة جمع مرتبطة. ناتج الطرح هو العدد المفقود في الجمع.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE}</Tag>
-          </div>
-          <Cols style={{ gridTemplateColumns: '1fr auto', alignItems: 'start' }}>
-            <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
-            <Card kind="rule" cap="أَتَذَكَّرُ" style={{ fontSize: '.72em' }}>
+          <BookSource>{PRACTICE}</BookSource>
+          <Cols>
+            <QText>{FIND}</QText>
+            <Card kind="rule" cap="أَتَذَكَّرُ">
               ١٤ − ٩ = ٥ وَ ٩ + ٥ = ١٤ حَقِيقَتَانِ مُتَرَابِطَتَانِ.
             </Card>
           </Cols>
-          <div className="qgrid two book">
-            <QCard n={6} className="dcard span2 side">
-              <Domino known={9} missing={5} k={6} />
-              <div className="flines">
-                <Sentence t={[14, '−', 9, '=', { box: true, b: 5, hl: ['p6'] }]} />
-                <Sentence t={[9, '+', { box: true, b: 5 }, '=', 14]} />
-              </div>
-            </QCard>
+          <Grid cols={3}>
+            <DominoLinesCard n={6} known={9} missing={5} lines={[[14, '−', 9, '=', { box: true, b: 5, hl: ['p6'] }], [9, '+', { box: true, b: 5 }, '=', 14]]} />
             {Two(7, [12, '−', 6, '=', { box: true, b: 6 }], [{ box: true, b: 6 }, '+', 6, '=', 12])}
             {Two(8, [8, '−', 7, '=', { box: true, b: 1 }], [7, '+', { box: true, b: 1 }, '=', 8])}
             {Two(9, [12, '−', 9, '=', { box: true, b: 3 }], [9, '+', { box: true, b: 3 }, '=', 12])}
             {Two(10, [7, '−', 2, '=', { box: true, b: 5 }], [2, '+', { box: true, b: 5 }, '=', 7])}
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={150} />
-          </Ctrls>
+          </Grid>
         </>
       ),
     },
 
-    /* ================= أتدرب ١١–١٤ · كما في ص ٧٥ ================= */
+    /* ================= أتدرب ١١–١٤، كما في ص ٧٥ ================= */
     {
       sec: 'practice', min: 4,
       notes: 'انتبه في ١٢: المربعان مختلفان (٧ ثم ١٤). وفي ١٣ و١٤ المربع في وسط الجمع والطرح الرأسي.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
-          <div className="qgrid two book">
+          <BookSource>{PRACTICE}</BookSource>
+          <QText>{FIND}</QText>
+          <Grid cols={2}>
             {Two(11, [15, '−', { box: true, b: 8 }, '=', 7], [7, '+', { box: true, b: 8 }, '=', 15])}
             {Two(12, [7, '+', { box: true, b: 7 }, '=', 14], [{ box: true, b: 14 }, '−', 7, '=', 7])}
-            <QCard n={13} className="vcard">
-              <div className="vrow">
-                <VSum a={9} op="+" b={9} v={18} missing="b" />
-                <VSum a={18} op="−" b={9} v={9} missing="b" />
-              </div>
-            </QCard>
-            <QCard n={14} className="vcard">
-              <div className="vrow">
-                <VSum a={6} op="+" b={7} v={13} missing="b" />
-                <VSum a={13} op="−" b={7} v={6} missing="b" />
-              </div>
-            </QCard>
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={120} />
-          </Ctrls>
+            <SumCard n={13} sums={[{ a: 9, op: '+', b: 9, v: 18, missing: 'b' }, { a: 18, op: '−', b: 9, v: 9, missing: 'b' }]} />
+            <SumCard n={14} sums={[{ a: 6, op: '+', b: 7, v: 13, missing: 'b' }, { a: 13, op: '−', b: 7, v: 6, missing: 'b' }]} />
+          </Grid>
         </>
       ),
     },
@@ -427,21 +300,20 @@ export default defineLesson({
           source={HOT} n={15} time={90}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>الجَبْرُ:</b> فِي الْحَدِيقَةِ ١١ طِفْلًا. إِذَا كَانَ ٥ مِنْهُمْ يَرْتَدُونَ قُمْصَانًا زَرْقَاءَ، وَ ٤ مِنْهُمْ يَرْتَدُونَ قُمْصَانًا بَيْضَاءَ، وَالْبَاقُونَ يَرْتَدُونَ قُمْصَانًا خَضْرَاءَ، فَكَمْ طِفْلًا يَرْتَدِي قَمِيصًا أَخْضَرَ؟
+              <BookLabel>الجَبْرُ:</BookLabel> فِي الْحَدِيقَةِ ١١ طِفْلًا. إِذَا كَانَ ٥ مِنْهُمْ يَرْتَدُونَ قُمْصَانًا زَرْقَاءَ، وَ ٤ مِنْهُمْ يَرْتَدُونَ قُمْصَانًا بَيْضَاءَ، وَالْبَاقُونَ يَرْتَدُونَ قُمْصَانًا خَضْرَاءَ، فَكَمْ طِفْلًا يَرْتَدِي قَمِيصًا أَخْضَرَ؟
             </>
           }
           long
-          hint="اجمع الأطفال المعروفين أولًا: ٥ + ٤ = ؟"
+          hint="كَمْ طِفْلًا نَعْرِفُ لَوْنَ قَمِيصِهِ؟"
           steps={[
-            { text: <Sentence t={[5, '+', 4, '=', 9]} /> },
+            { text: <>نَجْمَعُ الْمَعْرُوفِينَ: <Sentence t={[5, '+', 4, '=', 9]} /></> },
             { text: <Sentence t={[11, '−', 9, '=', 2]} /> },
-            { text: <Sentence t={[5, '+', 4, '+', 2, '=', 11]} /> },
-            { text: 'طِفْلَانِ يَرْتَدِيَانِ قَمِيصًا أَخْضَرَ', kind: 'ans' },
+            { text: 'طِفْلَانِ', kind: 'ans', label: 'يَرْتَدِيَانِ قَمِيصًا أَخْضَرَ' },
           ]}
           chart={
-            <div className="chart cubebox">
+            <CubeBox>
               <Sentence t={[5, '+', 4, '+', { box: true, b: 2 }, '=', 11]} big />
-            </div>
+            </CubeBox>
           }
         />
       ),
@@ -453,14 +325,14 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
-            center={<>الأعداد<br />المفقودة</>}
+            center={<>الْأَعْدَادُ<br />الْمَفْقُودَةُ</>}
             items={[
-              { kind: 'rule', cap: 'أعرف', text: 'المجموع وأحد العددين.' },
-              { kind: 'ex', cap: 'أطرح', text: 'المجموع − المعروف = المفقود.' },
-              { kind: 'qs', cap: 'مثال', text: '٩ + □ = ١٥ ← ١٥ − ٩ = ٦' },
-              { kind: 'warn', cap: 'أتحقق', text: 'أجمع: ٩ + ٦ = ١٥ ✓' },
+              { kind: 'rule', cap: 'أَعْرِفُ', text: 'الْمَجْمُوعَ وَأَحَدَ الْعَدَدَيْنِ.' },
+              { kind: 'ex', cap: 'أَطْرَحُ', text: 'الْمَجْمُوعُ − الْمَعْرُوفُ = الْمَفْقُودُ.' },
+              { kind: 'qs', cap: 'مِثَالٌ', text: '٩ + □ = ١٥، إِذَنْ ١٥ − ٩ = ٦' },
+              { kind: 'warn', cap: 'أَتَحَقَّقُ', text: 'أَجْمَعُ: ٩ + ٦ = ١٥' },
             ]}
           />
         </>
@@ -472,11 +344,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">أجد المفقود</SlideHead>
-          <div className="ticket">
-            <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="٤ + □ = ٩" options={['٤', '٥', '١٣']} answer="٥" /></Card>
-            <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="□ + ٧ = ١٦" options={['٧', '٩', '٢٣']} answer="٩" /></Card>
-            <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="٣ + ٥ + □ = ١٢" options={['٤', '٥', '٨']} answer="٤" /></Card>
-          </div>
+          <ExitTicket>
+            <MCQ q="٤ + □ = ٩" options={['٤', '٥', '١٣']} answer="٥" />
+            <MCQ q="□ + ٧ = ١٦" options={['٧', '٩', '٢٣']} answer="٩" />
+            <MCQ q="٣ + ٥ + □ = ١٢" options={['٤', '٥', '٨']} answer="٤" />
+          </ExitTicket>
         </>
       ),
     },

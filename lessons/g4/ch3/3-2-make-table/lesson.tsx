@@ -1,5 +1,5 @@
 import {
-  BookLabel, Card, Cols, FreqTable, Grid, PatternExplorer, PatternTable, Ctrls, DataGrid, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Intro, Mark, MCQ, MindMap, NextButton, QCol, QText,
+  BookLabel, CellSteps, Card, Cols, FreqTable, Grid, PatternExplorer, PatternTable, Ctrls, DataGrid, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Intro, Mark, MCQ, MindMap, NextButton, QCol, QText,
   QuestionSlide, SlideHead, Solution, Stack, Step, TableBox, Winner, defineLesson, type HlKey,
 } from '@engine';
 import { IntroClip } from './clip';
@@ -123,10 +123,11 @@ export default defineLesson({
                 <Step>
                   <b>خَطِّطْ:</b> يُمكنُكَ إنشاءُ جدولٍ لحلِّ المسألةِ.
                 </Step>
-                <Step hl={['v0', 'v1', 'v2', 'v3']}>
+                <Step>
                   <b>حُلَّ:</b> أَنْشِئْ جدولًا يُظْهِرُ أنَّ هناكَ مُعَلِّمَيْنِ لكلِّ ٩ طُلّابٍ: +٢ و+٩ في كل عمود.
                 </Step>
-                <Step hl={['v4', 'v5', 'v6', 'v7', 'p7']} kind="ans" label="عَدَدُ الطُّلَّابِ">
+                <CellSteps keys={['v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7']} />
+                <Step hl={['p7']} kind="ans" label="عَدَدُ الطُّلَّابِ">
                   ٧٢ طَالِبًا
                 </Step>
                 <Step>
@@ -266,7 +267,7 @@ export default defineLesson({
           long
           hint="كل ساعة تضيف ٦٠ دقيقة."
           steps={[
-            { text: 'نَزِيدُ ٦٠ دَقِيقَةً لِكُلِّ سَاعَةٍ: ١٨٠، ٢٤٠، ٣٠٠، ٣٦٠.', hl: ['v2', 'v3', 'v4', 'v5'] },
+            { text: 'نَزِيدُ ٦٠ دَقِيقَةً لِكُلِّ سَاعَةٍ: ١٨٠، ٢٤٠، ٣٠٠، ٣٦٠.', cells: ['v2', 'v3', 'v4', 'v5'] },
             { text: '٦ سَاعَاتٍ = ٣٦٠ دَقِيقَةً، وَ٣٦٠ أَكْبَرُ مِنْ ٣٠٠.', hl: ['p5'] },
             { label: 'الْيَوْمُ الدِّرَاسِيُّ', text: 'أَطْوَلُ مِنْ ٣٠٠ دَقِيقَةٍ', kind: 'ans' },
           ]}
@@ -287,8 +288,8 @@ export default defineLesson({
           question="إذا كانَ معَ رزانَ ١٧ ريالًا، وأرادَتْ أنْ تشتريَ شَطَائِرَ، ثمنُ الشَّطيرةِ الواحدةِ ريالانِ، فكمْ شَطيرةً يمكنُهَا أنْ تشتريَ؟"
           hint="أكمل الجدول حتى لا يكفي المال لشطيرة أخرى."
           steps={[
-            { text: 'كل شطيرة تزيد الثمن ريالين.', hl: ['v0', 'v1', 'v2', 'v3'] },
-            { text: '٨ شطائر بـ ١٦ ريالًا، و٩ شطائر بـ ١٨ ريالًا (أكثر من ١٧).', hl: ['v4', 'v5', 'v6', 'v7', 'p7'] },
+            { text: 'كل شطيرة تزيد الثمن ريالين.', cells: ['v0', 'v1', 'v2', 'v3'] },
+            { text: '٨ شطائر بـ ١٦ ريالًا، و٩ شطائر بـ ١٨ ريالًا (أكثر من ١٧).', cells: ['v4', 'v5', 'v6', 'v7'], hl: ['p7'] },
             { label: 'عَدَدُ الشَّطَائِرِ', text: '٨ شَطَائِرَ', kind: 'ans' },
           ]}
           chart={
@@ -330,7 +331,7 @@ export default defineLesson({
           hint="كل ٥ محاولات = محاولتان ناجحتان = ٤ نقاط."
           steps={[
             { text: 'كل ٥ محاولات تعطي ٤ نقاط.', hl: ['v0', 'p0'] },
-            { text: 'نُكْمِلُ حَتَّى تَصِلَ النِّقَاطُ إِلَى ٢٤.', hl: ['v1', 'v2', 'v3', 'v4', 'v5', 'p5'] },
+            { text: 'نُكْمِلُ حَتَّى تَصِلَ النِّقَاطُ إِلَى ٢٤.', cells: ['v1', 'v2', 'v3', 'v4', 'v5'], hl: ['p5'] },
             { label: 'عَدَدُ الْمُحَاوَلَاتِ', text: '٣٠ مُحَاوَلَةً', kind: 'ans' },
           ]}
           chart={
@@ -350,7 +351,7 @@ export default defineLesson({
           question="يتقاضَى عاملٌ ١٥٠ ريالًا كلَّ أُسبوعيْنِ مقابلَ عملٍ إضافيٍّ. فكمْ أُسبوعًا يجبُ عليهِ أنْ يعملَ إضافيًّا ليكسبَ أكثرَ منْ ١٠٠٠ ريالٍ؟"
           hint="كل أسبوعين يضيفان ١٥٠ ريالًا. توقف عندما يتجاوز المبلغ ١٠٠٠."
           steps={[
-            { text: '١٢ أسبوعًا = ٩٠٠ ريال، وهذا أقل من ١٠٠٠.', hl: ['v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'p5'] },
+            { text: '١٢ أسبوعًا = ٩٠٠ ريال، وهذا أقل من ١٠٠٠.', cells: ['v0', 'v1', 'v2', 'v3', 'v4', 'v5'], hl: ['p5'] },
             { text: '١٤ أسبوعًا = ١٠٥٠ ريالًا، وهذا أكثر من ١٠٠٠.', hl: ['v6', 'p6'] },
             { label: 'عَدَدُ الْأَسَابِيعِ', text: '١٤ أُسْبُوعًا', kind: 'ans' },
           ]}
@@ -371,8 +372,8 @@ export default defineLesson({
           question="تتصدقُ فاطمةُ بـ ٥ ريالاتٍ عنْ كلِّ ٢٠٠ ريالٍ ممَّا عندَهَا، فإذَا تصدقت بـ ٣٠ ريالًا، فكمْ ريالًا كانَ معهَا؟"
           hint="كل ٥ ريالات صدقة تقابل ٢٠٠ ريال."
           steps={[
-            { text: 'الصدقة تزيد ٥، والمال يزيد ٢٠٠.', hl: ['v0', 'v1', 'v2'] },
-            { text: 'صدقة ٣٠ ريالًا تقابل ١٢٠٠ ريال.', hl: ['v3', 'v4', 'v5', 'p5'] },
+            { text: 'الصدقة تزيد ٥، والمال يزيد ٢٠٠.', cells: ['v0', 'v1', 'v2'] },
+            { text: 'صدقة ٣٠ ريالًا تقابل ١٢٠٠ ريال.', cells: ['v3', 'v4', 'v5'], hl: ['p5'] },
             { label: 'مَا كَانَ مَعَهَا', text: '١٢٠٠ رِيَالٍ', kind: 'ans' },
           ]}
           chart={
@@ -432,7 +433,7 @@ export default defineLesson({
           long
           hint="كل عام يضيف ٥٠٠٠ تقريبًا."
           steps={[
-            { text: 'نُنْشِئُ جَدْوَلًا: كُلَّ عَامٍ يَزِيدُ ٥٠٠٠.', hl: ['v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'p5'] },
+            { text: 'نُنْشِئُ جَدْوَلًا: كُلَّ عَامٍ يَزِيدُ ٥٠٠٠.', cells: ['v0', 'v1', 'v2', 'v3', 'v4', 'v5'], hl: ['p5'] },
             { label: 'فِي سِتَّةِ أَعْوَامٍ', text: 'حَوَالَيْ ٣٠٠٠٠ شَخْصٍ', kind: 'ans' },
           ]}
           chart={

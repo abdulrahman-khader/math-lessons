@@ -1,14 +1,15 @@
 import {
-  CUBE, Card, Cols, Ctrls, CubeTrain, FactFamily, FactTriangle, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol,
-  QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson,
+  BookLabel, BookSource, Card, Cols, CUBE, CubeBox, CubeTrain, Definition, ExitTicket, FactFamily, FactGrid, FactTriangle, Goals, GoHomeButton,
+  Grid, IfTeams, Intro, Mark, MCQ, MindMap, QCol, QText, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, TriangleCard, TriFamilyCard,
+  Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const CHECK = 'أتأكَّدُ · ص ٧٦';
-const PRACTICE = 'أتدرَّبُ · ص ٧٧';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٧٧';
+const CHECK = 'أتأكَّدُ، ص ٧٦';
+const PRACTICE = 'أتدرَّبُ، ص ٧٧';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٧٧';
 const COMPLETE = 'أَسْتَعْمِلُ الْمُكَعَّبَاتِ، وأُكْمِلُ الْحَقَائِقَ الْمُتَرَابِطَةَ:';
 
 /** ألوان المثلثات كما في الكتاب */
@@ -20,35 +21,20 @@ const TRI = {
   orange: ['#ffc77d', '#f28a1d'],
 } as const;
 
-/**
- * مجموعة حقائق مترابطة كاملة للمثلث: جمعان ثم طرحان، كل الأعداد في خانات تمتلئ بالترتيب
- * (كما في أتدرب حيث السطور فارغة). إن تساوى الجزآن فحقيقتان فقط.
- */
-function FullFamily({ n, top, left, right, color }: { n: number; top: number; left: number; right: number; color: readonly [string, string] }) {
-  const same = left === right;
-  return (
-    <QCard n={n} className="tricard">
-      <FactTriangle top={top} left={left} right={right} color={color[0]} edge={color[1]} />
-      <div className="flines tri2">
-        <Sentence t={[{ b: right }, '+', { b: left }, '=', { b: top }]} />
-        <Sentence t={[{ b: top }, '−', { b: right }, '=', { b: left }]} />
-        {!same && <Sentence t={[{ b: left }, '+', { b: right }, '=', { b: top }]} />}
-        {!same && <Sentence t={[{ b: top }, '−', { b: left }, '=', { b: right }]} />}
-      </div>
-    </QCard>
-  );
-}
+const FullFamily = TriFamilyCard;
+const SUGGESTED = 'إِجَابَةٌ مُقْتَرَحَةٌ';
 
 export default defineLesson({
   meta: {
     id: 'g2-3-7-fact-families',
+    design: 'v2',
     code: '٣-٧',
     title: 'الْحَقَائِقُ الْمُتَرَابِطَةُ',
     shortTitle: 'الحقائق المترابطة',
     subject: 'الرياضيات',
     grade: 'الصف الثاني الابتدائي',
     chapter: 'الفصل الثالث: طرائق الطرح',
-    source: 'الجزء الأول · ص ٧٦–٧٧',
+    source: 'الجزء الأول، ص ٧٦–٧٧',
     minutes: 45,
     idea: 'أُكَوِّنُ مَجْمُوعَةَ الْحَقَائِقِ الْمُتَرَابِطَةِ.',
     bookQuestions: 9,
@@ -56,12 +42,12 @@ export default defineLesson({
   sectionDesc: {
     engage: 'مراجعة الجمع والطرح',
     explore: 'مستكشف الحقائق المترابطة',
-    explain: 'القاعدة · أستعد',
-    elab: 'نعمل معًا · من واقع الحياة',
+    explain: 'القاعدة، أستعد',
+    elab: 'نعمل معًا، من واقع الحياة',
     check: 'الأسئلة ١–٤',
     practice: 'الأسئلة ٥–٨',
     hot: 'السؤال ٩',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -79,11 +65,13 @@ export default defineLesson({
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أقرأ مثلث الحقائق.</li>
-                <li>أكتب الحقائق الأربع من ثلاثة أعداد.</li>
-                <li>أعرف متى تكون الحقائق اثنتين فقط.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أَقْرَأُ مُثَلَّثَ الْحَقَائِقِ.',
+                  'أَكْتُبُ الْحَقَائِقَ الْأَرْبَعَ مِنْ ثَلَاثَةِ أَعْدَادٍ.',
+                  'أَعْرِفُ مَتَى تَكُونُ الْحَقَائِقُ اثْنَتَيْنِ فَقَطْ.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -96,17 +84,17 @@ export default defineLesson({
       notes: 'ربط بالدرس ٣-٥. اختر طالبًا بالعجلة لكل سؤال.',
       content: (
         <>
-          <SlideHead tag="تذكّر · الدرس ٣-٥" kind="ink">الجمع والطرح متعاكسان</SlideHead>
+          <SlideHead tag="تذكّر، الدرس ٣-٥" kind="ink">الجمع والطرح متعاكسان</SlideHead>
           <Cols even>
             <Card kind="qs">
-              <MCQ q="٧ + ٣ = ١٠، إذن ١٠ − ٣ = ؟" options={['٣', '٧', '١٣']} answer="٧" award />
+              <MCQ q="٧ + ٣ = ١٠، إِذَنْ ١٠ − ٣ = ؟" options={['٣', '٧', '١٣']} answer="٧" award />
             </Card>
             <Card kind="qs">
-              <MCQ q="أيّ جملة تستعمل الأعداد ٤ و٥ و٩؟" options={['٩ − ٤ = ٥', '٩ − ٣ = ٦', '٥ − ٤ = ١']} answer="٩ − ٤ = ٥" award />
+              <MCQ q="أَيُّ جُمْلَةٍ تَسْتَعْمِلُ الْأَعْدَادَ ٤ وَ٥ وَ٩؟" options={['٩ − ٤ = ٥', '٩ − ٣ = ٦', '٥ − ٤ = ١']} answer="٩ − ٤ = ٥" award />
             </Card>
           </Cols>
           <Card kind="rule" cap="سؤال للتفكير">
-            من الأعداد <b>٣ و٧ و١٠</b> كم جملة جمع وطرح أستطيع أن أكتب؟
+            مِنَ الْأَعْدَادِ <Mark>٣ وَ٧ وَ١٠</Mark> كَمْ جُمْلَةَ جَمْعٍ وَطَرْحٍ نَسْتَطِيعُ أَنْ نَكْتُبَ؟
           </Card>
         </>
       ),
@@ -119,9 +107,9 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">مجموعة من أربع حقائق</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>غيّر عدد المكعبات، ثم اضغط كل جملة. ماذا يحدث إذا جعلت العددين متساويين؟</p>
+          <Intro>نُغَيِّرُ عَدَدَ الْمُكَعَّبَاتِ، ثُمَّ نَضْغَطُ كُلَّ جُمْلَةٍ. مَاذَا يَحْدُثُ إِذَا تَسَاوَى الْعَدَدَانِ؟</Intro>
           <FactFamily start={[7, 3]} />
-          <Card kind="rule" cap="لاحظ">ثلاثة أعداد تعطي أربع حقائق: جمعان وطرحان. وإذا تساوى الجزآن تصير حقيقتين فقط.</Card>
+          <Card kind="rule" cap="نُلَاحِظُ">ثَلَاثَةُ أَعْدَادٍ تُعْطِي أَرْبَعَ حَقَائِقَ، وَإِذَا تَسَاوَى الْجُزْآنِ تَصِيرُ حَقِيقَتَيْنِ.</Card>
         </>
       ),
     },
@@ -133,49 +121,48 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="القاعدة" kind="rule">مجموعة الحقائق المترابطة</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1.4fr 1fr', alignItems: 'center' }}>
+          <Cols>
             <Stack>
-              <Card kind="rule" style={{ fontSize: '1.05em', fontWeight: 700, lineHeight: 1.8 }}>
+              <Definition kind="rule">
                 <Mark>مَجْمُوعَةُ الْحَقَائِقِ الْمُتَرَابِطَةِ</Mark> هِيَ مَجْمُوعَةُ الْحَقَائِقِ الَّتِي تَرْبِطُ بَيْنَ ثَلاثَةِ أَعْدَادٍ.
-              </Card>
-              <Card kind="ex" cap="أتذكّر">تَشْتَرِكُ الْحَقَائِقُ الْمُتَرَابِطَةُ بِالأَعْدَادِ الثَّلاثَةِ نَفْسِهَا.</Card>
+              </Definition>
+              <Card kind="ex" cap="أَتَذَكَّرُ">تَشْتَرِكُ الْحَقَائِقُ الْمُتَرَابِطَةُ بِالأَعْدَادِ الثَّلاثَةِ نَفْسِهَا.</Card>
             </Stack>
-            <Card kind="ex" cap="مثلث الحقائق">
+            <Card kind="ex" cap="مُثَلَّثُ الْحَقَائِقِ">
               <FactTriangle top={10} left={3} right={7} color={TRI.blue[0]} edge={TRI.blue[1]} />
-              <p style={{ margin: 0, fontSize: '.75em', fontWeight: 700 }}>المجموع في الأعلى، والجزآن في الأسفل.</p>
+              الْمَجْمُوعُ فِي الْأَعْلَى، وَالْجُزْآنِ فِي الْأَسْفَلِ.
             </Card>
           </Cols>
         </>
       ),
     },
 
-    /* ================= أستعد · مثال الكتاب ================= */
+    /* ================= أستعد، مثال الكتاب ================= */
     {
       sec: 'explain', min: 3,
       notes: 'أنا أعمل: «أستفيد من حقائق الجمع والطرح لأكوّن الحقائق المترابطة». أشر إلى كل جملة وهي تظهر.',
       content: (
         <>
-          <SlideHead tag="أستعد · ص ٧٦" kind="ex">الأعداد ٣ و٧ و١٠</SlideHead>
+          <SlideHead tag="أستعد، ص ٧٦" kind="ex">الأعداد ٣ و٧ و١٠</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">أَسْتَفِيدُ مِنْ حَقَائِقِ الْجَمْعِ وَالطَّرْحِ لِأُكَوِّنَ الْحَقَائِقَ الْمُتَرَابِطَةَ.</p>
-              <div className="flines tri2">
-                <Sentence t={[7, '+', 3, '=', { b: 10 }]} />
-                <Sentence t={[10, '−', 3, '=', { b: 7 }]} />
-                <Sentence t={[3, '+', 7, '=', { b: 10 }]} />
-                <Sentence t={[10, '−', 7, '=', { b: 3 }]} />
-              </div>
-              <Ctrls>
-                <NextButton />
-              </Ctrls>
+              <QText>أَسْتَفِيدُ مِنْ حَقَائِقِ الْجَمْعِ وَالطَّرْحِ لِأُكَوِّنَ الْحَقَائِقَ الْمُتَرَابِطَةَ.</QText>
+              <FactGrid
+                lines={[
+                  [7, '+', 3, '=', { b: 10 }],
+                  [10, '−', 3, '=', { b: 7 }],
+                  [3, '+', 7, '=', { b: 10 }],
+                  [10, '−', 7, '=', { b: 3 }],
+                ]}
+              />
               <Solution>
-                <Step kind="ans">أربع حقائق مترابطة من الأعداد ٣ و٧ و١٠.</Step>
+                <Step kind="ans" label="عَدَدُ الْحَقَائِقِ">٤ حَقَائِقَ</Step>
               </Solution>
             </QCol>
             <Stack>
-              <div className="chart cubebox">
+              <CubeBox>
                 <CubeTrain parts={[{ n: 7, color: CUBE.green }, { n: 3, color: CUBE.orange }]} joined size={40} />
-              </div>
+              </CubeBox>
               <FactTriangle top={10} left={3} right={7} color={TRI.blue[0]} edge={TRI.blue[1]} />
             </Stack>
           </Cols>
@@ -202,12 +189,12 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">من المجموعة؟</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 8em', alignItems: 'center' }}>
-            <Stack>
+          <Cols>
+            <QCol>
               <MCQ q="أ) أَيُّ حَقِيقَةٍ مِنْ مَجْمُوعَةِ الْمُثَلَّثِ؟" options={['١٢ − ٥ = ٧', '١٢ − ٤ = ٨', '٧ − ٥ = ٢']} answer="١٢ − ٥ = ٧" award />
               <MCQ q="ب) ٥ + ٧ = ١٢. مَا الْحَقِيقَةُ الْأُخْرَى لِلْجَمْعِ؟" options={['٧ + ٥ = ١٢', '١٢ + ٥ = ١٧', '٥ + ٥ = ١٠']} answer="٧ + ٥ = ١٢" award />
               <MCQ q="ج) كَمْ حَقِيقَةً فِي مَجْمُوعَةِ الأَعْدَادِ ٥ وَ ٧ وَ ١٢؟" options={['٢', '٣', '٤']} answer="٤" award />
-            </Stack>
+            </QCol>
             <FactTriangle top={12} left={5} right={7} color={TRI.green[0]} edge={TRI.green[1]} />
           </Cols>
         </>
@@ -223,10 +210,7 @@ export default defineLesson({
           <SlideHead tag="من واقع الحياة" kind="ex">أقلام الحقيبة</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">فِي حَقِيبَةِ يُوسُفَ ٦ أَقْلَامٍ زَرْقَاءَ وَ ٨ أَقْلَامٍ حَمْرَاءَ، فَيَكُونُ عِنْدَهُ ١٤ قَلَمًا. أَكْتُبُ الْحَقَائِقَ الْمُتَرَابِطَةَ.</p>
-              <Ctrls>
-                <NextButton />
-              </Ctrls>
+              <QText>فِي حَقِيبَةِ يُوسُفَ ٦ أَقْلَامٍ زَرْقَاءَ وَ ٨ أَقْلَامٍ حَمْرَاءَ، فَيَكُونُ عِنْدَهُ ١٤ قَلَمًا. أَكْتُبُ الْحَقَائِقَ الْمُتَرَابِطَةَ.</QText>
               <Solution>
                 <Step>
                   <Sentence t={[6, '+', 8, '=', 14]} />
@@ -237,7 +221,7 @@ export default defineLesson({
                 <Step>
                   <Sentence t={[14, '−', 6, '=', 8]} />
                 </Step>
-                <Step kind="ans">
+                <Step>
                   <Sentence t={[14, '−', 8, '=', 6]} />
                 </Step>
               </Solution>
@@ -254,46 +238,20 @@ export default defineLesson({
       notes: 'في ٢ السطران الأخيران فارغان: يكتب الطلاب الحقيقتين الناقصتين. في ٣ حقيقتان فقط (لماذا؟ يُسأل في ٤).',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{CHECK}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{COMPLETE}</p>
-          <div className="qgrid one tri-rows book">
-            <QCard n={1} className="tricard">
-              <FactTriangle top={16} left={7} right={9} color={TRI.green[0]} edge={TRI.green[1]} />
-              <div className="flines tri2">
-                <Sentence t={[7, '+', 9, '=', { b: 16 }]} />
-                <Sentence t={[16, '−', 9, '=', { b: 7 }]} />
-                <Sentence t={[9, '+', 7, '=', { b: 16 }]} />
-                <Sentence t={[16, '−', 7, '=', { b: 9 }]} />
-              </div>
-            </QCard>
-            <QCard n={2} className="tricard">
-              <FactTriangle top={17} left={8} right={9} color={TRI.red[0]} edge={TRI.red[1]} />
-              <div className="flines tri2">
-                <Sentence t={[9, '+', 8, '=', { b: 17 }]} />
-                <Sentence t={[17, '−', 9, '=', { b: 8 }]} />
-                <Sentence t={[{ b: 8 }, '+', { b: 9 }, '=', { b: 17 }]} />
-                <Sentence t={[{ b: 17 }, '−', { b: 8 }, '=', { b: 9 }]} />
-              </div>
-            </QCard>
-            <QCard n={3} className="tricard">
-              <FactTriangle top={18} left={9} right={9} color={TRI.violet[0]} edge={TRI.violet[1]} />
-              <div className="flines tri2">
-                <Sentence t={[9, '+', 9, '=', { b: 18 }]} />
-                <Sentence t={[18, '−', 9, '=', { b: 9 }]} />
-              </div>
-            </QCard>
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={150} />
-          </Ctrls>
+          <BookSource>{CHECK}</BookSource>
+          <QText>{COMPLETE}</QText>
+          <Grid cols={1}>
+            <TriangleCard n={1} top={16} left={7} right={9} color={TRI.green}
+              lines={[[7, '+', 9, '=', { b: 16 }], [16, '−', 9, '=', { b: 7 }], [9, '+', 7, '=', { b: 16 }], [16, '−', 7, '=', { b: 9 }]]} />
+            <TriangleCard n={2} top={17} left={8} right={9} color={TRI.red}
+              lines={[[9, '+', 8, '=', { b: 17 }], [17, '−', 9, '=', { b: 8 }], [{ b: 8 }, '+', { b: 9 }, '=', { b: 17 }], [{ b: 17 }, '−', { b: 8 }, '=', { b: 9 }]]} />
+            <TriangleCard n={3} top={18} left={9} right={9} color={TRI.violet} lines={[[9, '+', 9, '=', { b: 18 }], [18, '−', 9, '=', { b: 9 }]]} />
+          </Grid>
         </>
       ),
     },
 
-    /* ================= أتأكد ٤ · أتحدث ================= */
+    /* ================= أتأكد ٤، أتحدث ================= */
     {
       sec: 'check', min: 2,
       notes: 'أتحدث: اطلب من الطلاب أن يحاولوا كتابة حقيقة ثالثة للأعداد ٩ و٩ و١٨. ماذا يلاحظون؟',
@@ -301,11 +259,11 @@ export default defineLesson({
         <QuestionSlide
           source={CHECK} n={4} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="لِمَاذَا اقْتَصَرَتِ الإِجَابَةُ فِي السُّؤَالِ ٣ عَلَى حَقِيقَتَيْنِ فَقَطْ؟"
-          hint="انظر إلى العددين في أسفل المثلث: هل هما مختلفان؟"
+          hint="هَلِ الْعَدَدَانِ فِي أَسْفَلِ الْمُثَلَّثِ مُخْتَلِفَانِ؟"
           steps={[
-            { text: 'العددان في أسفل المثلث متساويان: ٩ و٩.' },
-            { text: 'إذا بدّلت ترتيبهما في الجمع أحصل على الجملة نفسها: ٩ + ٩ = ١٨' },
-            { text: 'ولأن العددين متساويان فلا توجد إلا حقيقة جمع واحدة وحقيقة طرح واحدة.', kind: 'ans' },
+            { text: 'الْعَدَدَانِ فِي الْأَسْفَلِ مُتَسَاوِيَانِ: ٩ وَ٩' },
+            { text: 'إِذَا بَدَّلْنَا تَرْتِيبَهُمَا نَحْصُلُ عَلَى الْجُمْلَةِ نَفْسِهَا.' },
+            { text: 'لِأَنَّ الْجُزْأَيْنِ مُتَسَاوِيَانِ.', kind: 'ans', label: SUGGESTED },
           ]}
           chart={<FactTriangle top={18} left={9} right={9} color={TRI.violet[0]} edge={TRI.violet[1]} />}
         />
@@ -318,23 +276,17 @@ export default defineLesson({
       notes: 'السطور فارغة كلها: يكتب الطلاب الحقائق الأربع. اكشف الأعداد واحدًا واحدًا.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE}</Tag>
-          </div>
-          <Cols style={{ gridTemplateColumns: '1fr auto', alignItems: 'start' }}>
-            <p className="qtext" style={{ margin: 0 }}>{COMPLETE}</p>
-            <Card kind="rule" cap="أتذكّر" style={{ fontSize: '.72em' }}>
+          <BookSource>{PRACTICE}</BookSource>
+          <Cols>
+            <QText>{COMPLETE}</QText>
+            <Card kind="rule" cap="أَتَذَكَّرُ">
               تَشْتَرِكُ الْحَقَائِقُ الْمُتَرَابِطَةُ بِالأَعْدَادِ الثَّلاثَةِ نَفْسِهَا.
             </Card>
           </Cols>
-          <div className="qgrid one tri-rows book">
+          <Grid cols={1}>
             <FullFamily n={5} top={14} left={6} right={8} color={TRI.blue} />
             <FullFamily n={6} top={13} left={5} right={8} color={TRI.violet} />
-          </div>
-          <Ctrls>
-            <NextButton label="العدد التالي" />
-            <TimerButton sec={120} />
-          </Ctrls>
+          </Grid>
         </>
       ),
     },
@@ -345,18 +297,12 @@ export default defineLesson({
       notes: 'في ٨ الجزآن متساويان (٨ و٨): كم حقيقة؟ (اثنتان).',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{COMPLETE}</p>
-          <div className="qgrid one tri-rows book">
+          <BookSource>{PRACTICE}</BookSource>
+          <QText>{COMPLETE}</QText>
+          <Grid cols={1}>
             <FullFamily n={7} top={15} left={6} right={9} color={TRI.orange} />
             <FullFamily n={8} top={16} left={8} right={8} color={TRI.red} />
-          </div>
-          <Ctrls>
-            <NextButton label="العدد التالي" />
-            <TimerButton sec={120} />
-          </Ctrls>
+          </Grid>
         </>
       ),
     },
@@ -370,19 +316,22 @@ export default defineLesson({
           source={HOT} n={9} time={90}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>الجَبْرُ:</b> أَكْتُبُ الأَعْدَادَ الْمَفْقُودَةَ فِي □:
+              <BookLabel>الجَبْرُ:</BookLabel> أَكْتُبُ الأَعْدَادَ الْمَفْقُودَةَ فِي □:
             </>
           }
-          hint="كل الجمل من مجموعة واحدة: ٣ و١٠ و١٣."
-          steps={[{ text: 'كلها من مجموعة الحقائق المترابطة للأعداد ٣ و١٠ و١٣', kind: 'ans' }]}
+          hint="مَا الْأَعْدَادُ الثَّلَاثَةُ فِي هَذِهِ الْمَجْمُوعَةِ؟"
+          steps={[{ text: 'الْأَعْدَادُ: ٣ وَ١٠ وَ١٣' }]}
           chart={<FactTriangle top={13} left={3} right={10} color={TRI.green[0]} edge={TRI.green[1]} />}
         >
-          <div className="flines tri2">
-            <Sentence t={[3, '+', { box: true, b: 10 }, '=', 13]} big />
-            <Sentence t={[{ box: true, b: 13 }, '−', 3, '=', 10]} big />
-            <Sentence t={[10, '+', { box: true, b: 3 }, '=', 13]} big />
-            <Sentence t={[13, '−', { box: true, b: 10 }, '=', 3]} big />
-          </div>
+          <FactGrid
+            big
+            lines={[
+              [3, '+', { box: true, b: 10 }, '=', 13],
+              [{ box: true, b: 13 }, '−', 3, '=', 10],
+              [10, '+', { box: true, b: 3 }, '=', 13],
+              [13, '−', { box: true, b: 10 }, '=', 3],
+            ]}
+          />
         </QuestionSlide>
       ),
     },
@@ -393,14 +342,14 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
-            center={<>الحقائق<br />المترابطة</>}
+            center={<>الْحَقَائِقُ<br />الْمُتَرَابِطَةُ</>}
             items={[
-              { kind: 'rule', cap: 'ثلاثة أعداد', text: 'المجموع وجزآن، مثل ٣ و٧ و١٠.' },
-              { kind: 'ex', cap: 'أربع حقائق', text: '٧ + ٣، ٣ + ٧، ١٠ − ٣، ١٠ − ٧' },
-              { kind: 'qs', cap: 'مثلث الحقائق', text: 'المجموع في الأعلى، والجزآن في الأسفل.' },
-              { kind: 'warn', cap: 'جزآن متساويان', text: 'حقيقتان فقط: ٩ + ٩ = ١٨، ١٨ − ٩ = ٩' },
+              { kind: 'rule', cap: 'ثَلَاثَةُ أَعْدَادٍ', text: 'الْمَجْمُوعُ وَجُزْآنِ، مِثْلُ ٣ وَ٧ وَ١٠.' },
+              { kind: 'ex', cap: 'أَرْبَعُ حَقَائِقَ', text: '٧ + ٣، ٣ + ٧، ١٠ − ٣، ١٠ − ٧' },
+              { kind: 'qs', cap: 'مُثَلَّثُ الْحَقَائِقِ', text: 'الْمَجْمُوعُ فِي الْأَعْلَى، وَالْجُزْآنِ فِي الْأَسْفَلِ.' },
+              { kind: 'warn', cap: 'جُزْآنِ مُتَسَاوِيَانِ', text: 'حَقِيقَتَانِ فَقَطْ: ٩ + ٩ = ١٨، ١٨ − ٩ = ٩' },
             ]}
           />
         </>
@@ -412,13 +361,13 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">أكمل المجموعة</SlideHead>
-          <Cols style={{ gridTemplateColumns: '8em 1fr', alignItems: 'center' }}>
+          <Cols>
             <FactTriangle top={11} left={4} right={7} color={TRI.blue[0]} edge={TRI.blue[1]} />
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="٤ + ٧ = ؟" options={['٣', '١١', '١٢']} answer="١١" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="١١ − ٤ = ؟" options={['٧', '٤', '١٥']} answer="٧" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="أيّ جملة ليست من المجموعة؟" options={['٧ + ٤ = ١١', '١١ − ٧ = ٤', '٧ − ٤ = ٣']} answer="٧ − ٤ = ٣" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q="٤ + ٧ = ؟" options={['٣', '١١', '١٢']} answer="١١" />
+              <MCQ q="١١ − ٤ = ؟" options={['٧', '٤', '١٥']} answer="٧" />
+              <MCQ q="أَيُّ جُمْلَةٍ لَيْسَتْ مِنَ الْمَجْمُوعَةِ؟" options={['٧ + ٤ = ١١', '١١ − ٧ = ٤', '٧ − ٤ = ٣']} answer="٧ − ٤ = ٣" />
+            </ExitTicket>
           </Cols>
         </>
       ),

@@ -1,5 +1,5 @@
 import {
-  BalanceScale, BookLabel, BulletCard, Card, ColorChips, FenceRect, Grid, Lines, QText, TallyGroups, Cols, Ctrls, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton, QCol, QuestionSlide,
+  ShowLater,  BalanceScale, BookLabel, BulletCard, Card, ColorChips, FenceRect, Grid, Lines, QText, TallyGroups, Cols, Ctrls, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton, QCol, QuestionSlide,
   SlideHead, Solution, Stack, Step, Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
@@ -180,6 +180,7 @@ export default defineLesson({
               <Card kind="qs">في موقف المدرسة ٧ دراجات، بعضها بعجلتين وبعضها بثلاث عجلات. عدد العجلات كلها ١٦ عجلة. كم دراجة بثلاث عجلات؟</Card>
               <MCQ q="أيّ خطة نستعمل؟" options={['التخمين والتحقق', 'إنشاء جدول', 'الاستدلال المنطقي']} answer="التخمين والتحقق" award />
             </QCol>
+            <ShowLater>
             <Stack>
               <Card kind="ex" cap="نخمّن ونتحقق">
                 <Ctrls><NextButton /></Ctrls>
@@ -190,6 +191,7 @@ export default defineLesson({
               </Card>
               <MCQ q="كم دراجة بثلاث عجلات؟" options={['٢', '٣', '٤']} answer="٢" award />
             </Stack>
+            </ShowLater>
           </Cols>
         </>
       ),
@@ -211,7 +213,7 @@ export default defineLesson({
             { label: 'لِكُلِّ وَاحِدَةٍ', text: '٤ تُفَّاحَاتٍ', kind: 'ans' },
             { label: 'يَتَبَقَّى', text: 'تُفَّاحَةٌ وَاحِدَةٌ', kind: 'ans' },
           ]}
-          chart={<Plans />}
+          chart={<ShowLater><Plans /></ShowLater>}
         />
       ),
     },
@@ -229,14 +231,14 @@ export default defineLesson({
             { label: 'كُلُّ بِنْتٍ', text: '٢٠٠٠ رِيَالٍ', kind: 'ans' },
             { label: 'الْأَخُ', text: '٤٠٠٠ رِيَالٍ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="الأسهم">
               <Lines>
                 <b>بنت: ■</b>
                 <b>بنت: ■</b>
                 <b>الأخ: ■ ■</b>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -272,10 +274,10 @@ export default defineLesson({
             { text: 'أخضر أولًا: طريقتان، أزرق أولًا: طريقتان' },
             { label: 'عَدَدُ الطَّرَائِقِ', text: '٦ طَرَائِقَ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="الملفات">
               <ColorChips colors={['#e8635a', '#4fae3a', '#4f9be0']} />
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -293,7 +295,7 @@ export default defineLesson({
             { text: <><Eq>٢٥ − ١٤ = ١١</Eq></> },
             { label: 'تَبْقَى مَعَهُ', text: '١١ كُرَةً', kind: 'ans' },
           ]}
-          chart={<Plans />}
+          chart={<ShowLater><Plans /></ShowLater>}
         />
       ),
     },
@@ -343,13 +345,13 @@ export default defineLesson({
             { text: <>ذهابًا وإيابًا: <Eq>٢٣٠ + ٢٣٠ = ٤٦٠</Eq></> },
             { label: 'الْمَسَافَةُ', text: '٤٦٠ مِتْرًا', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="الطريق">
               <Lines>
                 <b>🏠 البيت ← ٢٠٠ م ← 🏪 المتجر</b>
                 <b>🏪 المتجر ← ٣٠ م ← 🏡 الجار</b>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -366,13 +368,13 @@ export default defineLesson({
             { text: <><Eq>٤٤ ÷ ٢ = ٢٢</Eq> ، ثم <Eq>٢٢ + ١٠ = ٣٢</Eq> ، ثم <Eq>٣٢ − ٨ = ٢٤</Eq></> },
             { label: 'الْعَدَدُ', text: '٢٤', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="العمل العكسي">
               <Lines>
                 <b>؟ ← +٨ ← −١٠ ← ×٢ ← ٤٤</b>
                 <b>٢٤ → −٨ → +١٠ → ÷٢ → ٤٤</b>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),

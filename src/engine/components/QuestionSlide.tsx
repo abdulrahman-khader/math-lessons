@@ -4,7 +4,7 @@ import { IconBook } from './V2Chrome';
 import { num } from '../digits';
 import type { HlKey } from '../types';
 import { Cols, QCol, Tag, type Kind } from './Layout';
-import { Ctrls, Hint, HintButton, NextButton, Solution, Step, TimerButton } from './Steps';
+import { CellSteps, Ctrls, Hint, HintButton, NextButton, Solution, Step, TimerButton } from './Steps';
 
 export interface StepDef {
   text: ReactNode;
@@ -13,6 +13,8 @@ export interface StepDef {
   kind?: 'ans' | 'warn';
   /** التصميم الجديد: اسم الإجابة بجانب صندوقها حين يطلب السؤال أكثر من إجابة («العبارةُ العدديَّةُ») */
   label?: ReactNode;
+  /** خانات جدول تظهر قبل هذه الخطوة واحدةً واحدة، ضغطة لكل مفتاح (‹v{i}›) */
+  cells?: readonly HlKey[];
 }
 
 interface Props {
@@ -246,15 +248,22 @@ function StepRuns({ steps }: { steps: StepDef[] }) {
           </div>
         ) : (
           r.map(([s, i]) => (
-            <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
-              {s.text}
-            </Step>
+            <Fragment key={i}>
+              {/* الجدول يمتلئ خانةً خانة أولًا، ثم تظهر الخطوة التي تقرؤه */}
+              {s.cells && <CellSteps keys={s.cells} />}
+              <Step hl={s.hl} kind={s.kind} label={s.label}>
+                {s.text}
+              </Step>
+            </Fragment>
           ))
         ),
       )}
     </Solution>
   );
 }
+
+/** عدد الضغطات التي تأخذها خطوات سؤال (الخطوة نفسها وخانات جدولها) */
+const presses = (steps: StepDef[]) => steps.reduce((n, s) => n + 1 + (s.cells?.length ?? 0), 0);
 
 /**
  * التصميم الجديد لأسئلة الكتاب المتتالية (الصف الثاني): سؤال واحد كبير في كل مرة، وتحته شريط بأرقام كل الأسئلة
@@ -271,7 +280,7 @@ function BookGroupV2({ source, tags, intro, qs, hint, chart, children }: Omit<Gr
   qs.forEach((q, i) => {
     if (i > 0) gate.push(at++);
     else gate.push(-1);
-    at += q.steps.length;
+    at += presses(q.steps);
     end.push(at);
   });
   const cur = gate.reduce((c, g, i) => (shownCount > g ? i : c), 0);

@@ -5,7 +5,7 @@ import { IconFull, IconHome, IconStar, IconWheel } from './components/icons';
 import { StarCheer, StarsModal, type Cheer } from './components/Stars';
 import { WheelModal } from './components/Wheel';
 import { sBad, sStar } from './sound';
-import { useStars } from './stars';
+import { absentToday, useStars } from './stars';
 
 const GRADE_KEY = 'stars:grade';
 
@@ -75,7 +75,7 @@ export function StarsApp() {
   };
 
   return (
-    <div id="app" data-page="stars">
+    <div id="app" data-page="stars" data-design="v2">
       <div id="stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         <header id="hdr">
           <a className="ib" href="./" aria-label="قائمة الدروس">
@@ -146,6 +146,7 @@ export function StarsApp() {
             picked={picked}
             onPick={(n) => setPicked((p) => [...p, n])}
             onRestore={() => setPicked([])}
+            absent={klass ? klass.students.filter((n) => absentToday(events, klass.id, n)) : []}
           />
           <StarCheer cheer={cheer} klass={klass} onDone={endCheer} />
           <ClassesModal open={classesOpen} onClose={() => setClassesOpen(false)} grade={grade} roster={roster} update={update} />

@@ -325,8 +325,8 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .card .counters.v2c { justify-content: center; }
 
 /* خانة العملية في الجملة: دائرة رمادية كما في الكتاب، تمتلئ بالأخضر مع الإشارة */
-#app[data-design="v2"] .sent .blank.box { width: 1.3em; min-width: 0; height: 1.3em; min-height: 0; border: 4px solid #9aa3b2; border-radius: 50%; background: #e3e6ec; }
-#app[data-design="v2"] .sent .blank.box:has(.step.shown) { border-color: var(--ans); background: var(--ans); }
+#app[data-design="v2"] .sent .blank.box:has(.opsign) { width: 1.3em; min-width: 0; height: 1.3em; min-height: 0; border: 4px solid #9aa3b2; border-radius: 50%; background: #e3e6ec; }
+#app[data-design="v2"] .sent .blank.box:has(.opsign):has(.step.shown) { border-color: var(--ans); background: var(--ans); }
 
 /* بطاقة «أكتب العملية»: الرقم في أعلاها، والجملة في وسط شريط أبيض، والتحقق في الوسط تحته */
 #app[data-design="v2"] .qcard.opq { justify-content: flex-start; align-items: stretch; gap: 14px; }
@@ -566,3 +566,112 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .cword .step.cring { position: absolute; inset: -6px -4px; margin: 0; padding: 0; display: grid; place-items: center; min-height: 0; border: 4px solid var(--ans); border-radius: 50%; background: #fff; color: var(--ans); font-size: 34px !important; font-weight: 700; visibility: hidden; animation: none; }
 #app[data-design="v2"] .cword .step.cring.shown { visibility: visible; }
 #app[data-design="v2"] .cchip { border-radius: 4px; }
+
+/* تمارين صفحة الكتاب (الصف الثاني): خانة الناتج صندوق إجابة صغير، والبطاقة سطر واحد مضغوط */
+#app[data-design="v2"] .blank:not(.box):not(.empty) { position: relative; min-width: 1.5em; min-height: 1.25em; padding: 4px 10px 0; border: 3px dashed #9aa3b2; border-radius: 12px; background: #fff; line-height: 1.1; }
+#app[data-design="v2"] .blank:not(.box):not(.empty):not(:has(.step.shown))::before { content: "؟"; color: #9aa3b2; font-size: .8em; font-weight: 700; }
+#app[data-design="v2"] .blank:not(.box):not(.empty):has(.step.shown) { border: 3px solid var(--ans); background: var(--ans); }
+#app[data-design="v2"] .blank:not(.box):not(.empty) .step.bv.shown { color: #fff; font-size: 1em; font-weight: 700; }
+#app[data-design="v2"] .qgrid > .qcard:is(.vcard, :has(> .flines)):not(.opq):not(.ccard):not(.dcard) { flex-direction: row; align-items: center; justify-content: flex-start; gap: 20px; padding: 10px 18px; min-height: 0; }
+#app[data-design="v2"] .qgrid > .qcard:has(> .flines):not(.opq) .fline, #app[data-design="v2"] .qgrid > .qcard:has(> .flines):not(.opq) .sent { font-size: 44px; }
+#app[data-design="v2"] .qcard.vcard .vrow { justify-content: center; }
+#app[data-design="v2"] .qcard.vcard .vsum { font-family: var(--body); font-size: 40px; font-weight: 700; line-height: 1.15; }
+#app[data-design="v2"] .qgrid:has(> .qcard.vcard), #app[data-design="v2"] .qgrid:has(> .qcard > .flines) { gap: 12px; }
+#app[data-design="v2"] .nlbox { padding: 0; border: 0; background: none; }
+#app[data-design="v2"] .nlbox.sm .nline { max-height: 120px; }
+/* العدّ التنازلي: الأعداد محجوزة أماكنها من البداية، وتظهر واحدًا واحدًا */
+#app[data-design="v2"] .countdown { font-family: var(--body); font-size: 44px; font-weight: 700; line-height: 1.3; flex-wrap: nowrap; }
+#app[data-design="v2"] .countdown .step.cd { display: inline-block; visibility: hidden; margin: 0; padding: 0; }
+#app[data-design="v2"] .countdown .step.cd.shown { visibility: visible; color: var(--sec); }
+#app[data-design="v2"] .blank:not(.box):not(.empty) .step.bv:not(.shown) { display: inline; visibility: hidden; font-size: 1em; font-weight: 700; }
+#app[data-design="v2"] .blank:not(.box):not(.empty):not(:has(.step.shown))::before { position: absolute; inset: 0; display: grid; place-items: center; padding-top: 4px; line-height: 1; }
+/* دائرة الكتاب حول البطاقة: مرسومة مكانها من البداية، وتظهر مع خطوتها بلون الإجابة */
+#app[data-design="v2"] .qcard { position: relative; }
+#app[data-design="v2"] .qcard > .step.ring { display: block; position: absolute; inset: 0; z-index: 2; margin: 0; padding: 0; border: 5px solid var(--ans); border-radius: 50%; background: none; color: transparent; font-size: 0; visibility: hidden; pointer-events: none; animation: none; }
+#app[data-design="v2"] .qcard > .step.ring.shown { visibility: visible; }
+#app[data-design="v2"] .qgrid > .qcard.ccard:has(> .flines) { padding: 10px 18px; gap: 6px; }
+#app[data-design="v2"] .qcard.ccard .flines.two72 { gap: 6px 24px; }
+#app[data-design="v2"] .qcard.ccard .fline { font-size: 40px; }
+#app[data-design="v2"] .qgrid > .qcard.dcard { flex-direction: column; align-items: center; gap: 8px; padding: 10px 18px; }
+#app[data-design="v2"] .qcard.dcard .domino { max-width: 150px; margin: 0; }
+#app[data-design="v2"] .qcard.dcard .flines.two72 { gap: 6px 24px; }
+#app[data-design="v2"] .step.later { display: flex !important; background: none !important; }
+
+/* ===== نجم الأسبوع بالتصميم الجديد: الصفحة واللوحة ومنصة الترتيب ===== */
+#app[data-design="v2"] { --gold: #e09b00; --gold-t: #fff3d1; }
+/* الصفحة: شريط فاتح كرأس الدروس، ثم اختيار الصف والفصل */
+#app[data-page="stars"][data-design="v2"] #hdr { min-height: 68px; padding: 0 28px; gap: 16px; background: var(--band); color: var(--ink); border-block-end: 3px solid var(--band-line); }
+#app[data-page="stars"][data-design="v2"] #hdr .ttl b { font-family: var(--body); font-size: 30px; font-weight: 700; }
+#app[data-page="stars"][data-design="v2"] #hdr .ttl span { font-size: 18px; font-weight: 600; opacity: 1; color: var(--muted); }
+#app[data-page="stars"][data-design="v2"] #hdr .ib { min-height: 48px; padding: 0 16px; border: 0; border-radius: 12px; background: #fff; color: var(--ink); font-family: var(--body); font-size: 20px; font-weight: 600; }
+#app[data-page="stars"][data-design="v2"] #hdr .ib svg { width: 24px; height: 24px; }
+#app[data-page="stars"][data-design="v2"] #hdr .ib.on { background: var(--gold); color: #fff; }
+#app[data-page="stars"][data-design="v2"] .spick { padding: 12px 28px; gap: 10px; background: #fff; border-block-end: 0; font-family: var(--body); font-size: 22px; }
+#app[data-page="stars"][data-design="v2"] .spick b { font-weight: 700; color: var(--muted); }
+#app[data-page="stars"][data-design="v2"] .spick .btn { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: #f0f2f5; color: var(--ink); font-family: var(--body); font-size: 20px; font-weight: 600; }
+#app[data-page="stars"][data-design="v2"] .spick .btn.sel { background: var(--ink); color: #fff; }
+#app[data-page="stars"][data-design="v2"] .spick .btn.hide { background: none; text-decoration: underline; color: var(--muted); }
+/* في الصفحة اللوحة هي الصفحة نفسها: لا خلفية داكنة ولا نافذة */
+#app[data-page="stars"][data-design="v2"] .modal.show:has(.sbox) { background: #fff; align-items: stretch; justify-content: stretch; }
+#app[data-page="stars"][data-design="v2"] .modal .mbox.sbox { width: 100%; max-width: none; max-height: none; border-radius: 0; padding: 20px 28px; }
+#app[data-page="stars"][data-design="v2"] .sbox .crow > .btn.hide { display: none; }
+#app[data-page="stars"][data-design="v2"] .sidle .btn { min-height: 64px; padding: 0 32px; border: 0; border-radius: 16px; background: var(--gold); color: #fff; font-family: var(--body); font-size: 28px; font-weight: 700; }
+
+/* اللوحة */
+#app[data-design="v2"] .sbox { width: 1400px; gap: 16px; font-family: var(--body); font-size: 22px; }
+#app[data-design="v2"] .sbox h3 { font-family: var(--body); font-size: 34px; font-weight: 700; }
+#app[data-design="v2"] .sbox h3 svg { color: var(--gold); }
+#app[data-design="v2"] .sbox .crow { gap: 8px; }
+#app[data-design="v2"] .sbox .crow .btn { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: #f0f2f5; color: var(--ink); font-family: var(--body); font-size: 20px; font-weight: 600; box-shadow: none; }
+#app[data-design="v2"] .sbox .crow .btn.sel { background: var(--ink); color: #fff; }
+#app[data-design="v2"] .sbox .crow .btn.primary { background: var(--gold); color: #fff; }
+#app[data-design="v2"] .sbox .crow .btn:disabled { opacity: .45; }
+#app[data-design="v2"] .sbox .crow .btn.sshow { background: var(--gold-t); color: #7a5300; }
+#app[data-design="v2"] .sbox .crow .btn.sshow.sel { background: var(--gold); color: #fff; }
+#app[data-design="v2"] .swk { font-size: 22px; font-weight: 600; color: var(--muted); }
+#app[data-design="v2"] .sgrid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; max-height: none; padding: 0; }
+#app[data-design="v2"] .scard { gap: 12px; padding: 10px 12px; border: 0; border-radius: 16px; background: #f5f6f8; }
+#app[data-design="v2"] .sname { font-size: 28px; font-weight: 700; line-height: 1.5; }
+#app[data-design="v2"] .scount { font-size: 20px; font-weight: 600; }
+#app[data-design="v2"] .scount .st { color: #8a5f00; }
+#app[data-design="v2"] .stot { min-width: 56px; padding: 2px 8px 6px; border-radius: 12px; background: var(--ink); font-family: var(--body); font-size: 34px; font-weight: 700; line-height: 1.3; }
+#app[data-design="v2"] .stot.hid { background: #e3e6ec; color: #9aa3b2; }
+#app[data-design="v2"] .sb { min-width: 56px; min-height: 56px; border: 0; border-radius: 50%; font-size: 24px; }
+#app[data-design="v2"] .sb.up { background: var(--gold); color: #fff; }
+#app[data-design="v2"] .sb.down { background: #fff; color: var(--bad); box-shadow: inset 0 0 0 3px #f1c6bd; }
+#app[data-design="v2"] .sb svg { width: 28px; height: 28px; }
+#app[data-design="v2"] .sundo { min-height: 44px; border: 0; border-radius: 999px; background: #f0f2f5; color: var(--muted); font-family: var(--body); font-size: 20px; font-weight: 600; }
+
+/* منصة نجوم الأسبوع: أسماء كبيرة فوق درجات بارتفاع المركز، والأول ذهبي في الوسط */
+#app[data-design="v2"] .podium { gap: 20px; }
+#app[data-design="v2"] .psteps { gap: 14px; padding-inline: 0; min-height: 520px; }
+#app[data-design="v2"] .pnames { min-height: 120px; justify-content: flex-end; }
+#app[data-design="v2"] .pwho b { font-family: var(--body); font-size: 44px; font-weight: 700; line-height: 1.4; }
+#app[data-design="v2"] .p1 .pwho b { font-size: 56px; }
+#app[data-design="v2"] .pwho small { font-size: 18px; font-weight: 600; }
+#app[data-design="v2"] .pwho.hidden b { color: #c9ced8; font-size: 64px; }
+#app[data-design="v2"] .pblock { border-radius: 18px 18px 0 0; font-family: var(--body); font-size: 48px; font-weight: 700; line-height: 1.1; }
+#app[data-design="v2"] .pblock svg { width: 44px; height: 44px; }
+#app[data-design="v2"] .p1 .pblock { height: 340px; background: var(--gold); }
+#app[data-design="v2"] .p2 .pblock { height: 270px; background: #8d98aa; }
+#app[data-design="v2"] .p3 .pblock { height: 210px; background: #b9773f; }
+#app[data-design="v2"] .p4 .pblock { height: 160px; background: #5b6b84; }
+#app[data-design="v2"] .p5 .pblock { height: 120px; background: #5b6b84; }
+#app[data-design="v2"] .pstep:not(.on) .pblock { filter: none; background: #e3e6ec; color: #fff; }
+#app[data-design="v2"] .pstep.on.p1 .pblock { box-shadow: 0 0 0 6px var(--gold-t); }
+
+/* سجل الأسابيع */
+#app[data-design="v2"] .shcols { grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; }
+#app[data-design="v2"] .sweeks { gap: 10px; max-height: none; }
+#app[data-design="v2"] .sweeks button { padding: 12px 18px; border-radius: 16px; background: #f5f6f8; gap: 4px; }
+#app[data-design="v2"] .sweeks b { font-size: 18px; font-weight: 600; }
+#app[data-design="v2"] .sweeks .swho { font-size: 26px; font-weight: 700; }
+#app[data-design="v2"] .sweeks svg, #app[data-design="v2"] .scounts svg { color: var(--gold); }
+#app[data-design="v2"] .scounts { padding: 16px 20px; border-radius: 16px; background: var(--gold-t); }
+#app[data-design="v2"] .scounts > b { font-size: 24px; font-weight: 700; }
+#app[data-design="v2"] .scounts td { font-size: 24px; font-weight: 700; padding: 4px 2px; }
+#app[data-design="v2"] .shist label.btn, #app[data-design="v2"] .shist .crow .btn { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: #f0f2f5; color: var(--ink); font-family: var(--body); font-size: 20px; font-weight: 600; display: inline-flex; align-items: center; }
+#app[data-design="v2"] .sab { min-height: 36px; padding: 0 14px; border: 0; background: #e3e6ec; color: var(--muted); font-family: var(--body); font-size: 18px; font-weight: 600; }
+#app[data-design="v2"] .sab.on { background: #5b6b84; color: #fff; }
+#app[data-design="v2"] .sbar { font-size: 18px; font-weight: 700; }
+#app[data-design="v2"] .scard.barred { background: #fdeceb; outline: 0; }

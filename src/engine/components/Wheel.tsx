@@ -17,6 +17,8 @@ const POINTER = Math.PI;
 const SIZE = 1000;
 
 interface Props {
+  /** الغائبون اليوم: لا يدخلون العجلة */
+  absent?: string[];
   open: boolean;
   onClose: () => void;
   names: string;
@@ -43,7 +45,7 @@ interface Props {
  * المعلم يديرها من الجوال، أو يلمس العجلة (أو المسافة)، ويغلقها بلمسة خارجها أو Esc.
  * النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة.
  */
-export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp }: Props) {
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp, absent = [] }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
@@ -55,7 +57,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
   const text = names || DEFAULT_NAMES;
   const hasTeams = !!klass && nTeams > 0 && Object.values(klass.team).some((t) => t < nTeams);
   const filter = hasTeams ? teamFilter : -1;
-  const pool = klass ? klass.students.filter((s) => filter < 0 || klass.team[s] === filter) : [];
+  const pool = klass ? klass.students.filter((s) => (filter < 0 || klass.team[s] === filter) && !absent.includes(s)) : [];
   const list = klass
     ? pool.filter((s) => !picked.includes(s))
     : text

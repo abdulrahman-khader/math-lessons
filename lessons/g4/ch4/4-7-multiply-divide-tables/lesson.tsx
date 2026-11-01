@@ -1,5 +1,5 @@
 import {
-  BookLabel, Card, ChartQuestion, Grid, OpQuestion, QuestionGroup, Cols, Ctrls, Eq, ExitTicket, FnTable, Goals, GoHomeButton, IfTeams, MCQ, MindMap, NextButton, QCard, QCol, QText,
+  ShowLater,  BookLabel, Card, ChartQuestion, Grid, OpQuestion, QuestionGroup, Cols, Ctrls, Eq, ExitTicket, FnTable, Goals, GoHomeButton, IfTeams, MCQ, MindMap, NextButton, QCard, QCol, QText,
   QuestionSlide, RuleTable, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, type Token,
 } from '@engine';
 import { IntroClip } from './clip';
@@ -298,11 +298,11 @@ export default defineLesson({
             { text: 'لا؛ لأنَّ القاعدةَ تربطُ المدخلةَ بمخرجتِها.' },
             { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'نَنْظُرُ إِلَى الْمُخْرَجَاتِ لِنَعْرِفَ الْعَمَلِيَّةَ.', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Stack>
               <RuleTable ruleStep={false} rule="△ × ٣" rows={[['△', [1, 2, 3]], ['□', [3, 6, 9]]]} color="#a8d5ba" />
               <RuleTable ruleStep={false} rule="△ + ٥" rows={[['△', [1, 2, 3]], ['□', [6, 7, 8]]]} color="#a8d5ba" />
-            </Stack>
+            </Stack></ShowLater>
           }
         />
       ),
@@ -446,7 +446,7 @@ export default defineLesson({
             { text: <>نَتَحَقَّقُ: <Eq>٥ + ٣ = ٨</Eq></> },
             { label: 'قِيمَةُ △', text: '٥', kind: 'ans' },
           ]}
-          chart={<Card kind="qs" cap="الدالة"><Sentence t={[{ b: 5, box: true }, '+', 3, '=', 8]} big /></Card>}
+          chart={<ShowLater><Card kind="qs" cap="الدالة"><Sentence t={[{ b: 5, box: true }, '+', 3, '=', 8]} big /></Card></ShowLater>}
         />
       ),
     },
@@ -555,7 +555,7 @@ export default defineLesson({
           question="في مقلمةِ العنودِ ثلاثةُ أقلامِ حبرٍ، ومسطرةٌ، ومبراةٌ، وأرادتِ اختيارَ شيءٍ واحدٍ منْهَا. صِفْ بالكلماتِ احتمالَ أنْ يكونَ ما اختارَتْهُ قلمَ رصاصٍ. (الدرس ٣-٦)"
           hint="هل في المقلمة قلم رصاص أصلًا؟"
           steps={[{ text: 'لَا يُوجَدُ قَلَمُ رَصَاصٍ فِي الْمِقْلَمَةِ.' }, { label: 'الِاحْتِمَالُ', text: 'مُسْتَحِيلٌ', kind: 'ans' }]}
-          chart={<Card kind="ex" cap="المقلمة">✒️ ✒️ ✒️، 📏، ✂️ مبراة</Card>}
+          chart={<ShowLater><Card kind="ex" cap="المقلمة">✒️ ✒️ ✒️، 📏، ✂️ مبراة</Card></ShowLater>}
         >
           <MCQ options={['مؤكَّد', 'أقل احتمالًا', 'مستحيل']} answer="مستحيل" />
         </QuestionSlide>

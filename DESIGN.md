@@ -110,6 +110,12 @@ A lesson file holds content only. **No `style={{…}}` and no `className` in `le
 | `OrderRows`, `Heights`, `CubeFace`, `TallyGroups`, `BalanceScale`, `FenceRect`, `ColorChips`, `PencilTriangles`, `Flow`, `BulletCard` | logic and problem-solving pictures |
 | `VoteExplorer`, `PatternExplorer`, `PieExplorer`, `BagExplorer`, `RuleMachine`, `OrderPuzzle`, `FnMachine` | hands-on explorers (also driven from the phone) |
 | `WriteBox` | a box students type into on the board |
+| `BookGroup source intro qs chart` | grade 2: several book questions on one chart; one question large at a time, with a numbered strip that fills with the answers (design D) |
+| `SentenceCard`, `SumCard`, `TowerCard`, `TrainFactCard`, `FamilyCard`, `DominoCard`, `DominoLinesCard`, `TriangleCard`, `TriFamilyCard` | grade 2 book drill cards (`BookDrill.tsx`), in a `Grid`; `ring` draws the book's circle around a card |
+| `LineBox`, `CubeBox`, `Countdown`, `FactGrid`, `BigPic` | number line panel, cubes panel, the rocket countdown, fact sentences in two columns, a big emoji picture |
+| `PicGraph`, `GridBars`, `LiveTally`, `TallyAnswer` | picture graphs and square bar graphs in the book grid; a tally the class fills by touching a row (removing marks is on the phone) |
+| `CircleRow`, `CompareQ`, `ColorPair`, `DrawCard`, `DrawTally`, `DrawExplorer`, `CubeChip`, `WordChoice` | grade 2 probability (`ChanceBook.tsx`) |
+| `FrogExplorer`, `DoublesExplorer`, `MissingExplorer` | grade 2 subtraction explorers (`G2Explorers.tsx`) |
 | `Card`, `Stack`, `Cols`, `QCol`, `SlideHead`, `Counters`, `HBars`, `Chart`, `MCQ`, `Sentence`, `Eq`, `NumMark`, `Mark` | as before |
 
 **Layout rules the engine applies by itself (don't fight them):**
@@ -136,6 +142,8 @@ A lesson file holds content only. **No `style={{…}}` and no `className` in `le
   - Draw the blank as the book's grey circle, which fills green when revealed. The `+` and `−` are SVG (`OpSign`), centred in the circle, because Naskh draws them too high.
   - In «اكتب العملية» cards, the sentence sits on a white strip on its own row (like «تأكَّدْ»), and the check goes centred under it.
 - **«تحدث» questions:** a short model answer labelled «إِجَابَةٌ مُقْتَرَحَةٌ».
+- **No hints before thinking:** anything we add beside a question that summarises its data, lists a plan, or shows the answer (a «الركاب» card, a work-backward chain, a heights picture) goes in `ShowLater`: hidden, with its space kept, until the first step (`own` when the slide has no other steps). The book's own pictures stay visible.
+- **Tables fill one cell at a time:** never reveal a whole table (or several rows) in one step. Give the step `cells: ['v1', 'v2', …]` (or put `<CellSteps keys>` in a `Solution`), so each press shows one column or row and highlights it.
 - **Don't add:** `kind: 'warn'` steps, Think-Pair-Share («فكّر، زاوج، شارك»), or award buttons on the board.
 
 ## 6. Picture panel

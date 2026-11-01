@@ -1,117 +1,37 @@
-import { useState } from 'react';
 import {
-  Blank, CUBE, Card, Cols, CubeTrain, Ctrls, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, NumberLine, QCard, QCol, QuestionSlide,
-  Sentence, SlideHead, Solution, Stack, Step, Tag, TimerButton, VSum, Winner, defineLesson, num, useRemoteWidget, type Token,
+  Blank, BookLabel, BookSource, Card, Cols, CubeBox, CubeTrain, ExitTicket, FrogExplorer, Frogs, Goals, GoHomeButton, Grid, IfTeams, Intro, LineBox,
+  Lines, Mark, MCQ, MindMap, NumberLine, QCard, QCol, QText, QuestionSlide, Sentence, SentenceCard, SlideHead, Solution, Stack, Step, SumCard,
+  Winner, defineLesson, type Token,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const CHECK = 'أتأكَّدُ · ص ٦٤';
-const PRACTICE = 'أتدرَّبُ · ص ٦٥';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٦٥';
+const CHECK = 'أتأكَّدُ، ص ٦٤';
+const PRACTICE = 'أتدرَّبُ، ص ٦٥';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٦٥';
 const FIND = 'أَجِدُ ناتِجَ الطَّرْحِ:';
 const FIND_CIRCLE = 'أَجِدُ ناتِجَ الطَّرْحِ، ثُمَّ أُحَوِّطُ المَسْأَلَةَ الَّتِي نَاتِجُ الطَّرْحِ فِيهَا يُسَاوِي صِفْرًا:';
 
-/** ضفادع على ورقة اللوتس؛ «الكل» يقفز منها كلها، و«صفر» لا يقفز منها شيء */
-const Frogs = ({ n, k, all }: { n: number; k: number; all?: boolean }) => (
-  <CubeTrain parts={[{ n, color: CUBE.green }]} shape="frog" k={k} take={all ? [0] : [1]} size={44} counts={false} />
-);
-
-/** مستكشف: عدد الضفادع، ثم «اطرح الكل» أو «اطرح صفرًا» */
-function FrogExplorer() {
-  const [n, setN] = useState(5);
-  const [mode, setMode] = useState<'none' | 'all' | 'zero'>('none');
-  const setCount = (v: number) => {
-    setN(Math.max(1, Math.min(9, v)));
-    setMode('none');
-  };
-  const sentence = mode === 'all' ? `${num(n)} − ${num(n)} = ٠` : mode === 'zero' ? `${num(n)} − ٠ = ${num(n)}` : `${num(n)} − ؟`;
-  useRemoteWidget(
-    () => ({
-      title: 'الضفادع',
-      info: sentence,
-      steppers: [{ key: 'n', label: 'عدد الضفادع', value: n, min: 1, max: 9, color: CUBE.green }],
-      buttons: [
-        { key: 'all', label: 'تقفز كلها', on: mode === 'all' },
-        { key: 'zero', label: 'لا يقفز أيّ ضفدع', on: mode === 'zero' },
-        { key: 'reset', label: 'من جديد' },
-      ],
-    }),
-    (k, v) => {
-      if (k === 'n' && v !== undefined) setCount(v);
-      else if (k === 'all' || k === 'zero') setMode(k);
-      else if (k === 'reset') setMode('none');
-    },
-    [n, mode],
-  );
-  return (
-    <div className="frogx">
-      <div className="chart cubebox">
-        <CubeTrain parts={[{ n, color: CUBE.green }]} shape="frog" removed={mode === 'all' ? 0 : null} size={52} counts={false} />
-      </div>
-      <div className="hopx-ctrl">
-        <div className="ffstep">
-          <span>عدد الضفادع</span>
-          <button aria-label="إنقاص الضفادع" disabled={n <= 1} onClick={() => setCount(n - 1)}>
-            −
-          </button>
-          <b>{num(n)}</b>
-          <button aria-label="زيادة الضفادع" disabled={n >= 9} onClick={() => setCount(n + 1)}>
-            +
-          </button>
-        </div>
-        <button className={'btn' + (mode === 'all' ? ' sel' : '')} onClick={() => setMode('all')}>
-          تقفز كلها
-        </button>
-        <button className={'btn' + (mode === 'zero' ? ' sel' : '')} onClick={() => setMode('zero')}>
-          لا يقفز أيّ ضفدع
-        </button>
-        <span className={'hopx-eq' + (mode !== 'none' ? ' done' : '')}>
-          <span className="eq">{sentence}</span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/** سؤال أفقي من أتدرب؛ إن كان ناتجه صفرًا تُحوَّط بطاقته بعد ظهور الناتج */
-function HQ({ n, a, b }: { n: number; a: number; b: number }) {
-  return (
-    <QCard n={n}>
-      <div className="flines">
-        <Sentence t={[a, '−', b, '=', { b: a - b }]} />
-      </div>
-      {a - b === 0 && <Step className="ring">صفر</Step>}
-    </QCard>
-  );
-}
-
-/** سؤال رأسي من أتدرب */
-function VQ({ n, a, b }: { n: number; a: number; b: number }) {
-  return (
-    <QCard n={n} className="vcard">
-      <div className="vrow">
-        <VSum a={a} op="−" b={b} v={a - b} />
-      </div>
-      {a - b === 0 && <Step className="ring">صفر</Step>}
-    </QCard>
-  );
-}
-
 /** سطر جملة طرح أفقية بخانة الناتج */
 const S = (a: number, b: number): Token[] => [a, '−', b, '=', { b: a - b }];
+/** سؤال أفقي من أتدرب؛ إن كان ناتجه صفرًا تُحوَّط بطاقته بعد ظهور الناتج */
+const HQ = ({ n, a, b }: { n: number; a: number; b: number }) => <SentenceCard n={n} lines={[S(a, b)]} ring={a === b ? 'صفر' : undefined} />;
+/** سؤال رأسي من أتدرب */
+const VQ = ({ n, a, b }: { n: number; a: number; b: number }) => <SumCard n={n} sums={[{ a, op: '−', b, v: a - b }]} ring={a === b ? 'صفر' : undefined} />;
+const SUGGESTED = 'إِجَابَةٌ مُقْتَرَحَةٌ';
 
 export default defineLesson({
   meta: {
     id: 'g2-3-2-subtract-zero-all',
+    design: 'v2',
     code: '٣-٢',
     title: 'طَرْحُ الصِّفْرِ وَطَرْحُ الْكُلِّ',
     shortTitle: 'طرح الصفر وطرح الكل',
     subject: 'الرياضيات',
     grade: 'الصف الثاني الابتدائي',
     chapter: 'الفصل الثالث: طرائق الطرح',
-    source: 'الجزء الأول · ص ٦٤–٦٥',
+    source: 'الجزء الأول، ص ٦٤–٦٥',
     minutes: 45,
     idea: 'أَطْرَحُ الصِّفْرَ مِنْ عَدَدٍ، وَأَطْرَحُ عَدَدًا مِنْ نَفْسِهِ.',
     bookQuestions: 23,
@@ -119,12 +39,12 @@ export default defineLesson({
   sectionDesc: {
     engage: 'مراجعة العدّ التنازلي',
     explore: 'الضفادع على ورقة اللوتس',
-    explain: 'القاعدة · أستعد',
-    elab: 'نعمل معًا · من واقع الحياة',
+    explain: 'القاعدة، أستعد',
+    elab: 'نعمل معًا، من واقع الحياة',
     check: 'الأسئلة ١–٧',
     practice: 'الأسئلة ٨–٢١',
     hot: 'الأسئلة ٢٢–٢٣',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -138,15 +58,17 @@ export default defineLesson({
             <Stack>
               <Card kind="rule" cap="فكرة الدرس">أَطْرَحُ الصِّفْرَ مِنْ عَدَدٍ، وَأَطْرَحُ عَدَدًا مِنْ نَفْسِهِ.</Card>
               <Card kind="rule" cap="نتذكّر">
-                <Mark>الصِّفْرُ</Mark> يعني: لا شيء.
+                <Mark>الصِّفْرُ</Mark> يَعْنِي: لَا شَيْءَ.
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أطرح الصفر من عدد.</li>
-                <li>أطرح عددًا من نفسه.</li>
-                <li>أعرف متى يكون الناتج صفرًا.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أَطْرَحُ الصِّفْرَ مِنْ عَدَدٍ.',
+                  'أَطْرَحُ عَدَدًا مِنْ نَفْسِهِ.',
+                  'أَعْرِفُ مَتَى يَكُونُ النَّاتِجُ صِفْرًا.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -159,10 +81,10 @@ export default defineLesson({
       notes: 'ربط بالدرس ٣-١: يقفز الطالب بإصبعه على خط الأعداد. ثم سؤال التفكير يمهّد للدرس.',
       content: (
         <>
-          <SlideHead tag="تذكّر · الدرس ٣-١" kind="ink">الطرح بالعدّ التنازلي</SlideHead>
-          <div className="chart nlbox sm">
+          <SlideHead tag="تذكّر، الدرس ٣-١" kind="ink">الطرح بالعدّ التنازلي</SlideHead>
+          <LineBox small>
             <NumberLine max={10} />
-          </div>
+          </LineBox>
           <Cols even>
             <Card kind="qs">
               <MCQ q="٧ − ٢ = ؟" options={['٤', '٥', '٩']} answer="٥" award />
@@ -172,7 +94,7 @@ export default defineLesson({
             </Card>
           </Cols>
           <Card kind="rule" cap="سؤال للتفكير">
-            كم قفزة أقفز في <b>٤ − ٠</b>؟ وكم قفزة في <b>٤ − ٤</b>؟ لنكتشف!
+            كَمْ قَفْزَةً نَقْفِزُ فِي <Mark>٤ − ٠</Mark>؟ وَكَمْ قَفْزَةً فِي <Mark>٤ − ٤</Mark>؟
           </Card>
         </>
       ),
@@ -185,9 +107,9 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">الضفادع على ورقة اللوتس</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>اختر عدد الضفادع، ثم: هل تقفز كلها؟ أم لا يقفز أيّ ضفدع؟</p>
+          <Intro>نَخْتَارُ عَدَدَ الضَّفَادِعِ، ثُمَّ: هَلْ تَقْفِزُ كُلُّهَا؟ أَمْ لَا يَقْفِزُ أَيُّ ضِفْدَعٍ؟</Intro>
           <FrogExplorer />
-          <Card kind="rule" cap="لاحظ">إذا قفزت كلها لم يبقَ شيء (صفر). وإذا لم يقفز أيّ ضفدع بقي العدد كما هو.</Card>
+          <Card kind="rule" cap="نُلَاحِظُ">إِذَا قَفَزَتْ كُلُّهَا لَمْ يَبْقَ شَيْءٌ (صِفْرٌ)، وَإِذَا لَمْ يَقْفِزْ أَيُّ ضِفْدَعٍ بَقِيَ الْعَدَدُ كَمَا هُوَ.</Card>
         </>
       ),
     },
@@ -200,11 +122,11 @@ export default defineLesson({
         <>
           <SlideHead tag="القاعدة" kind="rule">طرح الصفر وطرح الكل</SlideHead>
           <Cols even>
-            <Card kind="rule" cap="أطرح صفرًا" style={{ fontSize: '1em', fontWeight: 700, lineHeight: 1.8 }}>
+            <Card kind="rule" cap="أَطْرَحُ صِفْرًا">
               عِنْدَمَا أَطْرَحُ <Mark>الصِّفْرَ</Mark> مِنْ أَيِّ عَدَدٍ فَإِنَّ نَاتِجَ الطَّرْحِ هُوَ العَدَدُ نَفْسُهُ.
               <Sentence t={[8, '−', 0, '=', 8]} big />
             </Card>
-            <Card kind="rule" cap="أطرح الكل" style={{ fontSize: '1em', fontWeight: 700, lineHeight: 1.8 }}>
+            <Card kind="rule" cap="أَطْرَحُ الْكُلَّ">
               عِنْدَمَا أَطْرَحُ عَدَدًا مِنْ <Mark>نَفْسِهِ</Mark> فَإِنَّ نَاتِجَ الطَّرْحِ صِفْرٌ.
               <Sentence t={[8, '−', 8, '=', 0]} big />
             </Card>
@@ -213,33 +135,30 @@ export default defineLesson({
       ),
     },
 
-    /* ================= أستعد · مثال الكتاب ================= */
+    /* ================= أستعد، مثال الكتاب ================= */
     {
       sec: 'explain', min: 3,
       notes: 'أنا أعمل: «قفزت الضفادع الخمسة كلها، فلم يبقَ أيّ ضفدع. وفي الصورة الثانية لم يقفز أيّ ضفدع، فبقيت ٥».',
       content: (
         <>
-          <SlideHead tag="أستعد · ص ٦٤" kind="ex">كم ضفدعًا بقي؟</SlideHead>
-          <p className="qtext" style={{ margin: 0 }}>يُمْكِنُ أَنْ أَجِدَ الْفَرْقَ بَيْنَ عَدَدَيْنِ بِالطَّرْحِ. أَجِدُ عَدَدَ الضَّفَادِعِ الَّتِي بَقِيَتْ:</p>
+          <SlideHead tag="أستعد، ص ٦٤" kind="ex">كم ضفدعًا بقي؟</SlideHead>
+          <QText>يُمْكِنُ أَنْ أَجِدَ الْفَرْقَ بَيْنَ عَدَدَيْنِ بِالطَّرْحِ. أَجِدُ عَدَدَ الضَّفَادِعِ الَّتِي بَقِيَتْ:</QText>
           <Cols even>
             <Card kind="ex" cap="أَطْرَحُ الْكُلَّ">
               <Frogs n={5} k={1} all />
-              <div className="flines">
+              <Lines>
                 <Sentence t={[5, '−', 5, '=', { b: 0, hl: ['v1'] }]} big />
-              </div>
+              </Lines>
               <Step>لَمْ يَبْقَ أَيُّ ضِفْدَعٍ (٠ ضِفْدَعٍ)</Step>
             </Card>
             <Card kind="ex" cap="أَطْرَحُ صِفْرًا">
               <Frogs n={5} k={2} />
-              <div className="flines">
+              <Lines>
                 <Sentence t={[5, '−', 0, '=', { b: 5, hl: ['p2'] }]} big />
-              </div>
+              </Lines>
               <Step>بَقِيَتْ ٥ ضَفادِعَ</Step>
             </Card>
           </Cols>
-          <Ctrls>
-            <NextButton />
-          </Ctrls>
         </>
       ),
     },
@@ -263,11 +182,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">صفر أم العدد نفسه؟</SlideHead>
-          <Stack>
+          <QCol>
             <MCQ q="أ) ٩ − ٩ = ؟" options={['٠', '٩', '١٨']} answer="٠" award />
             <MCQ q="ب) ٧ − ٠ = ؟" options={['٠', '١', '٧']} answer="٧" award />
             <MCQ q="ج) أَيُّ مَسْأَلَةٍ نَاتِجُ الطَّرْحِ فِيهَا صِفْرٌ؟" options={['٦ − ٠', '٦ − ٦', '٦ − ١']} answer="٦ − ٦" award />
-          </Stack>
+          </QCol>
         </>
       ),
     },
@@ -281,83 +200,45 @@ export default defineLesson({
           <SlideHead tag="من واقع الحياة" kind="ex">صحن التمر</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">فِي الصَّحْنِ ٨ تَمَرَاتٍ، أَكَلَهَا الضُّيُوفُ كُلَّهَا. كَمْ تَمْرَةً بَقِيَتْ فِي الصَّحْنِ؟</p>
+              <QText>فِي الصَّحْنِ ٨ تَمَرَاتٍ، أَكَلَهَا الضُّيُوفُ كُلَّهَا. كَمْ تَمْرَةً بَقِيَتْ فِي الصَّحْنِ؟</QText>
               <MCQ options={['٠', '١', '٨']} answer="٠" award />
-              <Ctrls>
-                <NextButton label="كيف أفكّر؟" />
-              </Ctrls>
               <Solution>
-                <Step hl={['v0']}>أكلوا العدد كله، فأطرح العدد من نفسه.</Step>
-                <Step kind="ans">
+                <Step hl={['v0']}>أَكَلُوهَا كُلَّهَا، فَنَطْرَحُ الْعَدَدَ مِنْ نَفْسِهِ.</Step>
+                <Step>
                   <Sentence t={[8, '−', 8, '=', 0]} />
                 </Step>
+                <Step kind="ans" label="بَقِيَ فِي الصَّحْنِ">لَا شَيْءَ</Step>
               </Solution>
             </QCol>
-            <div className="chart cubebox">
+            <CubeBox>
               <CubeTrain parts={[{ n: 8, color: '#8a5a2b' }]} take={[0]} size={46} hide={[0]} />
-            </div>
+            </CubeBox>
           </Cols>
         </>
       ),
     },
 
-    /* ================= أتأكد ١–٦ · كما في ص ٦٤ ================= */
+    /* ================= أتأكد ١–٦، كما في ص ٦٤ ================= */
     {
       sec: 'check', min: 5,
       notes: 'كما في الكتاب ص ٦٤: كل سؤال فيه طرح الكل وطرح الصفر. اطلب من الطلاب قول القاعدة مع كل ناتج.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{CHECK}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{FIND}</p>
-          <div className="qgrid three book">
-            <QCard n={1}>
-              <div className="flines">
-                <Sentence t={S(3, 3)} />
-                <Sentence t={S(3, 0)} />
-              </div>
-            </QCard>
-            <QCard n={2}>
-              <div className="flines">
-                <Sentence t={S(2, 0)} />
-                <Sentence t={S(2, 2)} />
-              </div>
-            </QCard>
-            <QCard n={3}>
-              <div className="flines">
-                <Sentence t={S(6, 6)} />
-                <Sentence t={S(6, 0)} />
-              </div>
-            </QCard>
-            <QCard n={4} className="vcard">
-              <div className="vrow">
-                <VSum a={9} op="−" b={0} v={9} />
-                <VSum a={9} op="−" b={9} v={0} />
-              </div>
-            </QCard>
-            <QCard n={5} className="vcard">
-              <div className="vrow">
-                <VSum a={4} op="−" b={4} v={0} />
-                <VSum a={4} op="−" b={0} v={4} />
-              </div>
-            </QCard>
-            <QCard n={6} className="vcard">
-              <div className="vrow">
-                <VSum a={7} op="−" b={7} v={0} />
-                <VSum a={7} op="−" b={0} v={7} />
-              </div>
-            </QCard>
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={120} />
-          </Ctrls>
+          <BookSource>{CHECK}</BookSource>
+          <QText>{FIND}</QText>
+          <Grid cols={3}>
+            <SentenceCard n={1} lines={[S(3, 3), S(3, 0)]} />
+            <SentenceCard n={2} lines={[S(2, 0), S(2, 2)]} />
+            <SentenceCard n={3} lines={[S(6, 6), S(6, 0)]} />
+            <SumCard n={4} sums={[{ a: 9, op: '−', b: 0, v: 9 }, { a: 9, op: '−', b: 9, v: 0 }]} />
+            <SumCard n={5} sums={[{ a: 4, op: '−', b: 4, v: 0 }, { a: 4, op: '−', b: 0, v: 4 }]} />
+            <SumCard n={6} sums={[{ a: 7, op: '−', b: 7, v: 0 }, { a: 7, op: '−', b: 0, v: 7 }]} />
+          </Grid>
         </>
       ),
     },
 
-    /* ================= أتأكد ٧ · أتحدث ================= */
+    /* ================= أتأكد ٧، أتحدث ================= */
     {
       sec: 'check', min: 2,
       notes: 'أتحدث: اطلب من طالبين أن يشرحا بالضفادع أو بالأصابع.',
@@ -365,16 +246,16 @@ export default defineLesson({
         <QuestionSlide
           source={CHECK} n={7} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="كَيْفَ أَعْرِفُ أَنَّ ٨ − ٨ = ٠ وَأَنَّ ٨ − ٠ = ٨؟"
-          hint="فكّر في ٨ ضفادع: كم يبقى إن قفزت كلها؟ وإن لم يقفز أيّ منها؟"
+          hint="إِذَا قَفَزَتِ الضَّفَادِعُ الثَّمَانِيَةُ كُلُّهَا، فَكَمْ يَبْقَى؟"
           steps={[
-            { text: '٨ − ٨: أطرح العدد كله، فلا يبقى شيء: الناتج ٠', hl: ['v1'] },
-            { text: '٨ − ٠: لا أطرح شيئًا، فيبقى العدد نفسه: الناتج ٨' },
-            { text: 'طرح العدد من نفسه = صفر، وطرح الصفر = العدد نفسه.', kind: 'ans' },
+            { text: '٨ − ٨: لَا يَبْقَى شَيْءٌ.', hl: ['v1'] },
+            { text: '٨ − ٠: لَا نَطْرَحُ شَيْئًا، فَيَبْقَى ٨.' },
+            { text: 'طَرْحُ الْكُلِّ صِفْرٌ، وَطَرْحُ الصِّفْرِ الْعَدَدُ نَفْسُهُ.', kind: 'ans', label: SUGGESTED },
           ]}
           chart={
-            <div className="chart cubebox">
+            <CubeBox>
               <Frogs n={8} k={1} all />
-            </div>
+            </CubeBox>
           }
         />
       ),
@@ -386,27 +267,21 @@ export default defineLesson({
       notes: 'بعد كل ناتج صفر تظهر دائرة حول المسألة. اسأل: لماذا كان الناتج صفرًا؟',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE}</Tag>
-          </div>
-          <Cols style={{ gridTemplateColumns: '1fr auto', alignItems: 'start' }}>
-            <p className="qtext" style={{ margin: 0 }}>{FIND_CIRCLE}</p>
-            <Card kind="rule" cap="أَتَذَكَّرُ" style={{ fontSize: '.72em', maxWidth: '16em' }}>
+          <BookSource>{PRACTICE}</BookSource>
+          <Cols>
+            <QText>{FIND_CIRCLE}</QText>
+            <Card kind="rule" cap="أَتَذَكَّرُ">
               عِنْدَمَا أَطْرَحُ الصِّفْرَ مِنْ أَيِّ عَدَدٍ فَإِنَّ نَاتِجَ الطَّرْحِ هُوَ العَدَدُ نَفْسُهُ.
             </Card>
           </Cols>
-          <div className="qgrid three plain">
+          <Grid cols={3}>
             <HQ n={8} a={9} b={3} />
             <HQ n={9} a={8} b={1} />
             <HQ n={10} a={8} b={3} />
             <HQ n={11} a={4} b={4} />
             <HQ n={12} a={7} b={3} />
             <HQ n={13} a={3} b={1} />
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={120} />
-          </Ctrls>
+          </Grid>
         </>
       ),
     },
@@ -417,11 +292,9 @@ export default defineLesson({
       notes: 'الطرح الرأسي. اطلب من الطلاب أن يحوّطوا المسائل التي ناتجها صفر في كتبهم.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{FIND_CIRCLE}</p>
-          <div className="qgrid four plain">
+          <BookSource>{PRACTICE}</BookSource>
+          <QText>{FIND_CIRCLE}</QText>
+          <Grid cols={4}>
             <VQ n={14} a={8} b={8} />
             <VQ n={15} a={6} b={0} />
             <VQ n={16} a={5} b={5} />
@@ -430,11 +303,7 @@ export default defineLesson({
             <VQ n={19} a={1} b={1} />
             <VQ n={20} a={8} b={0} />
             <VQ n={21} a={5} b={0} />
-          </div>
-          <Ctrls>
-            <NextButton label="الناتج التالي" />
-            <TimerButton sec={120} />
-          </Ctrls>
+          </Grid>
         </>
       ),
     },
@@ -445,27 +314,20 @@ export default defineLesson({
       notes: 'الجبر: المطلوب عدد الخرزات التي أضاعها، فهو العدد المطروح المجهول. الجملتان تعطيان العدد نفسه، لكن الجملة التي «تبيّن» القصة هي ١٢ − □ = ٧ (من ١٢ ضاع عدد فبقي ٧).',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="ex">{HOT}</Tag>
-          </div>
-          <div className="qgrid one book">
+          <BookSource>{HOT}</BookSource>
+          <Stack>
             <QCard n={22}>
-              <div className="mcq-wrap">
-                <p className="qtext" style={{ margin: 0 }}>
-                  <b style={{ color: 'var(--ex)' }}>الجَبْرُ:</b> مَعَ سَعِيدٍ ١٢ خَرَزَةً. أَضَاعَ بَعْضًا مِنْهَا وَبَقِيَ مَعَهُ ٧ خَرَزَاتٍ. أُحَوِّطُ جُمْلَةَ الطَّرْحِ الَّتِي تُبَيِّنُ عَدَدَ الْخَرَزَاتِ الَّتِي أَضَاعَهَا سَعِيدٌ.
-                </p>
+                <QText>
+                  <BookLabel>الجَبْرُ:</BookLabel> مَعَ سَعِيدٍ ١٢ خَرَزَةً. أَضَاعَ بَعْضًا مِنْهَا وَبَقِيَ مَعَهُ ٧ خَرَزَاتٍ. أُحَوِّطُ جُمْلَةَ الطَّرْحِ الَّتِي تُبَيِّنُ عَدَدَ الْخَرَزَاتِ الَّتِي أَضَاعَهَا سَعِيدٌ.
+                </QText>
                 <MCQ options={['١٢ − ٧ = □', '١٢ − □ = ٧']} answer="١٢ − □ = ٧" award />
-              </div>
             </QCard>
             <QCard n={23}>
-              <p className="qtext" style={{ margin: 0, paddingInlineStart: '1.8em' }}>
+              <QText inline>
                 كَمْ خَرَزَةً أَضَاعَ سَعِيدٌ؟ <Blank v={5} /> خَرَزَاتٍ
-              </p>
+              </QText>
             </QCard>
-          </div>
-          <Ctrls>
-            <NextButton />
-          </Ctrls>
+          </Stack>
         </>
       ),
     },
@@ -476,14 +338,14 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
-            center={<>طرح الصفر<br />وطرح الكل</>}
+            center={<>طَرْحُ الصِّفْرِ<br />وَطَرْحُ الْكُلِّ</>}
             items={[
-              { kind: 'rule', cap: 'طرح الصفر', text: 'الناتج هو العدد نفسه: ٩ − ٠ = ٩' },
-              { kind: 'ex', cap: 'طرح الكل', text: 'الناتج صفر: ٩ − ٩ = ٠' },
-              { kind: 'qs', cap: 'الصفر', text: 'يعني لا شيء.' },
-              { kind: 'warn', cap: 'أنتبه', text: '٩ − ٠ يختلف عن ٩ − ٩' },
+              { kind: 'rule', cap: 'طَرْحُ الصِّفْرِ', text: 'النَّاتِجُ هُوَ الْعَدَدُ نَفْسُهُ: ٩ − ٠ = ٩' },
+              { kind: 'ex', cap: 'طَرْحُ الْكُلِّ', text: 'النَّاتِجُ صِفْرٌ: ٩ − ٩ = ٠' },
+              { kind: 'qs', cap: 'الصِّفْرُ', text: 'يَعْنِي لَا شَيْءَ.' },
+              { kind: 'warn', cap: 'أَنْتَبِهُ', text: '٩ − ٠ يَخْتَلِفُ عَنْ ٩ − ٩' },
             ]}
           />
         </>
@@ -495,11 +357,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">صفر أم العدد نفسه؟</SlideHead>
-          <div className="ticket">
-            <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="٥ − ٠ = ؟" options={['٠', '٥', '١٠']} answer="٥" /></Card>
-            <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="١١ − ١١ = ؟" options={['٠', '١', '١١']} answer="٠" /></Card>
-            <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="٧ − □ = ٧. ما العدد في □؟" options={['٠', '١', '٧']} answer="٠" /></Card>
-          </div>
+          <ExitTicket>
+            <MCQ q="٥ − ٠ = ؟" options={['٠', '٥', '١٠']} answer="٥" />
+            <MCQ q="١١ − ١١ = ؟" options={['٠', '١', '١١']} answer="٠" />
+            <MCQ q="٧ − □ = ٧. مَا الْعَدَدُ فِي □؟" options={['٠', '١', '٧']} answer="٠" />
+          </ExitTicket>
         </>
       ),
     },

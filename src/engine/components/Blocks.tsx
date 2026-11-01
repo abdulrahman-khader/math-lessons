@@ -1,4 +1,5 @@
 import { Children, type ReactNode } from 'react';
+import { useSlide } from '../context';
 import { num } from '../digits';
 import type { HlKey } from '../types';
 import type { Token } from './Primary';
@@ -201,3 +202,13 @@ export const WriteBox = ({ placeholder, label }: { placeholder: string; label: s
 
 /** صورة كبيرة من رموز تعبيرية في وسط بطاقتها (أرغفة، أشياء تُعدّ) */
 export const BigPic = ({ children }: { children: ReactNode }) => <div className="bigpic">{children}</div>;
+
+/**
+ * صورة أو بطاقة تساعد على الحل: مخفية (ومكانها محجوز) حتى يفكّر الطلاب، وتظهر مع أول خطوة في الشريحة.
+ * own: الشريحة بلا خطوات أخرى، فتكون هي نفسها خطوة تظهر مع «التالي».
+ */
+export function ShowLater({ own, children }: { own?: boolean; children: ReactNode }) {
+  const { shownCount } = useSlide();
+  if (own) return <Step className="later">{children}</Step>;
+  return <div className={'later' + (shownCount > 0 ? ' shown' : '')}>{children}</div>;
+}

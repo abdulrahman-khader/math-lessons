@@ -206,3 +206,15 @@ body.remote-body:has(.remote.r2) { background: #fff; }
 .r2panel .rstar .r2name { font-size: 18px; }
 .r2panel .rpicked { display: block; gap: 0; border: 0; border-radius: 16px; background: var(--tile); padding: 10px 14px; }
 .r2panel .wres { font-family: var(--body); font-weight: 700; color: var(--ink); }
+/* غياب اليوم: زر صغير يُضاء حين يُسجَّل الغياب؛ والأغلاط الثلاثة بالأحمر */
+.r2sq.away { font-size: 17px; font-weight: 700; color: var(--soft); }
+.r2sq.away.on { background: #5b6b84; color: #fff; }
+.r2cnt.barred { background: #b3341a; color: #fff; border-radius: 8px; padding: 0 6px; }
+/* الغياب: اسم لكل طالب، ولمسه يسجّله غائبًا اليوم */
+.r2absent { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.r2absent button { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 52px; padding: 0 14px; border: 0; border-radius: 12px; background: var(--tile); color: var(--ink); font: inherit; font-size: 17px; cursor: pointer; }
+.r2absent button span { font-size: 14px; font-weight: 600; color: var(--soft); }
+.r2absent button.on { background: #5b6b84; color: #fff; }
+.r2absent button.on span { color: #fff; }
+.r2absentbtn { display: flex; justify-content: space-between; align-items: center; }
+.r2absentbtn small { font-size: 14px; font-weight: 600; color: var(--soft); }

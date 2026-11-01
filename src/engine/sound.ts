@@ -74,3 +74,19 @@ export function sStar() {
 export const sTick = () => tone([1200], 0.04);
 /** العجلة تدور: نقرة خفيفة كلما مرّ اسم تحت السهم */
 export const sClick = () => tone([1700], 0.03, 'triangle', 0.12);
+
+/**
+ * منصة نجوم الأسبوع: صوت لكل مركز يكبر كلما اقترب من الأول. الخامس والرابع رنّتان، والثالث ثلاث،
+ * والثاني صعود من أربع نغمات، والأول قرع طبل سريع ثم فانفار النجمة.
+ */
+export function sPlace(rank: number) {
+  if (rank <= 1) {
+    // قرع خفيف يتسارع، ثم الفانفار
+    for (let i = 0; i < 9; i++) setTimeout(() => tone([180 + i * 12], 0.05, 'triangle', 0.12), i * (70 - i * 4));
+    setTimeout(sStar, 520);
+    return;
+  }
+  if (rank === 2) return tone([587, 740, 880, 1175], 0.14, 'triangle', 0.17);
+  if (rank === 3) return tone([523, 659, 784], 0.15, 'triangle', 0.16);
+  return tone([440, 554], 0.16, 'triangle', 0.15);
+}

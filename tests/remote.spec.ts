@@ -193,7 +193,8 @@ test('حين يصل خادم الربط حدّه اليومي يظهر تنبي�
 });
 
 test('الجوال يغيّر مكان المؤقت وحجمه على الآيباد', async ({ browser }) => {
-  // في التصميم القديم فقط: المؤقت في التصميم الجديد ثابت في رأس الشاشة
+  // في التصميم القديم فقط: المؤقت في التصميم الجديد ثابت في رأس الشاشة. كل الدروس الآن بالتصميم الجديد
+  test.skip(true, 'لا درس بالتصميم القديم');
   const old = readdirSync(dist).find((f) => f.startsWith('g2-') && f.endsWith('.html'))!;
   const { ipad, phone, errors } = await pair(browser, pathToFileURL(path.join(dist, old)).href);
   await sheet(phone, 'المؤقت');
@@ -335,6 +336,47 @@ test('زرّا الشرائح في الجوال يتجاوزان الخطوات'
   await phone.locator('.rnav button[aria-label="الشريحة السابقة"]').click();
   await phone.locator('.rnav button[aria-label="الشريحة السابقة"]').click();
   await expect.poll(() => activeIndex(ipad)).toBe(String(at - 1));
+  expect(errors).toEqual([]);
+});
+
+test('الغياب من صفحة إعداد الحصة في الجوال: لمس الاسم يسجّله غائبًا اليوم، والغائب لا يدخل العجلة', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  await ipad.evaluate(() => {
+    localStorage.setItem('classes', JSON.stringify({ grades: { g4: { classes: [{ id: 'k1', name: 'الفصل الأول', students: ['محمد', 'خالد', 'سعد'], team: {} }] } } }));
+    window.dispatchEvent(new Event('classes-changed'));
+  });
+  await sheet(phone, 'العجلة');
+  await phone.locator('.r2seg', { hasText: 'الفصل الأول' }).click();
+  await closeSheet(phone);
+  // الغياب في صفحة إعداد الحصة
+  await phone.getByRole('button', { name: 'إعداد الحصة' }).click();
+  await phone.getByRole('button', { name: /تسجيل الغياب/ }).click();
+  const khalid = phone.getByRole('button', { name: 'غائب اليوم: خالد' });
+  await khalid.click();
+  await expect(khalid).toHaveAttribute('aria-pressed', 'true');
+  await expect(phone.locator('.r2note', { hasText: 'الغائبون' })).toContainText('الغائبون: ١ من ٣');
+  // لمسه ثانيةً يلغي الغياب، ثم يُسجَّل من جديد
+  await khalid.click();
+  await expect(khalid).toHaveAttribute('aria-pressed', 'false');
+  await khalid.click();
+  await expect(khalid).toHaveAttribute('aria-pressed', 'true');
+  await closeSheet(phone);
+  await expect(phone.getByRole('button', { name: /تسجيل الغياب/ })).toContainText('الغائبون اليوم: ١');
+  await phone.getByRole('button', { name: 'ابدأ الدرس' }).click();
+  // العجلة على الآيباد: الحاضران فقط
+  await sheet(phone, 'العجلة');
+  await phone.locator('.r2btn', { hasText: 'أدِر العجلة' }).click();
+  await expect(ipad.locator('.wheel2')).toHaveAttribute('data-pool', '2');
+  await expect(phone.locator('.rpicked .wres')).not.toHaveText('خالد', { timeout: 15000 });
+  // لا زر غياب على السبورة؛ العدد يظهر في البطاقة بعد «إظهار النجوم»
+  await phone.locator('.r2btn', { hasText: 'إغلاق العجلة' }).click();
+  await closeSheet(phone);
+  await sheet(phone, 'النجوم');
+  await phone.locator('.r2line .r2btn', { hasText: 'إظهار' }).click();
+  await ipad.locator('.sbox').getByRole('button', { name: 'هذا الأسبوع' }).click();
+  await expect(ipad.locator('.sbox [aria-label^="غائب اليوم"]')).toHaveCount(0);
+  await ipad.locator('.sbox').getByRole('button', { name: 'إظهار النجوم' }).click();
+  await expect(ipad.locator('.scard', { hasText: 'خالد' }).locator('.scount')).toContainText('غ ١');
   expect(errors).toEqual([]);
 });
 

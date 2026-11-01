@@ -88,6 +88,22 @@ function AnswerSlot({ boxRef, shown, label, className, style, children }: { boxR
   );
 }
 
+/**
+ * خانات جدول تظهر واحدةً واحدة: خطوة خفية لكل مفتاح، فيمتلئ الجدول عمودًا (أو صفًّا) مع كل ضغطة،
+ * ويُبرز ما ظهر الآن. لا شيء منها مرئي في الحل نفسه.
+ */
+export function CellSteps({ keys }: { keys: readonly HlKey[] }) {
+  return (
+    <>
+      {keys.map((k) => (
+        <Step key={k} hl={[k]} className="cellstep">
+          {null}
+        </Step>
+      ))}
+    </>
+  );
+}
+
 /** حاوية حل: لا تظهر حتى تظهر أول خطوة فيها */
 export function Solution({ children }: { children: ReactNode }) {
   const gid = useId();

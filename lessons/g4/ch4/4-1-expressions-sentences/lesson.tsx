@@ -1,5 +1,5 @@
 import {
-  BookLabel, BookSource, Card, ChartQuestion, Cols, Counters, Ctrls, Definition, Eq, Examples, ExitTicket, GoHomeButton, Goals, Grid, HBars,
+  ShowLater,  BookLabel, BookSource, Card, ChartQuestion, Cols, Counters, Ctrls, Definition, Eq, Examples, ExitTicket, GoHomeButton, Goals, Grid, HBars,
   IfTeams, Intro, Lines, MCQ, Mark, MindMap, NextButton, NumberRow, NumMark, OpQuestion, QCol, QText, QuestionGroup, QuestionSlide,
   Sentence, SlideHead, Solution, Stack, Step, StepRow, TimerButton, Verdict, Winner, WordList, defineLesson, missingOp as op,
 } from '@engine';
@@ -368,11 +368,11 @@ export default defineLesson({
             { text: 'الْعِبَارَةُ: أَعْدَادٌ وَعَمَلِيَّاتٌ فَقَطْ.' },
             { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'الْجُمْلَةُ فِيهَا إِشَارَةُ = أَوْ > أَوْ <، وَالْعِبَارَةُ لَيْسَ فِيهَا إِشَارَةٌ.', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Stack>
               <Card kind="rule" cap="عبارة عددية"><Sentence t={[5, '+', 7]} /></Card>
               <Card kind="qs" cap="جملة عددية"><Sentence t={[5, '+', 7, '=', 12]} /></Card>
-            </Stack>
+            </Stack></ShowLater>
           }
         />
       ),
@@ -541,10 +541,10 @@ export default defineLesson({
             { text: <>الْعِبَارَتَانِ: <Eq>١٣ + ١٦</Eq> وَ<Eq>٢٩</Eq></> },
             { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: <Eq>١٣ + ١٦ = ٢٩</Eq>, kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="qs" cap="الأعداد">
               <NumberRow nums={[13, 16, 29]} />
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -578,10 +578,10 @@ export default defineLesson({
             { text: 'مِثَالٌ: مَعَ خَالِدٍ ٤٥ رِيَالًا، أَنْفَقَ مِنْهَا ٢٠ رِيَالًا. فَكَمْ بَقِيَ مَعَهُ؟' },
             { label: 'الْجُمْلَةُ الْعَدَدِيَّةُ', text: <Eq>٤٥ − ٢٠ = ٢٥</Eq>, kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="كلمات تدل على الطرح">
               <WordList words={['أنفق', 'أعطى', 'أكل', 'باع', 'بقي', 'تتبقّى', 'الفرق']} />
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),

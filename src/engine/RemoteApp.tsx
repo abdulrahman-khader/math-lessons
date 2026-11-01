@@ -8,7 +8,7 @@ import { ToggleGroup } from '@base-ui/react/toggle-group';
 import { SECTION_NAMES } from './sections';
 import { clock, duration, num } from './digits';
 import { PRESETS, SCALE_MAX, SCALE_MIN, SCALE_STEP } from './components/Timer';
-import { rankRows, topRows } from './stars';
+import { MAX_MISTAKES, rankRows, topRows } from './stars';
 import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl, IconReset, IconStar, IconTimer } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
@@ -25,7 +25,7 @@ import { RemoteWidgetCard } from './components/RemoteWidgetCard';
 const SPOTS = [-1, 0, 1].flatMap((ay) => [-1, 0, 1].map((ax) => ({ ax, ay })));
 const TEAM_OPTS = [0, 2, 3, 4];
 
-type Sheet = 'teams' | 'wheel' | 'stars' | 'timer' | 'slides' | 'groups' | null;
+type Sheet = 'teams' | 'wheel' | 'stars' | 'timer' | 'slides' | 'groups' | 'absent' | null;
 
 /* ---------- أيقونات الجوال ---------- */
 const Svg = ({ children, w = 2 }: { children: ReactNode; w?: number }) => (
@@ -208,8 +208,8 @@ function Fold({ title, className, children }: { title: ReactNode; className?: st
 }
 
 /** ترتيب هذا الأسبوع حتى الآن: للمعلم على جواله فقط، لا يظهر على الشاشة */
-function RemoteRanking({ list }: { list: [string, number, number][] }) {
-  const top = topRows(rankRows(list.map(([name, stars, mistakes]) => ({ name, stars, mistakes }))));
+function RemoteRanking({ list }: { list: [string, number, number, number?, number?][] }) {
+  const top = topRows(rankRows(list.map(([name, stars, mistakes, absences]) => ({ name, stars, mistakes, absences }))));
   if (!top.length) return null;
   return (
     <details className="rrank">
@@ -246,14 +246,14 @@ function StarsSheet({ stars, send }: { stars: NonNullable<RemoteState['stars']>;
         </div>
       </Fold>
       <RemoteRanking list={stars.list} />
-      {stars.list.map(([name, st, mi]) => (
+      {stars.list.map(([name, st, mi, ab = 0]) => (
         <Collapsible.Root key={name} className="rstar">
           <div className="r2srow">
             <Collapsible.Trigger className="r2name">
               <b>{name}</b>
             </Collapsible.Trigger>
             <span className="r2cnt star">★{num(st)}</span>
-            <span className="r2cnt bad">✕{num(mi)}</span>
+            <span className={'r2cnt bad' + (mi >= MAX_MISTAKES ? ' barred' : '')}>✕{num(mi)}</span>
             <button className="r2sq bad" aria-label={`غلطة على ${name}`} onClick={() => send({ c: 'star', s: name, d: -1 })}>
               ✕
             </button>
@@ -269,14 +269,46 @@ function StarsSheet({ stars, send }: { stars: NonNullable<RemoteState['stars']>;
               </button>
             </div>
             <div>
-              <span>الأغلاط هذا الأسبوع: {num(mi)}</span>
+              <span>
+                الأغلاط هذا الأسبوع: {num(mi)}
+                {mi >= MAX_MISTAKES && ' (لا يدخل نجم الأسبوع)'}
+              </span>
               <button className="r2sq" aria-label={`احذف غلطة من ${name}`} disabled={!mi} onClick={() => send({ c: 'starRemove', s: name, d: -1 })}>
                 −
               </button>
             </div>
+            <div>
+              <span>أيام الغياب هذا الأسبوع: {num(ab)}</span>
+            </div>
           </Collapsible.Panel>
         </Collapsible.Root>
       ))}
+    </>
+  );
+}
+
+/**
+ * الغياب: أسماء طلاب الفصل، ولمس الاسم يسجّله غائبًا اليوم (ولمسه ثانيةً يلغي ذلك).
+ * الغائب اليوم لا يدخل العجلة، ولا يُنقص غيابُه نجومَه: يفصل فقط بين المتعادلين في نجم الأسبوع.
+ */
+/** عدد الغائبين اليوم في الفصل المختار */
+const absentCount = (st: RemoteState) => (st.stars?.list ?? []).filter(([, , , , a]) => a).length;
+
+function AbsentList({ stars, send }: { stars: NonNullable<RemoteState['stars']>; send: (c: RemoteCmd) => void }) {
+  const away = stars.list.filter(([, , , , a]) => a).length;
+  return (
+    <>
+      <p className="r2note">
+        المس اسم الغائب. لا يدخل العجلة اليوم. الغائبون: {num(away)} من {num(stars.list.length)}
+      </p>
+      <div className="r2absent">
+        {stars.list.map(([name, , , , a]) => (
+          <button key={name} className={a ? 'on' : ''} aria-pressed={!!a} aria-label={`غائب اليوم: ${name}`} onClick={() => send({ c: 'absent', s: name })}>
+            <b>{name}</b>
+            <span>{a ? 'غائب' : 'حاضر'}</span>
+          </button>
+        ))}
+      </div>
     </>
   );
 }
@@ -465,7 +497,7 @@ function GroupsSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => vo
 }
 
 /** صفحة الإعداد قبل الحصة */
-function Setup({ st, send, timing, setEnd, onStart, onGroups }: { st: RemoteState; send: (c: RemoteCmd) => void; timing: Timing | null; setEnd: (e: string) => void; onStart: () => void; onGroups: () => void }) {
+function Setup({ st, send, timing, setEnd, onStart, onGroups, onAbsent }: { st: RemoteState; send: (c: RemoteCmd) => void; timing: Timing | null; setEnd: (e: string) => void; onStart: () => void; onGroups: () => void; onAbsent: () => void }) {
   const of = st.teamOf ?? [];
   return (
     <div className="r2setup">
@@ -477,6 +509,15 @@ function Setup({ st, send, timing, setEnd, onStart, onGroups }: { st: RemoteStat
         <section>
           <h2>الفصل</h2>
           <KlassPicker st={st} send={send} />
+        </section>
+      )}
+      {!!st.stars?.list.length && (
+        <section>
+          <h2>الغياب</h2>
+          <button className="r2btn r2absentbtn" onClick={onAbsent}>
+            تسجيل الغياب
+            <small>{absentCount(st) ? `الغائبون اليوم: ${num(absentCount(st))}` : 'الكل حاضر'}</small>
+          </button>
         </section>
       )}
       <section>
@@ -656,10 +697,16 @@ export function RemoteApp({ channel }: { channel: string }) {
           <span className={'dot' + (ok ? ' ok' : '')}>{status}</span>
         </header>
         {warnings}
-        {st && <Setup st={st} send={send} timing={timing} setEnd={setEnd} onStart={start} onGroups={() => setSheet('groups')} />}
+        {st && <Setup st={st} send={send} timing={timing} setEnd={setEnd} onStart={start} onGroups={() => setSheet('groups')} onAbsent={() => setSheet('absent')} />}
         {st && (
           <Sheet open={sheet === 'groups'} title="توزيع الطلاب" onClose={() => setSheet(null)}>
             <GroupsSheet st={st} send={send} />
+          </Sheet>
+        )}
+        {st && (
+          <Sheet open={sheet === 'absent'} title="الغياب" onClose={() => setSheet(null)}>
+            {!!st.klasses?.length && <KlassPicker st={st} send={send} />}
+            {st.stars ? <AbsentList stars={st.stars} send={send} /> : <p className="r2note">لا أسماء في هذا الفصل.</p>}
           </Sheet>
         )}
       </div>

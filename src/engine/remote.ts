@@ -88,6 +88,8 @@ export type RemoteCmd =
   | { c: 'starUndo' }
   /** يحذف آخر نجمة (d=١) أو آخر غلطة (d=−١) لطالب في هذا الأسبوع */
   | { c: 'starRemove'; s: string; d: number }
+  /** غياب اليوم لطالب (يُلغى بالضغط ثانيةً) */
+  | { c: 'absent'; s: string }
   /** يُرجع طالبًا واحدًا إلى العجلة */
   | { c: 'wheelReturn'; s: string }
   /** هل يخرج الاسم من العجلة بعد ظهوره */
@@ -187,7 +189,8 @@ export interface RemoteState {
   klass?: string;
   wheelPicked?: number;
   /** نجم الأسبوع لطلاب الفصل المختار: [الاسم، النجوم، الأغلاط] لهذا الأسبوع */
-  stars?: { open: boolean; list: [string, number, number][] } | null;
+  /** [الاسم، النجوم، الأغلاط، أيام الغياب، غائب اليوم ١/٠] */
+  stars?: { open: boolean; list: [string, number, number, number?, number?][] } | null;
   chart: RemoteChart | null;
   family?: RemoteFamily | null;
   widget?: RemoteWidget | null;

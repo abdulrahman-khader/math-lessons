@@ -5,7 +5,11 @@ import '@fontsource/tajawal/arabic-800.css';
 import '@fontsource/tajawal/latin-700.css';
 import '@fontsource/baloo-bhaijaan-2/arabic-700.css';
 import '@fontsource/baloo-bhaijaan-2/arabic-800.css';
+import '@fontsource/noto-naskh-arabic/500.css';
+import '@fontsource/noto-naskh-arabic/600.css';
+import '@fontsource/noto-naskh-arabic/700.css';
 import './styles/core.css';
+import './styles/v2.css';
 import { StarsApp } from './StarsApp';
 
 // صفحة نجم الأسبوع (dist/stars.html): تُفتح من قائمة الدروس دون درس

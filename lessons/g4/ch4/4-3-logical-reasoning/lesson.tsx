@@ -1,5 +1,5 @@
 import {
-  Card, Cols, CubeFace, Heights, Lines, OrderPuzzle, OrderRows, QText, Ctrls, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton, QCol, QuestionSlide, SlideHead,
+  Card, Cols, CubeFace, Heights, ShowLater, Lines, OrderPuzzle, OrderRows, QText, Ctrls, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton, QCol, QuestionSlide, SlideHead,
   Solution, Stack, Step, Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
@@ -65,7 +65,7 @@ export default defineLesson({
     /* ================= تهيئة ================= */
     {
       sec: 'engage', min: 2,
-      notes: 'لغز سريع قبل الدرس. لا تشرح الطريقة؛ اجمع إجابات وتعليلات الطلاب فقط. ثم اسأل: لم يقل أحد إن ريان أطول من مازن، كيف عرفنا؟',
+      notes: 'لغز سريع قبل الدرس. لا تشرح الطريقة؛ اجمع إجابات وتعليلات الطلاب فقط. ثم اسأل: لم يقل أحد إن ريان أطول من مازن، كيف عرفنا؟ بعد الإجابة أظهر الرسم (التالي) للتحقق.',
       content: (
         <>
           <SlideHead tag="لغز" kind="qs">من الأطول؟</SlideHead>
@@ -75,7 +75,9 @@ export default defineLesson({
               <MCQ q="من الأطول بين الثلاثة؟" options={['زياد', 'مازن', 'ريان']} answer="ريان" award />
               <MCQ q="ومن الأقصر؟" options={['مازن', 'ريان', 'زياد']} answer="مازن" award />
             </QCol>
-            <Heights names={['ريان', 'زياد', 'مازن']} colors={['#e8635a', '#4f9be0', '#4fae3a']} />
+            <ShowLater own>
+              <Heights names={['ريان', 'زياد', 'مازن']} colors={['#e8635a', '#4f9be0', '#4fae3a']} />
+            </ShowLater>
           </Cols>
         </>
       ),
@@ -237,7 +239,7 @@ export default defineLesson({
             { text: 'بدرٌ أطولُهم فهو الأول، ثم نرتّب الباقين سطرًا بعد سطر.' },
             { label: 'مِنَ الْأَطْوَلِ إِلَى الْأَقْصَرِ', text: 'بَدْرٌ، عَبْدُ اللَّهِ، فَهْدٌ، سُعُودٌ، مُحَمَّدٌ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Stack>
               <OrderRows
                 rows={[
@@ -247,7 +249,7 @@ export default defineLesson({
                   { clue: 'محمدٌ خلفَ سعودٍ', order: ['ب', 'ع', 'ف', 'س', 'م'] },
                 ]}
               />
-            </Stack>
+            </Stack></ShowLater>
           }
         />
       ),
@@ -285,14 +287,14 @@ export default defineLesson({
             { text: <>نَتَحَقَّقُ: <Eq>٦ + ٤ − ٢ = ٨</Eq></> },
             { label: 'كَانَ مَعَهَا', text: '٦ رِيَالَاتٍ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="من النهاية إلى البداية">
               <Lines>
                 <span>الآن: ٨</span>
                 <span>↑ ونعكس كل خطوة</span>
                 <span>البداية: ؟</span>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -310,13 +312,13 @@ export default defineLesson({
             { text: <><Eq>٣٩٤ − ٨٠ = ٣١٤</Eq> ، <Eq>٣١٤ − ٦٠ = ٢٥٤</Eq></> },
             { label: 'الْبَاقِي', text: '٢٥٤ مِتْرًا', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="المضمار ٤٠٠ متر">
               <Lines>
                 <span>٦ م + ٨٠ م + ٦٠ م قطعها</span>
                 <span>والباقي = ؟</span>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -334,7 +336,7 @@ export default defineLesson({
             { text: <>الثالثة: <Eq>٧ + ٥ = ١٢</Eq>، قبل الأخيرة: <Eq>١٢ + ١ − ٤ = ٩</Eq></> },
             { label: 'فِي الْحَافِلَةِ', text: '٩ أَشْخَاصٍ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="الركاب">
               <Lines>
                 <span>المحطة ١: ركب ٥</span>
@@ -342,7 +344,7 @@ export default defineLesson({
                 <span>المحطة ٣: ركب ٥</span>
                 <span>قبل الأخيرة: ركب ١، نزل ٤</span>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -378,14 +380,14 @@ export default defineLesson({
             { text: 'السباحةُ أولًا: سباحة، قدم، تنس، سباحة، تنس، قدم' },
             { label: 'عَدَدُ التَّرْتِيبَاتِ', text: '٦ تَرْتِيبَاتٍ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="الألعاب">
               <Lines>
                 <span>⚽ كرة القدم</span>
                 <span>🏓 تنس الطاولة</span>
                 <span>🏊 السباحة</span>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -403,14 +405,14 @@ export default defineLesson({
             { text: <>ثلاثة أعداد مختلفة مجموعها ٦: <Eq>١ + ٢ + ٣ = ٦</Eq></> },
             { label: 'فِي الْأَحْوَاضِ', text: '١ وَ٢ وَ٣ سَمَكَاتٍ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="الأحواض الثلاثة">
               <Lines>
                 <span>🐟</span>
                 <span>🐟🐟</span>
                 <span>🐟🐟🐟</span>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -427,7 +429,7 @@ export default defineLesson({
             { text: <>نَطْرَحُ الْمَبِيعَ: <Eq>١٠ − ٤ = ٦</Eq></> },
             { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'نَبْحَثُ عَنْ ٣ أَعْدَادٍ مُخْتَلِفَةٍ مَجْمُوعُهَا ٦.', kind: 'ans' },
           ]}
-          chart={<Card kind="rule" cap="الشرط">أعداد <b>مختلفة</b> في كل حوض، ومجموعها ٦.</Card>}
+          chart={<ShowLater><Card kind="rule" cap="الشرط">أعداد <b>مختلفة</b> في كل حوض، ومجموعها ٦.</Card></ShowLater>}
         />
       ),
     },

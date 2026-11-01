@@ -1,5 +1,5 @@
 import {
-  ArrowQuestion, BookLabel, BookSource, ChartQuestion, DataGrid, Grid, Intro, Lines, QuestionGroup, RepQuestion, TableBox, Card, Cols, Counters, Ctrls, Definition, Eq, ExitTicket, Goals, GoHomeButton, HBars, IfTeams, Mark, MCQ, MindMap,
+  ShowLater,  ArrowQuestion, BookLabel, BookSource, ChartQuestion, DataGrid, Grid, Intro, Lines, QuestionGroup, RepQuestion, TableBox, Card, Cols, Counters, Ctrls, Definition, Eq, ExitTicket, Goals, GoHomeButton, HBars, IfTeams, Mark, MCQ, MindMap,
   NextButton, QCol, QText, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, TenTowers, TimerButton, Winner,
   defineLesson, type Token,
 } from '@engine';
@@ -387,13 +387,13 @@ export default defineLesson({
             { label: 'الْجُمْلَةُ الْعَدَدِيَّةُ', text: <Eq>٥٤٨ − ١٦٣ = ٣٨٥</Eq>, kind: 'ans' },
             { label: 'الزِّيَادَةُ', text: '٣٨٥ كلم', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="المسافتان">
               <Lines>
                 <b>اليوم الأول: ٥٤٨ كلم</b>
                 <b>اليوم الثاني: ١٦٣ كلم</b>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),
@@ -557,13 +557,13 @@ export default defineLesson({
             { text: <><Eq>٢٧٣٥ − ٢٦٩٠ = ٤٥</Eq></> },
             { label: 'الزِّيَادَةُ', text: '٤٥ رِيَالًا', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="السعران">
               <Lines>
                 <b>ليلى: ٢٧٣٥ ريالًا</b>
                 <b>سميرة: ٢٦٩٠ ريالًا</b>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),

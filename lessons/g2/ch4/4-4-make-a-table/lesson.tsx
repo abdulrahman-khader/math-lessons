@@ -1,5 +1,5 @@
 import {
-  BigPic, BookLabel, Card, Cols, DataGrid, Eq, ExitTicket, Goals, GoHomeButton, Grid, IfTeams, Mark, MCQ, MindMap, QCol, QText, QuestionSlide, TableBox,
+  BigPic, BookLabel, CellSteps, Card, Cols, DataGrid, Eq, ExitTicket, Goals, GoHomeButton, Grid, IfTeams, Mark, MCQ, MindMap, QCol, QText, QuestionSlide, TableBox,
   SlideHead, Solution, Stack, Step, Winner, defineLesson, type Cell, type HlKey,
 } from '@engine';
 import { IntroClip } from './clip';
@@ -128,7 +128,8 @@ export default defineLesson({
               <Solution>
                 <Step><BookLabel>أَفْهَمُ:</BookLabel> ٣ أَرْغِفَةٍ لِكُلِّ وَجْبَةٍ، وَ٥ أَشْخَاصٍ.</Step>
                 <Step><BookLabel>أُخَطِّطُ:</BookLabel> نُنْشِئُ جَدْوَلًا، وَنَعُدُّ بِالثَّلَاثَاتِ.</Step>
-                <Step hl={cols(5)}><BookLabel>أَحُلُّ:</BookLabel> ٣، ٦، ٩، ١٢، ١٥</Step>
+                <Step><BookLabel>أَحُلُّ:</BookLabel> نَعُدُّ بِالثَّلَاثَاتِ.</Step>
+                <CellSteps keys={cols(5)} />
                 <Step kind="ans" label="عَدَدُ الْأَرْغِفَةِ">١٥ رَغِيفًا</Step>
                 <Step><BookLabel>أَتَحَقَّقُ:</BookLabel> <Eq>٣ + ٣ + ٣ + ٣ + ٣ = ١٥</Eq></Step>
               </Solution>
@@ -164,7 +165,8 @@ export default defineLesson({
             <QCol>
               <QText>لِكُلِّ قِطَّةٍ ٤ أَرْجُلٍ.</QText>
               <Solution>
-                <Step hl={cols(4)}>نَعُدُّ بِالْأَرْبَعَاتِ: ٤، ٨، ١٢، ١٦</Step>
+                <Step>نَعُدُّ بِالْأَرْبَعَاتِ.</Step>
+                <CellSteps keys={cols(4)} />
               </Solution>
               <MCQ q="كَمْ رِجْلًا لِـ ٤ قِطَطٍ؟" options={['١٢', '١٦', '٨']} answer="١٦" award />
             </QCol>
@@ -187,7 +189,7 @@ export default defineLesson({
           question="يُحِبُّ عَلَاءٌ أَنْ يَلْعَبَ كُرَةَ السَّلَّةِ فِي سَاحَةِ مَنْزِلِهِ؛ لِذَا فَهُوَ يَرْمِي الْكُرَةَ نَحْوَ السَّلَّةِ ٢٠ مَرَّةً فِي الْيَوْمِ. كَمْ يَوْمًا يَحْتَاجُ حَتَّى يَرْمِيَ الْكُرَةَ ١٠٠ مَرَّةٍ؟"
           hint="كَمْ رَمْيَةً فِي يَوْمَيْنِ؟"
           steps={[
-            { text: 'نَعُدُّ بِالْعِشْرِينَاتِ حَتَّى ١٠٠', hl: cols(5) },
+            { text: 'نَعُدُّ بِالْعِشْرِينَاتِ حَتَّى ١٠٠', cells: cols(5) },
             { text: '٥ أَيَّامٍ', kind: 'ans', label: 'عَدَدُ الْأَيَّامِ' },
           ]}
           chart={<TableBox><SkipTable top="عَدَدُ الْأَيَّامِ" bottom="عَدَدُ الرَّمَيَاتِ" a={1} b={20} n={5} /></TableBox>}
@@ -204,7 +206,7 @@ export default defineLesson({
           hint="كَمْ جَوْرَبًا فِي الزَّوْجِ الْوَاحِدِ؟"
           steps={[
             { text: 'فِي كُلِّ زَوْجٍ جَوْرَبَانِ.' },
-            { text: 'نَعُدُّ بِالِاثْنَيْنِ: ٢، ٤، ٦، ٨', hl: cols(4) },
+            { text: 'نَعُدُّ بِالِاثْنَيْنِ.', cells: cols(4) },
             { text: '٨ جَوَارِبَ', kind: 'ans', label: 'عَدَدُ الْجَوَارِبِ' },
           ]}
           chart={<TableBox><SkipTable top="عَدَدُ الْأَزْوَاجِ" bottom="عَدَدُ الْجَوَارِبِ" a={1} b={2} n={4} /></TableBox>}
@@ -223,7 +225,7 @@ export default defineLesson({
           question="يُرِيدُ حُسَيْنٌ أَنْ يُوَصِّلَ ٦٠ صُنْدُوقًا إِلَى أَصْحَابِهَا، لَكِنَّ سَيَّارَتَهُ تَسَعُ ١٠ صَنَادِيقَ فَقَطْ. كَمْ مَرَّةً سَيَسْتَعْمِلُ سَيَّارَتَهُ لِيُوَصِّلَ الصَّنَادِيقَ جَمِيعَهَا؟"
           hint="كَمْ صُنْدُوقًا فِي كُلِّ مَرَّةٍ؟"
           steps={[
-            { text: 'نَعُدُّ بِالْعَشَرَاتِ حَتَّى ٦٠', hl: cols(6) },
+            { text: 'نَعُدُّ بِالْعَشَرَاتِ حَتَّى ٦٠', cells: cols(6) },
             { text: '٦ مَرَّاتٍ', kind: 'ans', label: 'عَدَدُ الْمَرَّاتِ' },
           ]}
           chart={<TableBox><SkipTable top="عَدَدُ الْمَرَّاتِ" bottom="عَدَدُ الصَّنَادِيقِ" a={1} b={10} n={6} /></TableBox>}
@@ -239,7 +241,7 @@ export default defineLesson({
           question="يَتَسَلَّمُ مَتْجَرُ بَسَّامٍ عُلَبَ الْعَصِيرِ فِي صَنَادِيقَ يَسَعُ كُلٌّ مِنْهَا ٤ عُلَبٍ. إِذَا كَانَ أَحْمَدُ بِحَاجَةٍ إِلَى ٢٠ عُلْبَةً مِنَ الْعَصِيرِ، فَكَمْ صُنْدُوقًا يَجِبُ أَنْ يَشْتَرِيَ؟"
           hint="كَمْ عُلْبَةً فِي كُلِّ صُنْدُوقٍ؟"
           steps={[
-            { text: 'نَعُدُّ بِالْأَرْبَعَاتِ حَتَّى ٢٠', hl: cols(5) },
+            { text: 'نَعُدُّ بِالْأَرْبَعَاتِ حَتَّى ٢٠', cells: cols(5) },
             { text: '٥ صَنَادِيقَ', kind: 'ans', label: 'عَدَدُ الصَّنَادِيقِ' },
           ]}
           chart={<TableBox><SkipTable top="عَدَدُ الصَّنَادِيقِ" bottom="عَدَدُ الْعُلَبِ" a={1} b={4} n={5} /></TableBox>}

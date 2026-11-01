@@ -4,7 +4,7 @@ import { TimerPill, V2Header, V2Progress } from './components/V2Chrome';
 import { num } from './digits';
 import { SECTION_NAMES, TEAM_COLORS, V2_TEAM_COLORS } from './sections';
 import { sBad, setMuted, sGood, sStar } from './sound';
-import { useStars, tally, weekStart } from './stars';
+import { absentToday, useStars, tally, weekStart } from './stars';
 import { useSaved } from './store';
 import { classesOf, gradeOf, setClass, setGrade, shuffleTeams, useRoster, type Klass } from './classes';
 import { ClassesModal, GroupsModal } from './components/Classes';
@@ -61,7 +61,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     updateRoster((r) => setGrade(r, grade, (g) => ({ ...g, last: id })));
   };
   /* نجم الأسبوع: مشترك بين كل الدروس، لطلاب الفصل المختار */
-  const { events: starEvents, add: addStarEvent, undo: undoStar, remove: removeStar } = useStars();
+  const { events: starEvents, add: addStarEvent, undo: undoStar, remove: removeStar, toggleAbsent } = useStars();
   const [starsOpen, setStarsOpen] = useState(false);
   const [starsReq, setStarsReq] = useState<{ n: number; a: 'podium' | 'next' }>({ n: 0, a: 'next' });
   const [cheer, setCheer] = useState<Cheer | null>(null);
@@ -264,6 +264,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'starUndo':
         if (klass) undoStar(klass.id);
         break;
+      case 'absent':
+        if (klass?.students.includes(c.s)) toggleAbsent(klass.id, c.s);
+        break;
       case 'starRemove':
         if (klass?.students.includes(c.s)) removeStar(klass.id, c.s, c.d > 0 ? 1 : -1);
         break;
@@ -379,7 +382,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         klass: klass?.id ?? '',
         wheelPicked: picked.length,
         stars: klass
-          ? { open: starsOpen, list: tally(starEvents, klass.id, klass.students, weekStart(Date.now())).map((r) => [r.name, r.stars, r.mistakes] as [string, number, number]) }
+          ? { open: starsOpen, list: tally(starEvents, klass.id, klass.students, weekStart(Date.now())).map((r) => [r.name, r.stars, r.mistakes, r.absences, absentToday(starEvents, klass.id, r.name) ? 1 : 0] as [string, number, number, number, number]) }
           : null,
         chart: slideApis.current[cur]?.chart()?.get() ?? null,
         family: slideApis.current[cur]?.family()?.get() ?? null,
@@ -701,6 +704,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             onPick={(n) => setPicked((p) => [...p, n])}
             onRestore={() => setPicked([])}
             remove={wheelRemove}
+            absent={klass ? klass.students.filter((n) => absentToday(starEvents, klass.id, n)) : []}
           />
           {teamsShown && klass && st.nTeams > 0 && <TeamsBoard klass={klass} names={st.names.slice(0, st.nTeams)} colors={v2 ? V2_TEAM_COLORS : TEAM_COLORS} onClose={() => setTeamsShown(false)} />}
           <StarsModal

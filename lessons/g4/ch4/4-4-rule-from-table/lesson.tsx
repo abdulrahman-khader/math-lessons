@@ -1,5 +1,5 @@
 import {
-  BookLabel, ChartQuestion, Flow, FnTable, Grid, Lines, OpQuestion, PencilTriangles, QuestionGroup, RuleMachine, Card, Cols, Ctrls, Definition, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton,
+  ShowLater,  BookLabel, ChartQuestion, Flow, FnTable, Grid, Lines, OpQuestion, PencilTriangles, QuestionGroup, RuleMachine, Card, Cols, Ctrls, Definition, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton,
   QCol, QText, QuestionSlide, RuleTable, SlideHead, Solution, Stack, Step, Winner, defineLesson,
   type Token,
 } from '@engine';
@@ -397,7 +397,7 @@ export default defineLesson({
             { text: 'نُقَارِنُ كُلَّ مُدْخَلَةٍ بمُخرَجَتِها، وأبحثُ عن عمليةٍ واحدةٍ (جمع أو ضرب) تصحُّ في جميعِ الأعمدةِ.' },
             { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'نَجِدُ عَمَلِيَّةً تَصِحُّ فِي كُلِّ الْأَزْوَاجِ.', kind: 'ans' },
           ]}
-          chart={<Card kind="ex" cap="خطوات">١) أقارن، ٢) أجرّب عملية، ٣) أتحقق في كل عمود، ٤) أطبّق</Card>}
+          chart={<ShowLater><Card kind="ex" cap="خطوات">١) أقارن، ٢) أجرّب عملية، ٣) أتحقق في كل عمود، ٤) أطبّق</Card></ShowLater>}
         />
       ),
     },
@@ -438,12 +438,12 @@ export default defineLesson({
             { text: 'فَيْصَلٌ بَعْدَ سَمِيرٍ، وَعَلِيٌّ لَيْسَ الْأَوَّلَ وَلَا الْأَخِيرَ.' },
             { label: 'التَّرْتِيبُ', text: 'سَمِيرٌ، فَيْصَلٌ، عَلِيٌّ، سَالِمٌ', kind: 'ans' },
           ]}
-          chart={
+          chart={<ShowLater>
             <Card kind="ex" cap="المواعيد">
               <Lines>
                 <b>١:٠٠، ٢:٠٠، ٣:٠٠، ٤:٠٠</b>
               </Lines>
-            </Card>
+            </Card></ShowLater>
           }
         />
       ),

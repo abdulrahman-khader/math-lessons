@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { num } from '../digits';
 import type { Klass } from '../classes';
-import { isThursday, lastEvent, pastWeeks, tally, topRows, weekLabel, weekStart, type StarEvent, type StarRow } from '../stars';
-import { sEnd, sGood } from '../sound';
+import { backup, isThursday, MAX_MISTAKES, lastEvent, pastWeeks, restore, starCounts, tally, topRows, weekLabel, weekRows, weekStart, type StarEvent, type StarRow } from '../stars';
+import { sPlace } from '../sound';
 import { IconStar } from './icons';
 
 interface Props {
@@ -31,13 +31,15 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
   const [tab, setTab] = useState<Tab>('week');
   /** آخر بطاقة تغيّرت، لوميضها: ذهبي للنجمة وأحمر للغلطة */
   const [flash, setFlash] = useState<{ name: string; d: 1 | -1; n: number } | null>(null);
-  const [arch, setArch] = useState(0);
+  /** أسبوع مفتوح من السجل على منصته، أو −١ للسجل كله */
+  const [arch, setArch] = useState(-1);
   /** الأعداد مخفية عند كل فتح، ولا تظهر للطلاب إلا إذا أظهرها المعلم */
   const [shown, setShown] = useState(false);
   useEffect(() => {
     if (open) {
       setTab(isThursday() ? 'podium' : 'week');
       setShown(false);
+      setArch(-1);
     }
   }, [open]);
   /** يزداد مع كل «أظهر التالي» من الجوال، فتكشف المنصة المفتوحة مركزًا */
@@ -55,7 +57,8 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
   useEffect(() => {
     if (!last || last.t === seen.current) return;
     seen.current = last.t;
-    setFlash((f) => ({ name: last.s, d: last.d, n: (f?.n ?? 0) + 1 }));
+    const d = last.d;
+    if (d !== 0) setFlash((f) => ({ name: last.s, d, n: (f?.n ?? 0) + 1 }));
   }, [last?.t]);
 
   if (!open) return null;
@@ -85,8 +88,8 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
               <button className={'btn' + (tab === 'podium' ? ' sel' : '')} onClick={() => setTab('podium')}>
                 نجوم الأسبوع الماضي
               </button>
-              <button className={'btn' + (tab === 'archive' ? ' sel' : '')} onClick={() => setTab('archive')} disabled={weeks.length < 2}>
-                الأرشيف
+              <button className={'btn' + (tab === 'archive' ? ' sel' : '')} onClick={() => setTab('archive')}>
+                سجل الأسابيع
               </button>
               {tab === 'week' && (
                 <button className={'btn sshow' + (shown ? ' sel' : '')} aria-pressed={shown} onClick={() => setShown((x) => !x)}>
@@ -117,12 +120,15 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
         ) : tab === 'week' ? (
           <>
             <p className="swk">
-              {weekLabel(cur)} — {shown ? 'المجموع = النجوم − الأغلاط' : 'النجوم مخفية'}
+              {weekLabel(cur)} — {shown ? `المجموع = النجوم − الأغلاط، ومن أخذ ${num(MAX_MISTAKES)} أغلاط لا يدخل نجوم الأسبوع` : 'النجوم مخفية'}
             </p>
             <div className="sgrid">
               {rows.map((r) => (
                 // مفتاح جديد مع كل ضغطة على البطاقة نفسها يعيد تشغيل الوميض
-                <div key={flash?.name === r.name ? `${r.name}-${flash.n}` : r.name} className={'scard' + (flash?.name === r.name ? (flash.d > 0 ? ' up' : ' down') : '')}>
+                <div
+                  key={flash?.name === r.name ? `${r.name}-${flash.n}` : r.name}
+                  className={'scard' + (flash?.name === r.name ? (flash.d > 0 ? ' up' : ' down') : '') + (shown && r.barred ? ' barred' : '')}
+                >
                   <button className="sb up" aria-label={`نجمة لـ${r.name}`} onClick={() => give(r.name, 1)}>
                     <IconStar />
                   </button>
@@ -134,8 +140,10 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
                           <IconStar /> {num(r.stars)}
                         </span>
                         <span className="mi">✖ {num(r.mistakes)}</span>
+                        {r.absences > 0 && <span className="ab">غ {num(r.absences)}</span>}
                       </span>
                     )}
+                    {shown && r.barred && <span className="sbar">لا يدخل نجم الأسبوع</span>}
                   </span>
                   <span className={'stot' + (shown ? '' : ' hid')} title="المجموع">
                     {shown ? num(r.total) : '؟'}
@@ -148,7 +156,7 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
             </div>
             {last && (
               <button className="btn sundo" onClick={onUndo}>
-                تراجع عن آخر ضغطة: {last.d > 0 ? 'نجمة لـ' : 'غلطة على '}
+                تراجع عن آخر ضغطة: {last.d > 0 ? 'نجمة لـ' : last.d < 0 ? 'غلطة على ' : 'غياب '}
                 {last.s}
               </button>
             )}
@@ -156,18 +164,18 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
         ) : tab === 'now' ? (
           <Podium key={`now-${cur}`} rows={rows} label={weekLabel(cur)} next={nextReq} soFar />
         ) : tab === 'podium' ? (
-          <Podium key={`last-${cur}`} rows={tally(events, klass.id, klass.students, weekStart(cur - 1))} label={weekLabel(weekStart(cur - 1))} next={nextReq} />
-        ) : (
+          <Podium key={`last-${cur}`} rows={weekRows(events, klass.id, klass.students, weekStart(cur - 1))} label={weekLabel(weekStart(cur - 1))} next={nextReq} />
+        ) : arch >= 0 && weeks[arch] != null ? (
           <>
             <div className="crow">
-              {weeks.slice(1).map((w, i) => (
-                <button key={w} className={'btn' + (i === arch ? ' sel' : '')} onClick={() => setArch(i)}>
-                  {weekLabel(w)}
-                </button>
-              ))}
+              <button className="btn" onClick={() => setArch(-1)}>
+                كل الأسابيع
+              </button>
             </div>
-            {weeks[arch + 1] != null && <Podium key={`arch-${weeks[arch + 1]}`} rows={tally(events, klass.id, klass.students, weeks[arch + 1])} label={weekLabel(weeks[arch + 1])} next={nextReq} />}
+            <Podium key={`arch-${weeks[arch]}`} rows={weekRows(events, klass.id, klass.students, weeks[arch])} label={weekLabel(weeks[arch])} next={nextReq} />
           </>
+        ) : (
+          <History events={events} klass={klass} weeks={weeks} onOpen={setArch} />
         )}
       </div>
     </div>
@@ -187,11 +195,11 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
   /** عدد الأعمدة الظاهرة؛ الكشف من آخر طالب إلى الأول */
   const [shown, setShown] = useState(0);
   const all = shown >= top.length;
+  // كل مركز بصوته: الكشف من آخر طالب، فالذي يظهر الآن هو top[top.length − n − 1]
   const reveal = () =>
     setShown((n) => {
       if (n >= top.length) return n;
-      if (n + 1 === top.length) sEnd();
-      else sGood();
+      sPlace(top[top.length - n - 1].rank);
       return n + 1;
     });
   const lastNext = useRef(next);
@@ -212,6 +220,8 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
 
   if (!top.length) return <p className="sempty">لا نجوم في أسبوع {label}.</p>;
   const isShown = (i: number) => i >= top.length - shown;
+  /** ظهر صاحب المركز الأول: قصاصات فوق المنصة */
+  const firstOut = top.some((r, i) => r.rank === 1 && isShown(i));
   return (
     <div className="podium">
       <div className="crow">
@@ -227,6 +237,7 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
         </button>
       </div>
       <div className={'psteps' + (top.length > 5 ? ' many' : '')} style={{ gridTemplateColumns: `repeat(${cols.length}, 1fr)` }}>
+        {firstOut && <Confetti />}
         {cols.map(({ r, i }) => (
           <div key={r.name} className={`pstep p${r.rank}` + (isShown(i) ? ' on' : '')}>
             <div className="pnames">
@@ -354,6 +365,100 @@ export function StarCheer({ cheer, klass, onDone }: { cheer: Cheer | null; klass
         {!bad && <div className="cheer-msg">نجمة جديدة</div>}
         <div className="cheer-name">{cheer.name}</div>
       </div>
+    </div>
+  );
+}
+
+/** «ضغطة واحدة»، «ضغطتان»، «٣ ضغطات»، «١٢ ضغطة» */
+const presses = (n: number) => (n === 1 ? 'ضغطة واحدة' : n === 2 ? 'ضغطتان' : n <= 10 ? `${num(n)} ضغطات` : `${num(n)} ضغطة`);
+
+/**
+ * سجل الأسابيع: كل أسبوع سابق بنجومه (لا يُحذف شيء مع الوقت)، وكم مرة كان كل طالب نجم الأسبوع.
+ * ونسخة احتياطية تُنزَّل ملفًا وتُسترجع، فلا تضيع النجوم إن مُسحت بيانات المتصفح.
+ */
+function History({ events, klass, weeks, onOpen }: { events: StarEvent[]; klass: Klass; weeks: number[]; onOpen: (i: number) => void }) {
+  const [msg, setMsg] = useState('');
+  const counts = starCounts(events, klass.id, klass.students);
+  const save = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([backup()], { type: 'application/json' }));
+    const d = new Date();
+    a.download = `نجوم-${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  const load = async (f: File | undefined) => {
+    if (!f) return;
+    const n = restore(await f.text());
+    if (n === null) setMsg('هذا الملف ليس نسخة نجوم.');
+    else {
+      setMsg(n ? `استُرجع ${presses(n)}.` : 'كل ما في النسخة موجود هنا من قبل.');
+      if (n) setTimeout(() => location.reload(), 900);
+    }
+  };
+  return (
+    <div className="shist">
+      <div className="crow">
+        <p className="swk">كل الأسابيع محفوظة، ولا يُحذف منها شيء.</p>
+        <span className="sp" />
+        <button className="btn" onClick={save}>
+          تنزيل نسخة احتياطية
+        </button>
+        <label className="btn">
+          استرجاع نسخة
+          <input type="file" accept="application/json,.json" hidden onChange={(e) => load(e.target.files?.[0])} />
+        </label>
+      </div>
+      {msg && <p className="swk">{msg}</p>}
+      {!weeks.length ? (
+        <p className="sempty">لا أسابيع سابقة بعد: تظهر هنا بعد أول أسبوع فيه نجوم.</p>
+      ) : (
+        <div className="shcols">
+          <ol className="sweeks">
+            {weeks.map((w, i) => {
+              const top = topRows(weekRows(events, klass.id, klass.students, w));
+              return (
+                <li key={w}>
+                  <button onClick={() => onOpen(i)}>
+                    <b>{weekLabel(w)}</b>
+                    <span>
+                      {top.length
+                        ? top.map((r, j) => (
+                            <span key={r.name} className="swho">
+                              {j > 0 && '، '}
+                              <bdi>{r.name}</bdi> <IconStar /> {num(r.total)}
+                            </span>
+                          ))
+                        : 'لا نجوم في هذا الأسبوع'}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+          <div className="scounts">
+            <b>مرات نجم الأسبوع</b>
+            {counts.length ? (
+              <table>
+                <tbody>
+                  {counts.map((c) => (
+                    <tr key={c.name}>
+                      <td>
+                        <bdi>{c.name}</bdi>
+                      </td>
+                      <td>
+                        <IconStar /> {num(c.n)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="swk">لا أحد بعد.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

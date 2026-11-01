@@ -85,12 +85,20 @@ async function openWithClass(page: Page, errors: string[]) {
   await expect(page.locator('#stage')).toBeVisible();
 }
 
+/** أداة من رأس الدرس: في التصميم الجديد داخل قائمة ⋯ */
+async function openTool(page: Page, name: string) {
+  if (await page.locator('.v2dots').count()) {
+    await page.locator('.v2dots').click();
+    await page.getByRole('menuitem', { name, exact: true }).click();
+  } else await page.getByRole('button', { name }).click();
+}
+
 const card = (page: Page, name: string) => page.locator('.scard', { has: page.locator('.sname', { hasText: new RegExp(`^${name}$`) }) });
 
 test('لوحة النجوم: نجمة وغلطة ومجموع وتراجع، وتبقى بعد إعادة الفتح', async ({ page }) => {
   const errors: string[] = [];
   await openWithClass(page, errors);
-  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  await openTool(page, 'نجم الأسبوع');
   const box = page.locator('.sbox');
   await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
   // الأعداد مخفية حتى يُظهرها المعلم
@@ -108,7 +116,7 @@ test('لوحة النجوم: نجمة وغلطة ومجموع وتراجع، و�
   await box.getByRole('button', { name: /تراجع عن آخر ضغطة: غلطة على أحمد/ }).click();
   await expect(card(page, 'أحمد').locator('.scount')).toContainText('✖ ٠');
   await page.reload();
-  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  await openTool(page, 'نجم الأسبوع');
   await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
   await expect(card(page, 'محمد').locator('.stot')).toHaveText('؟'); // تعود مخفية عند كل فتح
   await box.getByRole('button', { name: 'إظهار النجوم' }).click();
@@ -124,7 +132,7 @@ test('لوحة النجوم: نجمة وغلطة ومجموع وتراجع، و�
 test('النجمة والغلطة تُعلنان على الشاشة باسم الطالب', async ({ page }) => {
   const errors: string[] = [];
   await openWithClass(page, errors);
-  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  await openTool(page, 'نجم الأسبوع');
   const box = page.locator('.sbox');
   await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
   await box.locator('[aria-label="غلطة على أحمد"]').click();
@@ -155,7 +163,7 @@ test('منصة نجوم الأسبوع الماضي مرتّبة، وتُكشف 
     localStorage.setItem('stars', JSON.stringify({ events: ev }));
   });
   await page.reload();
-  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  await openTool(page, 'نجم الأسبوع');
   await page.locator('.sbox').getByRole('button', { name: 'نجوم الأسبوع الماضي' }).click();
   // مخفية في البداية
   await expect(page.locator('.pstep.on')).toHaveCount(0);
@@ -174,7 +182,7 @@ test('العجلة على شاشة الفصل: الاسم الفائز كبير�
   const errors: string[] = [];
   await openWithClass(page, errors);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.getByRole('button', { name: 'عجلة الأسماء' }).click();
+  await openTool(page, 'عجلة الأسماء');
   const wheel = page.getByRole('dialog', { name: 'عجلة الأسماء' });
   await expect(wheel.locator('.wname')).toHaveText('؟');
   await wheel.getByRole('button', { name: 'أدِر العجلة' }).click();
@@ -207,7 +215,7 @@ test('المنصة: عمود لكل طالب، والمتعادلون بالمر
     localStorage.setItem('stars', JSON.stringify({ events: ev }));
   }, names);
   await page.reload();
-  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  await openTool(page, 'نجم الأسبوع');
   await page.locator('.sbox').getByRole('button', { name: 'نجوم الأسبوع الماضي' }).click();
   await expect(page.locator('.pstep')).toHaveCount(8);
   await page.getByRole('button', { name: 'ابدأ من المركز الأخير' }).click();
@@ -244,9 +252,93 @@ test('صفحة نجم الأسبوع من قائمة الدروس: الصف وا
   await expect(card(page, 'سعد')).toBeVisible();
   // النجمة نفسها تظهر في درس من الصف الثاني
   await page.goto(pathToFileURL(path.join(dist, file)).href);
-  await page.getByRole('button', { name: 'نجم الأسبوع' }).click();
+  await openTool(page, 'نجم الأسبوع');
   await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
   await box.getByRole('button', { name: 'إظهار النجوم' }).click();
   await expect(card(page, 'محمد').locator('.stot')).toHaveText('١');
+  expect(errors).toEqual([]);
+});
+
+test('سجل الأسابيع: كل الأسابيع محفوظة ولا يُحذف منها شيء، ونسخة احتياطية تُسترجع', async ({ page }) => {
+  const errors: string[] = [];
+  await openWithClass(page, errors);
+  // نجوم قبل ٣٠ أسبوعًا وقبل أسبوعين، لطالب حُذف اسمه من الفصل بعد ذلك
+  await page.evaluate(() => {
+    const w = 7 * 86400000;
+    const now = Date.now();
+    const ev = [
+      ...Array.from({ length: 3 }, (_, i) => ({ t: now - 30 * w + i, k: 'k1', s: 'محمد', d: 1 })),
+      ...Array.from({ length: 2 }, (_, i) => ({ t: now - 2 * w + i, k: 'k1', s: 'سالم', d: 1 })),
+    ];
+    localStorage.setItem('stars', JSON.stringify({ events: ev }));
+  });
+  await page.reload();
+  await openTool(page, 'نجم الأسبوع');
+  const box = page.locator('.sbox');
+  // نجمة جديدة هذا الأسبوع لا تحذف الأسابيع القديمة
+  await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
+  await box.locator('[aria-label="نجمة لـأحمد"]').click();
+  await expect(page.locator('.cheer')).toHaveCount(0, { timeout: 6000 });
+  await box.getByRole('button', { name: 'سجل الأسابيع' }).click();
+  await expect(box.locator('.sweeks li')).toHaveCount(2);
+  await expect(box.locator('.sweeks li').last()).toContainText('محمد');
+  await expect(box.locator('.sweeks li').first()).toContainText('سالم');
+  await expect(box.locator('.scounts')).toContainText('محمد');
+  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('stars')!).events.length);
+  expect(kept).toBe(6);
+  // أسبوع من السجل يُفتح على منصته
+  await box.locator('.sweeks li').last().locator('button').click();
+  await box.getByRole('button', { name: 'أظهر الكل' }).click();
+  await expect(page.locator('.p1 .pwho b')).toHaveText('محمد');
+  // النسخة الاحتياطية تُنزَّل، وتُسترجع على جهاز فارغ
+  await box.getByRole('button', { name: 'كل الأسابيع' }).click();
+  const dl = page.waitForEvent('download');
+  await box.getByRole('button', { name: 'تنزيل نسخة احتياطية' }).click();
+  const file = await (await dl).path();
+  await page.evaluate(() => localStorage.removeItem('stars'));
+  await page.reload();
+  await openTool(page, 'نجم الأسبوع');
+  await box.getByRole('button', { name: 'سجل الأسابيع' }).click();
+  await box.locator('input[type=file]').setInputFiles(file!);
+  await expect(box).toContainText('استُرجع ٦ ضغطات');
+  await page.waitForLoadState('load');
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('stars') ?? '{"events":[]}').events.length)).toBe(6);
+  expect(errors).toEqual([]);
+});
+
+test('من أخذ ٣ أغلاط لا يدخل نجوم الأسبوع، والغياب يفصل بين المتعادلين فقط', () => {
+  const from = at(2026, 10, 22, 0);
+  const ev: StarEvent[] = [];
+  const give = (s: string, stars: number, mistakes = 0, absences = 0) => {
+    for (let i = 0; i < stars; i++) ev.push({ t: from + 1000 + i, k: 'a', s, d: 1 });
+    for (let i = 0; i < mistakes; i++) ev.push({ t: from + 2000 + i, k: 'a', s, d: -1 });
+    for (let i = 0; i < absences; i++) ev.push({ t: from + 3000 + i, k: 'a', s, d: 0 });
+  };
+  give('سعد', 12, 3); // ٩، لكن ٣ أغلاط: محروم
+  give('علي', 6, 0, 2); // ٦ وغاب يومين
+  give('فهد', 6); // ٦ ولم يغب: يسبق عليًّا
+  give('خالد', 9, 0, 3); // ٩: الغياب لا ينقص مجموعه
+  const rows = tally(ev, 'a', ['سعد', 'علي', 'فهد', 'خالد'], from);
+  const by = Object.fromEntries(rows.map((r) => [r.name, r]));
+  expect(by['سعد'].barred).toBe(true);
+  expect(by['خالد'].total).toBe(9);
+  expect(topRows(rows).map((r) => [r.name, r.rank])).toEqual([
+    ['خالد', 1],
+    ['فهد', 2],
+    ['علي', 3],
+  ]);
+});
+
+test('من أخذ ٣ أغلاط تظهر بطاقته بعلامة الحرمان بعد «إظهار النجوم»', async ({ page }) => {
+  const errors: string[] = [];
+  await openWithClass(page, errors);
+  await openTool(page, 'نجم الأسبوع');
+  const box = page.locator('.sbox');
+  await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
+  for (let i = 0; i < 3; i++) await box.locator('[aria-label="غلطة على أحمد"]').click();
+  await expect(card(page, 'أحمد')).not.toHaveClass(/barred/); // مخفية حتى يُظهرها المعلم
+  await box.getByRole('button', { name: 'إظهار النجوم' }).click();
+  await expect(card(page, 'أحمد')).toHaveClass(/barred/);
+  await expect(card(page, 'أحمد')).toContainText('لا يدخل نجم الأسبوع');
   expect(errors).toEqual([]);
 });

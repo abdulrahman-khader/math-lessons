@@ -1,6 +1,6 @@
 # New lesson design (v2): rules
 
-These are the rules for moving every lesson to the new design. They come from how lesson 4-1 v2 (`lessons/g4/ch4/4-1-expressions-sentences-v2/`) was built and from the teacher's feedback while it was built. `CLAUDE.md` still applies in full: content style, Arabic and RTL rules, digits, tests. Where the two disagree on visual design, this file wins.
+These are the rules for moving every lesson to the new design. They come from how lesson 4-1 (`lessons/g4/ch4/4-1-expressions-sentences/`) was built and from the teacher's feedback while it was built. `CLAUDE.md` still applies in full: content style, Arabic and RTL rules, digits, tests. Where the two disagree on visual design, this file wins.
 
 The reference implementation is `src/engine/styles/v2.css`, `src/engine/components/V2Chrome.tsx`, and the components that check `useV2()` (QuestionSlide, Steps, Counters, DataViz, MCQ, Cubes, Home). When this file and the code disagree, fix one of them so they agree again.
 

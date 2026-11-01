@@ -1,13 +1,14 @@
 import {
-  Card, Cols, Ctrls, DataGrid, GoHomeButton, GridBars, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution,
-  Stack, Step, Winner, defineLesson, type Cell, type GridBar, type HlKey,
+  Card, Cols, DataGrid, Definition, ExitTicket, Goals, GoHomeButton, Grid, GridBars, IfTeams, Mark, MCQ, MindMap, QCol, QText,
+  QuestionSlide, SlideHead, Solution, Stack, Step, TableBox, Winner, defineLesson, type Cell, type GridBar, type HlKey,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const CHECK = 'أتأكَّدُ · ص ٩٤';
-const PRACTICE = 'أتدرَّبُ · ص ٩٥';
+const CHECK = 'أتأكَّدُ، ص ٩٤';
+const PRACTICE = 'أتدرَّبُ، ص ٩٥';
+const SUGGESTED = 'إِجَابَةٌ مُقْتَرَحَةٌ';
 
 type Row = [label: string, n: number, color: string];
 
@@ -31,13 +32,14 @@ const HANDS: Row[] = [['الْيُسْرَى', 4, '#f6a54a'], ['الْيُمْن
 export default defineLesson({
   meta: {
     id: 'g2-4-5-bar-graph',
+    design: 'v2',
     code: '٤-٥',
     title: 'التَّمْثِيلُ بِالأَعْمِدَةِ',
     shortTitle: 'التمثيل بالأعمدة',
     subject: 'الرياضيات',
     grade: 'الصف الثاني الابتدائي',
     chapter: 'الفصل الرابع: تمثيل البيانات وقراءتها',
-    source: 'الجزء الأول · ص ٩٤–٩٥',
+    source: 'الجزء الأول، ص ٩٤–٩٥',
     minutes: 45,
     idea: 'أُمَثِّلُ الْبَيَانَاتِ بِالأَعْمِدَةِ مِنْ جَدْوَلِ الإِشَارَاتِ.',
     bookQuestions: 5,
@@ -49,7 +51,7 @@ export default defineLesson({
     elab: 'نعمل معًا',
     check: 'الأسئلة ١–٢',
     practice: 'الأسئلة ٣–٥',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -65,11 +67,13 @@ export default defineLesson({
               <Card kind="rule" cap="المفردات"><Mark>التَّمْثِيلُ بِالأَعْمِدَةِ</Mark></Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, lineHeight: 1.7 }}>
-                <li>ألوّن مربعًا واحدًا لكل استجابة.</li>
-                <li>أمثّل البيانات بأعمدة أفقية أو رأسية.</li>
-                <li>أقارن الأعمدة بالنظر إلى طولها.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أُلَوِّنُ مُرَبَّعًا وَاحِدًا لِكُلِّ اسْتِجَابَةٍ.',
+                  'أُمَثِّلُ الْبَيَانَاتِ بِأَعْمِدَةٍ أُفُقِيَّةٍ أَوْ رَأْسِيَّةٍ.',
+                  'أُقَارِنُ الْأَعْمِدَةَ بِالنَّظَرِ إِلَى طُولِهَا.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -79,15 +83,15 @@ export default defineLesson({
     /* ================= تهيئة ================= */
     {
       sec: 'engage', min: 2,
-      notes: 'مراجعة الدرس ٤-٢.',
+      notes: 'مراجعة الدرس ٤-٢. ثم اسأل سؤال التفكير قبل الانتقال.',
       content: (
         <>
-          <SlideHead tag="تذكّر · الدرس ٤-٢" kind="ink">التمثيل بالصور</SlideHead>
-          <div className="qgrid two">
-            <MCQ q="المفتاح: كل صورة = ٢. كم صورة لـ ٦ طلاب؟" options={['٣', '٦', '٢']} answer="٣" award />
-            <MCQ q="في جدول الإشارات: |||| كم تعني؟" options={['٣', '٤', '٥']} answer="٤" award />
-          </div>
-          <Card kind="qs" cap="سؤال للتفكير">هل نستطيع أن نعرض البيانات بمربعات ملوّنة بدل الصور؟</Card>
+          <SlideHead tag="تذكّر، الدرس ٤-٢" kind="ink">التمثيل بالصور</SlideHead>
+          <Grid cols={2}>
+            <MCQ q="الْمِفْتَاحُ: كُلُّ صُورَةٍ = ٢. كَمْ صُورَةً لِـ ٦ طُلَّابٍ؟" options={['٣', '٦', '٢']} answer="٣" award />
+            <MCQ q="فِي جَدْوَلِ الْإِشَارَاتِ: |||| كَمْ تَعْنِي؟" options={['٣', '٤', '٥']} answer="٤" award />
+          </Grid>
+          <Card kind="qs" cap="سؤال للتفكير">هَلْ نَسْتَطِيعُ أَنْ نَعْرِضَ الْبَيَانَاتِ بِمُرَبَّعَاتٍ مُلَوَّنَةٍ بَدَلَ الصُّوَرِ؟</Card>
         </>
       ),
     },
@@ -95,24 +99,25 @@ export default defineLesson({
     /* ================= استكشاف ================= */
     {
       sec: 'explore', min: 4,
-      notes: 'كل ضغطة تلوّن عمودًا. اطلب من طالب أن يعدّ المربعات بصوت مرتفع.',
+      notes: 'كل خطوة تلوّن عمودًا. اطلب من طالب أن يعدّ المربعات بصوت مرتفع.',
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">من الإشارات إلى المربعات</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">أُلَوِّنُ مُرَبَّعًا وَاحِدًا لِكُلِّ اسْتِجَابَةٍ.</p>
-              <Ctrls><NextButton /></Ctrls>
+              <QText>أُلَوِّنُ مُرَبَّعًا وَاحِدًا لِكُلِّ اسْتِجَابَةٍ.</QText>
               <Solution>
-                <Step hl={upTo(0)}>فطيرة الجبن: ٤ مربعات</Step>
-                <Step hl={upTo(1)}>فطيرة البيض: ٥ مربعات</Step>
-                <Step hl={upTo(2)} kind="ans">فطيرة المربى: مربعان</Step>
+                <Step hl={upTo(0)}>فَطِيرَةُ الْجُبْنِ: ٤ مُرَبَّعَاتٍ</Step>
+                <Step hl={upTo(1)}>فَطِيرَةُ الْبَيْضِ: ٥ مُرَبَّعَاتٍ</Step>
+                <Step hl={upTo(2)}>فَطِيرَةُ الْمُرَبَّى: مُرَبَّعَانِ</Step>
               </Solution>
             </QCol>
-            <Stack>
-              <Tallies head="الإِفْطَارُ الْمُفَضَّلُ" rows={PASTRY} />
-              <GridBars title="الإِفْطَارُ الْمُفَضَّلُ" bars={bars(PASTRY)} max={5} catTitle="نَوْعُ الطَّعَامِ" reveal />
-            </Stack>
+            <TableBox>
+              <Stack>
+                <Tallies head="الإِفْطَارُ الْمُفَضَّلُ" rows={PASTRY} />
+                <GridBars title="الإِفْطَارُ الْمُفَضَّلُ" bars={bars(PASTRY)} max={5} catTitle="نَوْعُ الطَّعَامِ" reveal />
+              </Stack>
+            </TableBox>
           </Cols>
         </>
       ),
@@ -124,10 +129,10 @@ export default defineLesson({
       notes: 'اقرأ القاعدة. قارن الشكلين: الأفقي والرأسي، والبيانات نفسها.',
       content: (
         <>
-          <SlideHead tag="أستعدُّ · ص ٩٤" kind="rule">التمثيل بالأعمدة</SlideHead>
-          <Card kind="rule" style={{ fontSize: '.95em', fontWeight: 700, lineHeight: 1.8 }}>
+          <SlideHead tag="أستعدُّ، ص ٩٤" kind="rule">التمثيل بالأعمدة</SlideHead>
+          <Definition kind="rule">
             أَسْتَعْمِلُ <Mark>التَّمْثِيلَ بِالأَعْمِدَةِ</Mark> لِعَرْضِ الْبَيَانَاتِ. وَلِكَيْ أُنَفِّذَ تَمْثِيلًا بِالأَعْمِدَةِ فَإِنَّنِي أُلَوِّنُ مُرَبَّعًا وَاحِدًا لِكُلِّ اسْتِجَابَةٍ. وَيَظْهَرُ التَّمْثِيلُ بِالأَعْمِدَةِ فِي شَكْلَيْنِ مُخْتَلِفَيْنِ.
-          </Card>
+          </Definition>
           <Cols even>
             <Card kind="ex" cap="الشَّكْلُ الأَوَّلُ">
               <GridBars title="الإِفْطَارُ الْمُفَضَّلُ" bars={bars(PASTRY)} max={5} catTitle="نَوْعُ الطَّعَامِ" />
@@ -161,8 +166,8 @@ export default defineLesson({
           <SlideHead tag="نعمل معًا" kind="ex">الإفطار المفضل</SlideHead>
           <Cols>
             <QCol>
-              <MCQ q="كم مربعًا نلوّن لفطيرة البيض؟" options={['٤', '٥', '٢']} answer="٥" award />
-              <MCQ q="أيّ عمود أقصر؟" options={['فطيرة الجبن', 'فطيرة البيض', 'فطيرة المربى']} answer="فطيرة المربى" award />
+              <MCQ q="كَمْ مُرَبَّعًا نُلَوِّنُ لِفَطِيرَةِ الْبَيْضِ؟" options={['٤', '٥', '٢']} answer="٥" award />
+              <MCQ q="أَيُّ عَمُودٍ أَقْصَرُ؟" options={['فَطِيرَةُ الْجُبْنِ', 'فَطِيرَةُ الْبَيْضِ', 'فَطِيرَةُ الْمُرَبَّى']} answer="فَطِيرَةُ الْمُرَبَّى" award />
             </QCol>
             <GridBars title="الإِفْطَارُ الْمُفَضَّلُ" bars={bars(PASTRY)} max={5} vertical />
           </Cols>
@@ -173,38 +178,37 @@ export default defineLesson({
     /* ================= أتأكد ١–٢ ================= */
     {
       sec: 'check', min: 3,
-      notes: 'كل ضغطة تلوّن صفًا. اطلب من الطلاب التلوين في كتبهم معًا.',
+      notes: 'كل خطوة تلوّن صفًا. اطلب من الطلاب التلوين في كتبهم معًا.',
       content: (
         <QuestionSlide
           source={CHECK} n={1} time={120}
           question="أَسْتَعْمِلُ جَدْوَلَ الإِشَارَاتِ لِتَمْثِيلِ الْبَيَانَاتِ بِالأَعْمِدَةِ:"
-          hint="أعدّ إشارات كل صف، وألوّن العدد نفسه من المربعات."
+          hint="كَمْ إِشَارَةً فِي كُلِّ صَفٍّ؟"
           steps={[
-            { text: 'الفول ٣ مربعات، الجبن ٤', hl: upTo(1) },
-            { text: 'الفلافل ٢، الزعتر ١', hl: upTo(3) },
-            { text: 'البيض ٥ مربعات', hl: upTo(4), kind: 'ans' },
+            { text: 'الْفُولُ ٣، وَالْجُبْنُ ٤', hl: upTo(1) },
+            { text: 'الْفَلَافِلُ ٢، وَالزَّعْتَرُ ١', hl: upTo(3) },
+            { text: 'الْبَيْضُ ٥', hl: upTo(4) },
           ]}
           chart={
-            <div className="pgpair">
-              <Tallies head="الإِفْطَارُ الْمُفَضَّلُ" rows={FOOD} />
-              <GridBars title="الإِفْطَارُ الْمُفَضَّلُ" bars={bars(FOOD)} max={5} catTitle="نَوْعُ الطَّعَامِ" reveal />
-            </div>
+            <TableBox>
+              <Stack>
+                <Tallies head="الإِفْطَارُ الْمُفَضَّلُ" rows={FOOD} />
+                <GridBars title="الإِفْطَارُ الْمُفَضَّلُ" bars={bars(FOOD)} max={5} catTitle="نَوْعُ الطَّعَامِ" reveal />
+              </Stack>
+            </TableBox>
           }
         />
       ),
     },
     {
       sec: 'check', min: 1,
-      notes: 'أتحدث: اطلب من طالبين أن يشرحا.',
+      notes: 'أتحدث: اطلب من طالبين أن يشرحا. اقبل كل إجابة معقولة.',
       content: (
         <QuestionSlide
           source={CHECK} n={2} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="مَا وَجْهُ الاخْتِلَافِ بَيْنَ التَّمْثِيلِ بِالأَعْمِدَةِ وَالتَّمْثِيلِ بِالصُّوَرِ؟"
-          hint="ماذا يمثّل المربع؟ وماذا تمثّل الصورة؟"
-          steps={[
-            { text: 'في التمثيلِ بالأعمدةِ ألوّنُ مربعًا لكلِّ استجابةٍ.' },
-            { text: 'وفي التمثيلِ بالصورِ تدلُّ الصورةُ على استجابةٍ أو أكثرَ حسبَ المفتاحِ.', kind: 'ans' },
-          ]}
+          hint="مَاذَا يُمَثِّلُ الْمُرَبَّعُ؟ وَمَاذَا تُمَثِّلُ الصُّورَةُ؟"
+          steps={[{ text: 'الْمُرَبَّعُ اسْتِجَابَةٌ وَاحِدَةٌ، وَالصُّورَةُ حَسَبَ الْمِفْتَاحِ.', kind: 'ans', label: SUGGESTED }]}
           chart={<GridBars title="الإِفْطَارُ الْمُفَضَّلُ" bars={bars(FOOD)} max={5} />}
         />
       ),
@@ -218,17 +222,19 @@ export default defineLesson({
         <QuestionSlide
           source={PRACTICE} n={3} time={150}
           question="أُكْمِلُ جَدْوَلَ الإِشَارَاتِ، ثُمَّ أَسْتَعْمِلُهُ لِتَمْثِيلِ الْبَيَانَاتِ بِالأَعْمِدَةِ:"
-          hint="العدد = عدد الإشارات = عدد المربعات."
+          hint="كَمْ إِشَارَةً فِي كُلِّ صَفٍّ؟"
           steps={[
-            { text: 'أحمر ٤، أزرق ٦', hl: upTo(1) },
-            { text: 'أسود ٢، أخضر ٥', hl: upTo(3) },
-            { text: 'أبيض ٣ (طول كل عمود بعدد المربعات نفسه)', hl: upTo(4), kind: 'ans' },
+            { text: 'أَحْمَرُ ٤، وَأَزْرَقُ ٦', hl: upTo(1) },
+            { text: 'أَسْوَدُ ٢، وَأَخْضَرُ ٥', hl: upTo(3) },
+            { text: 'أَبْيَضُ ٣', hl: upTo(4) },
           ]}
           chart={
-            <div className="pgpair">
-              <Tallies head="لَوْنُ الْقَمِيصِ" rows={SHIRTS} count />
-              <GridBars title="لَوْنُ الْقَمِيصِ" bars={bars(SHIRTS)} max={6} catTitle="الأَلْوَانُ" valTitle="عَدَدُ الطُّلَّابِ" reveal tone="#c8e6c9" />
-            </div>
+            <TableBox>
+              <Stack>
+                <Tallies head="لَوْنُ الْقَمِيصِ" rows={SHIRTS} count />
+                <GridBars title="لَوْنُ الْقَمِيصِ" bars={bars(SHIRTS)} max={6} catTitle="الأَلْوَانُ" valTitle="عَدَدُ الطُّلَّابِ" reveal />
+              </Stack>
+            </TableBox>
           }
         />
       ),
@@ -240,16 +246,16 @@ export default defineLesson({
         <QuestionSlide
           source={PRACTICE} n={4} time={90}
           question="أُكْمِلُ جَدْوَلَ الإِشَارَاتِ، ثُمَّ أَسْتَعْمِلُهُ لِتَمْثِيلِ الْبَيَانَاتِ بِالأَعْمِدَةِ:"
-          hint="ألوّن من الأسفل إلى الأعلى."
+          hint="مِنْ أَيْنَ نَبْدَأُ التَّلْوِينَ؟"
           steps={[
-            { text: 'اليسرى ٤ مربعات', hl: upTo(0) },
-            { text: 'اليمنى ٦ مربعات', hl: upTo(1), kind: 'ans' },
+            { text: 'الْيُسْرَى ٤ مُرَبَّعَاتٍ', hl: upTo(0) },
+            { text: 'الْيُمْنَى ٦ مُرَبَّعَاتٍ', hl: upTo(1) },
           ]}
           chart={
-            <div className="row" style={{ gap: '.6em', alignItems: 'center', fontSize: '.85em' }}>
+            <TableBox>
               <Tallies head="يَكْتُبُ بِالْيَدِ" rows={HANDS} count />
               <GridBars title="يَكْتُبُ بِيَدِهِ الْيُمْنَى أَوِ الْيُسْرَى" bars={bars(HANDS)} max={7} vertical valTitle="عَدَدُ الطُّلَّابِ" reveal />
-            </div>
+            </TableBox>
           }
         />
       ),
@@ -258,17 +264,14 @@ export default defineLesson({
     /* ================= أتدرب ٥ ================= */
     {
       sec: 'practice', min: 1,
-      notes: 'أكتب: كل طالب يكتب جملتين.',
+      notes: 'أكتب: كل طالب يكتب جملة. اقبل كل إجابة معقولة.',
       content: (
         <QuestionSlide
           source={PRACTICE} n={5} tags={[{ kind: 'warn', text: 'أكتُبُ' }]}
           question="لِمَاذَا أَحْتَاجُ إِلَى تَمْثِيلِ الْبَيَانَاتِ فِي أَعْمِدَةٍ بَدَلًا مِنْ جَدْوَلِ الإِشَارَاتِ؟"
-          hint="انظر إلى التمثيل: كيف تعرف الأكثر بسرعة؟"
-          steps={[
-            { text: 'لأنَّ الأعمدةَ تُظهرُ المقارنةَ بين الفئاتِ بوضوحٍ وسرعةٍ.' },
-            { text: 'فأعرفُ الأكثرَ والأقلَّ بمجرّدِ النظرِ إلى طولِ العمودِ دون عدِّ الإشاراتِ.', kind: 'ans' },
-          ]}
-          chart={<GridBars title="لَوْنُ الْقَمِيصِ" bars={bars(SHIRTS)} max={6} tone="#c8e6c9" />}
+          hint="كَيْفَ نَعْرِفُ الْأَكْثَرَ بِسُرْعَةٍ؟"
+          steps={[{ text: 'نَعْرِفُ الْأَكْثَرَ وَالْأَقَلَّ بِالنَّظَرِ إِلَى طُولِ الْعَمُودِ.', kind: 'ans', label: SUGGESTED }]}
+          chart={<GridBars title="لَوْنُ الْقَمِيصِ" bars={bars(SHIRTS)} max={6} />}
         />
       ),
     },
@@ -279,14 +282,14 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
-            center={<>التمثيل<br />بالأعمدة</>}
+            center={<>التَّمْثِيلُ<br />بِالْأَعْمِدَةِ</>}
             items={[
-              { kind: 'rule', cap: 'من أين؟', text: 'من جدول الإشارات.' },
-              { kind: 'ex', cap: 'المربع', text: 'مربع ملوّن لكل استجابة.' },
-              { kind: 'qs', cap: 'شكلان', text: 'أعمدة أفقية أو رأسية.' },
-              { kind: 'warn', cap: 'أقارن', text: 'العمود الأطول = الأكثر.' },
+              { kind: 'rule', cap: 'مِنْ أَيْنَ؟', text: 'مِنْ جَدْوَلِ الْإِشَارَاتِ.' },
+              { kind: 'ex', cap: 'الْمُرَبَّعُ', text: 'مُرَبَّعٌ مُلَوَّنٌ لِكُلِّ اسْتِجَابَةٍ.' },
+              { kind: 'qs', cap: 'شَكْلَانِ', text: 'أَعْمِدَةٌ أُفُقِيَّةٌ أَوْ رَأْسِيَّةٌ.' },
+              { kind: 'warn', cap: 'أُقَارِنُ', text: 'الْعَمُودُ الْأَطْوَلُ هُوَ الْأَكْثَرُ.' },
             ]}
           />
         </>
@@ -299,12 +302,16 @@ export default defineLesson({
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">ثلاثة أسئلة</SlideHead>
           <Cols>
-            <GridBars title="الفاكهة المفضلة" bars={[{ label: 'تفاح', n: 5, color: '#e8635a' }, { label: 'موز', n: 3, color: '#f6d84a' }, { label: 'عنب', n: 4, color: '#b48ad8' }]} max={6} />
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="كم مربعًا لوّنّا للموز؟" options={['٣', '٤', '٥']} answer="٣" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="ما الفاكهة الأكثر تفضيلًا؟" options={['تفاح', 'موز', 'عنب']} answer="تفاح" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="لو اختار ٢ آخران العنب، كم يصير عموده؟" options={['٤', '٥', '٦']} answer="٦" /></Card>
-            </div>
+            <GridBars
+              title="الْفَاكِهَةُ الْمُفَضَّلَةُ"
+              bars={[{ label: 'تُفَّاحٌ', n: 5, color: '#e8635a' }, { label: 'مَوْزٌ', n: 3, color: '#f6d84a' }, { label: 'عِنَبٌ', n: 4, color: '#b48ad8' }]}
+              max={6}
+            />
+            <ExitTicket>
+              <MCQ q="كَمْ مُرَبَّعًا لَوَّنَّا لِلْمَوْزِ؟" options={['٣', '٤', '٥']} answer="٣" />
+              <MCQ q="مَا الْفَاكِهَةُ الْأَكْثَرُ تَفْضِيلًا؟" options={['تُفَّاحٌ', 'مَوْزٌ', 'عِنَبٌ']} answer="تُفَّاحٌ" />
+              <MCQ q="لَوِ اخْتَارَ طَالِبَانِ آخَرَانِ الْعِنَبَ، كَمْ مُرَبَّعًا يَصِيرُ عَمُودُهُ؟" options={['٤', '٥', '٦']} answer="٦" />
+            </ExitTicket>
           </Cols>
         </>
       ),

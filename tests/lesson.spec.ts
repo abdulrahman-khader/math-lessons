@@ -53,7 +53,7 @@ async function eachState(page: Page, i: number, check: (state: string) => Promis
     await check('التلميح مفتوح');
   }
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-  for (let k = 0; k < 15; k++) await page.keyboard.press('Space');
+  for (let k = 0; k < 40; k++) await page.keyboard.press('Space');
   await page.waitForTimeout(350); // انتهاء حركة الظهور
   await check('كل الخطوات ظاهرة');
   return slide;

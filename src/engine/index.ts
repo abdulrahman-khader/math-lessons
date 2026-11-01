@@ -13,7 +13,7 @@ export { Cup, LetterCards, NumberCards, ChanceScale, BagExplorer } from './compo
 export { OrderRows, Heights, OrderPuzzle, CubeFace } from './components/Logic';
 export { TallyGroups, BalanceScale, FenceRect, BulletCard, ColorChips } from './components/Investigation';
 export { TrendCard, TrendMini, TrendQuiz, MiniRow, TrendRow } from './components/Trends';
-export { QText, Intro, BookLabel, BookSource, Grid, QuestionGroup, OpQuestion, ChartQuestion, RepQuestion, ArrowQuestion, Examples, Lines, Verdict, StepRow, Definition, Goals, NumberRow, WordList, WriteBox, ExitTicket, missingOp, type ChartStep } from './components/Blocks';
+export { QText, Intro, BookLabel, BookSource, Grid, QuestionGroup, OpQuestion, ChartQuestion, RepQuestion, ArrowQuestion, Examples, Lines, Verdict, StepRow, Definition, Goals, NumberRow, WordList, WriteBox, ExitTicket, BigPic, missingOp, type ChartStep } from './components/Blocks';
 export { Tag, SlideHead, Cols, Stack, QCol, Card, Mark, Eq, DataTable, MindMap, Winner, IfTeams, GoHomeButton, QCard, NumMark, type Kind } from './components/Layout';
 export { CubeTrain, Blank, FactLine, VSum, FactFamily, CUBE, type CubePart, type ItemShape } from './components/Cubes';
 export { NumberLine, HopExplorer, Domino, Sentence, FactTriangle, GuessCheck, PairPick, Towers, useRemoteWidget, type Jump, type Token } from './components/Primary';
@@ -25,3 +25,4 @@ export { LiveTally, TallyAnswer, pickRows, type LiveRow } from './components/Liv
 export { Frac, Tally, DataGrid, HBars, Pie, Bag, chanceWord, type Cell, type Slice, type BagItem } from './components/DataViz';
 export { Clip, ClipCard, ClipTitle, Cube, Person, SvgEq, SvgFrac, CLIP_W, CLIP_H, tw, lerp, fade, ease, sector, type EqPart, type VoiceLine } from './components/Clip';
 export { useSlide } from './context';
+export { CubeChip, WordChoice, CircleRow, CompareQ, DrawTally, DrawCard, ColorPair, DrawExplorer, CUBE_COLORS, type ColorDef } from './components/ChanceBook';

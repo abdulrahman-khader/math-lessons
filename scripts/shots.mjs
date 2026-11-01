@@ -21,7 +21,7 @@ for (const lesson of pickLessons(filter)) {
   for (let i = 0; i < n; i++) {
     if (i > 0) await page.keyboard.press('PageDown');
     if (only.length && !only.includes(String(i + 1))) continue;
-    for (let k = 0; k < 15; k++) await page.keyboard.press('Space');
+    for (let k = 0; k < 60; k++) await page.keyboard.press('Space');
     await page.waitForTimeout(400);
     await page.screenshot({ path: path.join(out, `${String(i + 1).padStart(2, '0')}.png`) });
   }

@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { useV2 } from '../context';
 import { num } from '../digits';
 import { Tally } from './DataViz';
 import { useRemoteWidget } from './Primary';
@@ -103,6 +104,32 @@ export function LiveTally({ id, head, rows, count = true, tone = 'green', title 
     },
     [v.join(), total],
   );
+  const v2 = useV2();
+  // التصميم الجديد: لا أزرار على السبورة؛ لمسُ الصف يضيف إشارة، والحذف والمسح من الجوال
+  if (v2)
+    return (
+      <div className="ltally">
+        <table className="dgrid">
+          <thead>
+            <tr>
+              <th>{head}</th>
+              <th>الإِشَارَاتُ</th>
+              {count && <th>الْعَدَدُ</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={r.name} className="ltrow" onClick={() => add(i, 1)} aria-label={`أضف إشارة إلى ${r.name}`}>
+                <td>{r.label ?? r.name}</td>
+                <td className="ltmarks">{v[i] > 0 && <Tally n={v[i]} />}</td>
+                {count && <td>{v[i] > 0 ? num(v[i]) : ''}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <span className="ltfoot">عَدَدُ الْإِشَارَاتِ كُلِّهَا: {num(total)}</span>
+      </div>
+    );
   return (
     <div className="ltally">
       <table className={`dgrid ${tone}`}>

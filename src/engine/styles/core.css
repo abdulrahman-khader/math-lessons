@@ -618,19 +618,19 @@ body.flow .qgrid.four { grid-template-columns: 1fr 1fr; }
 
 /* ===== شكل الكتاب في دروس الصف الثاني ===== */
 /* رقم السؤال مربع أزرق كما في الكتاب */
-#app[data-lesson^="g2"] .qnum { border-radius: .18em; background: linear-gradient(#2a4fb0, #10307a); box-shadow: inset 0 -3px 0 #0006; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .qnum { border-radius: .18em; background: linear-gradient(#2a4fb0, #10307a); box-shadow: inset 0 -3px 0 #0006; }
 /* سطر النقاط مكان الناتج، والرقم يُكتب فوقه */
-#app[data-lesson^="g2"] .blank:not(.box) { border: 0; border-radius: 0; border-block-end: 4px dotted #7a8597; background: none; min-width: 2.6em; padding-inline: .2em; }
-#app[data-lesson^="g2"] .blank:not(.box):has(.step.shown) { border-block-end-color: var(--ex); background: none; }
-#app[data-lesson^="g2"] .blank.box { border-style: solid; border-color: var(--ink); border-width: 3px; border-radius: .1em; }
-#app[data-lesson^="g2"] .blank.box:has(.step.shown) { border-color: var(--ex); }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .blank:not(.box) { border: 0; border-radius: 0; border-block-end: 4px dotted #7a8597; background: none; min-width: 2.6em; padding-inline: .2em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .blank:not(.box):has(.step.shown) { border-block-end-color: var(--ex); background: none; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .blank.box { border-style: solid; border-color: var(--ink); border-width: 3px; border-radius: .1em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .blank.box:has(.step.shown) { border-color: var(--ex); }
 /* خلايا الأسئلة بلا إطار، تفصلها خطوط صفراء كما في الكتاب */
 .qgrid.book { gap: 4px; background: #f5c400; }
 .qgrid.book > .qcard { border: 0; border-radius: 0; background: var(--paper); }
 .qgrid.plain > .qcard { border: 0; background: transparent; }
 /* عناوين أقسام الكتاب */
-#app[data-lesson^="g2"] .bookrow > .tag.qs, #app[data-lesson^="g2"] .qhead > .tag.qs { background: linear-gradient(#e8372b, #b5180f); color: #ffe066; font-size: .72em; padding: .2em .9em; box-shadow: inset 0 -3px 0 #0004; }
-#app[data-lesson^="g2"] .bookrow > .tag.ex, #app[data-lesson^="g2"] .qhead > .tag.ex { background: none; color: #2f9a3c; font-family: var(--display); font-size: .95em; padding: 0; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .bookrow > .tag.qs, #app[data-lesson^="g2"]:not([data-design="v2"]) .qhead > .tag.qs { background: linear-gradient(#e8372b, #b5180f); color: #ffe066; font-size: .72em; padding: .2em .9em; box-shadow: inset 0 -3px 0 #0004; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .bookrow > .tag.ex, #app[data-lesson^="g2"]:not([data-design="v2"]) .qhead > .tag.ex { background: none; color: #2f9a3c; font-family: var(--display); font-size: .95em; padding: 0; }
 .qcard.tcard .twbox { flex: none; }
 .qcard.tcard .twbox .towers { height: 7.6em; width: auto; max-height: none; }
 .qgrid.book > .qcard { justify-content: flex-start; gap: 1.2em; padding-inline-start: 2.6em; }
@@ -717,19 +717,19 @@ table.dgrid.horiz td { min-width: 1.8em; padding: .3em .4em; }
 
 /* ===== الصف الثاني: أسئلة الكتاب أكبر وتملأ الشريحة ===== */
 /* شبكة الأسئلة تأخذ الارتفاع الفارغ ويتوزع على صفوفها؛ الخط --qfs يضبطه LessonApp بأكبر قيمة تتسع */
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid { flex: 1 0 auto; grid-auto-rows: auto; align-content: stretch; font-size: var(--qfs, 1em); }
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard { justify-content: center; align-items: center; padding-inline-start: 2.2em; }
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard > .qnum { font-size: .75em; }
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard.ccard,
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard.dcard,
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid > .qcard.vcard { justify-content: center; }
-#app[data-lesson^="g2"] .slide:has(> .bookrow) > .qgrid .flines { gap: .45em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow) > .qgrid { flex: 1 0 auto; grid-auto-rows: auto; align-content: stretch; font-size: var(--qfs, 1em); }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow) > .qgrid > .qcard { justify-content: center; align-items: center; padding-inline-start: 2.2em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow) > .qgrid > .qcard > .qnum { font-size: .75em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow) > .qgrid > .qcard.ccard,
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow) > .qgrid > .qcard.dcard,
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow) > .qgrid > .qcard.vcard { justify-content: center; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow) > .qgrid .flines { gap: .45em; }
 /* ما فوق الشبكة وتحتها لا ينضغط؛ إن ضاق المكان يصغُر خط الشبكة بدلًا منه */
-#app[data-lesson^="g2"] .slide:has(> .bookrow):has(> .qgrid) > :not(.qgrid) { flex: 0 0 auto; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .slide:has(> .bookrow):has(> .qgrid) > :not(.qgrid) { flex: 0 0 auto; }
 /* الصف الثاني، مسائل أخمّن وأتحقق: الأكياس وجدول التخمين أكبر ويملآن الجهة الفارغة */
-#app[data-lesson^="g2"] .cols > .ppick { font-size: 1.6em; align-self: center; align-items: center; }
-#app[data-lesson^="g2"] .cols > .gcheck { font-size: 1.25em; align-self: center; }
-#app[data-lesson^="g2"] .qhead ~ .cols .qtext.long { font-size: 1em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .cols > .ppick { font-size: 1.6em; align-self: center; align-items: center; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .cols > .gcheck { font-size: 1.25em; align-self: center; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .qhead ~ .cols .qtext.long { font-size: 1em; }
 
 /* ===== فصول الطلاب وتوزيعهم على الفرق ===== */
 .rbtn.on { background: var(--hl); border-color: var(--hl); color: #fff; }
@@ -871,8 +871,8 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .fnmach .fbox { background: #b55a26; color: #fff; padding: .4em 1em; border-radius: .4em; font-family: var(--display); font-size: 1.2em; }
 .fnmach .farrow { font-size: 2em; font-weight: 800; }
 /* الصف الثاني: جداول البيانات أكبر لتُقرأ من آخر الفصل */
-#app[data-lesson^="g2"] table.dgrid { font-size: 1.15em; }
-#app[data-lesson^="g2"] table.dgrid .tally { height: 1.3em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) table.dgrid { font-size: 1.15em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) table.dgrid .tally { height: 1.3em; }
 
 /* ===== التمثيل بالصور ===== */
 .picgraph { display: flex; flex-direction: column; align-items: center; gap: .3em; padding: .4em .6em; border: 3px solid #2b78c4; border-radius: .4em; align-self: center; }
@@ -887,7 +887,7 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .picgraph .pg-key { background: var(--paper); border: 2px solid var(--ink); padding: .1em .7em; font-weight: 700; font-size: .85em; }
 /* جدول إشارات وتمثيل بالصور معًا في عمود الرسم */
 .pgpair { display: flex; flex-direction: column; align-items: center; gap: .35em; font-size: .78em; align-self: center; }
-#app[data-lesson^="g2"] .pgpair table.dgrid { font-size: 1em; }
+#app[data-lesson^="g2"]:not([data-design="v2"]) .pgpair table.dgrid { font-size: 1em; }
 
 /* ===== الأعمدة بالمربعات (الصف الثاني) ===== */
 .gbars { display: flex; flex-direction: column; align-items: center; gap: .25em; padding: .4em .7em; border: 3px solid #2b78c4; border-radius: .4em; align-self: center; }
@@ -1025,3 +1025,17 @@ svg.pic20 { width: 100%; max-width: 20em; align-self: center; }
 .bullets { margin: 0; padding-inline-start: 1.2em; line-height: 1.75; font-weight: 700; }
 .chips { justify-content: space-around; }
 .chips span { width: 2.4em; height: 3em; border: 3px solid #13213b; border-radius: .3em; }
+
+/* صورة كبيرة من رموز تعبيرية */
+.bigpic { font-size: 3em; line-height: 1.3; text-align: center; }
+
+/* الاحتمال بشكل الكتاب (ChanceBook) */
+.cchip { display: inline-block; width: .9em; height: .9em; border: 2px solid #13213b; border-radius: .15em; vertical-align: middle; margin-inline: .15em; }
+.cchip.big { width: 1.8em; height: 1.8em; }
+.ccard .cbody { display: flex; flex-direction: column; align-items: center; gap: .3em; padding-inline-start: 1.6em; }
+.cpick { gap: .8em; align-items: center; flex-wrap: nowrap; }
+.cwords { gap: 1em; flex-wrap: nowrap; }
+.cbagpick { gap: .4em; }
+.cgot { font-weight: 800; }
+.ccard .cbody.start, .qcard .cbody.start { align-items: stretch; }
+.qcard .cbody { display: flex; flex-direction: column; gap: .3em; padding-inline-start: 1.6em; }

@@ -1,13 +1,13 @@
 import {
-  Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step,
-  Winner, defineLesson, type Cell, type HlKey,
+  BigPic, BookLabel, Card, Cols, DataGrid, Eq, ExitTicket, Goals, GoHomeButton, Grid, IfTeams, Mark, MCQ, MindMap, QCol, QText, QuestionSlide, TableBox,
+  SlideHead, Solution, Stack, Step, Winner, defineLesson, type Cell, type HlKey,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const TRY = 'أُحاوِلُ · ص ٩١';
-const PRACTICE = 'أتدرَّبُ · ص ٩١';
+const TRY = 'أُحاوِلُ، ص ٩١';
+const PRACTICE = 'أتدرَّبُ، ص ٩١';
 const MAKE = 'أُنْشِئُ جَدْوَلًا لِأَحُلَّ الْمَسْأَلَةَ:';
 
 /** جدول أفقي يعدّ بالقفز: العمود j يظهر مع خطوة فيها hl ‹v{j}›، ويُبرز بمفتاح p{j} */
@@ -31,13 +31,14 @@ const cols = (n: number) => Array.from({ length: n - 1 }, (_, j) => `v${j + 1}` 
 export default defineLesson({
   meta: {
     id: 'g2-4-4-make-a-table',
+    design: 'v2',
     code: '٤-٤',
     title: 'أَحُلُّ الْمَسْأَلَةَ: أُنْشِئُ جَدْوَلًا',
     shortTitle: 'أحل المسألة: أنشئ جدولًا',
     subject: 'الرياضيات',
     grade: 'الصف الثاني الابتدائي',
     chapter: 'الفصل الرابع: تمثيل البيانات وقراءتها',
-    source: 'الجزء الأول · ص ٩٠–٩١',
+    source: 'الجزء الأول، ص ٩٠–٩١',
     minutes: 45,
     idea: 'أُنْشِئُ جَدْوَلًا لِأَحُلَّ الْمَسْأَلَةَ.',
     bookQuestions: 4,
@@ -45,11 +46,11 @@ export default defineLesson({
   sectionDesc: {
     engage: 'العدّ بالقفز',
     explore: 'كم رغيفًا؟',
-    explain: 'أفهم · أخطط · أحل · أتحقق',
+    explain: 'أفهم، أخطط، أحل، أتحقق',
     elab: 'نعمل معًا',
     check: 'أحاول ١–٢',
     practice: 'أتدرب ٣–٤',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -62,14 +63,16 @@ export default defineLesson({
           <Cols even>
             <Stack>
               <Card kind="rule" cap="فكرة الدرس">أُنْشِئُ جَدْوَلًا لِأَحُلَّ الْمَسْأَلَةَ.</Card>
-              <Card kind="rule" cap="أتذكّر"><Mark>أَفْهَمُ · أُخَطِّطُ · أَحُلُّ · أَتَحَقَّقُ</Mark></Card>
+              <Card kind="rule" cap="أتذكّر"><Mark>أَفْهَمُ، أُخَطِّطُ، أَحُلُّ، أَتَحَقَّقُ</Mark></Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, lineHeight: 1.7 }}>
-                <li>أكتب المعطيات والمطلوب.</li>
-                <li>أُنشئ جدولًا يعدّ بالقفز.</li>
-                <li>أقرأ الإجابة من الجدول وأتحقق منها.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أَكْتُبُ الْمُعْطَيَاتِ وَالْمَطْلُوبَ.',
+                  'أُنْشِئُ جَدْوَلًا أَعُدُّ فِيهِ بِالْقَفْزِ.',
+                  'أَقْرَأُ الْإِجَابَةَ مِنَ الْجَدْوَلِ وَأَتَحَقَّقُ مِنْهَا.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -83,11 +86,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكّر" kind="ink">العدّ بالقفز</SlideHead>
-          <div className="qgrid three">
+          <Grid cols={3}>
             <MCQ q="٣، ٦، ٩، …" options={['١٠', '١٢', '١١']} answer="١٢" award />
             <MCQ q="٥، ١٠، ١٥، …" options={['٢٠', '١٦', '٢٥']} answer="٢٠" award />
             <MCQ q="٢، ٤، ٦، …" options={['٧', '٨', '١٠']} answer="٨" award />
-          </div>
+          </Grid>
         </>
       ),
     },
@@ -98,39 +101,41 @@ export default defineLesson({
       notes: 'اقرأ المسألة. اسأل: كم رغيفًا لشخص واحد؟ لشخصين؟ دع الطلاب يخمّنون قبل الجدول.',
       content: (
         <>
-          <SlideHead tag="أحُلُّ المسألةَ · ص ٩٠" kind="qs">الخبز مع الإفطار</SlideHead>
+          <SlideHead tag="أحُلُّ المسألةَ، ص ٩٠" kind="qs">الخبز مع الإفطار</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">يُقَدِّمُ أَحَدُ الْمَطَاعِمِ ٣ أَرْغِفَةِ خُبْزٍ مَعَ كُلِّ وَجْبَةِ إِفْطَارٍ. إِذَا طَلَبَ ٥ أَشْخَاصٍ وَجْبَةً وَاحِدَةً لِكُلٍّ مِنْهُمْ، فَكَمْ رَغِيفًا يُقَدَّمُ لَهُمْ جَمِيعًا؟</p>
-              <Card kind="qs" cap="خمّن">أكثر من ١٠ أرغفة أم أقل؟</Card>
+              <QText>يُقَدِّمُ أَحَدُ الْمَطَاعِمِ ٣ أَرْغِفَةِ خُبْزٍ مَعَ كُلِّ وَجْبَةِ إِفْطَارٍ. إِذَا طَلَبَ ٥ أَشْخَاصٍ وَجْبَةً وَاحِدَةً لِكُلٍّ مِنْهُمْ، فَكَمْ رَغِيفًا يُقَدَّمُ لَهُمْ جَمِيعًا؟</QText>
+              <Card kind="qs" cap="نُخَمِّنُ">أَكْثَرُ مِنْ ١٠ أَرْغِفَةٍ أَمْ أَقَلُّ؟</Card>
             </QCol>
-            <Card kind="ex" cap="وجبة واحدة">
-              <div style={{ fontSize: '3em', textAlign: 'center' }}>🫓🫓🫓</div>
+            <Card kind="ex" cap="وَجْبَةٌ وَاحِدَةٌ">
+              <BigPic>🫓🫓🫓</BigPic>
             </Card>
           </Cols>
         </>
       ),
     },
 
-    /* ================= أفهم · أخطط · أحل · أتحقق ================= */
+    /* ================= أفهم، أخطط، أحل، أتحقق ================= */
     {
       sec: 'explain', min: 6,
       notes: 'أنا أعمل: الخطوات الأربع كما في الكتاب. مع «أحل» تظهر أعمدة الجدول واحدًا بعد الآخر.',
       content: (
         <>
-          <SlideHead tag="أفهم · أخطط · أحل · أتحقق · ص ٩٠" kind="ex">أُنشئ جدولًا</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.1fr' }}>
+          <SlideHead tag="أفهم، أخطط، أحل، أتحقق، ص ٩٠" kind="ex">أُنشئ جدولًا</SlideHead>
+          <Cols>
             <QCol>
-              <Ctrls><NextButton /></Ctrls>
+              <QText>كَمْ رَغِيفًا يُقَدَّمُ لِـ ٥ أَشْخَاصٍ؟</QText>
               <Solution>
-                <Step><b>أَفْهَمُ:</b> المعطيات: ٣ أرغفة مع كل وجبة، و٥ أشخاص طلب كلٌّ منهم وجبة واحدة. المطلوب: عدد الأرغفة جميعها.</Step>
-                <Step><b>أُخَطِّطُ:</b> أُنشئُ جدولًا يقابلُ عددَ الوجباتِ بعددِ الأرغفةِ، وأعدُّ بالثلاثاتِ حتى ٥ وجباتٍ.</Step>
-                <Step hl={cols(5)}><b>أَحُلُّ:</b> عدد الوجبات ١، ٢، ٣، ٤، ٥ ويقابلها عدد الأرغفة ٣، ٦، ٩، ١٢، ١٥</Step>
-                <Step hl={cols(5)} kind="ans">الإجابة: ١٥ رغيفًا</Step>
-                <Step hl={cols(5)}><b>أَتَحَقَّقُ:</b> نعم؛ بالجمع المتكرر ٣ + ٣ + ٣ + ٣ + ٣ = ١٥ ✓</Step>
+                <Step><BookLabel>أَفْهَمُ:</BookLabel> ٣ أَرْغِفَةٍ لِكُلِّ وَجْبَةٍ، وَ٥ أَشْخَاصٍ.</Step>
+                <Step><BookLabel>أُخَطِّطُ:</BookLabel> نُنْشِئُ جَدْوَلًا، وَنَعُدُّ بِالثَّلَاثَاتِ.</Step>
+                <Step hl={cols(5)}><BookLabel>أَحُلُّ:</BookLabel> ٣، ٦، ٩، ١٢، ١٥</Step>
+                <Step kind="ans" label="عَدَدُ الْأَرْغِفَةِ">١٥ رَغِيفًا</Step>
+                <Step><BookLabel>أَتَحَقَّقُ:</BookLabel> <Eq>٣ + ٣ + ٣ + ٣ + ٣ = ١٥</Eq></Step>
               </Solution>
             </QCol>
-            <SkipTable top="عدد الوجبات" bottom="عدد الأرغفة" a={1} b={3} n={5} />
+            <TableBox>
+              <SkipTable top="عَدَدُ الْوَجَبَاتِ" bottom="عَدَدُ الْأَرْغِفَةِ" a={1} b={3} n={5} />
+            </TableBox>
           </Cols>
         </>
       ),
@@ -157,14 +162,15 @@ export default defineLesson({
           <SlideHead tag="نعمل معًا" kind="ex">أرجل القطط</SlideHead>
           <Cols>
             <QCol>
-              <Card kind="qs">لكل قطة ٤ أرجل. كم رجلًا لـ ٤ قطط؟</Card>
-              <Ctrls><NextButton /></Ctrls>
+              <QText>لِكُلِّ قِطَّةٍ ٤ أَرْجُلٍ.</QText>
               <Solution>
-                <Step hl={cols(4)}>نعدّ بالأربعات: ٤، ٨، ١٢، ١٦</Step>
+                <Step hl={cols(4)}>نَعُدُّ بِالْأَرْبَعَاتِ: ٤، ٨، ١٢، ١٦</Step>
               </Solution>
-              <MCQ q="كم رجلًا لـ ٤ قطط؟" options={['١٢', '١٦', '٨']} answer="١٦" award />
+              <MCQ q="كَمْ رِجْلًا لِـ ٤ قِطَطٍ؟" options={['١٢', '١٦', '٨']} answer="١٦" award />
             </QCol>
-            <SkipTable top="عدد القطط" bottom="عدد الأرجل" a={1} b={4} n={4} />
+            <TableBox>
+              <SkipTable top="عَدَدُ الْقِطَطِ" bottom="عَدَدُ الْأَرْجُلِ" a={1} b={4} n={4} />
+            </TableBox>
           </Cols>
         </>
       ),
@@ -179,12 +185,12 @@ export default defineLesson({
           source={TRY} n={1} time={90}
           intro={MAKE}
           question="يُحِبُّ عَلَاءٌ أَنْ يَلْعَبَ كُرَةَ السَّلَّةِ فِي سَاحَةِ مَنْزِلِهِ؛ لِذَا فَهُوَ يَرْمِي الْكُرَةَ نَحْوَ السَّلَّةِ ٢٠ مَرَّةً فِي الْيَوْمِ. كَمْ يَوْمًا يَحْتَاجُ حَتَّى يَرْمِيَ الْكُرَةَ ١٠٠ مَرَّةٍ؟"
-          hint="أعدّ بالعشرينات: ٢٠، ٤٠، … حتى ١٠٠."
+          hint="كَمْ رَمْيَةً فِي يَوْمَيْنِ؟"
           steps={[
-            { text: 'نعدّ بالعشرينات: ٢٠، ٤٠، ٦٠، ٨٠، ١٠٠', hl: cols(5) },
-            { text: '٥ أيام', kind: 'ans' },
+            { text: 'نَعُدُّ بِالْعِشْرِينَاتِ حَتَّى ١٠٠', hl: cols(5) },
+            { text: '٥ أَيَّامٍ', kind: 'ans', label: 'عَدَدُ الْأَيَّامِ' },
           ]}
-          chart={<SkipTable top="عدد الأيام" bottom="عدد الرميات" a={1} b={20} n={5} />}
+          chart={<TableBox><SkipTable top="عَدَدُ الْأَيَّامِ" bottom="عَدَدُ الرَّمَيَاتِ" a={1} b={20} n={5} /></TableBox>}
         />
       ),
     },
@@ -195,12 +201,13 @@ export default defineLesson({
         <QuestionSlide
           source={TRY} n={2} time={60}
           question="لَدَى ذِكْرَى ٤ أَزْوَاجٍ مِنَ الْجَوَارِبِ فِي دُرْجِ خِزَانَتِهَا. كَمْ جَوْرَبًا فِي الدُّرْجِ؟"
-          hint="في كل زوج جوربان. أعدّ بالاثنينات."
+          hint="كَمْ جَوْرَبًا فِي الزَّوْجِ الْوَاحِدِ؟"
           steps={[
-            { text: 'نعدّ بالاثنينات: ٢، ٤، ٦، ٨', hl: cols(4) },
-            { text: '٨ جوارب', kind: 'ans' },
+            { text: 'فِي كُلِّ زَوْجٍ جَوْرَبَانِ.' },
+            { text: 'نَعُدُّ بِالِاثْنَيْنِ: ٢، ٤، ٦، ٨', hl: cols(4) },
+            { text: '٨ جَوَارِبَ', kind: 'ans', label: 'عَدَدُ الْجَوَارِبِ' },
           ]}
-          chart={<SkipTable top="عدد الأزواج" bottom="عدد الجوارب" a={1} b={2} n={4} />}
+          chart={<TableBox><SkipTable top="عَدَدُ الْأَزْوَاجِ" bottom="عَدَدُ الْجَوَارِبِ" a={1} b={2} n={4} /></TableBox>}
         />
       ),
     },
@@ -214,12 +221,12 @@ export default defineLesson({
           source={PRACTICE} n={3} time={90}
           intro={MAKE}
           question="يُرِيدُ حُسَيْنٌ أَنْ يُوَصِّلَ ٦٠ صُنْدُوقًا إِلَى أَصْحَابِهَا، لَكِنَّ سَيَّارَتَهُ تَسَعُ ١٠ صَنَادِيقَ فَقَطْ. كَمْ مَرَّةً سَيَسْتَعْمِلُ سَيَّارَتَهُ لِيُوَصِّلَ الصَّنَادِيقَ جَمِيعَهَا؟"
-          hint="أعدّ بالعشرات حتى ٦٠."
+          hint="كَمْ صُنْدُوقًا فِي كُلِّ مَرَّةٍ؟"
           steps={[
-            { text: 'نعدّ بالعشرات: ١٠، ٢٠، ٣٠، ٤٠، ٥٠، ٦٠', hl: cols(6) },
-            { text: '٦ مرات', kind: 'ans' },
+            { text: 'نَعُدُّ بِالْعَشَرَاتِ حَتَّى ٦٠', hl: cols(6) },
+            { text: '٦ مَرَّاتٍ', kind: 'ans', label: 'عَدَدُ الْمَرَّاتِ' },
           ]}
-          chart={<SkipTable top="عدد المرات" bottom="عدد الصناديق" a={1} b={10} n={6} />}
+          chart={<TableBox><SkipTable top="عَدَدُ الْمَرَّاتِ" bottom="عَدَدُ الصَّنَادِيقِ" a={1} b={10} n={6} /></TableBox>}
         />
       ),
     },
@@ -230,12 +237,12 @@ export default defineLesson({
         <QuestionSlide
           source={PRACTICE} n={4} time={90}
           question="يَتَسَلَّمُ مَتْجَرُ بَسَّامٍ عُلَبَ الْعَصِيرِ فِي صَنَادِيقَ يَسَعُ كُلٌّ مِنْهَا ٤ عُلَبٍ. إِذَا كَانَ أَحْمَدُ بِحَاجَةٍ إِلَى ٢٠ عُلْبَةً مِنَ الْعَصِيرِ، فَكَمْ صُنْدُوقًا يَجِبُ أَنْ يَشْتَرِيَ؟"
-          hint="أعدّ بالأربعات حتى ٢٠."
+          hint="كَمْ عُلْبَةً فِي كُلِّ صُنْدُوقٍ؟"
           steps={[
-            { text: 'نعدّ بالأربعات: ٤، ٨، ١٢، ١٦، ٢٠', hl: cols(5) },
-            { text: '٥ صناديق', kind: 'ans' },
+            { text: 'نَعُدُّ بِالْأَرْبَعَاتِ حَتَّى ٢٠', hl: cols(5) },
+            { text: '٥ صَنَادِيقَ', kind: 'ans', label: 'عَدَدُ الصَّنَادِيقِ' },
           ]}
-          chart={<SkipTable top="عدد الصناديق" bottom="عدد العلب" a={1} b={4} n={5} />}
+          chart={<TableBox><SkipTable top="عَدَدُ الصَّنَادِيقِ" bottom="عَدَدُ الْعُلَبِ" a={1} b={4} n={5} /></TableBox>}
         />
       ),
     },
@@ -246,14 +253,14 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
-            center={<>أُنشئ<br />جدولًا</>}
+            center={<>أُنْشِئُ<br />جَدْوَلًا</>}
             items={[
-              { kind: 'rule', cap: 'أفهم', text: 'أكتب المعطيات والمطلوب.' },
-              { kind: 'ex', cap: 'أخطط', text: 'جدول بصفين: الشيء وعدده.' },
-              { kind: 'qs', cap: 'أحل', text: 'أعدّ بالقفز حتى أصل إلى المطلوب.' },
-              { kind: 'warn', cap: 'أتحقق', text: 'بالجمع المتكرر.' },
+              { kind: 'rule', cap: 'أَفْهَمُ', text: 'أَكْتُبُ الْمُعْطَيَاتِ وَالْمَطْلُوبَ.' },
+              { kind: 'ex', cap: 'أُخَطِّطُ', text: 'جَدْوَلٌ بِصَفَّيْنِ: الشَّيْءُ وَعَدَدُهُ.' },
+              { kind: 'qs', cap: 'أَحُلُّ', text: 'أَعُدُّ بِالْقَفْزِ حَتَّى أَصِلَ إِلَى الْمَطْلُوبِ.' },
+              { kind: 'warn', cap: 'أَتَحَقَّقُ', text: 'بِالْجَمْعِ الْمُتَكَرِّرِ.' },
             ]}
           />
         </>
@@ -265,11 +272,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">ثلاثة أسئلة</SlideHead>
-          <div className="ticket">
-            <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="لكل دراجة عجلتان. كم عجلة لـ ٣ دراجات؟" options={['٥', '٦', '٤']} answer="٦" /></Card>
-            <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="في كل علبة ٥ أقلام. كم قلمًا في ٤ علب؟" options={['٩', '٢٠', '١٥']} answer="٢٠" /></Card>
-            <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="يقرأ سعد ١٠ صفحات كل يوم. كم يومًا ليقرأ ٥٠ صفحة؟" options={['٥', '١٠', '٤']} answer="٥" /></Card>
-          </div>
+          <ExitTicket>
+            <MCQ q="لِكُلِّ دَرَّاجَةٍ عَجَلَتَانِ. كَمْ عَجَلَةً لِـ ٣ دَرَّاجَاتٍ؟" options={['٥', '٦', '٤']} answer="٦" />
+            <MCQ q="فِي كُلِّ عُلْبَةٍ ٥ أَقْلَامٍ. كَمْ قَلَمًا فِي ٤ عُلَبٍ؟" options={['٩', '٢٠', '١٥']} answer="٢٠" />
+            <MCQ q="يَقْرَأُ سَعْدٌ ١٠ صَفَحَاتٍ كُلَّ يَوْمٍ. كَمْ يَوْمًا لِيَقْرَأَ ٥٠ صَفْحَةً؟" options={['٥', '١٠', '٤']} answer="٥" />
+          </ExitTicket>
         </>
       ),
     },

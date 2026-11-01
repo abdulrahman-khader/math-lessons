@@ -198,3 +198,6 @@ export function ExitTicket({ levels = ['سهل', 'متوسط', 'صعب'], childr
 
 /** خانة يكتب فيها الطالب على السبورة (عنوان، جملة) */
 export const WriteBox = ({ placeholder, label }: { placeholder: string; label: string }) => <input className="inp" placeholder={placeholder} aria-label={label} />;
+
+/** صورة كبيرة من رموز تعبيرية في وسط بطاقتها (أرغفة، أشياء تُعدّ) */
+export const BigPic = ({ children }: { children: ReactNode }) => <div className="bigpic">{children}</div>;

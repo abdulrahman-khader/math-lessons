@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useSlide } from '../context';
+import { useSlide, useV2 } from '../context';
 
 /* ---------- التمثيل بالصور كما في الكتاب: صف لكل فئة، وصورة في كل خانة، والمفتاح تحته ---------- */
 
@@ -18,18 +18,21 @@ export interface PicRow {
  * وإلا تظهر كلها. الصف i يُبرز بمفتاح p{i}.
  */
 export function PicGraph({ title, rows, cells, keyText, reveal, tone = '#cfe0f5' }: { title: ReactNode; rows: PicRow[]; cells?: number; keyText?: ReactNode; reveal?: boolean; tone?: string }) {
-  const { activeHl } = useSlide();
+  const { activeHl, nowHl } = useSlide();
+  const v2 = useV2();
+  // التصميم الجديد: شبكة الكتاب بلا إطار ولا ألوان صفوف، ويُبرز الصف الذي تتحدث عنه الخطوة الحالية فقط
+  const lit = v2 ? nowHl : activeHl;
   const w = cells ?? Math.max(...rows.map((r) => r.n));
   return (
-    <div className="picgraph" style={{ background: tone }}>
+    <div className="picgraph" style={v2 ? undefined : { background: tone }}>
       <b className="pg-title">{title}</b>
       <table>
         <tbody>
           {rows.map((r, i) => {
             const show = !reveal || activeHl.has(`v${i}`);
             return (
-              <tr key={i} className={activeHl.has(`p${i}`) ? 'on' : undefined}>
-                <th style={{ background: r.color }}>
+              <tr key={i} className={lit.has(`p${i}`) ? 'on' : undefined}>
+                <th style={v2 ? undefined : { background: r.color }}>
                   <span className="pg-icon">{r.icon}</span> {r.label}
                 </th>
                 {Array.from({ length: w }, (_, j) => (

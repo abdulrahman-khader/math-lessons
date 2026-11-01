@@ -411,25 +411,29 @@ test('جدول الإشارات الفارغ: الجوال يضيف الإشار
   const card = phone.locator('.rwidget', { hasText: 'الفصل المفضل' });
   await card.locator('button[aria-label="زيادة الصَّيْفُ"]').click();
   await card.locator('button[aria-label="زيادة الصَّيْفُ"]').click();
-  await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
+  // على السبورة: لمس الصف يضيف إشارة (لا أزرار على الشاشة)
+  const winter = board.locator('tr[aria-label="أضف إشارة إلى الشِّتاءُ"]');
+  await winter.click();
   await expect(board.locator('tbody tr').nth(2).locator('td').last()).toHaveText('٢');
   await expect(card).toContainText('عدد الإشارات كلها: ٣');
   // الإجابات تُحسب من جدول الصف، وتتغير معه
-  const next = ipad.locator('section.slide.active button[aria-label="الخطوة التالية"]');
-  await next.click();
-  await next.click();
-  await expect(ipad.locator('section.slide.active .bans')).toHaveText(['الصيف (طالبان)', '١ + ٠ = ١']);
-  await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
-  await board.locator('button[aria-label="أضف إشارة إلى الشِّتاءُ"]').click();
-  await expect(ipad.locator('section.slide.active .bans').first()).toHaveText('الشتاء (٣ طلابٍ)');
-  await board.locator('button[aria-label="احذف إشارة من الشِّتاءُ"]').click();
-  await board.locator('button[aria-label="احذف إشارة من الشِّتاءُ"]').click();
+  for (let k = 0; k < 2; k++) await phone.locator('button[aria-label="الخطوة التالية"]').first().click();
+  const ans = ipad.locator('section.slide.active .bkq.now .aslot.shown');
+  await expect(ans).toHaveText(['الصَّيْفُ']);
+  await winter.click();
+  await winter.click();
+  await expect(ans).toHaveText(['الشِّتَاءُ']);
+  // الحذف من الجوال بعد أن يصله ما سُجّل على السبورة
+  await expect(card).toContainText('عدد الإشارات كلها: ٥');
+  await card.locator('button[aria-label="إنقاص الشِّتاءُ"]').click();
+  await expect(card).toContainText('عدد الإشارات كلها: ٤');
+  await card.locator('button[aria-label="إنقاص الشِّتاءُ"]').click();
   // السؤالان ١ و٢ تحت الجدول نفسه كما في الكتاب، والإشارات تبقى بعد الانتقال والعودة
-  await expect(ipad.locator('section.slide.active [data-qnum="2"]')).toBeVisible();
+  await expect(ipad.locator('section.slide.active [data-qnum="2"]')).toHaveCount(1);
   await phone.locator('.rnav button[aria-label="الشريحة التالية"]').click();
   await phone.locator('.rnav button[aria-label="الشريحة السابقة"]').click();
   await expect(ipad.locator('section.slide.active [data-qnum="1"]')).toBeVisible();
-  await expect(ipad.locator('section.slide.active .ltally')).toContainText('عدد الإشارات كلها: ٣');
+  await expect(ipad.locator('section.slide.active .ltally')).toContainText('عَدَدُ الْإِشَارَاتِ كُلِّهَا: ٣');
   await phone.locator('.rwidget .rbtn', { hasText: 'امسح الإشارات' }).click();
   await expect(ipad.locator('section.slide.active .ltally svg.tally')).toHaveCount(0);
   expect(errors).toEqual([]);

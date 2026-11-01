@@ -1,5 +1,5 @@
 import { Fragment, createContext, useContext, type ReactNode } from 'react';
-import { useV2 } from '../context';
+import { useSlide, useV2 } from '../context';
 import { IconBook } from './V2Chrome';
 import { num } from '../digits';
 import type { HlKey } from '../types';
@@ -122,6 +122,8 @@ interface GroupProps {
 
 /** أسئلة متتالية من الكتاب على رسم واحد، مرتّبة كما في الصفحة؛ «التالي» يكتب الإجابات واحدة واحدة */
 export function BookGroup({ source, tags, intro, qs, hint, time, chart, children }: GroupProps) {
+  const v2 = useV2();
+  if (v2) return <BookGroupV2 {...{ source, tags, intro, qs, hint, chart }}>{children}</BookGroupV2>;
   const body = (
     <QCol>
       {intro && <p className="bintro">{intro}</p>}
@@ -229,6 +231,113 @@ function runs(steps: StepDef[]): [StepDef, number][][] {
   return out;
 }
 
+/** خطوات السؤال: خطوات الطريقة سطورًا، والإجابات المتتالية في صف واحد */
+function StepRuns({ steps }: { steps: StepDef[] }) {
+  return (
+    <Solution>
+      {runs(steps).map((r, k) =>
+        r.length > 1 ? (
+          <div key={k} className="ansrow">
+            {r.map(([s, i]) => (
+              <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
+                {s.text}
+              </Step>
+            ))}
+          </div>
+        ) : (
+          r.map(([s, i]) => (
+            <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
+              {s.text}
+            </Step>
+          ))
+        ),
+      )}
+    </Solution>
+  );
+}
+
+/**
+ * التصميم الجديد لأسئلة الكتاب المتتالية (الصف الثاني): سؤال واحد كبير في كل مرة، وتحته شريط بأرقام كل الأسئلة
+ * تُكتب فيه إجاباتها. «التالي» يحلّ السؤال خطوةً خطوة، ثم ينقل إلى السؤال التالي (خطوة فاصلة غير مرئية).
+ * كل الأسئلة مرسومة في الخانة نفسها والمخفي منها غير مرئي فقط، فلا يتحرك شيء ولا يتغير ترتيب الخطوات.
+ * يفترض أن خطوات الشريحة كلها في هذه المجموعة (الخطوات تظهر بترتيب الصفحة).
+ */
+function BookGroupV2({ source, tags, intro, qs, hint, chart, children }: Omit<GroupProps, 'time'>) {
+  const { shownCount } = useSlide();
+  // موضع الخطوة الفاصلة قبل كل سؤال (عدا الأول)، وآخر خطوة في كل سؤال
+  const gate: number[] = [];
+  const end: number[] = [];
+  let at = 0;
+  qs.forEach((q, i) => {
+    if (i > 0) gate.push(at++);
+    else gate.push(-1);
+    at += q.steps.length;
+    end.push(at);
+  });
+  const cur = gate.reduce((c, g, i) => (shownCount > g ? i : c), 0);
+  const answer = (q: BookQ) => q.steps.filter((s) => s.kind === 'ans');
+  return (
+    <>
+      <div className="v2qh">
+        <span className="pg">
+          <IconBook />
+          {pageOf(source)}
+        </span>
+        {intro && <span className="bkintro">{intro}</span>}
+        {tags?.map((t, i) => (
+          <Tag key={i} kind={t.kind}>
+            {t.text}
+          </Tag>
+        ))}
+      </div>
+      <Cols>
+        <QCol>
+          <div className="bkone">
+            {qs.map((q, i) => (
+              <div key={q.n} className={'bkq' + (i === cur ? ' now' : '')} data-qnum={q.n} aria-hidden={i !== cur}>
+                {i > 0 && (
+                  <Step className="bgate">{null}</Step>
+                )}
+                <div className="bkh">
+                  <span className="qnum">{num(q.n)}</span>
+                  {q.tag && <Tag kind={q.tag.kind}>{q.tag.text}</Tag>}
+                </div>
+                <p className={'qtext' + (q.long ? ' long' : '')}>{q.question}</p>
+                {q.steps.length > 0 && <StepRuns steps={q.steps} />}
+              </div>
+            ))}
+          </div>
+          {children}
+          {hint && <Hint>{hint}</Hint>}
+          <ol className="bkstrip" aria-label="الأسئلة">
+            {qs.map((q, i) => {
+              const done = shownCount >= end[i] && q.steps.length > 0;
+              return (
+                <li key={q.n} className={(i === cur ? 'now ' : '') + (done ? 'done' : '')}>
+                  <span className="qnum">{num(q.n)}</span>
+                  <span className="bka">
+                    {done && !answer(q).length
+                      ? '✓'
+                      : done
+                      ? answer(q).map((s, k) => (
+                          <Fragment key={k}>
+                            {k > 0 && '، '}
+                            {s.text}
+                          </Fragment>
+                        ))
+                      : '؟'}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </QCol>
+        {chart}
+      </Cols>
+    </>
+  );
+}
+
 function QuestionV2({ source, n, tags, intro, question, long, hint, steps, chart, children }: Omit<Props, 'time'>) {
   return (
     <>
@@ -250,28 +359,7 @@ function QuestionV2({ source, n, tags, intro, question, long, hint, steps, chart
           <p className={'qtext' + (long ? ' long' : '')}>{question}</p>
           {children}
           {hint && <Hint>{hint}</Hint>}
-          {steps.length > 0 && (
-            <Solution>
-              {/* إجابتان متتاليتان (العبارة والجملة مثلًا) في صف واحد حين يتسع */}
-              {runs(steps).map((r, k) =>
-                r.length > 1 ? (
-                  <div key={k} className="ansrow">
-                    {r.map(([s, i]) => (
-                      <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
-                        {s.text}
-                      </Step>
-                    ))}
-                  </div>
-                ) : (
-                  r.map(([s, i]) => (
-                    <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
-                      {s.text}
-                    </Step>
-                  ))
-                ),
-              )}
-            </Solution>
-          )}
+          {steps.length > 0 && <StepRuns steps={steps} />}
         </QCol>
         {chart}
       </Cols>

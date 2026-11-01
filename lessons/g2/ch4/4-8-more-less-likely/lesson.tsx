@@ -1,64 +1,33 @@
 import {
-  Bag, Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, LiveTally, MCQ, TallyAnswer, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, SlideHead, Solution,
-  Stack, Step, Tag, TimerButton, Winner, defineLesson, num, type BagItem,
+  Bag, BookSource, Card, Cols, CompareQ, CubeChip, CUBE_COLORS as C, DataGrid, Definition, DrawCard, DrawTally, ExitTicket, Goals, GoHomeButton,
+  Grid, IfTeams, Lines, Mark, MCQ, MindMap, QCol, QText, QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, TableBox, TallyAnswer,
+  Winner, defineLesson, num,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const CHECK = 'أتأكَّدُ · ص ١٠٢';
-const PRACTICE = 'أتدرَّبُ · ص ١٠٣';
-const SOLVE = 'أحُلُّ المسألةَ · ص ١٠٣';
+const CHECK = 'أتأكَّدُ، ص ١٠٢';
+const PRACTICE = 'أتدرَّبُ، ص ١٠٣';
+const SOLVE = 'أحُلُّ المسألةَ، ص ١٠٣';
 const CIRCLE = 'أُحَوِّطُ الإِجَابَةَ الصَّحِيحَةَ: (أَكْثَرُ إِمْكَانِيَّةً، أَقَلُّ إِمْكَانِيَّةً)، مُتَّبِعًا الْخُطُوَاتِ، ثُمَّ أُكَرِّرُهَا ١٠ مَرَّاتٍ؛ لِأُكْمِلَ جَدْوَلَ الإِشَارَاتِ:';
-
-const C = { green: '#4fae3a', red: '#d7302a', yellow: '#f6c21c', purple: '#8e44ad' };
-
-const Cube = ({ c }: { c: string }) => (
-  <span aria-hidden style={{ display: 'inline-block', width: '.9em', height: '.9em', background: c, border: '2px solid #13213b', borderRadius: '.15em', verticalAlign: 'middle', marginInline: '.15em' }} />
-);
-
-/** تجربة السحب كما في الكتاب: الطلاب يسحبون من كيس حقيقي ١٠ مرات، والمعلم يسجّل كل سحبة بإشارة (من الشاشة أو الجوال) */
-function DrawTally({ id, items }: { id: string; items: BagItem[] }) {
-  return (
-    <div className="dtally">
-      <Bag items={items} shape="cube" size={240} />
-      <LiveTally id={id} head="اللَّوْنُ" count={false} title="نتائج السحب"
-        rows={items.map((it) => ({ name: it.name, label: <><Cube c={it.color} /> {it.name}</> }))} />
-    </div>
-  );
-}
-
-/** «سحب … من سحب …»: العبارة الصحيحة تُحوَّط عند الخطوة */
-function CompareQ({ n, a, b, items, ans }: { n: number; a: string; b: string; items: BagItem[]; ans: 'أَكْثَرُ إِمْكَانِيَّةً' | 'أَقَلُّ إِمْكَانِيَّةً' }) {
-  return (
-    <QCard n={n} className="ccard">
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.3em', paddingInlineStart: '1.6em' }}>
-        <b>يُوجَدُ {num(items[0].n)} <Cube c={items[0].color} /> وَ {num(items[1].n)} <Cube c={items[1].color} /> فِي كِيسٍ.</b>
-        <Bag items={items} shape="cube" size={200} />
-        <b>سَحْبُ <Cube c={a} /> …… مِنْ سَحْبِ <Cube c={b} /></b>
-        <div className="row" style={{ gap: '1em', flexWrap: 'nowrap' }}>
-          {(['أَكْثَرُ إِمْكَانِيَّةً', 'أَقَلُّ إِمْكَانِيَّةً'] as const).map((w) => (
-            <span key={w} className="cword">
-              {w}
-              {w === ans && <Step className="cring">{w}</Step>}
-            </span>
-          ))}
-        </div>
-      </div>
-    </QCard>
-  );
-}
+const SUGGESTED = 'إِجَابَةٌ مُقْتَرَحَةٌ';
+const SURE = 'أَكِيدٌ';
+const NEVER = 'مُسْتَحِيلٌ';
+const MORE = 'أَكْثَرُ إِمْكَانِيَّةً';
+const LESS = 'أَقَلُّ إِمْكَانِيَّةً';
 
 export default defineLesson({
   meta: {
     id: 'g2-4-8-more-less-likely',
+    design: 'v2',
     code: '٤-٨',
     title: 'أَكْثَرُ إِمْكَانِيَّةً - أَقَلُّ إِمْكَانِيَّةً',
     shortTitle: 'أكثر إمكانية وأقل إمكانية',
     subject: 'الرياضيات',
     grade: 'الصف الثاني الابتدائي',
     chapter: 'الفصل الرابع: تمثيل البيانات وقراءتها',
-    source: 'الجزء الأول · ص ١٠٢–١٠٣',
+    source: 'الجزء الأول، ص ١٠٢–١٠٣',
     minutes: 45,
     idea: 'أَصِفُ الْحَوَادِثَ وَفْقَ إِمْكَانِيَّةِ وُقُوعِهَا.',
     bookQuestions: 8,
@@ -66,11 +35,11 @@ export default defineLesson({
   sectionDesc: {
     engage: 'تذكّر أكيد ومستحيل',
     explore: 'أستعد: أقلام جمال',
-    explain: 'أكثر إمكانية · أقل إمكانية',
+    explain: 'أكثر إمكانية، أقل إمكانية',
     elab: 'نعمل معًا',
     check: 'الأسئلة ١–٣',
     practice: 'الأسئلة ٤–٨',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -83,14 +52,16 @@ export default defineLesson({
           <Cols even>
             <Stack>
               <Card kind="rule" cap="فكرة الدرس">أَصِفُ الْحَوَادِثَ وَفْقَ إِمْكَانِيَّةِ وُقُوعِهَا.</Card>
-              <Card kind="rule" cap="المفردات"><Mark>أَكْثَرُ إِمْكَانِيَّةً</Mark> · <Mark>أَقَلُّ إِمْكَانِيَّةً</Mark></Card>
+              <Card kind="rule" cap="المفردات"><Mark>أَكْثَرُ إِمْكَانِيَّةً</Mark>، <Mark>أَقَلُّ إِمْكَانِيَّةً</Mark></Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, lineHeight: 1.7 }}>
-                <li>أقارن عدد كل لون في الكيس.</li>
-                <li>أصف السحب بأكثر إمكانية أو أقل إمكانية.</li>
-                <li>أجري تجربة وأسجّل نتائجها بالإشارات.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أُقَارِنُ عَدَدَ كُلِّ لَوْنٍ فِي الْكِيسِ.',
+                  'أَصِفُ السَّحْبَ بِأَكْثَرِ إِمْكَانِيَّةٍ أَوْ أَقَلِّ إِمْكَانِيَّةٍ.',
+                  'أُجْرِي تَجْرِبَةً، وَأُسَجِّلُ نَتَائِجَهَا بِالْإِشَارَاتِ.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -100,15 +71,15 @@ export default defineLesson({
     /* ================= تهيئة ================= */
     {
       sec: 'engage', min: 2,
-      notes: 'مراجعة الدرس ٤-٧. السؤال الثالث يمهّد للدرس.',
+      notes: 'مراجعة الدرس ٤-٧. سؤال التفكير يمهّد للدرس.',
       content: (
         <>
-          <SlideHead tag="تذكّر · الدرس ٤-٧" kind="ink">أكيد أم مستحيل؟</SlideHead>
+          <SlideHead tag="تذكّر، الدرس ٤-٧" kind="ink">أكيد أم مستحيل؟</SlideHead>
           <Cols>
             <QCol>
-              <MCQ q={<>كل المكعبات <Cube c={C.green} />. سحب <Cube c={C.green} />:</>} options={['أكيد', 'مستحيل']} answer="أكيد" award />
-              <MCQ q={<>كل المكعبات <Cube c={C.green} />. سحب <Cube c={C.red} />:</>} options={['أكيد', 'مستحيل']} answer="مستحيل" award />
-              <Card kind="qs" cap="سؤال للتفكير">في كيس ٥ مكعبات حمراء ومكعب أخضر. سحب الأحمر: هل هو أكيد؟ هل هو مستحيل؟</Card>
+              <MCQ q={<>كُلُّ الْمُكَعَّبَاتِ <CubeChip c={C.green} />. سَحْبُ <CubeChip c={C.green} />:</>} options={[SURE, NEVER]} answer={SURE} award />
+              <MCQ q={<>كُلُّ الْمُكَعَّبَاتِ <CubeChip c={C.green} />. سَحْبُ <CubeChip c={C.red} />:</>} options={[SURE, NEVER]} answer={NEVER} award />
+              <Card kind="qs" cap="سؤال للتفكير">٥ مُكَعَّبَاتٍ حَمْرَاءَ وَمُكَعَّبٌ أَخْضَرُ: هَلْ سَحْبُ الْأَحْمَرِ أَكِيدٌ؟</Card>
             </QCol>
             <Bag items={[{ name: 'أحمر', n: 5, color: C.red }, { name: 'أخضر', n: 1, color: C.green }]} shape="cube" size={260} />
           </Cols>
@@ -122,21 +93,20 @@ export default defineLesson({
       notes: 'اقرأ من الكتاب، ثم أجروا التجربة: ادعُ طالبًا يسحب ١٠ مرات. هل كانت الإشارات الحمراء أكثر؟',
       content: (
         <>
-          <SlideHead tag="أستعدُّ · ص ١٠٢" kind="qs">أقلام جمال</SlideHead>
+          <SlideHead tag="أستعدُّ، ص ١٠٢" kind="qs">أقلام جمال</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">يَسْحَبُ جَمَالٌ قَلَمَ تَلْوِينٍ مِنَ الْكِيسِ مِنْ غَيْرِ أَنْ يَنْظُرَ إِلَيْهِ. فَأَيُّهُمَا أَكْثَرُ إِمْكَانِيَّةً: أَنْ يَسْحَبَ الأَحْمَرَ أَمِ الأَخْضَرَ؟</p>
-              <Ctrls><NextButton /></Ctrls>
+              <QText>يَسْحَبُ جَمَالٌ قَلَمَ تَلْوِينٍ مِنَ الْكِيسِ مِنْ غَيْرِ أَنْ يَنْظُرَ إِلَيْهِ. فَأَيُّهُمَا أَكْثَرُ إِمْكَانِيَّةً: أَنْ يَسْحَبَ الأَحْمَرَ أَمِ الأَخْضَرَ؟</QText>
               <Solution>
-                <Step>عَدَدُ الأَحْمَرِ (٤) يَزِيدُ عَلَى عَدَدِ الأَخْضَرِ (١).</Step>
-                <Step kind="ans">إِذَنْ إِمْكَانِيَّةُ سَحْبِ الأَحْمَرِ هِيَ <Mark>أَكْثَرُ إِمْكَانِيَّةً</Mark>.</Step>
+                <Step>الْأَحْمَرُ ٤، وَالْأَخْضَرُ ١</Step>
+                <Step kind="ans" label={MORE}>الْأَحْمَرُ</Step>
               </Solution>
             </QCol>
             {/* أقلام الكتاب وجدول إشاراته كما في ص ١٠٢ */}
-            <div className="dtally">
+            <TableBox>
               <Bag items={[{ name: 'أَحْمَرُ', n: 4, color: '#e8436a' }, { name: 'أَخْضَرُ', n: 1, color: '#7cc14a' }]} shape="cube" size={240} />
               <DataGrid tone="green" head={['اللَّوْنُ', 'الإِشَارَاتُ']} rows={[['أَحْمَرُ', { tally: 7 }], ['أَخْضَرُ', { tally: 3 }]]} />
-            </div>
+            </TableBox>
           </Cols>
         </>
       ),
@@ -148,18 +118,22 @@ export default defineLesson({
       notes: 'اقرأ القاعدة. المقارنة: اللون الأكثر عددًا أكثر إمكانية.',
       content: (
         <>
-          <SlideHead tag="القاعدة · ص ١٠٢" kind="rule">أكثر إمكانية وأقل إمكانية</SlideHead>
-          <Card kind="rule" style={{ fontSize: '1.05em', fontWeight: 700, lineHeight: 1.9 }}>
+          <SlideHead tag="القاعدة، ص ١٠٢" kind="rule">أكثر إمكانية وأقل إمكانية</SlideHead>
+          <Definition kind="rule">
             أَصِفُ إِمْكَانِيَّةَ وُقُوعِ حَدَثٍ مَا بِـ<Mark>أَكْثَرِ إِمْكَانِيَّةٍ</Mark>، أَوْ <Mark>أَقَلِّ إِمْكَانِيَّةٍ</Mark>، وَذَلِكَ بِحَسَبِ فُرْصَةِ حُدُوثِهِ.
-          </Card>
+          </Definition>
           <Cols even>
-            <Card kind="ex" cap="أكثر إمكانية">
+            <Card kind="ex" cap={MORE}>
               <Bag items={[{ name: 'أحمر', n: 6, color: C.red }, { name: 'أصفر', n: 2, color: C.yellow }]} shape="cube" size={200} />
-              <b style={{ textAlign: 'center' }}>سحب <Cube c={C.red} /> أكثر إمكانية؛ لأنّ عدده أكبر.</b>
+              <Lines>
+                <b>سَحْبُ <CubeChip c={C.red} />: عَدَدُهُ أَكْبَرُ</b>
+              </Lines>
             </Card>
-            <Card kind="qs" cap="أقل إمكانية">
+            <Card kind="qs" cap={LESS}>
               <Bag items={[{ name: 'أحمر', n: 6, color: C.red }, { name: 'أصفر', n: 2, color: C.yellow }]} shape="cube" size={200} />
-              <b style={{ textAlign: 'center' }}>سحب <Cube c={C.yellow} /> أقل إمكانية؛ لأنّ عدده أقل.</b>
+              <Lines>
+                <b>سَحْبُ <CubeChip c={C.yellow} />: عَدَدُهُ أَقَلُّ</b>
+              </Lines>
             </Card>
           </Cols>
         </>
@@ -187,8 +161,8 @@ export default defineLesson({
           <SlideHead tag="نعمل معًا" kind="ex">أيّهما أكثر إمكانية؟</SlideHead>
           <Cols>
             <QCol>
-              <MCQ q={<>سحب <Cube c={C.yellow} /> من هذا الكيس:</>} options={['أكثر إمكانية', 'أقل إمكانية']} answer="أكثر إمكانية" award />
-              <MCQ q={<>سحب <Cube c={C.green} /> من هذا الكيس:</>} options={['أكثر إمكانية', 'أقل إمكانية']} answer="أقل إمكانية" award />
+              <MCQ q={<>سَحْبُ <CubeChip c={C.yellow} /> مِنْ هَذَا الْكِيسِ:</>} options={[MORE, LESS]} answer={MORE} award />
+              <MCQ q={<>سَحْبُ <CubeChip c={C.green} /> مِنْ هَذَا الْكِيسِ:</>} options={[MORE, LESS]} answer={LESS} award />
             </QCol>
             <Bag items={[{ name: 'أصفر', n: 7, color: C.yellow }, { name: 'أخضر', n: 2, color: C.green }]} shape="cube" size={260} />
           </Cols>
@@ -199,43 +173,32 @@ export default defineLesson({
     /* ================= أتأكد ١–٢ ================= */
     {
       sec: 'check', min: 3,
-      notes: 'السؤال ١: المسافة تُحوِّط. السؤال ٢: تجربة بكيس حقيقي فيه ٤ أخضر و٢ أحمر؛ ادعُ طالبًا يسحب ويعيد المكعب ١٠ مرات، واضغط + للون الذي يخرج.',
+      notes: 'السؤال ١: الخطوة تُحوِّط. السؤال ٢: تجربة بكيس حقيقي فيه ٤ أخضر و٢ أحمر؛ ادعُ طالبًا يسحب ويعيد المكعب ١٠ مرات، والمس صف اللون الذي يخرج.',
       content: (
-        <>
-          <div className="row bookrow"><Tag kind="qs">{CHECK}</Tag></div>
-          <p className="qtext" style={{ margin: 0, fontSize: '.8em' }}>{CIRCLE}</p>
-          <Cols>
-            <CompareQ n={1} a={C.green} b={C.red} items={[{ name: 'أخضر', n: 4, color: C.green }, { name: 'أحمر', n: 2, color: C.red }]} ans="أَكْثَرُ إِمْكَانِيَّةً" />
-            <QCard n={2}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '.3em', paddingInlineStart: '1.6em' }}>
-                <b>أَضَعُ ٤ <Cube c={C.green} /> وَ ٢ <Cube c={C.red} /> فِي كِيسٍ.</b>
-                <DrawTally id="g2-4-8-q2" items={[{ name: 'أَخْضَرُ', n: 4, color: C.green }, { name: 'أَحْمَرُ', n: 2, color: C.red }]} />
-              </div>
-            </QCard>
-          </Cols>
-          <Ctrls><NextButton /><TimerButton sec={120} /></Ctrls>
-        </>
+        <QuestionGroup source={CHECK} instruction={CIRCLE} cols={2} time={120}>
+          <CompareQ n={1} a={C.green} b={C.red} items={[{ name: 'أخضر', n: 4, color: C.green }, { name: 'أحمر', n: 2, color: C.red }]} ans={MORE} />
+          <DrawCard n={2} id="g2-4-8-q2" items={[{ name: 'أَخْضَرُ', n: 4, color: C.green }, { name: 'أَحْمَرُ', n: 2, color: C.red }]} />
+        </QuestionGroup>
       ),
     },
 
     /* ================= أتأكد ٣ ================= */
     {
       sec: 'check', min: 1,
-      notes: 'أتحدث: قارن نتائج الصف في جدول السؤال ٢ بإجابة السؤال ١.',
+      notes: 'أتحدث: قارن نتائج الصف في جدول السؤال ٢ بإجابة السؤال ١. التجربة قد تختلف عن المتوقع، وهذا مقبول.',
       content: (
         <QuestionSlide
           source={CHECK} n={3} tags={[{ kind: 'warn', text: 'أتحدَّثُ' }]}
           question="هَلْ تَتَّفِقُ النَّتَائِجُ الَّتِي حَصَلْتُ عَلَيْهَا فِي جَدْوَلِ الإِشَارَاتِ مَعَ إِجَابَتِي عَنِ السُّؤَالِ (١)؟ أَشْرَحُ."
-          hint="أيّ لون له إشارات أكثر في جدولك؟"
-          steps={[{
-            kind: 'ans',
+          hint="أَيُّ لَوْنٍ لَهُ إِشَارَاتٌ أَكْثَرُ فِي جَدْوَلِنَا؟"
+          steps={[
             // من نتائج تجربة الصف في السؤال ٢: الأخضر أولًا ثم الأحمر
-            text: <TallyAnswer id="g2-4-8-q2" rows={2} f={([g, r]) =>
-              g > r
-                ? `نعم؛ إشاراتُ الأخضرِ (${num(g)}) أكثرُ من إشاراتِ الأحمرِ (${num(r)})، وهذا يوافقُ أنَّ سحبَ الأخضرِ أكثرُ إمكانيةً.`
-                : `لا؛ خرجَ الأخضرُ ${num(g)} والأحمرُ ${num(r)}. المتوقَّعُ أن يكونَ الأخضرُ أكثرَ لأنَّ في الكيسِ ٤ خضراءَ و٢ حمراءَ فقط، لكنَّ نتائجَ التجربةِ قد تختلفُ.`
-            } />,
-          }]}
+            { text: <TallyAnswer id="g2-4-8-q2" rows={2} f={([g, r]) => `الْأَخْضَرُ ${num(g)}، وَالْأَحْمَرُ ${num(r)}`} /> },
+            {
+              kind: 'ans', label: SUGGESTED,
+              text: <TallyAnswer id="g2-4-8-q2" rows={2} f={([g, r]) => (g > r ? 'نَعَمْ، خَرَجَ الْأَخْضَرُ أَكْثَرَ.' : 'لَا، وَالتَّجْرِبَةُ قَدْ تَخْتَلِفُ.')} />,
+            },
+          ]}
           chart={<DrawTally id="g2-4-8-q2" items={[{ name: 'أَخْضَرُ', n: 4, color: C.green }, { name: 'أَحْمَرُ', n: 2, color: C.red }]} />}
         />
       ),
@@ -244,37 +207,29 @@ export default defineLesson({
     /* ================= أتدرب ٤–٥ ================= */
     {
       sec: 'practice', min: 2,
-      notes: 'المسافة تُحوِّط الإجابة في كل سؤال.',
+      notes: 'كل خطوة تُحوِّط الإجابة في سؤال.',
       content: (
-        <>
-          <div className="row bookrow"><Tag kind="qs">{PRACTICE}</Tag></div>
-          <p className="qtext" style={{ margin: 0, fontSize: '.8em' }}>{CIRCLE}</p>
-          <div className="qgrid two">
-            <CompareQ n={4} a={C.red} b={C.yellow} items={[{ name: 'أحمر', n: 2, color: C.red }, { name: 'أصفر', n: 6, color: C.yellow }]} ans="أَقَلُّ إِمْكَانِيَّةً" />
-            <CompareQ n={5} a={C.red} b={C.yellow} items={[{ name: 'أحمر', n: 5, color: C.red }, { name: 'أصفر', n: 4, color: C.yellow }]} ans="أَكْثَرُ إِمْكَانِيَّةً" />
-          </div>
-          <Ctrls><NextButton /><TimerButton sec={90} /></Ctrls>
-        </>
+        <QuestionGroup source={PRACTICE} instruction={CIRCLE} cols={2} time={90}>
+          <CompareQ n={4} a={C.red} b={C.yellow} items={[{ name: 'أحمر', n: 2, color: C.red }, { name: 'أصفر', n: 6, color: C.yellow }]} ans={LESS} />
+          <CompareQ n={5} a={C.red} b={C.yellow} items={[{ name: 'أحمر', n: 5, color: C.red }, { name: 'أصفر', n: 4, color: C.yellow }]} ans={MORE} />
+        </QuestionGroup>
       ),
     },
 
     /* ================= أتدرب ٦–٧ ================= */
     ...[
-      { n: 6, id: 'g2-4-8-q6', a: 2, b: 6, note: 'تجربة: ادعُ طالبًا يسحب من كيس فيه ٢ أحمر و٦ أصفر، ويعيد المكعب كل مرة، واضغط + للون الذي يخرج حتى ١٠ سحبات.' },
-      { n: 7, id: 'g2-4-8-q7', a: 5, b: 4, note: 'تجربة: ادعُ طالبًا يسحب من كيس فيه ٥ أحمر و٤ أصفر، ويعيد المكعب كل مرة، واضغط + للون الذي يخرج حتى ١٠ سحبات.' },
+      { n: 6, id: 'g2-4-8-q6', a: 2, b: 6, note: 'تجربة: ادعُ طالبًا يسحب من كيس فيه ٢ أحمر و٦ أصفر، ويعيد المكعب كل مرة، والمس صف اللون الذي يخرج حتى ١٠ سحبات.' },
+      { n: 7, id: 'g2-4-8-q7', a: 5, b: 4, note: 'تجربة: ادعُ طالبًا يسحب من كيس فيه ٥ أحمر و٤ أصفر، ويعيد المكعب كل مرة، والمس صف اللون الذي يخرج حتى ١٠ سحبات.' },
     ].map(({ n, id, a, b, note }) => ({
       sec: 'practice' as const, min: 2,
       notes: note,
       content: (
         <>
-          <div className="row bookrow"><Tag kind="qs">{PRACTICE}</Tag></div>
-          <p className="qtext" style={{ margin: 0, fontSize: '.8em' }}>{CIRCLE}</p>
-          <QCard n={n}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '.3em', paddingInlineStart: '1.6em' }}>
-              <b>أَضَعُ {num(a)} <Cube c={C.red} /> وَ {num(b)} <Cube c={C.yellow} /> فِي كِيسٍ.</b>
-              <DrawTally id={id} items={[{ name: 'أَحْمَرُ', n: a, color: C.red }, { name: 'أَصْفَرُ', n: b, color: C.yellow }]} />
-            </div>
-          </QCard>
+          <BookSource>{PRACTICE}</BookSource>
+          <QText>{CIRCLE}</QText>
+          <Grid cols={1}>
+            <DrawCard n={n} id={id} items={[{ name: 'أَحْمَرُ', n: a, color: C.red }, { name: 'أَصْفَرُ', n: b, color: C.yellow }]} />
+          </Grid>
         </>
       ),
     })),
@@ -286,11 +241,12 @@ export default defineLesson({
       content: (
         <QuestionSlide
           source={SOLVE} n={8} tags={[{ kind: 'warn', text: 'التَّفْكِيرُ الْمَنْطِقِيُّ' }]}
-          question={<>وَضَعَتْ لَيْلَى ٥ <Cube c={C.purple} /> وَ ٥ <Cube c={C.green} /> فِي كِيسٍ. أَيُّهُمَا إِمْكَانِيَّةُ حُدُوثِهِ أَكْثَرُ مِنَ الآخَرِ: سَحْبُ <Cube c={C.purple} /> أَمْ <Cube c={C.green} />؟ أُوَضِّحُ إِجَابَتِي.</>}
-          hint="قارن العددين."
+          question={<>وَضَعَتْ لَيْلَى ٥ <CubeChip c={C.purple} /> وَ ٥ <CubeChip c={C.green} /> فِي كِيسٍ. أَيُّهُمَا إِمْكَانِيَّةُ حُدُوثِهِ أَكْثَرُ مِنَ الآخَرِ: سَحْبُ <CubeChip c={C.purple} /> أَمْ <CubeChip c={C.green} />؟ أُوَضِّحُ إِجَابَتِي.</>}
+          hint="مَاذَا نُلَاحِظُ عَلَى الْعَدَدَيْنِ؟"
           steps={[
-            { text: 'البنفسجي ٥، والأخضر ٥: العددان متساويان.' },
-            { text: 'لا فرق؛ إمكانيةُ سحبِ البنفسجيِّ تساوي إمكانيةَ سحبِ الأخضرِ.', kind: 'ans' },
+            { text: 'الْبَنَفْسَجِيُّ ٥، وَالْأَخْضَرُ ٥' },
+            { text: 'الْعَدَدَانِ مُتَسَاوِيَانِ.' },
+            { text: 'لَا فَرْقَ بَيْنَهُمَا', kind: 'ans', label: 'الْإِجَابَةُ' },
           ]}
           chart={<Bag items={[{ name: 'بنفسجي', n: 5, color: C.purple }, { name: 'أخضر', n: 5, color: C.green }]} shape="cube" size={260} />}
         />
@@ -303,14 +259,14 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
-            center={<>إمكانية<br />الحدوث</>}
+            center={<>إِمْكَانِيَّةُ<br />الْحُدُوثِ</>}
             items={[
-              { kind: 'rule', cap: 'أكثر إمكانية', text: 'اللون الأكثر عددًا في الكيس.' },
-              { kind: 'ex', cap: 'أقل إمكانية', text: 'اللون الأقل عددًا في الكيس.' },
-              { kind: 'qs', cap: 'متساوي', text: 'إذا تساوى العددان.' },
-              { kind: 'warn', cap: 'التجربة', text: 'أسحب وأسجّل وأعيد، ١٠ مرات.' },
+              { kind: 'rule', cap: MORE, text: 'اللَّوْنُ الْأَكْثَرُ عَدَدًا فِي الْكِيسِ.' },
+              { kind: 'ex', cap: LESS, text: 'اللَّوْنُ الْأَقَلُّ عَدَدًا فِي الْكِيسِ.' },
+              { kind: 'qs', cap: 'مُتَسَاوِيَانِ', text: 'إِذَا تَسَاوَى الْعَدَدَانِ.' },
+              { kind: 'warn', cap: 'التَّجْرِبَةُ', text: 'أَسْحَبُ، وَأُسَجِّلُ، وَأُعِيدُ، ١٠ مَرَّاتٍ.' },
             ]}
           />
         </>
@@ -324,11 +280,11 @@ export default defineLesson({
           <SlideHead tag="تذكرة الخروج" kind="qs">ثلاثة أسئلة</SlideHead>
           <Cols>
             <Bag items={[{ name: 'أخضر', n: 3, color: C.green }, { name: 'أحمر', n: 7, color: C.red }]} shape="cube" size={260} />
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q={<>سحب <Cube c={C.red} />:</>} options={['أكثر إمكانية', 'أقل إمكانية']} answer="أكثر إمكانية" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q={<>سحب <Cube c={C.green} />:</>} options={['أكثر إمكانية', 'أقل إمكانية']} answer="أقل إمكانية" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q={<>كم مكعبًا <Cube c={C.green} /> نضيف ليتساوى السحب؟</>} options={['٢', '٤', '٧']} answer="٤" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q={<>سَحْبُ <CubeChip c={C.red} />:</>} options={[MORE, LESS]} answer={MORE} />
+              <MCQ q={<>سَحْبُ <CubeChip c={C.green} />:</>} options={[MORE, LESS]} answer={LESS} />
+              <MCQ q={<>كَمْ مُكَعَّبًا <CubeChip c={C.green} /> نُضِيفُ لِيَتَسَاوَى السَّحْبُ؟</>} options={['٢', '٤', '٧']} answer="٤" />
+            </ExitTicket>
           </Cols>
         </>
       ),

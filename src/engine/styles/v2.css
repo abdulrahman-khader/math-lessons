@@ -494,3 +494,75 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .qgrid.one .qcard.opq .flines { flex-direction: row; align-items: center; gap: 28px; }
 #app[data-design="v2"] .qgrid.one .qcard.opq .strip { align-self: auto; padding: 10px 24px 4px; }
 #app[data-design="v2"] .qgrid.one .qcard.opq .fline { font-size: 44px; }
+
+/* أسئلة الكتاب المتتالية (الصف الثاني، التصميم D): سؤال واحد كبير، وشريط بأرقام الأسئلة وإجاباتها */
+#app[data-design="v2"] .v2qh .bkintro { font-size: var(--t-label); font-weight: 600; color: var(--muted); line-height: 1.6; }
+#app[data-design="v2"] .bkone { display: grid; flex: 1; align-content: start; }
+#app[data-design="v2"] .bkq { grid-area: 1 / 1; display: flex; flex-direction: column; gap: 8px; visibility: hidden; }
+#app[data-design="v2"] .bkq.now { visibility: visible; }
+#app[data-design="v2"] .bkq .bgate { display: none !important; }
+#app[data-design="v2"] .bkh { display: flex; align-items: center; gap: 14px; }
+#app[data-design="v2"] .bkstrip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; flex: none; }
+#app[data-design="v2"] .bkstrip li { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 10px 10px; border-radius: 14px; background: #f5f6f8; }
+#app[data-design="v2"] .bkstrip li.now { background: #fff; outline: 4px solid var(--sec); outline-offset: -4px; }
+#app[data-design="v2"] .bkstrip .qnum { width: 36px; height: 36px; padding-top: 3px; font-size: 20px; }
+#app[data-design="v2"] .bkstrip .bka { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--t-small); font-weight: 700; color: #aab3c2; }
+#app[data-design="v2"] .bkstrip li.done .bka { color: var(--ans); }
+#app[data-design="v2"] .qcol:has(> .bkone) { height: 100%; }
+#app[data-design="v2"] .bkstrip { margin-top: auto; }
+
+/* التمثيل بالصور: شبكة الكتاب (مثل الجداول)، بلا إطار خارجي ولا ألوان صفوف */
+#app[data-design="v2"] .picgraph { border: 0; padding: 0; background: none; gap: 10px; }
+#app[data-design="v2"] .picgraph .pg-title { font-family: var(--body); font-size: 30px; font-weight: 700; }
+#app[data-design="v2"] .picgraph table { background: #fff; border: 4px solid var(--ink); }
+#app[data-design="v2"] .picgraph th, #app[data-design="v2"] .picgraph td { border: 3px solid var(--ink); height: 72px; }
+#app[data-design="v2"] .picgraph td { width: 64px; }
+#app[data-design="v2"] .picgraph th { padding: 0 16px; font-size: 28px; font-weight: 700; background: color-mix(in srgb, var(--sec) 14%, #fff); }
+#app[data-design="v2"] .picgraph .pg-icon { font-size: 38px; }
+#app[data-design="v2"] .picgraph th .pg-icon { font-size: 28px; }
+#app[data-design="v2"] .picgraph tr.on th, #app[data-design="v2"] .picgraph tr.on td { background: var(--sec-t); outline: 0; }
+#app[data-design="v2"] .picgraph .pg-key { border: 0; background: none; padding: 0; font-size: 26px; font-weight: 600; }
+/* الرقم بجانب السؤال كما في الكتاب، والخطوات تحت النص */
+#app[data-design="v2"] .bkq { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; row-gap: 8px; align-content: start; }
+#app[data-design="v2"] .bkq > * { grid-column: 2; }
+#app[data-design="v2"] .bkq > .bkh { grid-column: 1; grid-row: 1 / span 2; align-self: start; flex-direction: column; margin-top: 14px; }
+
+/* أعمدة المربعات (الصف الثاني): بلا إطار ولا ألوان فئات؛ يُبرز صف الخطوة الحالية أو عمودها */
+#app[data-design="v2"] .gbars { border: 0; padding: 0; background: none; gap: 10px; font-size: 28px; }
+#app[data-design="v2"] .gbars .gb-title { font-family: var(--body); font-size: 30px; font-weight: 700; }
+#app[data-design="v2"] .gb-grid, #app[data-design="v2"] .gb-vgrid { background: #fff; }
+#app[data-design="v2"] .gb-label { border-width: 3px; font-size: 28px; font-weight: 700; min-height: 60px; background: color-mix(in srgb, var(--sec) 14%, #fff); }
+#app[data-design="v2"] .gb-cell { border-width: 3px; min-height: 60px; }
+#app[data-design="v2"] .gb-vgrid .gb-cell { min-height: 44px; }
+#app[data-design="v2"] .gb-row.on .gb-label, #app[data-design="v2"] .gb-row.on .gb-cell:not([style]), #app[data-design="v2"] .gb-vgrid .gb-cell.on:not([style]) { background: var(--sec-t); }
+#app[data-design="v2"] .gb-vgrid .gb-cell.on { outline: 0; }
+#app[data-design="v2"] .gb-tick i, #app[data-design="v2"] .gb-vtick, #app[data-design="v2"] .gb-vlabel { font-size: 24px; font-weight: 600; background: none; }
+#app[data-design="v2"] .gb-vlabel { font-size: 26px; font-weight: 700; }
+#app[data-design="v2"] .gb-val, #app[data-design="v2"] .gb-vval, #app[data-design="v2"] .gb-cat { font-size: 24px; font-weight: 600; }
+
+/* جدول الإشارات الذي يملؤه الصف: بعرض اللوحة، ولمس الصف يضيف إشارة */
+#app[data-design="v2"] .ltally { align-self: stretch; align-items: stretch; gap: 10px; }
+#app[data-design="v2"] .ltally table { width: 100%; }
+#app[data-design="v2"] .ltrow { cursor: pointer; touch-action: manipulation; }
+#app[data-design="v2"] .ltrow:active td { background: var(--sec-t); }
+#app[data-design="v2"] .ltmarks { min-inline-size: 180px; }
+#app[data-design="v2"] .ltfoot { font-size: var(--t-small); font-weight: 600; color: var(--muted); text-align: center; }
+/* جدول الإشارات وأعمدته معًا في لوحة واحدة: صفوف أقصر حتى يتسعا */
+#app[data-design="v2"] .chart.tbl:has(.gbars) table.dgrid :is(td, th) { padding-block: 0; font-size: 24px; line-height: 1.6; }
+#app[data-design="v2"] .chart.tbl:has(.gbars) .gb-label, #app[data-design="v2"] .chart.tbl:has(.gbars) .gb-cell { min-height: 40px; font-size: 24px; }
+#app[data-design="v2"] .chart.tbl:has(.gbars) .gb-vgrid .gb-cell { min-height: 34px; }
+#app[data-design="v2"] .chart.tbl:has(.gbars) .gbars .gb-title { font-size: 26px; }
+#app[data-design="v2"] .chart.tbl:has(.gbars) > .stack, #app[data-design="v2"] .chart.tbl:has(.gbars) > div { gap: 12px !important; }
+#app[data-design="v2"] .chart.tbl:has(.picgraph) table.dgrid :is(td, th) { padding-block: 0; font-size: 24px; line-height: 1.6; }
+#app[data-design="v2"] .chart.tbl:has(.picgraph) .picgraph :is(td, th) { height: 46px; font-size: 24px; }
+#app[data-design="v2"] .chart.tbl:has(.picgraph) .picgraph td { width: 46px; }
+#app[data-design="v2"] .chart.tbl:has(.picgraph) .picgraph .pg-icon { font-size: 28px; }
+#app[data-design="v2"] .chart.tbl:has(.picgraph) .picgraph :is(.pg-title, .pg-key) { font-size: 24px; }
+#app[data-design="v2"] .chart.tbl:has(.picgraph) > .stack, #app[data-design="v2"] .chart.tbl:has(.picgraph) > div { gap: 12px !important; }
+#app[data-design="v2"] .bkq .qtext.long { font-size: 36px; line-height: 1.75; }
+
+/* «أحوّط»: الدائرة فوق الكلمة نفسها، مرسومة مكانها من البداية فلا يتحرك شيء */
+#app[data-design="v2"] .cword { position: relative; font-size: 34px; font-weight: 700; padding: 0 14px; }
+#app[data-design="v2"] .cword .step.cring { position: absolute; inset: -6px -4px; margin: 0; padding: 0; display: grid; place-items: center; min-height: 0; border: 4px solid var(--ans); border-radius: 50%; background: #fff; color: var(--ans); font-size: 34px !important; font-weight: 700; visibility: hidden; animation: none; }
+#app[data-design="v2"] .cword .step.cring.shown { visibility: visible; }
+#app[data-design="v2"] .cchip { border-radius: 4px; }

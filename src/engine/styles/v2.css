@@ -675,3 +675,19 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .sab.on { background: #5b6b84; color: #fff; }
 #app[data-design="v2"] .sbar { font-size: 18px; font-weight: 700; }
 #app[data-design="v2"] .scard.barred { background: #fdeceb; outline: 0; }
+
+/* الأرقام داخل الجداول أكبر قليلًا من الرأس، فتُقرأ من آخر الفصل */
+#app[data-design="v2"] table.dgrid tbody td, #app[data-design="v2"] table.data td { font-size: 36px; }
+#app[data-design="v2"] table.dgrid.small tbody td, #app[data-design="v2"] .qcard table.data td, #app[data-design="v2"] .compact table.data td { font-size: 28px; }
+#app[data-design="v2"] .chart.tbl:is(:has(.gbars), :has(.picgraph)) table.dgrid tbody td { font-size: 28px; }
+/* جدول طويل (٥ صفوف فأكثر): الأرقام بالحجم الأكبر نفسه تقريبًا، وصفوف أقصر حتى يتسع */
+#app[data-design="v2"] table.dgrid:has(tbody tr:nth-child(5)) tbody td { font-size: 32px; padding-block: 2px 0; line-height: 1.4; }
+/* جدولان فوق بعض في لوحة واحدة: صفوف أقصر */
+#app[data-design="v2"] .chart.tbl :is(table.dgrid:has(~ table.dgrid), table.dgrid ~ table.dgrid) tbody td { font-size: 32px; padding-block: 0; line-height: 1.4; }
+#app[data-design="v2"] table.dgrid.horiz tbody td { font-size: 32px; }
+/* الكبر للأرقام فقط: عمود التسميات (أول خانة في الصف) يبقى بحجمه */
+#app[data-design="v2"] table.dgrid:not(.horiz) tbody td:first-child { font-size: 30px; }
+#app[data-design="v2"] .chart.tbl :is(table.dgrid:has(~ table.dgrid), table.dgrid ~ table.dgrid):not(.horiz) tbody td:first-child { font-size: 26px; }
+/* القاعدة في رأس الجدول: صندوق إجابة أخضر مثل خانات الجدول، ومكانه محجوز قبل ظهوره */
+#app[data-design="v2"] .ruletbl .rulev { margin: 0; padding: 2px 14px 4px; border-radius: 10px; line-height: 1.3; }
+#app[data-design="v2"] .ruletbl .rulev.shown { background: var(--ans); color: #fff; animation: none; }

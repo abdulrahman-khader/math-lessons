@@ -110,6 +110,16 @@ export function useSlide(): SlideState {
 /** مجموعة الحل التي تنتمي إليها الخطوة (داخل <Solution>) */
 export const GroupCtx = createContext<string | undefined>(undefined);
 
+/**
+ * ترتيب الظهور في شريحة فيها جدول: القاعدة في رأس الجدول أولًا (نكتشفها)، ثم خانات الجدول (نطبّقها)،
+ * ثم خطوات الحل وإجاباته بترتيبها. وفي كل مرحلة بترتيب الصفحة.
+ */
+function phase(el: HTMLElement): number {
+  if (el.classList.contains('rulev')) return 0;
+  if (el.closest('table')) return 1;
+  return 2;
+}
+
 export function SlideScope({ index, children }: { index: number; children: ReactNode }) {
   const engine = useEngine();
   const steps = useRef(new Map<string, StepMeta>());
@@ -133,7 +143,7 @@ export function SlideScope({ index, children }: { index: number; children: React
       .filter(([id]) => !shownRef.current.includes(id))
       .map(([id, m]) => ({ id, el: m.el() }))
       .filter((x): x is { id: string; el: HTMLElement } => !!x.el)
-      .sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+      .sort((a, b) => phase(a.el) - phase(b.el) || (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
     if (!pending.length) return false;
     const next = [...shownRef.current, pending[0].id];
     shownRef.current = next;

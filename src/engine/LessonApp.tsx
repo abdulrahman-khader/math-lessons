@@ -704,6 +704,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             onPick={(n) => setPicked((p) => [...p, n])}
             onRestore={() => setPicked([])}
             remove={wheelRemove}
+            autoClose={2500}
             absent={klass ? klass.students.filter((n) => absentToday(starEvents, klass.id, n)) : []}
           />
           {teamsShown && klass && st.nTeams > 0 && <TeamsBoard klass={klass} names={st.names.slice(0, st.nTeams)} colors={v2 ? V2_TEAM_COLORS : TEAM_COLORS} onClose={() => setTeamsShown(false)} />}

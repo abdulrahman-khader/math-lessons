@@ -38,6 +38,8 @@ interface Props {
   onRestore?: () => void;
   /** هل يخرج الاسم بعد ظهوره. يُتحكم به من الجوال */
   remove?: boolean;
+  /** بعد ظهور الاسم بهذه المدة (ملّي ثانية) تُغلق العجلة ويعود الدرس ليجيب الطالب */
+  autoClose?: number;
 }
 
 /**
@@ -45,7 +47,7 @@ interface Props {
  * المعلم يديرها من الجوال، أو يلمس العجلة (أو المسافة)، ويغلقها بلمسة خارجها أو Esc.
  * النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة.
  */
-export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp, absent = [] }: Props) {
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp, absent = [], autoClose }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
@@ -54,6 +56,9 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
   /** بعد التوقف: الأسماء كما كانت والفائز بينها، فلا تتحرك الشرائح حين يخرج اسمه */
   const shown = useRef<{ list: string[]; win: number } | null>(null);
   const remove = removeProp ?? !!klass;
+  const closeTimer = useRef(0);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   const text = names || DEFAULT_NAMES;
   const hasTeams = !!klass && nTeams > 0 && Object.values(klass.team).some((t) => t < nTeams);
   const filter = hasTeams ? teamFilter : -1;
@@ -161,6 +166,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
 
   useEffect(() => {
     if (open) return;
+    clearTimeout(closeTimer.current);
     shown.current = null;
     setLive('');
   }, [open]);
@@ -172,6 +178,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       if (klass && picked.length) onRestore?.();
       return;
     }
+    clearTimeout(closeTimer.current);
     shown.current = null;
     setSpinning(true);
     onResult?.('…');
@@ -208,6 +215,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       onResult?.(N[pick]);
       sGood();
       if (remove) (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n')));
+      if (autoClose) closeTimer.current = window.setTimeout(() => closeRef.current(), autoClose);
     };
     requestAnimationFrame(f);
   };

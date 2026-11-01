@@ -22,6 +22,14 @@ async function fresh(page: Page, file: string) {
 
 const home = (page: Page) => page.locator('section.slide.active .teamset');
 
+/** أداة من شريط الأدوات، أو من قائمة ⋯ في التصميم الجديد */
+async function openTool(page: Page, name: string) {
+  if (await page.locator('.v2dots').count()) {
+    await page.locator('.v2dots').click();
+    await page.getByRole('menuitem', { name, exact: true }).click();
+  } else await page.getByRole('button', { name }).click();
+}
+
 test('فصول الصف تُكتب مرة واحدة وتظهر في دروسه الأخرى لا في الصف الآخر', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -71,7 +79,7 @@ test('التوزيع على الفرق والعجلة على الفصل دون �
 
   // العجلة على شاشة الفصل: العجلة والاسم فقط، تدور بلمسها، ولا يتكرر اسم
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.getByRole('button', { name: 'عجلة الأسماء' }).click();
+  await openTool(page, 'عجلة الأسماء');
   const wheel = page.getByRole('dialog', { name: 'عجلة الأسماء' });
   await expect(wheel).toHaveAttribute('data-left', '6');
   await expect(wheel.locator('button')).toHaveCount(0);

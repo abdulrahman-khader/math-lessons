@@ -1,91 +1,20 @@
-import { useState } from 'react';
 import {
-  Card, Cols, Ctrls, DataGrid, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack,
-  Step, Tally, Winner, defineLesson, num, useRemoteWidget, type Cell, type HlKey,
+  BookLabel, Card, Grid, Cols, Ctrls, Definition, ExitTicket, FreqTable, GoHomeButton, Goals, IfTeams, Intro, MCQ, Mark, MindMap, NextButton, QCol,
+  QText, QuestionSlide, RawData, SlideHead, Solution, Stack, Step, TableBox, Tally, TallyTable, VoteExplorer, Winner, WrongTally,
+  defineLesson, type DataRow as Row,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const CHECK = 'تأكَّدْ · ص ٨٠';
-const PRACTICE_80 = 'تدرَّبْ وحُلَّ المسائلَ · ص ٨٠';
-const PRACTICE_81 = 'تدرَّبْ وحُلَّ المسائلَ · ص ٨١';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٨١';
+const CHECK = 'تأكَّدْ، ص ٨٠';
+const PRACTICE_80 = 'تدرَّبْ وحُلَّ المسائلَ، ص ٨٠';
+const PRACTICE_81 = 'تدرَّبْ وحُلَّ المسائلَ، ص ٨١';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٨١';
 
-type Row = [label: string, n: number];
-
-/** خلية تظهر مع الخطوة التي فيها hl ‹v{i}› */
-const at = (i: number, c: { v?: string | number; tally?: number }): Cell => ({ ...c, k: `v${i}` as HlKey });
-
-/** لوحة إشارات؛ reveal: الإشارات تظهر مع الخطوات */
-const TallyBoard = ({ title, head, rows, reveal, tone = 'salmon' }: { title: string; head: string; rows: Row[]; reveal?: boolean; tone?: 'salmon' | 'orange' }) => (
-  <DataGrid title={title} head={[head, 'الإشاراتُ']} tone={tone} rows={rows.map(([l, n], i) => [l, reveal ? at(i, { tally: n }) : { tally: n }])} />
-);
-
-/** جدول تكراري؛ reveal: الأعداد تظهر مع الخطوات */
-const FreqTable = ({ title, head, rows, reveal, count = 'التَّكرارُ' }: { title: string; head: string; rows: Row[]; reveal?: boolean; count?: string }) => (
-  <DataGrid title={title} head={[head, count]} rows={rows.map(([l, n], i) => [l, reveal ? at(i, { v: n }) : n])} />
-);
-
-/** بيانات خام كما جُمعت (أعمدة من اليمين) */
-const Raw = ({ title, cols }: { title: string; cols: string[][] }) => {
-  const h = Math.max(...cols.map((c) => c.length));
-  return <DataGrid title={title} small rows={Array.from({ length: h }, (_, r) => cols.map((c) => c[r] ?? ''))} />;
-};
-
-const Box = ({ children }: { children: React.ReactNode }) => <div className="chart tbl">{children}</div>;
-
-/** مستكشف: تصويت الصف، كل ضغطة إشارة، ثم الجدول التكراري */
-const FRUITS = ['التُّفّاحُ', 'الموزُ', 'البرتقالُ', 'العنبُ'];
-function VoteExplorer() {
-  const [n, setN] = useState([0, 0, 0, 0]);
-  const add = (i: number, d: number) => setN((x) => x.map((v, j) => (j === i ? Math.max(0, Math.min(30, v + d)) : v)));
-  const total = n.reduce((a, b) => a + b, 0);
-  useRemoteWidget(
-    () => ({
-      title: 'تصويت الصف',
-      info: `عدد الأصوات: ${num(total)}`,
-      steppers: FRUITS.map((f, i) => ({ key: String(i), label: f, value: n[i], min: 0, max: 30 })),
-      buttons: [{ key: 'clear', label: 'تصويت جديد' }],
-    }),
-    (k, v) => {
-      if (k === 'clear') setN([0, 0, 0, 0]);
-      else if (v !== undefined) add(+k, v - n[+k]);
-    },
-    [n],
-  );
-  return (
-    <Cols style={{ gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'start' }}>
-      <Stack>
-        {FRUITS.map((f, i) => (
-          <div key={f} className="ffstep">
-            <span>{f}</span>
-            <button aria-label={`إنقاص ${f}`} disabled={!n[i]} onClick={() => add(i, -1)}>
-              −
-            </button>
-            <b>{num(n[i])}</b>
-            <button aria-label={`صوت ل${f}`} onClick={() => add(i, 1)}>
-              +
-            </button>
-          </div>
-        ))}
-        <button className="btn" onClick={() => setN([0, 0, 0, 0])}>
-          تصويت جديد
-        </button>
-      </Stack>
-      <DataGrid title="الفاكهةُ المفضَّلةُ" head={['الفاكهةُ', 'الإشاراتُ']} tone="salmon" rows={FRUITS.map((f, i) => [f, { tally: n[i] }])} />
-      <Stack>
-        <DataGrid title="الفاكهةُ المفضَّلةُ" head={['الفاكهةُ', 'التَّكرارُ']} rows={[...FRUITS.map((f, i): Cell[] => [f, n[i]]), ['المجموعُ', total]]} />
-        {/* تُحسب من تصويت الصف، وتتغير مع كل صوت */}
-        {total > 0 && (
-          <b className="votetop">
-            الأكثرُ تصويتًا: {FRUITS.filter((_, i) => n[i] === Math.max(...n)).join(' و')} ({num(Math.max(...n))})
-          </b>
-        )}
-      </Stack>
-    </Cols>
-  );
-}
+const TallyBoard = TallyTable;
+const Raw = RawData;
+const Box = TableBox;
 
 /* البيانات */
 const HOBBIES: Row[] = [['القراءةُ', 5], ['الخياطةُ', 4], ['الرَّسمُ', 3]];
@@ -109,13 +38,14 @@ const toolsIntro = 'في الأسئلةِ (٩ – ١٢)، إستعملْ لوح�
 export default defineLesson({
   meta: {
     id: 'g4-3-1-collect-data',
+    design: 'v2',
     code: '٣-١',
     title: 'جَمْعُ البَياناتِ وتنظِيمُها',
     shortTitle: 'جمع البيانات وتنظيمها',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الثالث: تنظيم البيانات وعرضها وتفسيرها',
-    source: 'الجزء الأول · ص ٧٩–٨١',
+    source: 'الجزء الأول، ص ٧٩–٨١',
     minutes: 45,
     idea: 'أَجْمَعُ البَياناتِ وأُنظِّمُها.',
     bookQuestions: 14,
@@ -123,12 +53,12 @@ export default defineLesson({
   sectionDesc: {
     engage: 'هوايات الطالبات',
     explore: 'تصويت الصف',
-    explain: 'المفردات · مثال ١',
-    elab: 'نعمل معًا · مثال ٢',
+    explain: 'المفردات، مثال ١',
+    elab: 'نعمل معًا، مثال ٢',
     check: 'الأسئلة ١–٤',
     practice: 'الأسئلة ٥–١٢',
     hot: 'الأسئلة ١٣–١٤',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -142,48 +72,43 @@ export default defineLesson({
             <Stack>
               <Card kind="rule" cap="فكرة الدرس">أَجْمَعُ البَياناتِ وأُنظِّمُها.</Card>
               <Card kind="rule" cap="المفردات">
-                <Mark>المَسْحُ</Mark> · <Mark>البَياناتُ</Mark> · <Mark>لَوْحةُ الإشاراتِ</Mark> · <Mark>الجدْولُ التّكراريُّ</Mark>
+                <Mark>المَسْحُ</Mark>، <Mark>البَياناتُ</Mark>، <Mark>لَوْحةُ الإشاراتِ</Mark>، <Mark>الجدْولُ التّكراريُّ</Mark>
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أجمع البيانات بإجراء مسح.</li>
-                <li>أنظّم البيانات في لوحة إشارات.</li>
-                <li>أنظّم البيانات في جدول تكراري.</li>
-                <li>أقرأ لوحة الإشارات والجدول التكراري.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أجمع البيانات بإجراء مسح.',
+                  'أنظّم البيانات في لوحة إشارات.',
+                  'أنظّم البيانات في جدول تكراري.',
+                  'أقرأ لوحة الإشارات والجدول التكراري.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
       ),
     },
 
-    /* ================= تهيئة · استعد ================= */
+    /* ================= تهيئة، استعد ================= */
     {
       sec: 'engage', min: 3,
       notes: 'اقرأ «استعد» من الكتاب. اسأل: هل يسهل أن نعرف أيّ هواية أكثر من هذه السبورة؟ نحتاج طريقة أسرع للتنظيم.',
       content: (
         <>
-          <SlideHead tag="اسْتَعِدَّ · ص ٧٩" kind="qs">هوايات الطالبات</SlideHead>
+          <SlideHead tag="اسْتَعِدَّ، ص ٧٩" kind="qs">هوايات الطالبات</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">سألتِ المعلِّمةُ بعضَ الطّالباتِ عَنْ هِوَايَاتِهِنَّ، فكانتِ النّتيجةُ كَمَا هوَ موضَّحٌ في الشّكلِ المجاورِ.</p>
+              <QText>سألتِ المعلِّمةُ بعضَ الطّالباتِ عَنْ هِوَايَاتِهِنَّ، فكانتِ النّتيجةُ كَمَا هوَ موضَّحٌ في الشّكلِ المجاورِ.</QText>
               <MCQ q="كم طالبةً هوايتُها القراءةُ؟" options={['٣', '٤', '٥']} answer="٥" award />
               <Card kind="qs" cap="سؤال للتفكير">كيف ننظّم هذه الأسماء لنعرف بسرعة أيّ هواية هي الأكثر؟</Card>
             </QCol>
-            <div className="chart tbl board">
-              <DataGrid
+            <TableBox>
+              <RawData
                 head={['القراءةُ', 'الخياطةُ', 'الرَّسمُ']}
-                tone="green"
-                rows={[
-                  ['فاطمةُ', 'سعادُ', 'نجودُ'],
-                  ['مها', 'أملُ', 'سَلمى'],
-                  ['زينبُ', 'عائشةُ', 'مَريمُ'],
-                  ['العنودُ', 'لَيلَى', ''],
-                  ['لُبنَى', '', ''],
-                ]}
+                cols={[['فاطمةُ', 'مها', 'زينبُ', 'العنودُ', 'لُبنَى'], ['سعادُ', 'أملُ', 'عائشةُ', 'لَيلَى'], ['نجودُ', 'سَلمى', 'مَريمُ']]}
               />
-            </div>
+            </TableBox>
           </Cols>
         </>
       ),
@@ -196,8 +121,8 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">مسح: ما الفاكهة المفضّلة في صفّنا؟</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>اضغط + لكل صوت، وراقب لوحة الإشارات والجدول التكراري.</p>
-          <VoteExplorer />
+          <Intro>نضغطُ + لِكُلِّ صَوْتٍ، وَنُرَاقِبُ لَوْحَةَ الْإِشَارَاتِ وَالْجَدْوَلَ التَّكْرَارِيَّ.</Intro>
+          <VoteExplorer title="الفاكهةُ المفضَّلةُ" head="الفاكهةُ" options={['التُّفّاحُ', 'الموزُ', 'البرتقالُ', 'العنبُ']} />
           <Card kind="rule" cap="لاحظ">في لوحة الإشارات كل إشارة صوت واحد، وكل خمس إشارات حزمة. وفي الجدول التكراري نكتب العدد.</Card>
         </>
       ),
@@ -209,15 +134,15 @@ export default defineLesson({
       notes: 'اقرأ النص من الكتاب، وأشر إلى كل مفردة. ثم بطاقة «تذكّر» عن كتابة العدد ٥ بالإشارات.',
       content: (
         <>
-          <SlideHead tag="القاعدة · ص ٧٩" kind="rule">المسح والبيانات</SlideHead>
-          <Card kind="rule" style={{ fontSize: '1.02em', fontWeight: 700, lineHeight: 1.85 }}>
+          <SlideHead tag="القاعدة، ص ٧٩" kind="rule">المسح والبيانات</SlideHead>
+          <Definition kind="rule">
             مَا قامتْ به المعلِّمةُ هوَ إجراءُ <Mark>مَسْحٍ</Mark>. وهوَ إحدَى طُرقِ جَمْعِ <Mark>البَياناتِ</Mark>. ويُمكنُ تنظيمُ البَياناتِ فِي <Mark>لَوْحَةِ إشاراتٍ</Mark> أوْ فِي <Mark>جدولٍ تكراريٍّ</Mark>.
-          </Card>
+          </Definition>
           <Cols even>
             <Card kind="ex" cap="لوحة الإشارات">تُمثِّلُ كلُّ إشارةٍ طالبةً واحدةً.</Card>
             <Card kind="ex" cap="الجدول التكراري">تُستعملُ الأعدادُ لتسجيلِ النتائجِ.</Card>
             <Card kind="warn" cap="تذكَّرْ">
-              يُمثِّلُ العددُ ٥ بالإشاراتِ <Tally n={5} /> وليسَ <span className="tally5">|||||</span>
+              يُمثِّلُ العددُ ٥ بالإشاراتِ <Tally n={5} /> وليسَ <WrongTally />
             </Card>
           </Cols>
         </>
@@ -230,12 +155,12 @@ export default defineLesson({
       notes: 'أنا أعمل: نفّذ الخطوات الثلاث بصوت مسموع. مع كل خطوة تظهر إشارات هواية وعددها في الجدولين.',
       content: (
         <>
-          <SlideHead tag="مثالٌ من واقعِ الحياةِ ١ · ص ٧٩" kind="ex">تنظيم البيانات</SlideHead>
+          <SlideHead tag="مثالٌ من واقعِ الحياةِ ١، ص ٧٩" kind="ex">تنظيم البيانات</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">
-                <b style={{ color: 'var(--ex)' }}>هِوايَاتٌ:</b> أُنظرْ إلى البَياناتِ الَّتِي جمعَتْها المعلِّمةُ، ثمَّ نَظِّمْهَا في لَوْحَةِ إشاراتٍ وفي جدولٍ تَكراريٍّ.
-              </p>
+              <QText>
+                <BookLabel>هِوايَاتٌ:</BookLabel> أُنظرْ إلى البَياناتِ الَّتِي جمعَتْها المعلِّمةُ، ثمَّ نَظِّمْهَا في لَوْحَةِ إشاراتٍ وفي جدولٍ تَكراريٍّ.
+              </QText>
               <Ctrls>
                 <NextButton />
               </Ctrls>
@@ -244,9 +169,7 @@ export default defineLesson({
                 <Step>الخطوةُ ٢: أُكتبْ كلَّ هِوايةٍ في العُمودِ الأوَّلِ.</Step>
                 <Step hl={['p0', 'v0']}>الخطوةُ ٣: إستعملْ إشاراتٍ أوْ أعدادًا لتسجيلِ النتائجِ: القراءةُ ٥،</Step>
                 <Step hl={['p1', 'v1']}>الخياطةُ ٤،</Step>
-                <Step hl={['p2', 'v2']} kind="ans">
-                  الرسمُ ٣.
-                </Step>
+                <Step hl={['p2', 'v2']}>الرسمُ ٣.</Step>
               </Solution>
             </QCol>
             <Box>
@@ -279,11 +202,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">أقرأ الإشارات</SlideHead>
-          <Stack>
+          <Grid cols={3}>
             <MCQ q={<>أ) كم تمثّل هذه الإشارات؟ <Tally n={7} /></>} options={['٥', '٦', '٧']} answer="٧" award />
             <MCQ q={<>ب) كيف أمثّل العدد ١٢ بالإشارات؟</>} options={['حزمتان وإشارتان', 'حزمة وسبع إشارات', '١٢ إشارة متتالية']} answer="حزمتان وإشارتان" award />
             <MCQ q="ج) في أيّ الجدولين نكتب الأعداد؟" options={['الجدول التكراري', 'لوحة الإشارات']} answer="الجدول التكراري" award />
-          </Stack>
+          </Grid>
         </>
       ),
     },
@@ -294,22 +217,18 @@ export default defineLesson({
       notes: 'مثال ٢ من الكتاب ص ٨٠. ناقش ردود الأفعال: أيّها الأفضل عند رؤية إعلان؟ (أستعين برأي أسرتي).',
       content: (
         <>
-          <SlideHead tag="مثالٌ من واقعِ الحياةِ ٢ · ص ٨٠" kind="ex">وسائل التواصل الاجتماعي</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.15fr' }}>
+          <SlideHead tag="مثالٌ من واقعِ الحياةِ ٢، ص ٨٠" kind="ex">وسائل التواصل الاجتماعي</SlideHead>
+          <Cols>
             <QCol>
-              <p className="qtext long">
-                <b style={{ color: 'var(--ex)' }}>وسائلُ التَّواصلِ الاجتماعيِّ:</b> سألَ المعلمُ طلابَ الصفِّ الرابعِ الابتدائيِّ عن ردةِ فعلِهِمْ عندَ ظهورِ إعلانٍ حولَ منتجٍ لأحدِ مشروباتِ الطّاقةِ؛ أثناءَ تصفحِهِمْ وسائلَ التَّواصلِ الاجتماعيِّ. ثمَّ نظَّمَ المعلمُ البياناتِ الَّتي جمعَهَا في لوحةِ الإشاراتِ و الجدولِ التِّكراريِّ.
-              </p>
+              <QText long>
+                <BookLabel>وسائلُ التَّواصلِ الاجتماعيِّ:</BookLabel> سألَ المعلمُ طلابَ الصفِّ الرابعِ الابتدائيِّ عن ردةِ فعلِهِمْ عندَ ظهورِ إعلانٍ حولَ منتجٍ لأحدِ مشروباتِ الطّاقةِ؛ أثناءَ تصفحِهِمْ وسائلَ التَّواصلِ الاجتماعيِّ. ثمَّ نظَّمَ المعلمُ البياناتِ الَّتي جمعَهَا في لوحةِ الإشاراتِ و الجدولِ التِّكراريِّ.
+              </QText>
               <MCQ q="ما ردّة الفعل التي اختارها أكبر عدد من الطلاب؟" options={['أُبلِّغُ أُسرتِي', 'أُبادرُ بالشراء', 'أَستشيرُ أصدقائِي']} answer="أُبلِّغُ أُسرتِي" award />
             </QCol>
             <Box>
               <Stack>
-                <div className="tight">
-                  <TallyBoard title="ردودُ أفعالِ الطلابِ" head="ردةُ الفعلِ" rows={REACTIONS} />
-                </div>
-                <div className="tight">
-                  <FreqTable title="ردودُ أفعالِ الطلابِ" head="ردةُ الفعلِ" rows={REACTIONS} />
-                </div>
+                <TallyBoard title="ردودُ أفعالِ الطلابِ" head="ردةُ الفعلِ" rows={REACTIONS} small />
+                <FreqTable title="ردودُ أفعالِ الطلابِ" head="ردةُ الفعلِ" rows={REACTIONS} small />
               </Stack>
             </Box>
           </Cols>
@@ -330,7 +249,6 @@ export default defineLesson({
             { text: 'الحافلةُ ٨ = حزمة وثلاث إشارات.', hl: ['p0', 'v0'] },
             { text: 'السيارةُ ١٢ = حزمتان وإشارتان.', hl: ['p1', 'v1'] },
             { text: 'المشيُ ٦ = حزمة وإشارة.', hl: ['p2', 'v2'] },
-            { text: 'لوحة الإشارات مكتملة.', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -352,9 +270,9 @@ export default defineLesson({
           question="في المسألةِ ١: ما الوسيلةُ الّتي يستعملُها أكبرُ عددٍ مِنَ الطُّلَّابِ؟ وما الوسيلةُ الّتي يستعملُها أقلُّ عددٍ مِنَ الطُّلّابِ؟"
           hint="قارن الأعداد: ٨ و١٢ و٦."
           steps={[
-            { text: 'أكبر عدد ١٢: السيارةُ.', hl: ['p1'] },
-            { text: 'أقل عدد ٦: المشيُ.', hl: ['p2'] },
-            { text: 'الأكبر: السيارة، والأقل: المشي.', kind: 'ans' },
+            { text: 'أَكْبَرُ عَدَدٍ ١٢، وَأَقَلُّ عَدَدٍ ٦.', hl: ['p1', 'p2'] },
+            { label: 'الْأَكْبَرُ', text: 'السَّيَّارَةُ', kind: 'ans' },
+            { label: 'الْأَقَلُّ', text: 'الْمَشْيُ', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -377,11 +295,11 @@ export default defineLesson({
             { text: 'زرقاءُ ٣', hl: ['p1', 'v1'] },
             { text: 'صفراءُ ٢', hl: ['p2', 'v2'] },
             { text: 'بيضاءُ ٢', hl: ['p3', 'v3'] },
-            { text: 'المجموع ٣ + ٣ + ٢ + ٢ = ١٠ سمكات.', kind: 'ans' },
+            { text: 'نَتَحَقَّقُ: ٣ + ٣ + ٢ + ٢ = ١٠ سَمَكَاتٍ.' },
           ]}
           chart={
             <Box>
-              <Cols even style={{ alignItems: 'center' }}>
+              <Cols even>
                 <Raw title="ألوانُ سمكِ الزِّينةِ" cols={[['حمراءُ', 'حمراءُ', 'حمراءُ', 'صفراءُ', 'صفراءُ'], ['زرقاءُ', 'زرقاءُ', 'زرقاءُ', 'بيضاءُ', 'بيضاءُ']]} />
                 <FreqTable title="ألوانُ سمكِ الزِّينةِ" head="اللونُ" rows={FISH} reveal />
               </Cols>
@@ -399,10 +317,8 @@ export default defineLesson({
           question="إذا أردتَ إجراءَ مسحٍ، فاكتُبْ ثلاثةَ أسئلةٍ يمكنُكَ استعمالُهَا لإجرائِهِ."
           hint="سؤال المسح له إجابات قليلة يمكن عدّها: ما…المفضّل لديك؟"
           steps={[
-            { text: 'ما لونُك المفضّل؟' },
-            { text: 'كيف تصل إلى المدرسة؟' },
-            { text: 'ما رياضتُك المفضّلة؟' },
-            { text: 'أسئلة إجاباتها محدّدة، فيمكن تنظيمها في لوحة إشارات أو جدول تكراري.', kind: 'ans' },
+            { text: 'نَخْتَارُ أَسْئِلَةً إِجَابَاتُهَا قَلِيلَةٌ يُمْكِنُ عَدُّهَا.' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'مَا لَوْنُكَ الْمُفَضَّلُ؟ كَيْفَ تَصِلُ إِلَى الْمَدْرَسَةِ؟ مَا رِيَاضَتُكَ الْمُفَضَّلَةُ؟', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -427,11 +343,10 @@ export default defineLesson({
             { text: 'الجبنُ ٥: حزمة واحدة.', hl: ['p0', 'v0'] },
             { text: 'الزعترُ ٣: ثلاث إشارات.', hl: ['p1', 'v1'] },
             { text: 'اللحمُ ٢: إشارتان.', hl: ['p2', 'v2'] },
-            { text: 'لوحة الإشارات مكتملة، والمجموع ١٠.', kind: 'ans' },
           ]}
           chart={
             <Box>
-              <Cols even style={{ alignItems: 'center' }}>
+              <Cols even>
                 <Raw title="الفطائرُ المُفضَّلةُ" cols={[['الجبنُ', 'الجبنُ', 'الجبنُ', 'الجبنُ'], ['الجبنُ', 'الزعترُ', 'الزعترُ', 'الزعترُ'], ['اللحمُ', 'اللحمُ']]} />
                 <TallyBoard title="الفطائرُ المُفضَّلةُ" head="النوعُ" rows={PIES} reveal />
               </Cols>
@@ -452,11 +367,10 @@ export default defineLesson({
             { text: 'علومٌ ٣', hl: ['p0', 'v0'] },
             { text: 'رياضياتٌ ٢', hl: ['p1', 'v1'] },
             { text: 'لُغتي ٤', hl: ['p2', 'v2'] },
-            { text: 'لوحة الإشارات مكتملة، والمجموع ٩.', kind: 'ans' },
           ]}
           chart={
             <Box>
-              <Cols even style={{ alignItems: 'center' }}>
+              <Cols even>
                 <Raw title="المادَّةُ الدِّراسيَّةُ المفضَّلةُ" cols={[['علومٌ', 'علومٌ', 'علومٌ', 'رياضياتٌ', 'رياضياتٌ'], ['لُغتي', 'لُغتي', 'لُغتي', 'لُغتي']]} />
                 <TallyBoard title="المادَّةُ الدِّراسيَّةُ المفضَّلةُ" head="المادةُ" rows={SUBJECTS} reveal />
               </Cols>
@@ -474,7 +388,7 @@ export default defineLesson({
           intro="نَظِّمِ البَياناتِ في السُّؤَالَيْنِ الآتِيَيْنِ في جدولٍ تَكْرَاريٍّ:"
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>القياسُ:</b> سجَّلَ عادلٌ درجاتِ الحرارةِ خلالَ أُسبوعٍ عَلَى النَّحْوِ التَّالِي:
+              <BookLabel>القياسُ:</BookLabel> سجَّلَ عادلٌ درجاتِ الحرارةِ خلالَ أُسبوعٍ عَلَى النَّحْوِ التَّالِي:
             </>
           }
           hint="عدّ الإشارات في كل صف واكتب العدد."
@@ -483,11 +397,11 @@ export default defineLesson({
             { text: '٢٥ – ٢٩: ٣ أيام', hl: ['p1', 'v1'] },
             { text: '٣٠ – ٣٤: يوم واحد', hl: ['p2', 'v2'] },
             { text: '٣٥ – ٣٩: يوم واحد', hl: ['p3', 'v3'] },
-            { text: 'المجموع ٧ أيام: أسبوع كامل.', kind: 'ans' },
+            { text: 'نَتَحَقَّقُ: الْمَجْمُوعُ ٧ أَيَّامٍ، أُسْبُوعٌ كَامِلٌ.' },
           ]}
           chart={
             <Box>
-              <Stack className="tight">
+              <Stack>
                 <TallyBoard title="درجاتُ الحرارةِ في أسبوعٍ" head="درجةُ الحرارةِ (س°)" rows={TEMPS} tone="orange" />
                 <FreqTable title="درجاتُ الحرارةِ في أسبوعٍ" head="درجةُ الحرارةِ (س°)" rows={TEMPS} count="عددُ الأيامِ" reveal />
               </Stack>
@@ -509,7 +423,7 @@ export default defineLesson({
             { text: 'الرَّسمُ ٣', hl: ['p1', 'v1'] },
             { text: 'السِّباحةُ ٥', hl: ['p2', 'v2'] },
             { text: 'القراءةُ ٣', hl: ['p3', 'v3'] },
-            { text: 'المجموع ٤ + ٣ + ٥ + ٣ = ١٥ طالبًا.', kind: 'ans' },
+            { text: 'نَتَحَقَّقُ: ٤ + ٣ + ٥ + ٣ = ١٥ طَالِبًا.' },
           ]}
           chart={
             <Box>
@@ -542,7 +456,8 @@ export default defineLesson({
           hint="ابحث عن الصف الذي فيه أكثر إشارات."
           steps={[
             { text: 'القلمُ الرصاصُ: حزمة (٥) وثلاث إشارات.', hl: ['p2'] },
-            { text: 'القلمُ الرصاصُ، بِيعَ منه ٨ أقلام.', kind: 'ans' },
+            { label: 'الْأَدَاةُ', text: 'الْقَلَمُ الرَّصَاصُ', kind: 'ans' },
+            { label: 'عَدَدُ مَا بِيعَ', text: '٨ أَقْلَامٍ', kind: 'ans' },
           ]}
           chart={<Box>{tools}</Box>}
         />
@@ -556,7 +471,7 @@ export default defineLesson({
           source={PRACTICE_81} n={10} time={30}
           question="ما الأداةُ التي بِيعَ منهُا قِطعةٌ واحدةٌ فقطْ ؟"
           hint="ابحث عن الصف الذي فيه إشارة واحدة."
-          steps={[{ text: 'المقصُّ', hl: ['p3'], kind: 'ans' }]}
+          steps={[{ text: 'إِشَارَةٌ وَاحِدَةٌ فِي صَفِّ الْمِقَصِّ.', hl: ['p3'] }, { label: 'الْأَدَاةُ', text: 'الْمِقَصُّ', kind: 'ans' }]}
           chart={<Box>{tools}</Box>}
         />
       ),
@@ -571,7 +486,7 @@ export default defineLesson({
           hint="حوّل كل صف إلى عدد، ثم اجمع."
           steps={[
             { text: '٥ + ٢ + ٨ + ١', hl: ['p0', 'p1', 'p2', 'p3'] },
-            { text: '١٦ أداةً', kind: 'ans' },
+            { label: 'الْمَجْمُوعُ', text: '١٦ أَدَاةً', kind: 'ans' },
           ]}
           chart={<Box>{tools}</Box>}
         />
@@ -590,11 +505,10 @@ export default defineLesson({
             { text: 'الصمغُ ٢', hl: ['p1', 'v1'] },
             { text: 'القلمُ الرصاصُ ٨', hl: ['p2', 'v2'] },
             { text: 'المقصُّ ١', hl: ['p3', 'v3'] },
-            { text: 'الجدول التكراري مكتمل.', kind: 'ans' },
           ]}
           chart={
             <Box>
-              <Stack className="tight">
+              <Stack>
                 {tools}
                 <FreqTable title="الأدواتُ المدرسيَّةُ المبيعةُ خلالَ ساعةٍ" head="الأدواتُ" rows={TOOLS} reveal />
               </Stack>
@@ -613,13 +527,13 @@ export default defineLesson({
           source={HOT} n={13}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>مسألةٌ مفتوحةٌ:</b> مَا أوجُهُ التشابُهِ والاختلافِ بينَ الجدولِ التِّكراريِّ ولوحةِ الإشاراتِ؟
+              <BookLabel>مسألةٌ مفتوحةٌ:</BookLabel> مَا أوجُهُ التشابُهِ والاختلافِ بينَ الجدولِ التِّكراريِّ ولوحةِ الإشاراتِ؟
             </>
           }
           hint="ماذا يعرض كل منهما؟ وكيف يسجّل النتائج؟"
           steps={[
             { text: 'التشابه: كلاهما ينظّم البيانات في جدول له عنوان وعمودان.' },
-            { text: 'الاختلاف: لوحة الإشارات تستعمل الإشارات، والجدول التكراري يستعمل الأعداد.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'الِاخْتِلَافُ: اللَّوْحَةُ بِالْإِشَارَاتِ، وَالْجَدْوَلُ بِالْأَعْدَادِ.', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -642,7 +556,7 @@ export default defineLesson({
           hint="كم عدد سكان مدينتك تقريبًا؟ هل يمكن رسم إشارة لكل واحد منهم؟"
           steps={[
             { text: 'عدد السكان كبير جدًا، فرسم إشارة لكل شخص صعب ويأخذ وقتًا طويلًا.' },
-            { text: 'الجدول التكراري أفضل؛ لأنه يستعمل الأعداد.', kind: 'ans' },
+            { label: 'الْأَفْضَلُ', text: 'الْجَدْوَلُ التَّكْرَارِيُّ', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -659,7 +573,7 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>جمع البيانات<br />وتنظيمها</>}
             items={[
@@ -678,15 +592,15 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">ألعاب الفسحة</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.25fr' }}>
+          <Cols>
             <Box>
               <TallyBoard title="ألعابُ الفسحةِ" head="اللعبةُ" rows={[['كرةُ القدمِ', 9], ['الحبلُ', 6], ['الكرةُ الطائرةُ', 4]]} />
             </Box>
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="كم طالبًا يلعب بالحبل؟" options={['٥', '٦', '٧']} answer="٦" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="ما اللعبة الأقل؟" options={['كرةُ القدمِ', 'الحبلُ', 'الكرةُ الطائرةُ']} answer="الكرةُ الطائرةُ" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="كم يزيد لاعبو كرة القدم على لاعبي الكرة الطائرة؟" options={['٣', '٥', '١٣']} answer="٥" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q="كم طالبًا يلعب بالحبل؟" options={['٥', '٦', '٧']} answer="٦" />
+              <MCQ q="ما اللعبة الأقل؟" options={['كرةُ القدمِ', 'الحبلُ', 'الكرةُ الطائرةُ']} answer="الكرةُ الطائرةُ" />
+              <MCQ q="كم يزيد لاعبو كرة القدم على لاعبي الكرة الطائرة؟" options={['٣', '٥', '١٣']} answer="٥" />
+            </ExitTicket>
           </Cols>
         </>
       ),

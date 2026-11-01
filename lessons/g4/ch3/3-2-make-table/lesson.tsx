@@ -1,99 +1,33 @@
-import { useState } from 'react';
 import {
-  Card, Cols, Ctrls, DataGrid, Eq, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack,
-  Step, Winner, defineLesson, num, useRemoteWidget, type Cell, type HlKey,
+  BookLabel, Card, Cols, FreqTable, Grid, PatternExplorer, PatternTable, Ctrls, DataGrid, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Intro, Mark, MCQ, MindMap, NextButton, QCol, QText,
+  QuestionSlide, SlideHead, Solution, Stack, Step, TableBox, Winner, defineLesson, type HlKey,
 } from '@engine';
 import { IntroClip } from './clip';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
-const ANALYZE = 'حلِّلِ الخُطَّةَ · ص ٨٣';
-const PRACTICE = 'تدرَّبْ علَى الخُطَّةِ · ص ٨٣';
+const ANALYZE = 'حلِّلِ الخُطَّةَ، ص ٨٣';
+const PRACTICE = 'تدرَّبْ علَى الخُطَّةِ، ص ٨٣';
 
-/**
- * جدول نمط أفقي كما في الكتاب: الصف الأول عناوين، والعمود j (بعد العناوين) يظهر مع خطوة فيها hl ‹v{j}›
- * إن كان رقمه في hide، ويُبرز بمفتاح p{j}.
- */
-function Pattern({ heads, rows, hide = [], tone = 'green', small }: { heads: string[]; rows: (number | string)[][]; hide?: number[]; tone?: 'green' | 'blue'; small?: boolean }) {
-  const grid: Cell[][] = heads.map((h, r) => [h, ...rows[r].map((v, j): Cell => (hide.includes(j) ? { v, k: `v${j}` as HlKey } : v))]);
-  return <DataGrid orient="cols" tone={tone} rows={grid} small={small} />;
-}
-
-const Box = ({ children }: { children: React.ReactNode }) => <div className="chart tbl">{children}</div>;
+const Pattern = PatternTable;
+const Box = TableBox;
 const seq = (a: number, n: number) => Array.from({ length: n }, (_, i) => a * (i + 1));
 const all = (n: number) => Array.from({ length: n }, (_, i) => i);
 
 /** جدول الرحلة: معلِّمان لكل ٩ طلاب */
 const TRIP = (hide: number[] = []) => <Pattern heads={['عددُ المعلِّمينَ', 'عددُ الطُّلّابِ']} rows={[seq(2, 8), seq(9, 8)]} hide={hide} />;
 
-/** مستكشف: ما يزيده كل صف، وعدد الأعمدة الظاهرة */
-function PatternExplorer() {
-  const [a, setA] = useState(2);
-  const [b, setB] = useState(9);
-  const [cols, setCols] = useState(3);
-  const fit = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-  useRemoteWidget(
-    () => ({
-      title: 'جدول النمط',
-      info: `${num(a * cols)} ← ${num(b * cols)}`,
-      steppers: [
-        { key: 'a', label: 'يزيد الصف الأول', value: a, min: 1, max: 9 },
-        { key: 'b', label: 'يزيد الصف الثاني', value: b, min: 1, max: 12 },
-      ],
-      buttons: [
-        { key: 'next', label: 'العمود التالي', on: true, disabled: cols >= 8 },
-        { key: 'reset', label: 'من جديد' },
-      ],
-    }),
-    (k, v) => {
-      if (k === 'a' && v !== undefined) setA(fit(v, 1, 9));
-      else if (k === 'b' && v !== undefined) setB(fit(v, 1, 12));
-      else if (k === 'next') setCols((c) => Math.min(8, c + 1));
-      else if (k === 'reset') setCols(1);
-    },
-    [a, b, cols],
-  );
-  const stepper = (label: string, v: number, set: (v: number) => void, hi: number) => (
-    <div className="ffstep">
-      <span>{label}</span>
-      <button aria-label={`إنقاص ${label}`} disabled={v <= 1} onClick={() => set(fit(v - 1, 1, hi))}>
-        −
-      </button>
-      <b>{num(v)}</b>
-      <button aria-label={`زيادة ${label}`} disabled={v >= hi} onClick={() => set(fit(v + 1, 1, hi))}>
-        +
-      </button>
-    </div>
-  );
-  return (
-    <Stack>
-      <div className="hopx-ctrl">
-        {stepper('يزيد الصف الأول', a, setA, 9)}
-        {stepper('يزيد الصف الثاني', b, setB, 12)}
-        <button className="btn step-btn" disabled={cols >= 8} onClick={() => setCols((c) => c + 1)}>
-          العمود التالي
-        </button>
-        <button className="btn" onClick={() => setCols(1)}>
-          من جديد
-        </button>
-      </div>
-      <Box>
-        <Pattern heads={['الصفُّ الأوَّلُ', 'الصفُّ الثاني']} rows={[seq(a, cols), seq(b, cols)]} />
-      </Box>
-    </Stack>
-  );
-}
-
 export default defineLesson({
   meta: {
     id: 'g4-3-2-make-table',
+    design: 'v2',
     code: '٣-٢',
     title: 'خُطَّةُ حَلِّ الْمَسْأَلَةِ: إنشاءُ جدولٍ',
     shortTitle: 'خطة حل المسألة: إنشاء جدول',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الثالث: تنظيم البيانات وعرضها وتفسيرها',
-    source: 'الجزء الأول · ص ٨٢–٨٣',
+    source: 'الجزء الأول، ص ٨٢–٨٣',
     minutes: 45,
     idea: 'أستعملُ خطَّةَ إنشاءِ جدولٍ لأحلَّ المسألةَ.',
     bookQuestions: 13,
@@ -101,11 +35,11 @@ export default defineLesson({
   sectionDesc: {
     engage: 'الرحلة العلمية',
     explore: 'جدول النمط',
-    explain: 'أفهم · أخطّط · أحلّ · أتحقّق',
+    explain: 'أفهم، أخطّط، أحلّ، أتحقّق',
     elab: 'نعمل معًا',
     check: 'حلّل الخطة: ١–٤',
     practice: 'تدرّب على الخطة: ٥–١٣',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -119,15 +53,17 @@ export default defineLesson({
             <Stack>
               <Card kind="rule" cap="فكرة الدرس">أستعملُ خطَّةَ إنشاءِ جدولٍ لأحلَّ المسألةَ.</Card>
               <Card kind="rule" cap="خطوات حل المسألة">
-                <Mark>أفهمْ</Mark> · <Mark>خطّطْ</Mark> · <Mark>حُلَّ</Mark> · <Mark>تحقّقْ</Mark>
+                <Mark>أفهمْ</Mark>، <Mark>خطّطْ</Mark>، <Mark>حُلَّ</Mark>، <Mark>تحقّقْ</Mark>
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أنشئ جدولًا يُظهر النمط في المسألة.</li>
-                <li>أكمل الجدول حتى أصل إلى الإجابة.</li>
-                <li>أتحقق من إجابتي بعملية أخرى.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أنشئ جدولًا يُظهر النمط في المسألة.',
+                  'أكمل الجدول حتى أصل إلى الإجابة.',
+                  'أتحقق من إجابتي بعملية أخرى.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -143,17 +79,11 @@ export default defineLesson({
           <SlideHead tag="ص ٨٢" kind="qs">الرحلة العلمية</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">ذهبَ طُلّابُ الصَّفِّ الرّابعِ في رحلةٍ عِلْميَّةٍ برُفْقَةِ مُعلِّميهِم، فَاصْطَحَبَ كُلُّ مُعلِّمَيْنِ مجموعةً منْ ٩ طُلّابٍ. فإذَا كانَ عددُ المعلِّمينَ المُرافِقينَ ١٦ مُعلِّمًا، فمَا عددُ الطُّلّابِ في تِلْكَ الرِّحلةِ؟</p>
+              <QText>ذهبَ طُلّابُ الصَّفِّ الرّابعِ في رحلةٍ عِلْميَّةٍ برُفْقَةِ مُعلِّميهِم، فَاصْطَحَبَ كُلُّ مُعلِّمَيْنِ مجموعةً منْ ٩ طُلّابٍ. فإذَا كانَ عددُ المعلِّمينَ المُرافِقينَ ١٦ مُعلِّمًا، فمَا عددُ الطُّلّابِ في تِلْكَ الرِّحلةِ؟</QText>
               <Card kind="qs" cap="خمّن">أكثر من ٥٠ طالبًا أم أقل؟</Card>
             </QCol>
             <Card kind="ex" cap="ما الذي يتكرر؟">
-              <p style={{ margin: 0, fontWeight: 700, lineHeight: 1.9 }}>
-                كل مجموعة: <b>٢</b> معلِّمان و<b>٩</b> طلاب.
-                <br />
-                مجموعتان: ٤ معلِّمين و١٨ طالبًا.
-                <br />
-                ثلاث مجموعات: …؟
-              </p>
+              <Goals items={['كل مجموعة: ٢ معلِّمان و٩ طلاب.', 'مجموعتان: ٤ معلِّمين و١٨ طالبًا.', 'ثلاث مجموعات: …؟']} />
             </Card>
           </Cols>
         </>
@@ -167,21 +97,21 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">جدول ينمو بنمط</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>اختر ما يزيده كل صف، ثم أضف عمودًا عمودًا. هل تتوقع العمود التالي قبل أن يظهر؟</p>
-          <PatternExplorer />
+          <Intro>اختر ما يزيده كل صف، ثم أضف عمودًا عمودًا. هل تتوقع العمود التالي قبل أن يظهر؟</Intro>
+          <PatternExplorer heads={['الصفُّ الأوَّلُ', 'الصفُّ الثاني']} />
           <Card kind="rule" cap="لاحظ">في كل عمود جديد يزيد كل صف بالمقدار نفسه. هذا هو النمط.</Card>
         </>
       ),
     },
 
-    /* ================= أفهم · أخطط · أحل · أتحقق ================= */
+    /* ================= أفهم، أخطط، أحل، أتحقق ================= */
     {
       sec: 'explain', min: 6,
       notes: 'أنا أعمل: نفّذ الخطوات الأربع كما في الكتاب ص ٨٢. مع خطوة «حلّ» تظهر أعمدة الجدول عمودًا عمودًا.',
       content: (
         <>
-          <SlideHead tag="خُطَّةُ حَلِّ المسألةِ · ص ٨٢" kind="ex">أفهم · أخطّط · أحلّ · أتحقّق</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.1fr' }}>
+          <SlideHead tag="خُطَّةُ حَلِّ المسألةِ، ص ٨٢" kind="ex">أفهم، أخطّط، أحلّ، أتحقّق</SlideHead>
+          <Cols>
             <QCol>
               <Ctrls>
                 <NextButton />
@@ -196,8 +126,8 @@ export default defineLesson({
                 <Step hl={['v0', 'v1', 'v2', 'v3']}>
                   <b>حُلَّ:</b> أَنْشِئْ جدولًا يُظْهِرُ أنَّ هناكَ مُعَلِّمَيْنِ لكلِّ ٩ طُلّابٍ: +٢ و+٩ في كل عمود.
                 </Step>
-                <Step hl={['v4', 'v5', 'v6', 'v7', 'p7']} kind="ans">
-                  إذَنْ عددُ الطُّلّابِ في تلكَ الرِّحلةِ هو ٧٢ طالبًا.
+                <Step hl={['v4', 'v5', 'v6', 'v7', 'p7']} kind="ans" label="عَدَدُ الطُّلَّابِ">
+                  ٧٢ طَالِبًا
                 </Step>
                 <Step>
                   <b>تَحَقَّقْ:</b> <Eq>١٦ ÷ ٢ = ٨</Eq> مجموعات، و<Eq>٨ × ٩ = ٧٢</Eq> طالبًا. الإجابةُ صحيحةٌ ✓
@@ -229,16 +159,16 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">أكمل النمط</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'start' }}>
+          <Cols>
             <Box>
               <Pattern heads={['عددُ الصناديقِ', 'عددُ الأقلامِ']} rows={[[1, 2, 3, 4], [6, 12, 18, '؟']]} />
             </Box>
-            <Stack>
+          </Cols>
+          <Grid cols={3}>
               <MCQ q="أ) ما العدد المكان «؟»" options={['٢٠', '٢٤', '٣٠']} answer="٢٤" award />
               <MCQ q="ب) كم قلمًا في ٦ صناديق؟" options={['٣٠', '٣٦', '٤٢']} answer="٣٦" award />
               <MCQ q="ج) ما النمط في صف الأقلام؟" options={['يزيد ٦ كل مرة', 'يزيد ٢ كل مرة', 'يتضاعف كل مرة']} answer="يزيد ٦ كل مرة" award />
-            </Stack>
-          </Cols>
+          </Grid>
         </>
       ),
     },
@@ -256,7 +186,7 @@ export default defineLesson({
           steps={[
             { text: 'بدأنا بمعلِّمَين و٩ طلاب.', hl: ['p0'] },
             { text: 'في كل عمود أضفنا ٢ إلى المعلِّمين و٩ إلى الطلاب.' },
-            { text: 'توقفنا عندما وصل عدد المعلِّمين إلى ١٦، فكان عدد الطلاب ٧٢.', hl: ['p7'], kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'تَوَقَّفْنَا عِنْدَ ١٦ مُعَلِّمًا، فَكَانَ الطُّلَّابُ ٧٢.', hl: ['p7'], kind: 'ans' },
           ]}
           chart={<Box>{TRIP()}</Box>}
         />
@@ -271,8 +201,8 @@ export default defineLesson({
           question="مَا النَّمطُ الَّذِي يُظْهِرُهُ الجدولُ؟"
           hint="بكم يزيد كل صف من عمود إلى العمود الذي يليه؟"
           steps={[
-            { text: 'عدد المعلِّمين يزيد ٢ كل مرة: ٢، ٤، ٦، …', hl: ['p1', 'p2'] },
-            { text: 'عدد الطلاب يزيد ٩ كل مرة: ٩، ١٨، ٢٧، …', kind: 'ans' },
+            { text: 'الْمُعَلِّمُونَ: ٢، ٤، ٦، … وَالطُّلَّابُ: ٩، ١٨، ٢٧، …', hl: ['p1', 'p2'] },
+            { label: 'النَّمَطُ', text: 'الْمُعَلِّمُونَ يَزِيدُونَ ٢، وَالطُّلَّابُ ٩', kind: 'ans' },
           ]}
           chart={<Box>{TRIP()}</Box>}
         />
@@ -289,7 +219,7 @@ export default defineLesson({
           steps={[
             { text: 'معلِّم لكل ٣ طلاب: ١ ← ٣، ٢ ← ٦، ٣ ← ٩، …', hl: ['p0', 'p1', 'p2'] },
             { text: <Eq>٧٢ ÷ ٣ = ٢٤</Eq>, hl: ['v4'] },
-            { text: '٢٤ معلِّمًا', kind: 'ans' },
+            { label: 'عَدَدُ الْمُعَلِّمِينَ', text: '٢٤ مُعَلِّمًا', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -309,7 +239,7 @@ export default defineLesson({
           hint="اضرب عدد المعلِّمين في عدد الطلاب مع كل معلِّم."
           steps={[
             { text: <Eq>٢٤ × ٣ = ٧٢</Eq> },
-            { text: 'الناتج ٧٢ يساوي عدد الطلاب في الرحلة، فالإجابة صحيحة.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'النَّاتِجُ ٧٢ يُسَاوِي عَدَدَ الطُّلَّابِ.', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -330,17 +260,15 @@ export default defineLesson({
           intro="حُلَّ كُلًّا من المسائلِ الآتيةِ باستعمالِ خُطَّةِ إنشاءِ جدولٍ:"
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>الجبرُ:</b> طُولُ اليومِ الدِّراسيِّ في مدرسةِ آمِنَةَ ٦ساعاتٍ. أَكْمِلِ الجدولَ الآتيَ لتعرفَ هلِ اليومُ الدِّراسيُّ في مدرسةِ آمنةَ أطولُ أمْ أقصرُ منْ ٣٠٠ دقيقةٍ.
+              <BookLabel>الجبرُ:</BookLabel> طُولُ اليومِ الدِّراسيِّ في مدرسةِ آمِنَةَ ٦ساعاتٍ. أَكْمِلِ الجدولَ الآتيَ لتعرفَ هلِ اليومُ الدِّراسيُّ في مدرسةِ آمنةَ أطولُ أمْ أقصرُ منْ ٣٠٠ دقيقةٍ.
             </>
           }
           long
           hint="كل ساعة تضيف ٦٠ دقيقة."
           steps={[
-            { text: '٣ ساعات = ١٨٠ دقيقة', hl: ['v2', 'p2'] },
-            { text: '٤ ساعات = ٢٤٠ دقيقة', hl: ['v3', 'p3'] },
-            { text: '٥ ساعات = ٣٠٠ دقيقة', hl: ['v4', 'p4'] },
-            { text: '٦ ساعات = ٣٦٠ دقيقة', hl: ['v5', 'p5'] },
-            { text: '٣٦٠ أكبر من ٣٠٠؛ إذن اليوم الدراسي أطولُ من ٣٠٠ دقيقة.', kind: 'ans' },
+            { text: 'نَزِيدُ ٦٠ دَقِيقَةً لِكُلِّ سَاعَةٍ: ١٨٠، ٢٤٠، ٣٠٠، ٣٦٠.', hl: ['v2', 'v3', 'v4', 'v5'] },
+            { text: '٦ سَاعَاتٍ = ٣٦٠ دَقِيقَةً، وَ٣٦٠ أَكْبَرُ مِنْ ٣٠٠.', hl: ['p5'] },
+            { label: 'الْيَوْمُ الدِّرَاسِيُّ', text: 'أَطْوَلُ مِنْ ٣٠٠ دَقِيقَةٍ', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -361,7 +289,7 @@ export default defineLesson({
           steps={[
             { text: 'كل شطيرة تزيد الثمن ريالين.', hl: ['v0', 'v1', 'v2', 'v3'] },
             { text: '٨ شطائر بـ ١٦ ريالًا، و٩ شطائر بـ ١٨ ريالًا (أكثر من ١٧).', hl: ['v4', 'v5', 'v6', 'v7', 'p7'] },
-            { text: '٨ شطائر، ويتبقى معها ريال واحد.', kind: 'ans' },
+            { label: 'عَدَدُ الشَّطَائِرِ', text: '٨ شَطَائِرَ', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -381,7 +309,7 @@ export default defineLesson({
           hint="كل كتاب يضيف ٤ ريالات."
           steps={[
             { text: '٤، ٨، ١٢، ١٦، ٢٠، ٢٤، ٢٨، ٣٢', hl: all(8).map((j) => `v${j}` as HlKey) },
-            { text: '٨ كتبٍ', hl: ['p7'], kind: 'ans' },
+            { label: 'عَدَدُ الْكُتُبِ', text: '٨ كُتُبٍ', hl: ['p7'], kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -402,8 +330,8 @@ export default defineLesson({
           hint="كل ٥ محاولات = محاولتان ناجحتان = ٤ نقاط."
           steps={[
             { text: 'كل ٥ محاولات تعطي ٤ نقاط.', hl: ['v0', 'p0'] },
-            { text: 'أكمل حتى تصل النقاط إلى ٢٤.', hl: ['v1', 'v2', 'v3', 'v4', 'v5', 'p5'] },
-            { text: '٣٠ مرَّةً', kind: 'ans' },
+            { text: 'نُكْمِلُ حَتَّى تَصِلَ النِّقَاطُ إِلَى ٢٤.', hl: ['v1', 'v2', 'v3', 'v4', 'v5', 'p5'] },
+            { label: 'عَدَدُ الْمُحَاوَلَاتِ', text: '٣٠ مُحَاوَلَةً', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -424,7 +352,7 @@ export default defineLesson({
           steps={[
             { text: '١٢ أسبوعًا = ٩٠٠ ريال، وهذا أقل من ١٠٠٠.', hl: ['v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'p5'] },
             { text: '١٤ أسبوعًا = ١٠٥٠ ريالًا، وهذا أكثر من ١٠٠٠.', hl: ['v6', 'p6'] },
-            { text: '١٤ أسبوعًا', kind: 'ans' },
+            { label: 'عَدَدُ الْأَسَابِيعِ', text: '١٤ أُسْبُوعًا', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -445,7 +373,7 @@ export default defineLesson({
           steps={[
             { text: 'الصدقة تزيد ٥، والمال يزيد ٢٠٠.', hl: ['v0', 'v1', 'v2'] },
             { text: 'صدقة ٣٠ ريالًا تقابل ١٢٠٠ ريال.', hl: ['v3', 'v4', 'v5', 'p5'] },
-            { text: '١٢٠٠ ريالٍ', kind: 'ans' },
+            { label: 'مَا كَانَ مَعَهَا', text: '١٢٠٠ رِيَالٍ', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -463,14 +391,14 @@ export default defineLesson({
           source={PRACTICE} n={11} time={60}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>الجبرُ:</b> يقضِي محمدٌ ٤٠ دقيقةً يوميًّا في ممارسةِ المشيِ. أكملِ الجدولَ التاليَ لتجدَ عددَ الدقائقِ الَّتي يمشِيهَا في ٥ أيامٍ؟
+              <BookLabel>الجبرُ:</BookLabel> يقضِي محمدٌ ٤٠ دقيقةً يوميًّا في ممارسةِ المشيِ. أكملِ الجدولَ التاليَ لتجدَ عددَ الدقائقِ الَّتي يمشِيهَا في ٥ أيامٍ؟
             </>
           }
           hint="أضف ٤٠ في كل يوم."
           steps={[
             { text: 'الرابعُ: ١٢٠ + ٤٠ = ١٦٠', hl: ['v3', 'p3'] },
             { text: 'الخامسُ: ١٦٠ + ٤٠ = ٢٠٠', hl: ['v4', 'p4'] },
-            { text: '٢٠٠ دقيقةٍ', kind: 'ans' },
+            { label: 'فِي ٥ أَيَّامٍ', text: '٢٠٠ دَقِيقَةٍ', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -498,19 +426,18 @@ export default defineLesson({
           source={PRACTICE} n={12} time={90}
           question={
             <>
-              <b style={{ color: 'var(--bad)' }}>أضرارُ التدخينِ:</b> يُعـدُّ التَّدخينُ مـنْ أكثرِ مسبباتِ الموتِ الَّتي يمكنُ الوقايةُ منهَا؛ على مُستوى العالمِ، حيثُ يودي التَّدخينُ بحياةِ ٩٢ شخصًا كلَّ أسبوعٍ، أيْ ما يعادلُ ٥٠٠٠ شخصٍ كلَّ عامٍ. قدّرْ عددَ الوفيَّاتِ النَّاجمةِ عنِ التَّدخينِ خلالَ ستَّةِ أعوامٍ. اشرحْ إجابتَكَ.
+              <BookLabel>أضرارُ التدخينِ:</BookLabel> يُعـدُّ التَّدخينُ مـنْ أكثرِ مسبباتِ الموتِ الَّتي يمكنُ الوقايةُ منهَا؛ على مُستوى العالمِ، حيثُ يودي التَّدخينُ بحياةِ ٩٢ شخصًا كلَّ أسبوعٍ، أيْ ما يعادلُ ٥٠٠٠ شخصٍ كلَّ عامٍ. قدّرْ عددَ الوفيَّاتِ النَّاجمةِ عنِ التَّدخينِ خلالَ ستَّةِ أعوامٍ. اشرحْ إجابتَكَ.
             </>
           }
           long
           hint="كل عام يضيف ٥٠٠٠ تقريبًا."
           steps={[
-            { text: 'أنشئ جدولًا: كل عام يزيد ٥٠٠٠.', hl: ['v0', 'v1', 'v2'] },
-            { text: 'بعد ستة أعوام:', hl: ['v3', 'v4', 'v5', 'p5'] },
-            { text: 'حوالي ٣٠٠٠٠ شخصٍ', kind: 'ans' },
+            { text: 'نُنْشِئُ جَدْوَلًا: كُلَّ عَامٍ يَزِيدُ ٥٠٠٠.', hl: ['v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'p5'] },
+            { label: 'فِي سِتَّةِ أَعْوَامٍ', text: 'حَوَالَيْ ٣٠٠٠٠ شَخْصٍ', kind: 'ans' },
           ]}
           chart={
             <Box>
-              <Pattern heads={['الأعوامُ', 'الوفيَّاتُ (تقريبًا)']} rows={[[1, 2, 3, 4, 5, 6], seq(5000, 6)]} hide={all(6)} small />
+              <FreqTable head="الأعوامُ" count="الوفيَّاتُ (تقريبًا)" rows={[['١', 5000], ['٢', 10000], ['٣', 15000], ['٤', 20000], ['٥', 25000], ['٦', 30000]]} reveal />
             </Box>
           }
         />
@@ -526,7 +453,7 @@ export default defineLesson({
           hint="ما الذي يتكرر في المسألة ١٠؟"
           steps={[
             { text: 'في المسألة كمّيتان تزيدان معًا بنمط ثابت: ٥ ريالات صدقة لكل ٢٠٠ ريال.' },
-            { text: 'الجدول ينظّم الأعداد ويُظهر النمط، فنكمله حتى نصل إلى ٣٠ ريالًا.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'الْجَدْوَلُ يُظْهِرُ النَّمَطَ، فَنُكْمِلُهُ حَتَّى ٣٠ رِيَالًا.', kind: 'ans' },
           ]}
           chart={
             <Box>
@@ -543,7 +470,7 @@ export default defineLesson({
       notes: 'اطلب من الطلاب ترتيب الخطوات الأربع شفهيًا.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>خطة إنشاء<br />جدول</>}
             items={[
@@ -562,15 +489,15 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">علب العصير</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.25fr' }}>
+          <Cols>
             <Box>
               <Pattern heads={['عددُ الكراتينِ', 'عددُ العلبِ']} rows={[[1, 2, 3, '؟'], [6, 12, 18, 24]]} />
             </Box>
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="بكم يزيد عدد العلب كل مرة؟" options={['٣', '٦', '١٢']} answer="٦" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="ما العدد المكان «؟»" options={['٤', '٥', '٢٤']} answer="٤" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="كم كرتونًا يلزم لـ ٤٨ علبة؟" options={['٦', '٨', '١٢']} answer="٨" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q="بكم يزيد عدد العلب كل مرة؟" options={['٣', '٦', '١٢']} answer="٦" />
+              <MCQ q="ما العدد المكان «؟»" options={['٤', '٥', '٢٤']} answer="٤" />
+              <MCQ q="كم كرتونًا يلزم لـ ٤٨ علبة؟" options={['٦', '٨', '١٢']} answer="٨" />
+            </ExitTicket>
           </Cols>
         </>
       ),

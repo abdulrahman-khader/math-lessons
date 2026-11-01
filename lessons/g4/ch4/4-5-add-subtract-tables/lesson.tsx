@@ -1,36 +1,14 @@
 import {
-  Card, Cols, Ctrls, Eq, FnTable, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide, RuleTable, SlideHead,
-  Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson,
+  BookLabel, Card, FnMachine, Grid, QuestionGroup, Cols, Ctrls, Definition, Eq, ExitTicket, FnTable, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton, QCard,
+  QCol, QText, QuestionSlide, RuleTable, SlideHead, Solution, Stack, Step, Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
 
-/** آلة الدالة كما في الكتاب: مدخلة ← قاعدة الدالة ← مخرجة */
-function FnMachine({ rule = 'قاعدةُ الدالَّةِ' }: { rule?: string }) {
-  return (
-    <div className="fnmach">
-      <div className="fncol">
-        <b className="fin">مُدخَلةٌ ▲</b>
-        <span>ابدأْ بعددٍ يُسمَّى المُدخَلةَ</span>
-      </div>
-      <span className="farrow">←</span>
-      <div className="fncol">
-        <b className="fbox">{rule}</b>
-        <span>أجْرِ عمليةً أوْ أكثرَ على المُدخَلةِ</span>
-      </div>
-      <span className="farrow">←</span>
-      <div className="fncol">
-        <b className="fout">مُخرَجةٌ ■</b>
-        <span>العددُ الجديدُ الَّذي ينتجُ يُسمَّى المُخرَجةَ</span>
-      </div>
-    </div>
-  );
-}
-
-const READY = 'اسْتَعِدَّ · ص ١٢٠';
-const CHECK = 'تأكَّدْ · ص ١٢٢';
-const PRACTICE_122 = 'تدرَّبْ وحُلَّ المسائلَ · ص ١٢٢';
-const PRACTICE_123 = 'تدرَّبْ وحُلَّ المسائلَ · ص ١٢٣';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ١٢٣';
+const READY = 'اسْتَعِدَّ، ص ١٢٠';
+const CHECK = 'تأكَّدْ، ص ١٢٢';
+const PRACTICE_122 = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٢٢';
+const PRACTICE_123 = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٢٣';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ١٢٣';
 const TURTLE = 'في الحديقةِ نعامةٌ عمرُهَا أكبرُ مِنْ عُمْرِ السُّلحَفاةِ بِـ ٤ سنواتٍ. أَجِبْ عنِ السُّؤَالَيْنِ ٢ ، ٣:';
 const BUILD = 'أَنْشِئْ جدولَ دَالَّةٍ لكلِّ سؤالٍ ممَّا يلِي، ثمَّ اكْتُبْ قاعدةَ الدَّالَّةِ:';
 const BLUE = '#a9c8ec';
@@ -38,13 +16,14 @@ const BLUE = '#a9c8ec';
 export default defineLesson({
   meta: {
     id: 'g4-4-5-add-subtract-tables',
+    design: 'v2',
     code: '٤-٥',
     title: 'جداولُ الدَّوالِّ: جداولُ الجمعِ والطَّرحِ',
     shortTitle: 'جداول الدوال: الجمع والطرح',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الرابع: الأنماط والجبر',
-    source: 'الجزء الأول · ص ١٢٠–١٢٣',
+    source: 'الجزء الأول، ص ١٢٠–١٢٣',
     minutes: 45,
     idea: 'أستعملُ عمليَّتَي الجمعِ والطَّرحِ لأُنشئَ جدولًا أوْ أُكملَهُ.',
     bookQuestions: 15,
@@ -52,12 +31,12 @@ export default defineLesson({
   sectionDesc: {
     engage: 'تذكّر الدرس ٤-٤',
     explore: 'استعد: حسابات التوفير',
-    explain: 'الدالة · الأمثلة ١–٣',
+    explain: 'الدالة، الأمثلة ١–٣',
     elab: 'نعمل معًا',
     check: 'الأسئلة ١–٤',
     practice: 'الأسئلة ٥–١٢',
     hot: 'الأسئلة ١٣–١٥',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -73,12 +52,14 @@ export default defineLesson({
               <Card kind="rule" cap="المفردات"><Mark>الدَّالَّةُ</Mark></Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أصف الدالة بالمدخلة والقاعدة والمخرجة.</li>
-                <li>أُنشئ جدول دالة قاعدته جمع أو طرح.</li>
-                <li>أكتشف قاعدة الدالة من جدول.</li>
-                <li>أتحقق بالعملية العكسية.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أصف الدالة بالمدخلة والقاعدة والمخرجة.',
+                  'أُنشئ جدول دالة قاعدته جمع أو طرح.',
+                  'أكتشف قاعدة الدالة من جدول.',
+                  'أتحقق بالعملية العكسية.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -91,8 +72,8 @@ export default defineLesson({
       notes: 'مراجعة الدرس ٤-٤ بالعجلة. اسأل بعد كل جواب: هل القاعدة جمع أم ضرب؟',
       content: (
         <>
-          <SlideHead tag="تذكّر · الدرس ٤-٤" kind="ink">ما القاعدة؟</SlideHead>
-          <div className="qgrid two">
+          <SlideHead tag="تذكّر، الدرس ٤-٤" kind="ink">ما القاعدة؟</SlideHead>
+          <Grid>
             <Stack>
               <RuleTable rows={[['المدخلة △', [4, 5, 6, 7]], ['المخرجة □', [10, 11, 12, 13]]]} color={BLUE} />
               <MCQ q="ما القاعدة؟" options={['△ × ٢', '△ + ٦', '△ + ١٠']} answer="△ + ٦" award />
@@ -101,7 +82,7 @@ export default defineLesson({
               <RuleTable rows={[['المدخلة △', [10, 9, 8, 7]], ['المخرجة □', [7, 6, 5, 4]]]} color={BLUE} />
               <MCQ q="ما القاعدة؟" options={['△ − ٣', '△ + ٣', '△ − ٤']} answer="△ − ٣" award />
             </Stack>
-          </div>
+          </Grid>
         </>
       ),
     },
@@ -115,11 +96,11 @@ export default defineLesson({
           <SlideHead tag={READY} kind="qs">حسابات التوفير</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">يُبيِّنُ الجدولُ المُجاوِرُ المبالغَ الَّتي وَفَّرَتْهَا أربعُ فَتيَات. فإذا حَصلَتْ كلُّ فتاةٍ على ٥ ريالاتٍ إضافةً لما معَها، فكمْ يُصبحُ المبلغُ معَ كلٍّ منهنَّ؟</p>
+              <QText>يُبيِّنُ الجدولُ المُجاوِرُ المبالغَ الَّتي وَفَّرَتْهَا أربعُ فَتيَات. فإذا حَصلَتْ كلُّ فتاةٍ على ٥ ريالاتٍ إضافةً لما معَها، فكمْ يُصبحُ المبلغُ معَ كلٍّ منهنَّ؟</QText>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>نضيف ٥ إلى كل مبلغ.</Step>
-                <Step kind="ans">فوزية ٣٠، نائلة ٢٨، شادية ٢٧، تماضر ٢٦ ريالًا</Step>
+                <Step kind="ans" label="مَا مَعَ كُلٍّ مِنْهُنَّ">٣٠، ٢٨، ٢٧، ٢٦ رِيَالًا</Step>
               </Solution>
             </QCol>
             <FnTable
@@ -144,10 +125,10 @@ export default defineLesson({
       notes: 'اقرأ التعريف، ثم أشر إلى الآلة: ابدأ بالمدخلة، أجرِ العملية، فتحصل على المخرجة.',
       content: (
         <>
-          <SlideHead tag="القاعدة · ص ١٢٠" kind="rule">الدَّالَّةُ</SlideHead>
-          <Card kind="rule" style={{ fontSize: '.95em', fontWeight: 700, lineHeight: 1.85 }}>
+          <SlideHead tag="القاعدة، ص ١٢٠" kind="rule">الدَّالَّةُ</SlideHead>
+          <Definition kind="rule">
             يعتمدُ المبلغُ الَّذي يصبحُ معَ كلٍّ منهنَّ علَى المبلغِ الَّذي تحصلُ عليهِ. والعَلاقةُ الَّتي تعتمدُ فيها كَمِّيَّةٌ على كميةٍ أُخرَى تُسمَّى <Mark>دَالَّةً</Mark>. ويمكنُكَ استعمالُ قاعدةِ دالَّةٍ لِتَصِفَ العَلاقةَ بَينَ المُدخَلاتِ والمُخرَجاتِ.
-          </Card>
+          </Definition>
           <FnMachine />
           <Card kind="ex">يُمثِّلُ الرَّمزُ ▲ أوْ ■ عددًا غيرَ معلومٍ، ويمكنُ استعمالُ الرَّمزِ ▲ لتمثيلِ المُدخَلةِ، والرَّمزِ ■ للمُخرَجةِ.</Card>
         </>
@@ -160,15 +141,15 @@ export default defineLesson({
       notes: 'أنا أعمل: العمود الأوسط يكتب القاعدة على كل مدخلة قبل الحساب.',
       content: (
         <>
-          <SlideHead tag="مثال ١ · من واقع الحياة · ص ١٢٠" kind="ex">إنشاء جدول دالة</SlideHead>
+          <SlideHead tag="مثال ١، من واقع الحياة، ص ١٢٠" kind="ex">إنشاء جدول دالة</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext"><b style={{ color: 'var(--ex)' }}>نُقودٌ:</b> أَنْشِئْ جدولَ دَالَّةٍ لِتجدَ مقدارَ النُّقودِ مع كلِّ فتاةٍ بعدَ أنْ حصلَتْ على ٥ ريالاتٍ إضافيَّةٍ.</p>
+              <QText><BookLabel>نُقودٌ:</BookLabel> أَنْشِئْ جدولَ دَالَّةٍ لِتجدَ مقدارَ النُّقودِ مع كلِّ فتاةٍ بعدَ أنْ حصلَتْ على ٥ ريالاتٍ إضافيَّةٍ.</QText>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>القاعدة: △ + ٥</Step>
                 <Step>نكتب القاعدة على كل مدخلة، ثم نحسب.</Step>
-                <Step kind="ans">المخرجات: ٣٠، ٢٨، ٢٧، ٢٦</Step>
+                <Step kind="ans" label="المخرجات">٣٠، ٢٨، ٢٧، ٢٦</Step>
               </Solution>
             </QCol>
             <FnTable
@@ -192,14 +173,14 @@ export default defineLesson({
       notes: 'التحقق بالعملية العكسية: نطرح ٣ من كل مخرجة فنرجع إلى المدخلة.',
       content: (
         <>
-          <SlideHead tag="مثال ٢ · ص ١٢١" kind="ex">إكمالُ جدولِ دالَّةٍ ( + )</SlideHead>
+          <SlideHead tag="مثال ٢، ص ١٢١" kind="ex">إكمالُ جدولِ دالَّةٍ ( + )</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext"><b style={{ color: 'var(--ex)' }}>العُمرُ:</b> يزيدُ عُمْرُ ناصرٍ على عُمْرِ أخِيهِ بـ٣ سنواتٍ. أَوْجِدْ عُمْرَ ناصرٍ عندمَا يكونُ عُمرُ أخيهِ ٢، ٣، ٤، ٥ سنواتٍ.</p>
+              <QText><BookLabel>العُمرُ:</BookLabel> يزيدُ عُمْرُ ناصرٍ على عُمْرِ أخِيهِ بـ٣ سنواتٍ. أَوْجِدْ عُمْرَ ناصرٍ عندمَا يكونُ عُمرُ أخيهِ ٢، ٣، ٤، ٥ سنواتٍ.</QText>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>القاعدةُ هيَ: △ + ٣ أوْ «أَضِفْ ٣». اِبدأْ بكلِّ مُدخَلةٍ، وَاسْتعمِلِ القاعدةَ لتجدَ كلَّ مُخرَجةٍ.</Step>
-                <Step kind="ans">عمر ناصر: ٥، ٦، ٧، ٨ سنوات</Step>
+                <Step kind="ans" label="عمر ناصر">٥، ٦، ٧، ٨ سنوات</Step>
                 <Step><b>تذكّر:</b> لكَي تتحققَ منْ صحةِ إجابتِكَ، استعملِ العمليةَ العكسيةَ: <Eq>٥ − ٣ = ٢</Eq> ، <Eq>٨ − ٣ = ٥</Eq></Step>
               </Solution>
             </QCol>
@@ -215,14 +196,14 @@ export default defineLesson({
       notes: 'هنا القاعدة طرح: الطلاب أقل من المقاعد بـ ٢.',
       content: (
         <>
-          <SlideHead tag="مثال ٣ · ص ١٢١" kind="ex">إكمالُ جدولِ دالَّةٍ ( − )</SlideHead>
+          <SlideHead tag="مثال ٣، ص ١٢١" kind="ex">إكمالُ جدولِ دالَّةٍ ( − )</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext"><b style={{ color: 'var(--ex)' }}>مقاعدُ:</b> يُوجدُ في كلِّ غرفةٍ مِنْ غُرَفِ الصفِّ الرَّابعِ مقعدانِ إضافيَّانِ. أَوْجِدْ عددَ الطُّلَّابِ في كلِّ غرفةٍ بناءً على عددِ المقاعدِ، ثمَّ طَبِّقِ القاعدةَ لِتُكْمِلَ جدولَ الدَّالَّةِ.</p>
+              <QText><BookLabel>مقاعدُ:</BookLabel> يُوجدُ في كلِّ غرفةٍ مِنْ غُرَفِ الصفِّ الرَّابعِ مقعدانِ إضافيَّانِ. أَوْجِدْ عددَ الطُّلَّابِ في كلِّ غرفةٍ بناءً على عددِ المقاعدِ، ثمَّ طَبِّقِ القاعدةَ لِتُكْمِلَ جدولَ الدَّالَّةِ.</QText>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step>القاعدةُ هيَ: △ − ٢ أوْ «اطْرَحْ ٢». اِبدأْ بكلِّ مُدخَلةٍ (△)، وَاستعمِلِ القاعدةَ لِتجدَ كلَّ مُخرَجةٍ (□).</Step>
-                <Step kind="ans">عدد الطلاب: ١٨، ١٩، ٢٠، ٢١</Step>
+                <Step kind="ans" label="عدد الطلاب">١٨، ١٩، ٢٠، ٢١</Step>
               </Solution>
             </QCol>
             <FnTable
@@ -259,7 +240,7 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">جدول الدالة</SlideHead>
-          <div className="qgrid two">
+          <Grid>
             <Stack>
               <FnTable rule="△ + ٧" color={BLUE} rows={[[3, 10], [5, 12], [8, '؟']]} />
               <MCQ q="ما المخرجة الناقصة؟" options={['١٥', '١٤', '١']} answer="١٥" award />
@@ -268,7 +249,7 @@ export default defineLesson({
               <FnTable rule="؟" color={BLUE} rows={[[30, 21], [25, 16], [19, 10]]} />
               <MCQ q="ما قاعدة الدالة؟" options={['△ + ٩', '△ − ٩', '△ − ١٠']} answer="△ − ٩" award />
             </Stack>
-          </div>
+          </Grid>
         </>
       ),
     },
@@ -285,7 +266,7 @@ export default defineLesson({
           steps={[
             { text: <><Eq>١ + ٥ = ٦</Eq> ، <Eq>٢ + ٥ = ٧</Eq></> },
             { text: <><Eq>٣ + ٥ = ٨</Eq> ، <Eq>٤ + ٥ = ٩</Eq></> },
-            { text: 'عمر فاطمة: ٦، ٧، ٨، ٩ سنوات', kind: 'ans' },
+            { label: 'عمر فاطمة', text: '٦، ٧، ٨، ٩ سنوات', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ + ٥" color="#a8d5ba" rows={[[1, { b: 6 }], [2, { b: 7 }], [3, { b: 8 }], [4, { b: 9 }]]} />}
         />
@@ -305,7 +286,7 @@ export default defineLesson({
           steps={[
             { text: <><Eq>١٣ − ٤ = ٩</Eq> ، <Eq>١٤ − ٤ = ١٠</Eq></> },
             { text: <><Eq>١٥ − ٤ = ١١</Eq> ، <Eq>١٦ − ٤ = ١٢</Eq></> },
-            { text: 'عمر السلحفاة: ٩، ١٠، ١١، ١٢ سنة', kind: 'ans' },
+            { label: 'عمر السلحفاة', text: '٩، ١٠، ١١، ١٢ سنة', kind: 'ans' },
           ]}
           chart={<FnTable heads={['عمر النعامة △', 'عمر السلحفاة □']} rows={[[13, { b: 9 }], [14, { b: 10 }], [15, { b: 11 }], [16, { b: 12 }]]} />}
         />
@@ -319,7 +300,7 @@ export default defineLesson({
           source={CHECK} n={3} time={30}
           question="أُكْتُبْ قاعدةَ الدَّالَّةِ."
           hint="ماذا فعلنا بعمر النعامة في السؤال ٢؟"
-          steps={[{ text: 'القاعدة: △ − ٤ ، أي «اطرحْ ٤» من عمر النعامة', kind: 'ans' }]}
+          steps={[{ label: 'الْقَاعِدَةُ', text: '△ − ٤', kind: 'ans' }]}
           chart={<FnTable rule="△ − ٤" ruleStep heads={['عمر النعامة △', 'عمر السلحفاة □']} rows={[[13, 9], [14, 10], [15, 11], [16, 12]]} />}
         />
       ),
@@ -334,7 +315,7 @@ export default defineLesson({
           hint="ماذا ترى عندما تكون كل مدخلة بجانب مخرجتها؟"
           steps={[
             { text: 'يرتّبُ الجدولُ كلَّ مدخلةٍ أمامَ مخرجتِها، فتظهرُ العلاقةُ الثابتةُ بينهما بوضوحٍ.' },
-            { text: 'فأكتشفُ النمطَ وأكتبُ القاعدةَ، ثم أطبّقها على مدخلات جديدة.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'نَكْتَشِفُ الْقَاعِدَةَ ثُمَّ نُطَبِّقُهَا.', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ − ٤" rows={[[13, 9], [14, 10], [15, 11]]} color="#a8d5ba" />}
         />
@@ -347,13 +328,13 @@ export default defineLesson({
       notes: 'ماجد قطع أكثر: نضيف ٦.',
       content: (
         <QuestionSlide
-          source={PRACTICE_122} n={5} time={60}
+          source={PRACTICE_122} n={5} time={60} long
           intro="أكملْ كلَّ جدولٍ فيما يلي:"
           question="تزيدُ المسافةُ الَّتي قطعَها ماجدٌ بدرَّاجتِهِ الهَوائيَّةِ ٦ كلم علَى المسافةِ الَّتي قطعَها سُهَيْلٌ بِدرَّاجتِهِ الهوائيَّةِ. استعملْ قاعدةَ الدالةِ في الجدولِ المجاورِ؛ لتجدَ المسافةَ الَّتي قطعَها ماجدٌ، عندمَا قطعَ سُهَيْلٌ ١، ٣، ٥، ٧ كلم."
           hint="أضف ٦ إلى كل مسافة قطعها سهيل."
           steps={[
             { text: <><Eq>١ + ٦ = ٧</Eq> ، <Eq>٣ + ٦ = ٩</Eq> ، <Eq>٥ + ٦ = ١١</Eq> ، <Eq>٧ + ٦ = ١٣</Eq></> },
-            { text: 'المسافات: ٧، ٩، ١١، ١٣ كلم', kind: 'ans' },
+            { label: 'المسافات', text: '٧، ٩، ١١، ١٣ كلم', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ + ٦" color={BLUE} rows={[[1, { b: 7 }], [3, { b: 9 }], [5, { b: 11 }], [7, { b: 13 }]]} />}
         />
@@ -364,19 +345,14 @@ export default defineLesson({
       notes: 'جدولان بقاعدة طرح. اطلب التحقق بالجمع.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE_122}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>أكملْ كلَّ جدولٍ فيما يلي:</p>
-          <div className="qgrid two">
+          <QuestionGroup source={PRACTICE_122} instruction="أكملْ كلَّ جدولٍ فيما يلي:" time={120}>
             <QCard n={6}>
               <FnTable rule="△ − ٤" ruleStep={false} color={BLUE} rows={[[15, { b: 11 }], [12, { b: 8 }], [9, { b: 5 }], [6, { b: 2 }]]} />
             </QCard>
             <QCard n={7}>
               <FnTable rule="△ − ٩" ruleStep={false} color={BLUE} rows={[[17, { b: 8 }], [18, { b: 9 }], [19, { b: 10 }], [20, { b: 11 }]]} />
             </QCard>
-          </div>
-          <Ctrls><NextButton /><TimerButton sec={120} /></Ctrls>
+          </QuestionGroup>
         </>
       ),
     },
@@ -387,12 +363,12 @@ export default defineLesson({
       notes: 'كل يوم ينقص العدد ١١ صفحة. كم يومًا احتاجت؟ (٤ أيام).',
       content: (
         <QuestionSlide
-          source={PRACTICE_123} n={8} time={60}
+          source={PRACTICE_123} n={8} time={60} long
           question="يَتكوَّنُ كتابٌ مِن ٤٤ صفحةً. إذا قرأتْ عائشةُ في كلِّ يومِ العددَ نفسَهُ مِن الصَّفحاتِ حتَّى أَنْهَتْهُ، والجدولُ المُجاورُ يُوضِّحُ عددَ الصَّفحاتِ قبلَ القِراءةِ اليَوميَّةِ وبعدَها، فأَوْجِدْ قاعدةَ الدَّالَّةِ الَّتي يُمثِّلُها الجدولُ المجاورُ."
           hint="ما الفرق بين كل مدخلة ومخرجتها؟"
           steps={[
             { text: <><Eq>٤٤ − ٣٣ = ١١</Eq> ، <Eq>٣٣ − ٢٢ = ١١</Eq> ، <Eq>١١ − ١١ = ٠</Eq></> },
-            { text: 'القاعدة: △ − ١١ ، أي تقرأ عائشة ١١ صفحة كل يوم', kind: 'ans' },
+            { label: 'الْقَاعِدَةُ', text: '△ − ١١', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ − ١١" ruleStep color={BLUE} rows={[[44, 33], [33, 22], [22, 11], [11, 0]]} />}
         />
@@ -411,7 +387,7 @@ export default defineLesson({
           hint="الخصم يُنقص المبلغ."
           steps={[
             { text: 'القاعدة: △ − ٥' },
-            { text: 'يدفع: ٣٥، ٣٦، ٣٧، ٣٨ ريالًا', kind: 'ans' },
+            { label: 'يدفع', text: '٣٥، ٣٦، ٣٧، ٣٨ ريالًا', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ − ٥" ruleStep heads={['الثمن △', 'المدفوع □']} color={BLUE} rows={[[40, { b: 35 }], [41, { b: 36 }], [42, { b: 37 }], [43, { b: 38 }]]} />}
         />
@@ -427,7 +403,7 @@ export default defineLesson({
           hint="المدخلة صناديق التفاح، وهي الأكثر."
           steps={[
             { text: 'القاعدة: △ − ٣' },
-            { text: 'صناديق البرتقال: ٥، ٦، ٧، ٨', kind: 'ans' },
+            { label: 'صناديق البرتقال', text: '٥، ٦، ٧، ٨', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ − ٣" ruleStep heads={['التفاح △', 'البرتقال □']} color={BLUE} rows={[[8, { b: 5 }], [9, { b: 6 }], [10, { b: 7 }], [11, { b: 8 }]]} />}
         />
@@ -446,7 +422,8 @@ export default defineLesson({
           steps={[
             { text: <><Eq>١٢٢ − ٢٥ = ٩٧</Eq> ، <Eq>٩٧ − ٢٥ = ٧٢</Eq></> },
             { text: <><Eq>٧٢ − ٢٥ = ٤٧</Eq> ، <Eq>٤٧ − ٢٥ = ٢٢</Eq></> },
-            { text: 'القاعدة: اطرح ٢٥ كل يوم · المتبقي: ٩٧، ٧٢، ٤٧، ٢٢ ريالًا', kind: 'ans' },
+            { label: 'الْقَاعِدَةُ', text: '△ − ٢٥', kind: 'ans' },
+            { label: 'الْمُتَبَقِّي', text: '٩٧، ٧٢، ٤٧، ٢٢ رِيَالًا', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ − ٢٥" heads={['قبل اليوم △', 'بعد اليوم □']} color={BLUE} rows={[[122, { b: 97 }], [97, { b: 72 }], [72, { b: 47 }], [47, { b: 22 }]]} />}
         />
@@ -462,7 +439,8 @@ export default defineLesson({
           hint="بعد كل شخص نطرح ١٥."
           steps={[
             { text: <><Eq>٧٥ − ١٥ = ٦٠</Eq> ، <Eq>٦٠ − ١٥ = ٤٥</Eq> ، <Eq>٤٥ − ١٥ = ٣٠</Eq></> },
-            { text: 'القاعدة: اطرح ١٥ · يتبقى معها ٣٠ ريالًا', kind: 'ans' },
+            { label: 'الْقَاعِدَةُ', text: '△ − ١٥', kind: 'ans' },
+            { label: 'يَتَبَقَّى مَعَهَا', text: '٣٠ رِيَالًا', kind: 'ans' },
           ]}
           chart={<FnTable rule="△ − ١٥" heads={['قبل △', 'بعد □']} color={BLUE} rows={[[75, { b: 60 }], [60, { b: 45 }], [45, { b: 30 }]]} />}
         />
@@ -478,7 +456,7 @@ export default defineLesson({
           source={HOT} n={13} tags={[{ kind: 'warn', text: 'مسألةٌ مفتوحةٌ' }]}
           question="أَنْشِئْ جدولَ دَالَّةٍ للقاعدةِ « أَضِفْ ٥»."
           hint="اختر أي أربعة أعداد مدخلات، وأضف ٥ إلى كل منها."
-          steps={[{ text: 'مثال: المدخلات ١، ٢، ٣، ٤ ، والمخرجات ٦، ٧، ٨، ٩', kind: 'ans' }]}
+          steps={[{ label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: '١، ٢، ٣، ٤ ← ٦، ٧، ٨، ٩', kind: 'ans' }]}
           chart={<FnTable rule="△ + ٥" rows={[[1, { b: 6 }], [2, { b: 7 }], [3, { b: 8 }], [4, { b: 9 }]]} color="#a8d5ba" />}
         />
       ),
@@ -494,7 +472,8 @@ export default defineLesson({
           steps={[
             { text: <>سلطان: <Eq>٨ + ٩ = ١٧</Eq> ، <Eq>١٠ + ٩ = ١٩</Eq> ، <Eq>١٥ + ٩ = ٢٤</Eq> ✓</> },
             { text: <>أحمد: <Eq>٥ + ٩ = ١٤</Eq> وليس ١٣ ✗</> },
-            { text: 'سلطانُ إجابتُهُ صحيحةٌ؛ لأنَّ كلَّ مخرجةٍ تساوي المدخلةَ + ٩، وأخطأَ أحمدُ في ٥ + ٩.', kind: 'ans' },
+            { text: 'كُلُّ مُخْرَجَةٍ = الْمُدْخَلَةُ + ٩، وَأَخْطَأَ أَحْمَدُ فِي ٥ + ٩.' },
+            { label: 'الصَّحِيحُ', text: 'سُلْطَانُ', kind: 'ans' },
           ]}
           chart={
             <Stack>
@@ -519,7 +498,7 @@ export default defineLesson({
           hint="ما الفرق بين كل مدخلة ومخرجتها؟"
           steps={[
             { text: 'القاعدة: △ + ١٠ ، أي «أضفْ ١٠»' },
-            { text: 'مثال: مع خالد ٢٥٢ ريالًا فأعطاه أبوه ١٠ ريالات، فكم صار معه؟ ٢٦٢ ريالًا.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'مَعَ خَالِدٍ ٢٥٢ رِيَالًا، وَأَخَذَ ١٠، فَكَمْ صَارَ مَعَهُ؟', kind: 'ans' },
           ]}
           chart={<RuleTable rule="△ + ١٠" rows={[['المُدخلةُ △', [252, 251, 250]], ['المُخرجةُ □', [262, 261, 260]]]} color="#a8d5ba" />}
         />
@@ -532,7 +511,7 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>جداول<br />الدوال</>}
             items={[
@@ -551,11 +530,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">ثلاثة أسئلة</SlideHead>
-          <div className="ticket">
-            <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="القاعدة △ + ٤. ما المخرجة عندما تكون المدخلة ٩؟" options={['٥', '١٣', '٣٦']} answer="١٣" /></Card>
-            <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="المدخلات ١٢، ١٣، ١٤ والمخرجات ٥، ٦، ٧. ما القاعدة؟" options={['△ + ٧', '△ − ٧', '△ − ٦']} answer="△ − ٧" /></Card>
-            <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="عمر الأب أكبر من عمر ابنه بـ ٢٦ سنة. كم عمر الابن إذا كان عمر الأب ٣٥؟" options={['٦١', '٩', '١١']} answer="٩" /></Card>
-          </div>
+          <ExitTicket>
+            <MCQ q="القاعدة △ + ٤. ما المخرجة عندما تكون المدخلة ٩؟" options={['٥', '١٣', '٣٦']} answer="١٣" />
+            <MCQ q="المدخلات ١٢، ١٣، ١٤ والمخرجات ٥، ٦، ٧. ما القاعدة؟" options={['△ + ٧', '△ − ٧', '△ − ٦']} answer="△ − ٧" />
+            <MCQ q="عمر الأب أكبر من عمر ابنه بـ ٢٦ سنة. كم عمر الابن إذا كان عمر الأب ٣٥؟" options={['٦١', '٩', '١١']} answer="٩" />
+          </ExitTicket>
         </>
       ),
     },

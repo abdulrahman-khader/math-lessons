@@ -2,6 +2,8 @@
 
 Interactive smartboard presentations for Saudi elementary math lessons (Arabic, RTL). One shared engine in `src/engine/`, one content file per lesson in `lessons/`. Each lesson builds into one HTML file in `dist/`, published on GitHub Pages. The teacher runs it in a current browser on their Mac, projected over HDMI with a fast connection: offline use and old smartboard browsers are not requirements.
 
+**New design (v2):** lessons are moving to the new design (`meta.design: 'v2'`). Before converting or building any lesson, read `DESIGN.md` and follow it: layout, sizes, colours, answers, pictures, full-screen moments, the phone remote, and the conversion checklist.
+
 ## Commands
 
 - `npm run dev -- 3-4`: dev server for the lesson whose path contains `3-4`

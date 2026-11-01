@@ -696,6 +696,7 @@ table.dgrid .dg-title { font-size: 1.05em; }
 .chart.tbl.board { background: #234f3a; }
 .chart.tbl.board table.dgrid td { background: #2f6b4e; color: #fff; border-color: #ffffff55; }
 .pex-f { font-size: 1.15em; font-weight: 800; }
+.ffstep:has(> .pex-f) { grid-template-columns: auto 2.2em 1.8em 2.2em auto; }
 .piefig { margin: 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; gap: .1em; }
 .piefig figcaption { font-weight: 800; font-size: .78em; text-align: center; line-height: 1.5; }
 .chart.pic svg.pie, .chart.pic svg.bag { max-height: 16.5em; }
@@ -984,3 +985,43 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .teamsboard .tbcols { display: grid; gap: 18px; }
 .teamsboard .tbcol { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; border-radius: 16px; background: #f3f4f7; border-block-start: 10px solid var(--tc); font-size: 30px; line-height: 1.5; }
 .teamsboard .tbcol b { margin-block-end: 6px; font-size: 34px; font-weight: 700; color: var(--tc); }
+
+/* ===== قطع الشرائح الجاهزة (components/Blocks.tsx): أشكالها هنا لا في ملفات الدروس ===== */
+.qinline { margin: 0; gap: .4em; }
+.blabel { color: var(--ex); }
+.opcheck { font-size: .72em; font-weight: 700; color: var(--ex); }
+.chartq { display: flex; flex-direction: column; gap: .2em; padding-inline-start: 1.6em; }
+.chartq > .qtext { margin: 0; font-size: .8em; }
+.flines.center { align-items: center; }
+.verdict.ok { color: var(--good); }
+.verdict.no { color: var(--bad); }
+.steprow { gap: 40px; }
+.card.def { font-size: .95em; font-weight: 700; line-height: 1.85; }
+.goals { margin: 0; padding-inline-start: 1.2em; font-size: .9em; font-weight: 700; line-height: 1.7; }
+.words { line-height: 1.9; }
+.numrow { justify-content: space-around; font-size: 1.6em; font-weight: 800; }
+.cols.vote { grid-template-columns: 1fr 1fr 1fr; align-items: start; }
+.trendcard .trendtext { font-size: .75em; font-weight: 700; }
+.fracpie p { margin: 0; text-align: center; font-size: 1.2em; font-weight: 800; }
+.chance p { margin: 0; text-align: center; font-size: .72em; font-weight: 800; line-height: 1.5; }
+.chance p span { color: var(--rule); }
+.chanceword { font-size: 1.2em; }
+.draws { margin: 0; font-weight: 700; font-size: .8em; }
+.repq { display: flex; flex-direction: column; align-items: center; gap: .25em; padding-inline-start: 1.6em; }
+.repwords { font-size: .68em; font-weight: 700; color: var(--ex); }
+.arrowq { gap: .5em; font-size: 1.3em; font-weight: 800; }
+.oclues { margin: 0; padding-inline-start: 1.2em; line-height: 1.8; font-weight: 700; }
+.otip { margin: 0; font-weight: 700; }
+.obtns { gap: .5em; }
+svg.cubeface { width: 9em; align-self: center; }
+.mpick { gap: .5em; }
+.flow { justify-content: center; align-items: center; gap: 0; font-size: 1.2em; font-weight: 800; }
+.flowitem { display: inline-flex; align-items: center; gap: 1em; margin-inline-start: 1em; }
+.flowitem:first-child { margin-inline-start: 0; }
+svg.pentri { width: 100%; }
+svg.tallygroups { width: 100%; }
+svg.pic22 { width: 100%; max-width: 22em; align-self: center; }
+svg.pic20 { width: 100%; max-width: 20em; align-self: center; }
+.bullets { margin: 0; padding-inline-start: 1.2em; line-height: 1.75; font-weight: 700; }
+.chips { justify-content: space-around; }
+.chips span { width: 2.4em; height: 3em; border: 3px solid #13213b; border-radius: .3em; }

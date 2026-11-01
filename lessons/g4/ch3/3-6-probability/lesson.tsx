@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import {
-  Bag, Card, Cols, Ctrls, DataGrid, Eq, GoHomeButton, HBars, IfTeams, MCQ, Mark, MindMap, NextButton, Pie, QCol, QuestionSlide, SlideHead,
-  Solution, Stack, Step, Winner, chanceWord, defineLesson, num, useRemoteWidget, useSlide, type BagItem, type HlKey, type Slice,
+  Bag, BagExplorer, BookLabel, ChanceScale, Cup, LetterCards, NumberCards, TableBox, Card, Cols, Ctrls, DataGrid, Definition, Eq, ExitTicket, Goals, GoHomeButton, HBars, IfTeams, Intro, Mark, MCQ, MindMap,
+  NextButton, PicBox, Pie, QCol, QText, QuestionSlide, SlideHead, Solution, Stack, Step, Winner, defineLesson,
+  type BagItem, type HlKey, type Slice,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -50,13 +50,13 @@ const LETTERS: Slice[] = [
   { label: 'و', value: 1, color: '#fdf09a' },
 ];
 
-const CHECK = 'تأكَّدْ · ص ٩٤';
-const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ · ص ٩٥';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٩٦';
-const TEST = 'تدريبٌ على اختبارٍ · ص ٩٦';
-const REVIEW = 'مراجعةٌ تراكميةٌ · ص ٩٦';
+const CHECK = 'تأكَّدْ، ص ٩٤';
+const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ٩٥';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٩٦';
+const TEST = 'تدريبٌ على اختبارٍ، ص ٩٦';
+const REVIEW = 'مراجعةٌ تراكميةٌ، ص ٩٦';
 
-const Pic = ({ children }: { children: React.ReactNode }) => <div className="chart pic">{children}</div>;
+const Pic = PicBox;
 const NumSpinner = () => (
   <Pic>
     <Pie slices={NUMS} start={-30} pointer={270} size={400} fs={34} />
@@ -78,125 +78,6 @@ const Cubes = () => (
   </Pic>
 );
 
-/** كوب بلاستيكي: مقلوب أو على جنبه أو قائم */
-function Cup({ pose }: { pose: 'down' | 'side' | 'up' }) {
-  const rot = pose === 'down' ? 180 : pose === 'side' ? 90 : 0;
-  return (
-    <svg viewBox="0 0 60 60" className="cup" role="img" aria-label={pose === 'down' ? 'مقلوب' : pose === 'side' ? 'على جنبه' : 'قائم'}>
-      <g transform={`rotate(${rot} 30 30)`}>
-        <path d="M13 10 L47 10 L41 52 L19 52 Z" fill="#bfe6f8" stroke="#3a8fc4" strokeWidth={3} strokeLinejoin="round" />
-        <ellipse cx={30} cy={10} rx={17} ry={4.5} fill="#e6f6fd" stroke="#3a8fc4" strokeWidth={3} />
-      </g>
-    </svg>
-  );
-}
-
-/** بطاقات حروف كلمة «الرياضيات» (ص ٩٤)، بطاقات (ي) تبرز بمفتاح p0 */
-const WORD = ['ا', 'ل', 'ر', 'ي', 'ا', 'ض', 'ي', 'ا', 'ت'];
-const CARD_COLORS = ['#2f86d6', '#f08a1d', '#e43d3d', '#2fa65a', '#f6d23a', '#2f86d6', '#f08a1d', '#e43d3d', '#2fa65a'];
-function LetterCards() {
-  const { activeHl } = useSlide();
-  const lit = activeHl.has('p0');
-  return (
-    <div className="lcards">
-      {WORD.map((l, i) => (
-        <span key={i} className={'lcard' + (lit ? (l === 'ي' ? ' on' : ' dim') : '')} style={{ background: CARD_COLORS[i] }}>
-          {l}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/** مستكشف: عدد الكرات الحمراء والزرقاء، ووصف احتمال سحب حمراء، وسحب عشوائي */
-function BagExplorer() {
-  const [r, setR] = useState(3);
-  const [b, setB] = useState(5);
-  /** آخر كرة مسحوبة: رقمها في الكيس (الحمراء أولًا) ورقم السحبة */
-  const [out, setOut] = useState<{ k: number; id: number } | null>(null);
-  const last = out ? (out.k < r ? 'حمراء' : 'زرقاء') : null;
-  const [draws, setDraws] = useState({ red: 0, blue: 0 });
-  const n = r + b;
-  const word = n ? chanceWord(r, n) : '—';
-  const set = (which: 'r' | 'b', v: number) => {
-    const x = Math.max(0, Math.min(10, v));
-    if (which === 'r') setR(x);
-    else setB(x);
-    setOut(null);
-    setDraws({ red: 0, blue: 0 });
-  };
-  const draw = () => {
-    if (!n) return;
-    const k = Math.floor(Math.random() * n);
-    const red = k < r;
-    setOut((o) => ({ k, id: (o?.id ?? 0) + 1 }));
-    setDraws((d) => (red ? { ...d, red: d.red + 1 } : { ...d, blue: d.blue + 1 }));
-  };
-  useRemoteWidget(
-    () => ({
-      title: 'الكيس',
-      info: `سحب كرة حمراء: ${word} (${num(r)} من ${num(n)})` + (last ? ` · سُحبت: ${last}` : ''),
-      steppers: [
-        { key: 'r', label: 'الحمراء', value: r, min: 0, max: 10, color: RED },
-        { key: 'b', label: 'الزرقاء', value: b, min: 0, max: 10, color: BLUE },
-      ],
-      buttons: [{ key: 'draw', label: 'اسحب كرة', on: true, disabled: !n }],
-    }),
-    (k, v) => {
-      if (k === 'r' && v !== undefined) set('r', v);
-      else if (k === 'b' && v !== undefined) set('b', v);
-      else if (k === 'draw') draw();
-    },
-    [r, b, out, draws],
-  );
-  const stepper = (label: string, v: number, which: 'r' | 'b', color: string) => (
-    <div className="ffstep" style={{ borderColor: color }}>
-      <span style={{ color }}>{label}</span>
-      <button aria-label={`إنقاص ${label}`} disabled={v <= 0} onClick={() => set(which, v - 1)}>
-        −
-      </button>
-      <b>{num(v)}</b>
-      <button aria-label={`زيادة ${label}`} disabled={v >= 10} onClick={() => set(which, v + 1)}>
-        +
-      </button>
-    </div>
-  );
-  return (
-    <Cols style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'center' }}>
-      <Stack>
-        {stepper('الحمراء', r, 'r', RED)}
-        {stepper('الزرقاء', b, 'b', BLUE)}
-        <Card kind="ex" cap="احتمال سحب كرة حمراء">
-          <b style={{ fontSize: '1.2em' }}>{word}</b> · {num(r)} من {num(n)}
-        </Card>
-        <div className="hopx-ctrl">
-          <button className="btn step-btn" onClick={draw} disabled={!n}>
-            اسحب كرة
-          </button>
-          <span className="hopx-eq done">
-            <span className="eq">
-              {last ? (
-                <>
-                  <span className="ball-dot" style={{ background: last === 'حمراء' ? RED : BLUE }} />
-                  سُحبت: {last}
-                </>
-              ) : (
-                'لم نسحب بعد'
-              )}
-            </span>
-          </span>
-        </div>
-        <p style={{ margin: 0, fontWeight: 700, fontSize: '.8em' }}>
-          السحبات: حمراء {num(draws.red)} · زرقاء {num(draws.blue)}
-        </p>
-      </Stack>
-      <Pic>
-        <Bag items={[{ name: 'حمراء', n: r, color: RED }, { name: 'زرقاء', n: b, color: BLUE }]} out={out} />
-      </Pic>
-    </Cols>
-  );
-}
-
 /** سؤال وصف بالكلمات على كيس الكرات (تدرّب ٧–١٢) */
 const marbleQ = (n: number, q: string, lit: number[], why: string, ans: string, intro?: string) => ({
   sec: 'practice' as const,
@@ -210,7 +91,7 @@ const marbleQ = (n: number, q: string, lit: number[], why: string, ans: string, 
       hint="كم كرة في الكيس؟ وكم منها يحقق الناتج؟"
       steps={[
         { text: why, hl: lit.map((i) => `p${i}` as HlKey) },
-        { text: ans, kind: 'ans' },
+        { label: 'الِاحْتِمَالُ', text: ans, kind: 'ans' },
       ]}
       chart={<Marbles />}
     />
@@ -230,7 +111,7 @@ const letterQ = (n: number, q: string, lit: number[], why: string, ans: string, 
       hint="كم جزءًا في القرص؟ وكم جزءًا يحقق الناتج؟"
       steps={[
         { text: why, hl: lit.map((i) => `p${i}` as HlKey) },
-        { text: ans, kind: 'ans' },
+        { label: 'الِاحْتِمَالُ', text: ans, kind: 'ans' },
       ]}
       chart={<LetterSpinner />}
     />
@@ -250,7 +131,7 @@ const numQ = (n: number, q: string, lit: number[], why: string, ans: string, int
       hint="انظر إلى الأعداد الستة على القرص."
       steps={[
         { text: why, hl: lit.map((i) => `p${i}` as HlKey) },
-        { text: ans, kind: 'ans' },
+        { label: 'الِاحْتِمَالُ', text: ans, kind: 'ans' },
       ]}
       chart={<NumSpinner />}
     />
@@ -263,22 +144,19 @@ const LETTER_INTRO = 'إذا تمَّ تدويرُ المؤشِّرِ، اِست
 const CARDS_INTRO = 'صندوقٌ يحتوي علَى عشرِ بطاقاتٍ مرقمةٍ منْ ١ - ١٠ ، سُحِبتْ بطاقةٌ مِنَ الصندوقِ دونَ النظرِ إليهَا. صِفِ احتمالَ كلٍّ مِنَ النواتجِ الآتيةِ.';
 
 const BOOKS = { title: 'الكتبُ المستعارةُ', labels: ['الرياضيةُ', 'الألغازُ', 'الحيواناتُ', 'المغامراتُ'], values: [60, 50, 20, 40], max: 70, grid: 10, lab: 10, xTitle: 'عددُ الكتبِ المستعارةِ', yTitle: 'موضوعُ الكتبِ' };
-const Books = () => (
-  <div className="chart">
-    <HBars {...BOOKS} color="#f4813f" />
-  </div>
-);
+const Books = () => <HBars {...BOOKS} />;
 
 export default defineLesson({
   meta: {
     id: 'g4-3-6-probability',
+    design: 'v2',
     code: '٣-٦',
     title: 'الاحتمالُ',
     shortTitle: 'الاحتمال',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الثالث: تنظيم البيانات وعرضها وتفسيرها',
-    source: 'الجزء الأول · ص ٩٣–٩٦',
+    source: 'الجزء الأول، ص ٩٣–٩٦',
     minutes: 45,
     idea: 'أَصِفُ الاحتمَالَ بالكلماتِ والأعدادِ.',
     bookQuestions: 27,
@@ -286,12 +164,12 @@ export default defineLesson({
   sectionDesc: {
     engage: 'كيس الكرات',
     explore: 'اسحب كرة',
-    explain: 'القاعدة · الأمثلة ١–٣',
+    explain: 'القاعدة، الأمثلة ١–٣',
     elab: 'نعمل معًا',
     check: 'الأسئلة ١–٦',
     practice: 'الأسئلة ٧–٢٠',
     hot: 'الأسئلة ٢١–٢٧',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -309,11 +187,13 @@ export default defineLesson({
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أصف الاحتمال بالكلمات: مؤكَّد، أكثر احتمالًا، متساوي الإمكانية، أقل احتمالًا، مستحيل.</li>
-                <li>أصف الاحتمال بالأعداد: ٢ من ٩.</li>
-                <li>أستعمل الكيس والقرص الدوّار والجداول.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أصف الاحتمال بالكلمات: مؤكَّد، أكثر احتمالًا، متساوي الإمكانية، أقل احتمالًا، مستحيل.',
+                  'أصف الاحتمال بالأعداد: ٢ من ٩.',
+                  'أستعمل الكيس والقرص الدوّار والجداول.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -326,10 +206,10 @@ export default defineLesson({
       notes: 'اقرأ «استعد» من الكتاب. اطلب من كل طالب أن يخمّن اللون ويبرّر: «لأن…».',
       content: (
         <>
-          <SlideHead tag="اسْتَعِدَّ · ص ٩٣" kind="qs">كيس الكرات</SlideHead>
+          <SlideHead tag="اسْتَعِدَّ، ص ٩٣" kind="qs">كيس الكرات</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">يَحتَوِي كِيسٌ على عددٍ مِنَ الكُراتِ الزُّجاجيَّةِ الملوَّنةِ. إذَا سَحَبَتْ عائشةُ كُرةً مِن داخلِ الكِيسِ دُونَ أنْ تنظرَ إلَى لونِها. فمَا لونُ الكُرةِ الَّتِي تعتقدُ أنَّ عائشةَ قدْ سَحَبَتْهَا؟</p>
+              <QText>يَحتَوِي كِيسٌ على عددٍ مِنَ الكُراتِ الزُّجاجيَّةِ الملوَّنةِ. إذَا سَحَبَتْ عائشةُ كُرةً مِن داخلِ الكِيسِ دُونَ أنْ تنظرَ إلَى لونِها. فمَا لونُ الكُرةِ الَّتِي تعتقدُ أنَّ عائشةَ قدْ سَحَبَتْهَا؟</QText>
               <Card kind="qs" cap="سؤال للتفكير">هل يمكن أن نكون متأكدين من اللون؟ لماذا؟</Card>
             </QCol>
             <Pic>
@@ -347,7 +227,7 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">اسحب كرة</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>غيّر عدد الكرات الحمراء والزرقاء، وراقب وصف الاحتمال، ثم اسحب كرة.</p>
+          <Intro>غيّر عدد الكرات الحمراء والزرقاء، وراقب وصف الاحتمال، ثم اسحب كرة.</Intro>
           <BagExplorer />
         </>
       ),
@@ -359,30 +239,19 @@ export default defineLesson({
       notes: 'اقرأ القاعدة، ثم الأكياس الخمسة من اليمين: مؤكَّد ← مستحيل.',
       content: (
         <>
-          <SlideHead tag="القاعدة · ص ٩٣" kind="rule">الاحتمال بالكلمات</SlideHead>
-          <Card kind="rule" style={{ fontSize: '1em', fontWeight: 700, lineHeight: 1.8 }}>
+          <SlideHead tag="القاعدة، ص ٩٣" kind="rule">الاحتمال بالكلمات</SlideHead>
+          <Definition kind="rule">
             تُسمَّى فُرْصَةُ الحُصولِ على ناتجٍ <Mark>الاحتمالَ</Mark>. ويُوصَفُ الاحتمالُ بالكلماتِ الآتيةِ: مؤكَّدٌ، وأكثرُ احتمالًا، ومتساوِي الإمكانيةِ، وأقلُّ احتمالًا، ومُستحِيلٌ.
-          </Card>
-          <div className="qgrid five">
-            {(
-              [
-                [6, 0, 'مؤكَّدٌ'],
-                [5, 1, 'أكثرُ احتمالًا'],
-                [3, 3, 'متساوِي الإمكانيَّةِ'],
-                [1, 5, 'أقلُّ احتمالًا'],
-                [0, 6, 'مستحيلٌ'],
-              ] as const
-            ).map(([r, b, w]) => (
-              <Card key={w} kind="ex">
-                <Bag items={[{ name: 'حمراء', n: r, color: RED }, { name: 'زرقاء', n: b, color: BLUE }]} size={150} />
-                <p style={{ margin: 0, textAlign: 'center', fontSize: '.72em', fontWeight: 800, lineHeight: 1.5 }}>
-                  اختيارُ كرةٍ حمراءَ
-                  <br />
-                  <span style={{ color: 'var(--rule)' }}>{w}</span>
-                </p>
-              </Card>
-            ))}
-          </div>
+          </Definition>
+          <ChanceScale
+            steps={[
+              [6, 0, 'مؤكَّدٌ'],
+              [5, 1, 'أكثرُ احتمالًا'],
+              [3, 3, 'متساوِي الإمكانيَّةِ'],
+              [1, 5, 'أقلُّ احتمالًا'],
+              [0, 6, 'مستحيلٌ'],
+            ]}
+          />
         </>
       ),
     },
@@ -393,17 +262,17 @@ export default defineLesson({
       notes: 'أنا أعمل: عدّ الكرات الصفراء وقارن بنصف الكرات (٤).',
       content: (
         <>
-          <SlideHead tag="مثال ١ · ص ٩٣" kind="ex">وصف الاحتمال بالكلمات</SlideHead>
+          <SlideHead tag="مثال ١، ص ٩٣" kind="ex">وصف الاحتمال بالكلمات</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">صِفْ إمكانيَّةَ أنْ تسحبَ عائشةُ كرةً صفراءَ.</p>
+              <QText>صِفْ إمكانيَّةَ أنْ تسحبَ عائشةُ كرةً صفراءَ.</QText>
               <Ctrls>
                 <NextButton />
               </Ctrls>
               <Solution>
                 <Step hl={['p2']}>يحتوِي كيسٌ علَى ٨ كُراتٍ زجاجيةٍ ملونةٍ، اثنتانِ منهَا صفراوانِ.</Step>
                 <Step>عددُ الكُراتِ الصَّفراءِ أقلُّ منْ نِصفِ عددِ الكُراتِ الموجودةِ في الكيسِ.</Step>
-                <Step kind="ans">إذَنْ سحبُ كُرَةٍ صفراءَ هوَ الأقلُّ احتمالًا.</Step>
+                <Step kind="ans" label="الْأَقَلُّ احْتِمَالًا">سَحْبُ كُرَةٍ صَفْرَاءَ</Step>
               </Solution>
             </QCol>
             <Pic>
@@ -420,22 +289,22 @@ export default defineLesson({
       notes: 'الريال الواحد عملة معدنية، فالأوراق النقدية ٦ فقط.',
       content: (
         <>
-          <SlideHead tag="مثالٌ من واقعِ الحياةِ ٢ · ص ٩٤" kind="ex">النقود</SlideHead>
+          <SlideHead tag="مثالٌ من واقعِ الحياةِ ٢، ص ٩٤" kind="ex">النقود</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">
-                <b style={{ color: 'var(--ex)' }}>نقودٌ:</b> يُظهِرُ الجدولُ المُجاورُ فئاتِ النُّقودِ الموجودةِ في محفظةِ راشدٍ. إذَا افترضْنَا أنَّهُ فقدَ ورقةً نقديَّةً، فمَا احتمالُ أنْ تكونَ من فئةِ ١٠ ريالاتٍ.
-              </p>
+              <QText>
+                <BookLabel>نقودٌ:</BookLabel> يُظهِرُ الجدولُ المُجاورُ فئاتِ النُّقودِ الموجودةِ في محفظةِ راشدٍ. إذَا افترضْنَا أنَّهُ فقدَ ورقةً نقديَّةً، فمَا احتمالُ أنْ تكونَ من فئةِ ١٠ ريالاتٍ.
+              </QText>
               <Ctrls>
                 <NextButton />
               </Ctrls>
               <Solution>
                 <Step hl={['p0', 'p1']}>الأوراق النقدية: ١ + ٥ = ٦ (الريال الواحد عملة معدنية).</Step>
                 <Step hl={['p1']}>هُنالكَ ٥ أوراقٍ منْ فئةِ ١٠ ريالاتٍ منْ بينِ ٦ أوراقٍ نقديَّةٍ.</Step>
-                <Step kind="ans">إذنْ كونُ الورقةِ المفقُودةِ منْ فئةِ ١٠ ريالاتٍ هوَ الأكثرُ احتمالًا.</Step>
+                <Step kind="ans" label="الْأَكْثَرُ احْتِمَالًا">فِئَةُ ١٠ رِيَالَاتٍ</Step>
               </Solution>
             </QCol>
-            <div className="chart tbl">
+            <TableBox>
               <DataGrid
                 head={['الفئةُ', 'العددُ']}
                 rows={[
@@ -445,7 +314,7 @@ export default defineLesson({
                   ['المجموعُ', 8],
                 ]}
               />
-            </div>
+            </TableBox>
           </Cols>
         </>
       ),
@@ -457,15 +326,15 @@ export default defineLesson({
       notes: 'وصف الاحتمال بالأعداد: «عدد الحالات المطلوبة من العدد الكلي».',
       content: (
         <>
-          <SlideHead tag="مثال ٣ · ص ٩٤" kind="ex">وصف الاحتمال بالأعداد</SlideHead>
-          <p className="qtext">كُتِبَ كُلُّ حرفٍ منْ حروفِ كلمةِ «الرياضيات» على بطاقةٍ. استعمِلِ الأعدادَ لوصفِ احتمالِ اختيارِ بطاقةٍ كُتِبَ عليهَا الحرفُ (ي) دُونَ النَّظرِ إلى البطاقاتِ.</p>
-          <LetterCards />
+          <SlideHead tag="مثال ٣، ص ٩٤" kind="ex">وصف الاحتمال بالأعداد</SlideHead>
+          <QText>كُتِبَ كُلُّ حرفٍ منْ حروفِ كلمةِ «الرياضيات» على بطاقةٍ. استعمِلِ الأعدادَ لوصفِ احتمالِ اختيارِ بطاقةٍ كُتِبَ عليهَا الحرفُ (ي) دُونَ النَّظرِ إلى البطاقاتِ.</QText>
+          <LetterCards letters={['ا', 'ل', 'ر', 'ي', 'ا', 'ض', 'ي', 'ا', 'ت']} colors={['#2f86d6', '#f08a1d', '#e43d3d', '#2fa65a', '#f6d23a']} lit="ي" />
           <Ctrls>
             <NextButton />
           </Ctrls>
           <Solution>
             <Step hl={['p0']}>هنالكَ بطاقتانِ كُتِبَ عليهِمَا الحرفُ (ي) مِنْ أصْلِ ٩ بطاقاتٍ.</Step>
-            <Step kind="ans">إذَنِ احتمالُ اختيارِ بطاقةٍ كُتِبَ عليهَا الحرفُ (ي) هُوَ: ٢ منْ ٩</Step>
+            <Step kind="ans" label="الِاحْتِمَالُ">٢ مِنْ ٩</Step>
           </Solution>
         </>
       ),
@@ -491,7 +360,7 @@ export default defineLesson({
         <>
           <SlideHead tag="نعمل معًا" kind="ex">أصف الاحتمال</SlideHead>
           <Cols>
-            <QCol style={{ gap: '.3em' }}>
+            <QCol>
               <MCQ q="أ) سحب كرة حمراء من هذا الكيس:" options={['مؤكَّد', 'أقل احتمالًا', 'مستحيل']} answer="أقل احتمالًا" award />
               <MCQ q="ب) سحب كرة خضراء:" options={['مستحيل', 'متساوي الإمكانية', 'أكثر احتمالًا']} answer="مستحيل" award />
               <MCQ q="ج) احتمال سحب كرة زرقاء بالأعداد:" options={['٣ من ٨', '٥ من ٨', '٣ من ٥']} answer="٣ من ٨" award />
@@ -521,7 +390,7 @@ export default defineLesson({
           steps={[
             { text: 'في الكيس ١٠ مكعبات، منها ٢ صفراوان.', hl: ['p1'] },
             { text: 'غير الأصفر: ٦ + ١ + ١ = ٨', hl: ['p0', 'p2', 'p3'] },
-            { text: '٨ من ١٠', kind: 'ans' },
+            { label: 'الِاحْتِمَالُ', text: '٨ مِنْ ١٠', kind: 'ans' },
           ]}
           chart={<Cubes />}
         />
@@ -538,7 +407,8 @@ export default defineLesson({
           hint="أيّ لون عدد مكعباته أكبر؟"
           steps={[
             { text: 'الأزرق ٦ مكعبات من ١٠، وهو أكثر من نصف المكعبات.', hl: ['p0'] },
-            { text: 'الأزرقُ؛ لأن عدد المكعبات الزرقاء أكبر من عدد مكعبات أي لون آخر.', kind: 'ans' },
+            { text: 'الْمُكَعَّبَاتُ الزَّرْقَاءُ أَكْثَرُ مِنْ أَيِّ لَوْنٍ آخَرَ.' },
+            { label: 'اللَّوْنُ', text: 'الْأَزْرَقُ', kind: 'ans' },
           ]}
           chart={<Cubes />}
         />
@@ -574,10 +444,11 @@ export default defineLesson({
           steps={[
             { text: 'أزرق ٨، أخضر ١٢، برتقالي ١: المجموع ٢١.', hl: ['p0', 'p1', 'p2'] },
             { text: 'البرتقالي مرة واحدة فقط.', hl: ['p2'] },
-            { text: 'أقلُّ احتمالًا، ١ من ٢١', kind: 'ans' },
+            { label: 'بِالْكَلِمَاتِ', text: 'أَقَلُّ احْتِمَالًا', kind: 'ans' },
+            { label: 'بِالْأَعْدَادِ', text: '١ مِنْ ٢١', kind: 'ans' },
           ]}
           chart={
-            <div className="chart tbl">
+            <TableBox>
               <DataGrid
                 head={['اللونُ', 'عددُ المرّاتِ']}
                 rows={[
@@ -586,7 +457,7 @@ export default defineLesson({
                   ['بُرتقاليٌّ', { tally: 1, color: '#f08a1d' }],
                 ]}
               />
-            </div>
+            </TableBox>
           }
         />
       ),
@@ -607,10 +478,11 @@ export default defineLesson({
           steps={[
             { text: 'على جنبه: ١٨ كوبًا من ٣٢.', hl: ['p1'] },
             { text: 'نصف ٣٢ هو ١٦، و١٨ أكبر من ١٦.' },
-            { text: 'أكثرُ احتمالًا، ١٨ من ٣٢', kind: 'ans' },
+            { label: 'بِالْكَلِمَاتِ', text: 'أَكْثَرُ احْتِمَالًا', kind: 'ans' },
+            { label: 'بِالْأَعْدَادِ', text: '١٨ مِنْ ٣٢', kind: 'ans' },
           ]}
           chart={
-            <div className="chart tbl">
+            <TableBox>
               <DataGrid
                 head={['كيفَ استقرَّ الكوبُ؟', 'العددُ']}
                 rows={[
@@ -619,7 +491,7 @@ export default defineLesson({
                   [{ node: <Cup pose="up" /> }, 4],
                 ]}
               />
-            </div>
+            </TableBox>
           }
         />
       ),
@@ -634,7 +506,7 @@ export default defineLesson({
           source={HOT} n={21}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>مَسْأَلَةٌ مفتوحةٌ:</b> صمِّمْ قُرْصًا دوَّارًا مُقسَّمًا إلى ٨ أجزاءٍ متساويةٍ، ثمَّ لوِّنْ أجزاءَ القُرصِ بألوانٍ مختلفةٍ، بحيثُ يكونُ تَوَقُّفُ المؤشِّرِ على اللَّونِ الأخضرِ أكثرَ احتمالًا ، وتوقُّفُهُ عَلَى اللَّوْنِ الأحمرِ أوِ اللَّوْنِ الأزرقِ أقلَّ احتمالًا.
+              <BookLabel>مَسْأَلَةٌ مفتوحةٌ:</BookLabel> صمِّمْ قُرْصًا دوَّارًا مُقسَّمًا إلى ٨ أجزاءٍ متساويةٍ، ثمَّ لوِّنْ أجزاءَ القُرصِ بألوانٍ مختلفةٍ، بحيثُ يكونُ تَوَقُّفُ المؤشِّرِ على اللَّونِ الأخضرِ أكثرَ احتمالًا ، وتوقُّفُهُ عَلَى اللَّوْنِ الأحمرِ أوِ اللَّوْنِ الأزرقِ أقلَّ احتمالًا.
             </>
           }
           long
@@ -642,7 +514,7 @@ export default defineLesson({
           steps={[
             { text: 'الأخضر أكثر من نصف الأجزاء: ٥ أجزاء.', hl: ['p0', 'p1', 'p2', 'p3', 'p4'] },
             { text: 'الأحمر جزءان، والأزرق جزء واحد: كل منهما أقل من النصف.', hl: ['p5', 'p6', 'p7'] },
-            { text: 'مثال: ٥ أخضر، ٢ أحمر، ١ أزرق.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: '٥ أَخْضَرُ، ٢ أَحْمَرُ، ١ أَزْرَقُ', kind: 'ans' },
           ]}
           chart={
             <Pic>
@@ -662,7 +534,7 @@ export default defineLesson({
           hint="ماذا يحدث إذا كانت كل الكرات من لون واحد؟"
           steps={[
             { text: 'كيس فيه ٦ كرات كلها حمراء.', hl: ['p0'] },
-            { text: 'سحب كرة حمراء منه مؤكَّد الحدوث؛ لأن كل الكرات حمراء.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'سَحْبُ كُرَةٍ حَمْرَاءَ مِنْ كِيسٍ كُلُّ كُرَاتِهِ حَمْرَاءُ', kind: 'ans' },
           ]}
           chart={
             <Pic>
@@ -681,20 +553,14 @@ export default defineLesson({
         <QuestionSlide
           source={TEST} n={23} time={30}
           intro={CARDS_INTRO}
-          question="سحبُ بطاقةٍ عليهَا عددٌ فرديٌّ أوْ عددٌ زوجيٌّ"
+          long question="سحبُ بطاقةٍ عليهَا عددٌ فرديٌّ أوْ عددٌ زوجيٌّ"
           hint="هل يوجد عدد من ١ إلى ١٠ ليس فرديًّا ولا زوجيًّا؟"
           steps={[
             { text: 'كل البطاقات من ١ إلى ١٠ عليها عدد فردي أو زوجي.' },
-            { text: 'أ) مؤكدٌ', kind: 'ans' },
+            { label: 'الِاحْتِمَالُ', text: 'أ) مُؤَكَّدٌ', kind: 'ans' },
           ]}
           chart={
-            <div className="chart tbl">
-              <div className="ncards">
-                {['١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '١٠'].map((x) => (
-                  <span key={x}>{x}</span>
-                ))}
-              </div>
-            </div>
+            <NumberCards n={10} />
           }
         >
           <MCQ options={['أ) مؤكدٌ', 'ب) أكثرُ احتمالًا', 'جـ) متساوِي الإمكانيةِ', 'د) مستحيلٌ']} answer="أ) مؤكدٌ" />
@@ -711,16 +577,10 @@ export default defineLesson({
           hint="ما أكبر عدد على البطاقات؟"
           steps={[
             { text: 'أكبر عدد على البطاقات ١٠، ولا يوجد عدد أكبر منه.' },
-            { text: 'د) مستحيلٌ', kind: 'ans' },
+            { label: 'الِاحْتِمَالُ', text: 'د) مُسْتَحِيلٌ', kind: 'ans' },
           ]}
           chart={
-            <div className="chart tbl">
-              <div className="ncards">
-                {['١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '١٠'].map((x) => (
-                  <span key={x}>{x}</span>
-                ))}
-              </div>
-            </div>
+            <NumberCards n={10} />
           }
         >
           <MCQ options={['أ) مؤكدٌ', 'ب) أكثرُ احتمالًا', 'جـ) أقلُّ احتمالًا', 'د) مستحيلٌ']} answer="د) مستحيلٌ" />
@@ -740,7 +600,8 @@ export default defineLesson({
           steps={[
             { text: 'الرياضية ٦٠، الألغاز ٥٠، الحيوانات ٢٠، المغامرات ٤٠', hl: ['v0', 'v1', 'v2', 'v3'] },
             { text: <Eq>٦٠ + ٥٠ + ٢٠ + ٤٠ = ١٧٠</Eq> },
-            { text: '١٧٠ كتابًا، موضوعاتها: الرياضية والألغاز والحيوانات والمغامرات.', kind: 'ans' },
+            { label: 'عَدَدُ الْكُتُبِ', text: '١٧٠ كِتَابًا', kind: 'ans' },
+            { label: 'الْمَوْضُوعَاتُ', text: 'الرِّيَاضِيَّةُ وَالْأَلْغَازُ وَالْحَيَوَانَاتُ وَالْمُغَامَرَاتُ', kind: 'ans' },
           ]}
           chart={<Books />}
         />
@@ -756,7 +617,8 @@ export default defineLesson({
           hint="ابحث عن أطول عمود."
           steps={[
             { text: 'أطول عمود: الرياضية.', hl: ['p0'] },
-            { text: 'الكتب الرياضية، ٦٠ كتابًا.', hl: ['g0', 'v0'], kind: 'ans' },
+            { label: 'الْمَوْضُوعُ', text: 'الرِّيَاضِيَّةُ', hl: ['g0', 'v0'], kind: 'ans' },
+            { label: 'عَدَدُ الْكُتُبِ', text: '٦٠ كِتَابًا', kind: 'ans' },
           ]}
           chart={<Books />}
         />
@@ -774,10 +636,10 @@ export default defineLesson({
           steps={[
             { text: <>الثلاثاء: <Eq>٢٣٦٧ + ٤٥ = ٢٤١٢</Eq></>, hl: ['v1'] },
             { text: <Eq>٢٣٦٧ + ٢٤١٢ + ٢٧٤٥ = ٧٥٢٤</Eq>, hl: ['v0', 'v2'] },
-            { text: '٧٥٢٤ وجبةً', kind: 'ans' },
+            { label: 'الْمَجْمُوعُ', text: '٧٥٢٤ وَجْبَةً', kind: 'ans' },
           ]}
           chart={
-            <div className="chart tbl">
+            <TableBox>
               <DataGrid
                 head={['اليومُ', 'عددُ الوجباتِ']}
                 rows={[
@@ -787,7 +649,7 @@ export default defineLesson({
                   ['المجموعُ', { v: 7524, k: 'v2' }],
                 ]}
               />
-            </div>
+            </TableBox>
           }
         />
       ),
@@ -799,7 +661,7 @@ export default defineLesson({
       notes: 'اطلب من الطلاب ترتيب الكلمات الخمس من المؤكَّد إلى المستحيل.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>الاحتمال</>}
             items={[
@@ -818,13 +680,13 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">قرص الحروف</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.25fr' }}>
+          <Cols>
             <LetterSpinner />
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="توقّف المؤشر على (م):" options={['مؤكَّد', 'مستحيل', 'أقل احتمالًا']} answer="مستحيل" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="احتمال التوقف على (ع) بالأعداد:" options={['١ من ٥', '١ من ٤', '٥ من ١']} answer="١ من ٥" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="التوقف على حرف غير (ع):" options={['أقل احتمالًا', 'أكثر احتمالًا', 'مستحيل']} answer="أكثر احتمالًا" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q="توقّف المؤشر على (م):" options={['مؤكَّد', 'مستحيل', 'أقل احتمالًا']} answer="مستحيل" />
+              <MCQ q="احتمال التوقف على (ع) بالأعداد:" options={['١ من ٥', '١ من ٤', '٥ من ١']} answer="١ من ٥" />
+              <MCQ q="التوقف على حرف غير (ع):" options={['أقل احتمالًا', 'أكثر احتمالًا', 'مستحيل']} answer="أكثر احتمالًا" />
+            </ExitTicket>
           </Cols>
         </>
       ),

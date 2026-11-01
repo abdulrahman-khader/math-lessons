@@ -83,7 +83,9 @@ function CellView({ c }: { c: Cell }) {
 
 /** جدول بيانات بإبراز الصفوف أو الأعمدة، وخلايا تظهر مع خطوات الحل */
 export function DataGrid({ title, head, rows, tone = 'blue', orient = 'rows', small }: GridProps) {
-  const { activeHl } = useSlide();
+  const { activeHl, nowHl } = useSlide();
+  // التصميم الجديد: يُبرز صف الخطوة الحالية وحده، كالأعمدة؛ والقديم كل ما ظهر
+  const hl = useV2() ? nowHl : activeHl;
   const cols = Math.max(head?.length ?? 0, ...rows.map((r) => r.length));
   return (
     <table className={`dgrid ${tone}${small ? ' small' : ''}${orient === 'cols' ? ' horiz' : ''}`}>
@@ -107,9 +109,9 @@ export function DataGrid({ title, head, rows, tone = 'blue', orient = 'rows', sm
       )}
       <tbody>
         {rows.map((r, i) => (
-          <tr key={i} className={orient === 'rows' && activeHl.has(`p${i}`) ? 'on' : undefined}>
+          <tr key={i} className={orient === 'rows' && hl.has(`p${i}`) ? 'on' : undefined}>
             {r.map((c, j) => {
-              const colOn = orient === 'cols' && j > 0 && activeHl.has(`p${j - 1}`);
+              const colOn = orient === 'cols' && j > 0 && hl.has(`p${j - 1}`);
               return orient === 'cols' && j === 0 ? (
                 <th key={j}>
                   <CellView c={c} />

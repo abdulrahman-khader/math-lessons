@@ -57,9 +57,17 @@ async function device(browser: Browser, dev: string, url: string) {
   return { page, errors };
 }
 
+/** أداة من شريط الأدوات، أو من قائمة ⋯ في التصميم الجديد */
+async function openTool(page: Page, name: string) {
+  if (await page.locator('.v2dots').count()) {
+    await page.locator('.v2dots').click();
+    await page.getByRole('menuitem', { name, exact: true }).click();
+  } else await page.locator(`button[aria-label="${name}"]`).click();
+}
+
 async function pair(browser: Browser, url = href) {
   const ipad = await device(browser, 'iPad Pro 11', url);
-  await ipad.page.locator('button[aria-label="التحكم من الجوال"]').click();
+  await openTool(ipad.page, 'التحكم من الجوال');
   await ipad.page.locator('.rpanel button', { hasText: 'تشغيل' }).click();
   await expect(ipad.page.locator('.rstat')).toContainText('جاهز', { timeout: READY });
   const ch = await ipad.page.evaluate(() => localStorage.getItem('remote:channel'));
@@ -110,9 +118,10 @@ test('الجوال يتصل مباشرة عبر PeerJS ولا يستهلك ntfy'
   await expect.poll(() => activeIndex(ipad)).not.toBe('0');
   await sheet(phone, 'المؤقت');
   await phone.locator('.rpresets .r2btn').first().click();
-  await expect(ipad.locator('#timerw.show')).toBeVisible();
+  // المؤقت في وسط الشاشة، أو في رأسها في التصميم الجديد
+  await expect(ipad.locator('#timerw.show, #v2timer')).toBeVisible();
   await phone.locator('.rtimer .r2btn', { hasText: 'إغلاق المؤقت' }).click();
-  await expect(ipad.locator('#timerw')).toHaveCount(0);
+  await expect(ipad.locator('#timerw, #v2timer')).toHaveCount(0);
 
   expect(relay.posts.length, 'كل الأوامر والحالات عبر القناة المباشرة').toBe(afterHandshake);
   expect(errors).toEqual([]);
@@ -142,7 +151,7 @@ test('أسئلة الاختيار تظهر على الجوال وتُجاب من
 
 test('إن تعذّر الاتصال المباشر يعمل التحكم عبر خادم الرسائل', async ({ browser }) => {
   const ipad = await device(browser, 'iPad Pro 11', href);
-  await ipad.page.locator('button[aria-label="التحكم من الجوال"]').click();
+  await openTool(ipad.page, 'التحكم من الجوال');
   await ipad.page.locator('.rpanel button', { hasText: 'تشغيل' }).click();
   await expect(ipad.page.locator('.rstat')).toContainText('جاهز', { timeout: READY });
   const ch = await ipad.page.evaluate(() => localStorage.getItem('remote:channel'));
@@ -184,7 +193,9 @@ test('حين يصل خادم الربط حدّه اليومي يظهر تنبي�
 });
 
 test('الجوال يغيّر مكان المؤقت وحجمه على الآيباد', async ({ browser }) => {
-  const { ipad, phone, errors } = await pair(browser);
+  // في التصميم القديم فقط: المؤقت في التصميم الجديد ثابت في رأس الشاشة
+  const old = readdirSync(dist).find((f) => f.startsWith('g2-') && f.endsWith('.html'))!;
+  const { ipad, phone, errors } = await pair(browser, pathToFileURL(path.join(dist, old)).href);
   await sheet(phone, 'المؤقت');
   await phone.locator('.rpresets .r2btn').nth(1).click();
   const timer = ipad.locator('#timerw');

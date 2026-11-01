@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useSlide } from '../context';
+import { useSlide, useV2 } from '../context';
 import { num } from '../digits';
 import type { ChartSpec } from '../types';
 
@@ -25,6 +25,12 @@ export function geom(c: ChartSpec): Geom {
   return { W, H, m, pw, ph, n, X: (i) => m.l + (pw * (i + 0.5)) / n, Y: (v) => m.t + ph * (1 - (v - c.min) / (c.max - c.min)) };
 }
 
+/** عمود مستدير من أعلاه فقط، لا من جهة المحور (التصميم الجديد) */
+function topRounded(x: number, y: number, w: number, h: number, r: number) {
+  const k = Math.min(r, h, w / 2);
+  return `M${x} ${y + h}V${y + k}A${k} ${k} 0 0 1 ${x + k} ${y}H${x + w - k}A${k} ${k} 0 0 1 ${x + w} ${y + k}V${y + h}Z`;
+}
+
 const range = (from: number, to: number, step: number) => {
   const out: number[] = [];
   for (let v = from; v <= to + 1e-9; v += step) out.push(+v.toFixed(6));
@@ -42,7 +48,8 @@ interface Props {
 
 /** رسم بياني SVG: خطوط أو أعمدة أو مكعبات، مع أدلة قراءة تُبرَز من خطوات الحل في الشريحة نفسها. */
 export function ChartSvg({ spec: c, values, mode, ghost }: Props) {
-  const { activeHl } = useSlide();
+  const { activeHl, nowHl } = useSlide();
+  const v2 = useV2();
   const on = (k: string) => (activeHl.has(k) ? ' on' : '');
   const vals = values ?? c.values;
   const g = geom(c);
@@ -64,7 +71,16 @@ export function ChartSvg({ spec: c, values, mode, ghost }: Props) {
   if (md === 'bars') {
     const bw = Math.min((pw / g.n) * 0.55, 90);
     vals.forEach((v, i) => {
-      if (v) parts.push(<rect key={`b${i}`} className={'bar' + on(`p${i}`)} x={X(i) - bw / 2} y={Y(v)} width={bw} height={base - Y(v)} />);
+      // التصميم الجديد: عمود الخطوة الحالية على خلفية القلم الفسفوري، والأعمدة كلها بلون واحد محايد
+      if (v2 && nowHl.has(`p${i}`)) parts.unshift(<rect key={`h${i}`} className="colhl" x={X(i) - pw / g.n / 2 + 3} y={m.t} width={pw / g.n - 6} height={ph} rx={12} />);
+      if (!v) return;
+      parts.push(
+        v2 ? (
+          <path key={`b${i}`} className="bar" d={topRounded(X(i) - bw / 2, Y(v), bw, base - Y(v), 10)} />
+        ) : (
+          <rect key={`b${i}`} className={'bar' + on(`p${i}`)} x={X(i) - bw / 2} y={Y(v)} width={bw} height={base - Y(v)} />
+        ),
+      );
     });
   } else if (md === 'cubes') {
     const u = c.cube ?? 1;
@@ -159,6 +175,13 @@ export function ChartSvg({ spec: c, values, mode, ghost }: Props) {
         const w = t.length * 14 + 26;
         let y = Y(v) - 48;
         if (y < m.t - 8) y = Y(v) + 18;
+        // التصميم الجديد: القيمة كبيرة فوق العمود بلا شارة، تظهر مع خطوتها
+        if (v2)
+          return (
+            <text key={`vt${i}`} className={'cv' + on(`v${i}`)} x={X(i)} y={Math.max(Y(v) - 14, m.t + 30)} textAnchor="middle">
+              {t}
+            </text>
+          );
         return (
           <g key={`vt${i}`} className={'vt' + on(`v${i}`)}>
             <rect x={X(i) - w / 2} y={y} width={w} height={34} rx={8} />

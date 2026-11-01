@@ -1,53 +1,10 @@
 import { useState } from 'react';
 import {
-  Card, Chart, Cols, Ctrls, DataTable, DragChart, Eq, GoHomeButton, Hint, HintButton, IfTeams, MCQ, Mark, MindMap,
-  NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step, TrendExplorer, Winner, defineLesson,
+  BookLabel, Card, Intro, MiniRow, TrendCard, TrendMini, TrendQuiz, TrendRow, WriteBox, Chart, Cols, Ctrls, DataTable, Definition, DragChart, Eq, ExitTicket, Goals, GoHomeButton, Hint, HintButton, IfTeams,
+  Mark, MCQ, MindMap, NextButton, QCol, QText, QuestionSlide, SlideHead, Solution, Stack, Step, TrendExplorer, Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
 import * as C from './charts';
-
-/* ---------- رسوم صغيرة خاصة بهذا الدرس ---------- */
-
-const dot = (cx: number, cy: number) => <circle cx={cx} cy={cy} r={6} fill="#fff" stroke="#13213b" strokeWidth={3} />;
-
-function TrendCard({ y1, y2, color, title, text }: { y1: number; y2: number; color: string; title: string; text: string }) {
-  return (
-    <Card kind="ex">
-      <svg viewBox="0 0 100 60">
-        <line x1={10} y1={y1} x2={90} y2={y2} stroke={color} strokeWidth={7} strokeLinecap="round" />
-        {dot(10, y1)}
-        {dot(90, y2)}
-      </svg>
-      <h3 style={{ color }}>{title}</h3>
-      <span style={{ fontSize: '.75em', fontWeight: 700 }}>{text}</span>
-    </Card>
-  );
-}
-
-function Mini({ points, color, children }: { points: string; color: string; children: string }) {
-  return (
-    <div className="mini">
-      <svg viewBox="0 0 120 60">
-        <polyline points={points} fill="none" stroke={color} strokeWidth={5} strokeLinejoin="round" />
-      </svg>
-      <b>{children}</b>
-    </div>
-  );
-}
-
-function QuickTrend({ y1, y2, answer }: { y1: number; y2: number; answer: 'صعود' | 'هبوط' | 'ثبات' }) {
-  return (
-    <div className="mini">
-      <svg viewBox="0 0 120 70">
-        <line x1={10} y1={62} x2={114} y2={62} stroke="#13213b" strokeWidth={2} />
-        <polyline points={`20,${y1} 100,${y2}`} fill="none" stroke="#e8590c" strokeWidth={6} />
-        {dot(20, y1)}
-        {dot(100, y2)}
-      </svg>
-      <MCQ options={['صعود', 'هبوط', 'ثبات']} answer={answer} />
-    </div>
-  );
-}
 
 /** السؤال ١١: الطالب يسحب النقطة «ل» لإكمال البيانات */
 function OpenProblemChart() {
@@ -55,34 +12,35 @@ function OpenProblemChart() {
   return <DragChart spec={C.open} values={values} onChange={setValues} editable={[4]} snap={1} ghost={4} />;
 }
 
-const CHECK = 'تأكَّدْ · ص ٨٨';
-const PRACTICE_88 = 'تدرَّبْ وحُلَّ المسائلَ · ص ٨٨';
-const PRACTICE_89 = 'تدرَّبْ وحُلَّ المسائلَ · ص ٨٩';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٨٩';
+const CHECK = 'تأكَّدْ، ص ٨٨';
+const PRACTICE_88 = 'تدرَّبْ وحُلَّ المسائلَ، ص ٨٨';
+const PRACTICE_89 = 'تدرَّبْ وحُلَّ المسائلَ، ص ٨٩';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٨٩';
 
 export default defineLesson({
   meta: {
     id: 'g4-3-4-line-graphs',
+    design: 'v2',
     code: '٣-٤',
     title: 'التَّمثيلُ بالخُطوطِ',
     shortTitle: 'التمثيل بالخطوط',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الثالث: تنظيم البيانات وعرضها وتفسيرها',
-    source: 'الجزء الأول · ص ٨٧–٨٩',
+    source: 'الجزء الأول، ص ٨٧–٨٩',
     minutes: 45,
     idea: 'أُفسِّرُ التَّمثيلَ بالخُطوطِ.',
     bookQuestions: 12,
   },
   sectionDesc: {
     engage: 'ربط بالدرس السابق ولغز',
-    explore: 'سحب وإفلات · استعد',
-    explain: 'القاعدة · مثال ١',
-    elab: 'نعمل معًا · الحياة',
+    explore: 'سحب وإفلات، استعد',
+    explain: 'القاعدة، مثال ١',
+    elab: 'نعمل معًا، الحياة',
     check: 'الأسئلة ١–٦',
     practice: 'الأسئلة ٧–١٠',
     hot: 'الأسئلة ١١–١٢',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -98,12 +56,14 @@ export default defineLesson({
               <Card kind="rule" cap="المفردات"><Mark>التَّمثيلُ بالخُطوطِ</Mark></Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أقرأ قيمة نقطة من التمثيل.</li>
-                <li>أحدد الأكبر والأقل.</li>
-                <li>أصف التغير: صعود، هبوط، ثبات.</li>
-                <li>أحسب الفرق والمجموع من التمثيل.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أقرأ قيمة نقطة من التمثيل.',
+                  'أحدد الأكبر والأقل.',
+                  'أصف التغير: صعود، هبوط، ثبات.',
+                  'أحسب الفرق والمجموع من التمثيل.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -116,7 +76,7 @@ export default defineLesson({
       notes: 'ربط بالدرس السابق ٣-٣ (التمثيل بالأعمدة). أدر العجلة لاختيار طالب، وامنح نجمة لفريقه عند الإجابة الصحيحة.',
       content: (
         <>
-          <SlideHead tag="تذكّر · الدرس ٣-٣" kind="ink">التمثيل بالأعمدة</SlideHead>
+          <SlideHead tag="تذكّر، الدرس ٣-٣" kind="ink">التمثيل بالأعمدة</SlideHead>
           <Cols>
             <QCol>
               <p>قاس طلاب الصف الرابع أطوالهم، وكانت كما هي مبيَّنة في التمثيل المجاور.</p>
@@ -138,11 +98,8 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="لغز" kind="qs">نبتة الفول في مشروع العلوم</SlideHead>
-          <Cols className="compact">
-            <Step hl={['line', 'p1', 'p2']} style={{ order: 2 }}>
-              <Chart spec={C.bean} />
-            </Step>
-            <QCol style={{ order: 1 }}>
+          <Cols>
+            <QCol>
               <p>زرعت مجموعة «النخيل» بذرة فول في مشروع مدرسي، وقاست طولها في نهاية كل أسبوع.</p>
               <DataTable rows={[['الأسبوع', 'الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس'], ['الطول (سم)', 2, 4, 9, 11, 13]]} />
               <Card kind="qs" cap="خمّن">بين أي أسبوعين نمت النبتة <b>أكثر</b>؟</Card>
@@ -150,6 +107,9 @@ export default defineLesson({
               <Step><Card kind="ex" cap="انظر إلى الخط">الخط الأشد صعودًا بين الأسبوع الثاني والثالث: زادت ٥ سم.</Card></Step>
               <Step><Card kind="rule" cap="هذا هو درسنا">رسمٌ يوضح التغير مع مرور الزمن اسمه <Mark>التمثيل بالخطوط</Mark>.</Card></Step>
             </QCol>
+            <Step hl={['line', 'p1', 'p2']}>
+              <Chart spec={C.bean} />
+            </Step>
           </Cols>
         </>
       ),
@@ -182,10 +142,10 @@ export default defineLesson({
       notes: 'امنح الطلاب دقيقة للتفكير، ثم اسمع إجابتين. بعدها اضغط المسافة لإظهار الإجابة خطوة خطوة.',
       content: (
         <>
-          <SlideHead tag="اسْتَعِدَّ · ص ٨٧" kind="qs">درجات الحرارة في مدينة الرياض</SlideHead>
+          <SlideHead tag="اسْتَعِدَّ، ص ٨٧" kind="qs">درجات الحرارة في مدينة الرياض</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">يُوضِّحُ الرَّسمُ البيانيُّ دَرجاتِ الحَرارةِ مِن يَومِ السَّبتِ إلَى يَومِ الجُمعةِ في مَدينةِ الرِّياضِ. صِفْ كَيفَ تَغيَّرتْ دَرجاتُ الحَرارةِ خِلالَ هذَا الأُسبوعِ.</p>
+              <QText>يُوضِّحُ الرَّسمُ البيانيُّ دَرجاتِ الحَرارةِ مِن يَومِ السَّبتِ إلَى يَومِ الجُمعةِ في مَدينةِ الرِّياضِ. صِفْ كَيفَ تَغيَّرتْ دَرجاتُ الحَرارةِ خِلالَ هذَا الأُسبوعِ.</QText>
               <Ctrls><HintButton /><NextButton /></Ctrls>
               <Hint>تتبّع الخط بإصبعك من اليسار إلى اليمين: أين يصعد؟ أين يهبط؟</Hint>
               <Solution>
@@ -207,14 +167,14 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="القاعدة" kind="rule">ما التمثيل بالخطوط؟</SlideHead>
-          <Card kind="rule" style={{ fontSize: '1.05em', fontWeight: 700, lineHeight: 1.75 }}>
+          <Definition kind="rule">
             يُستعملُ <Mark>التَّمثيلُ بالخُطوطِ</Mark>؛ لتوضيحِ كَيفَ تتغيَّرُ مَجموعةٌ مِنَ البَيانَاتِ مَعَ مُرورِ الزَّمنِ. ومِنْ خِلالِ مُلاحظةِ الخُطوطِ المستقيمةِ الوَاصِلةِ بينَ النُّقَطِ، يُمْكِنُ وَصفُ اتِّجاهِ البَيانَاتِ صُعُودًا أو هُبُوطًا.
-          </Card>
-          <div className="trend3">
+          </Definition>
+          <TrendRow>
             <TrendCard y1={50} y2={10} color="#167a3a" title="صعود" text="البيانات تزداد" />
             <TrendCard y1={10} y2={50} color="#c02626" title="هبوط" text="البيانات تقل" />
             <TrendCard y1={30} y2={30} color="#0a58b0" title="ثبات" text="البيانات لا تتغير" />
-          </div>
+          </TrendRow>
         </>
       ),
     },
@@ -241,24 +201,22 @@ export default defineLesson({
       ),
     },
 
-    /* ================= مثال ١ · أنا أعمل ================= */
+    /* ================= مثال ١، أنا أعمل ================= */
     {
       sec: 'explain', min: 4,
       notes: 'أنا أعمل: نفّذ كل خطوة بصوت مسموع، وأشر بإصبعك على السبورة: «أبحث عن أدنى نقطة… أتحرك للأسفل… أقرأ اليوم». الطلاب يشاهدون فقط.',
       content: (
         <>
-          <SlideHead tag="مثال ١ · أنا أعمل · ص ٨٧" kind="ex">تفسير التمثيل بالخطوط</SlideHead>
+          <SlideHead tag="مثال ١، أنا أعمل، ص ٨٧" kind="ex">تفسير التمثيل بالخطوط</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext"><b style={{ color: 'var(--ex)' }}>القياسُ:</b> مَا اليَومُ الَّذِي كَانتْ دَرجةُ الحَرارةِ فِيهِ الأقلَّ ارتفَاعًا؟ ومَا الأيَّامُ الَّتي كَانتْ دَرجةُ الحَرارةِ فيهَا الأكثرُ ارتفاعًا؟</p>
+              <QText long><BookLabel>القياسُ:</BookLabel> مَا اليَومُ الَّذِي كَانتْ دَرجةُ الحَرارةِ فِيهِ الأقلَّ ارتفَاعًا؟ ومَا الأيَّامُ الَّتي كَانتْ دَرجةُ الحَرارةِ فيهَا الأكثرُ ارتفاعًا؟</QText>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
-                <Step hl={['p5']}>١ لمعرفة اليوم الأقل ارتفاعًا: أوجد أدنى نقطة على الرسم.</Step>
-                <Step hl={['g5', 'x5']}>٢ أتحرك للأسفل وأحدد اليوم المقابل لها.</Step>
-                <Step kind="ans">اليوم الأقل ارتفاعًا: الخميس.</Step>
-                <Step hl={['p2', 'p3']}>٣ لمعرفة الأيام الأكثر ارتفاعًا: أوجد أعلى نقطة.</Step>
-                <Step hl={['g2', 'g3', 'x2', 'x3']}>٤ أتحرك للأسفل وأحدد اليوم المقابل.</Step>
-                <Step kind="ans">الأكثر ارتفاعًا: يوم الاثنين، ويوم الثلاثاء.</Step>
+                <Step hl={['p5', 'g5', 'x5']}>نَنْزِلُ مِنْ أَدْنَى نُقْطَةٍ إِلَى الْيَوْمِ.</Step>
+                <Step kind="ans" label="الْأَقَلُّ ارْتِفَاعًا">الْخَمِيسُ</Step>
+                <Step hl={['p2', 'p3', 'g2', 'g3', 'x2', 'x3']}>نَنْزِلُ مِنْ أَعْلَى نُقْطَتَيْنِ إِلَى الْيَوْمَيْنِ.</Step>
+                <Step kind="ans" label="الْأَكْثَرُ ارْتِفَاعًا">الِاثْنَيْنُ وَالثُّلَاثَاءُ</Step>
               </Solution>
             </QCol>
             <Chart spec={C.temp} />
@@ -287,8 +245,8 @@ export default defineLesson({
         <>
           <SlideHead tag="نعمل معًا" kind="ex">النادي الرياضي المدرسي</SlideHead>
           <Cols>
-            <QCol style={{ gap: '.3em' }}>
-              <p style={{ fontSize: '.78em', fontWeight: 700 }}>يوضح التمثيل عدد الطلاب الذين حضروا النادي الرياضي في المدرسة خلال خمسة أسابيع.</p>
+            <QCol>
+              <Intro>يوضح التمثيل عدد الطلاب الذين حضروا النادي الرياضي في المدرسة خلال خمسة أسابيع.</Intro>
               <MCQ q="أ) في أي أسبوع كان العدد الأقل؟" options={['الأول', 'الثالث', 'الرابع']} answer="الرابع" award />
               <MCQ q="ب) بين أي أسبوعين بقي العدد ثابتًا؟" options={['الأول والثاني', 'الثاني والثالث', 'الرابع والخامس']} answer="الثاني والثالث" award />
               <MCQ q="ج) كم زاد العدد من الأسبوع الرابع إلى الخامس؟" options={['١٥', '١٠', '٣٥']} answer="١٥" award />
@@ -306,11 +264,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="من واقع الحياة" kind="ex">أين نستعمل التمثيل بالخطوط؟</SlideHead>
-          <div className="minis">
-            <Mini points="8,48 32,36 56,40 80,20 112,14" color="#e8590c">درجات الحرارة في نشرة الطقس</Mini>
-            <Mini points="8,52 32,44 56,32 80,22 112,10" color="#167a3a">وزن الطفل كل شهر عند الطبيب</Mini>
-            <Mini points="8,40 32,40 56,18 80,30 112,26" color="#0a58b0">عدد خطوات المشي كل يوم</Mini>
-          </div>
+          <MiniRow>
+            <TrendMini points="8,48 32,36 56,40 80,20 112,14" color="#e8590c">درجات الحرارة في نشرة الطقس</TrendMini>
+            <TrendMini points="8,52 32,44 56,32 80,22 112,10" color="#167a3a">وزن الطفل كل شهر عند الطبيب</TrendMini>
+            <TrendMini points="8,40 32,40 56,18 80,30 112,26" color="#0a58b0">عدد خطوات المشي كل يوم</TrendMini>
+          </MiniRow>
           <MCQ
             q="أيّ هذه البيانات يناسبها التمثيل بالخطوط أكثر؟"
             options={['اللون المفضل لطلاب الفصل', 'عدد زوار معرض كل أسبوع خلال شهر', 'عدد الطلاب في كل صف من صفوف المدرسة']}
@@ -328,11 +286,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تحقق سريع" kind="qs">صعود أم هبوط أم ثبات؟</SlideHead>
-          <div className="minis">
-            <QuickTrend y1={20} y2={20} answer="ثبات" />
-            <QuickTrend y1={50} y2={12} answer="صعود" />
-            <QuickTrend y1={14} y2={48} answer="هبوط" />
-          </div>
+          <MiniRow>
+            <TrendQuiz y1={20} y2={20} answer="ثبات" />
+            <TrendQuiz y1={50} y2={12} answer="صعود" />
+            <TrendQuiz y1={14} y2={48} answer="هبوط" />
+          </MiniRow>
         </>
       ),
     },
@@ -348,9 +306,9 @@ export default defineLesson({
           question="كَمْ عَددُ الطُّلابِ الَّذِينَ استقلُّوا الحَافلةَ المَدرسيَّةَ عَامَ ١٤٣٧؟"
           hint="ابدأ من العام ١٤٣٧ على المحور الأفقي، ثم اصعد إلى النقطة."
           steps={[
-            { text: 'أحدد العام ١٤٣٧ على المحور الأفقي، وأصعد إلى النقطة.', hl: ['x0', 'p0'] },
-            { text: 'أتحرك أفقيًّا من النقطة إلى المحور الرأسي وأقرأ العدد.', hl: ['h0'] },
-            { text: '٢٥٠ طالبًا', hl: ['v0'], kind: 'ans' },
+            { text: 'نَبْدَأُ مِنْ ١٤٣٧ وَنَصْعَدُ إِلَى النُّقْطَةِ.', hl: ['x0', 'p0'] },
+            { text: 'نَتَحَرَّكُ أُفُقِيًّا إِلَى الْمِحْوَرِ الرَّأْسِيِّ.', hl: ['h0'] },
+            { label: 'عَدَدُ الطُّلَّابِ', text: '٢٥٠ طَالِبًا', hl: ['v0'], kind: 'ans' },
           ]}
           chart={<Chart spec={C.bus} />}
         />
@@ -365,9 +323,9 @@ export default defineLesson({
           question="مَا العَامُ الَّذِي كَانَ فيهِ عَددُ الطُّلابِ الَّذينَ استقلُّوا الحَافلةَ المَدرسيَّةَ أكبرَ؟"
           hint="«أكبر» عدد يعني أعلى نقطة في التمثيل."
           steps={[
-            { text: 'أبحث عن أعلى نقطة في التمثيل.', hl: ['p0'] },
-            { text: 'أتحرك للأسفل وأقرأ العام: ١٤٣٧، وعدد الطلاب ٢٥٠.', hl: ['g0', 'x0', 'v0'] },
-            { text: 'عام ١٤٣٧؛ إذ استقلها ٢٥٠ طالبًا.', kind: 'ans' },
+            { text: 'نَبْحَثُ عَنْ أَعْلَى نُقْطَةٍ: ٢٥٠ طَالِبًا.', hl: ['p0', 'v0'] },
+            { text: 'نَنْزِلُ مِنْهَا إِلَى الْعَامِ.', hl: ['g0', 'x0'] },
+            { label: 'الْعَامُ', text: '١٤٣٧', kind: 'ans' },
           ]}
           chart={<Chart spec={C.bus} />}
         />
@@ -385,7 +343,7 @@ export default defineLesson({
             { text: 'عام ١٤٣٨: ١٥٠ طالبًا.', hl: ['p1', 'h1', 'v1'] },
             { text: 'عام ١٤٣٩: ١٢٥ طالبًا.', hl: ['p2', 'h2', 'v2'] },
             { text: <Eq>١٥٠ − ١٢٥ = ٢٥</Eq> },
-            { text: '٢٥ طالبًا', kind: 'ans' },
+            { label: 'الْفَرْقُ', text: '٢٥ طَالِبًا', kind: 'ans' },
           ]}
           chart={<Chart spec={C.bus} />}
         />
@@ -403,7 +361,7 @@ export default defineLesson({
             { text: 'الأكبر: عام ١٤٣٧ (٢٥٠ طالبًا).', hl: ['p0', 'v0', 'x0'] },
             { text: 'الأقل: عام ١٤٣٩ (١٢٥ طالبًا).', hl: ['p2', 'v2', 'x2'] },
             { text: <Eq>٢٥٠ − ١٢٥ = ١٢٥</Eq> },
-            { text: 'الفرق ١٢٥ طالبًا.', kind: 'ans' },
+            { label: 'الْفَرْقُ', text: '١٢٥ طَالِبًا', kind: 'ans' },
           ]}
           chart={<Chart spec={C.bus} />}
         />
@@ -418,9 +376,9 @@ export default defineLesson({
           question="مَا مَجموعُ عَددِ الطُّلابِ الَّذينَ استقلُّوا الحَافلةَ المَدرسيَّةَ مِن عَامِ ١٤٣٧ إلى عَامِ ١٤٤٠؟"
           hint="«المجموع» يعني الجمع. كم نقطة في التمثيل؟"
           steps={[
-            { text: 'أقرأ العدد عند كل نقطة: ٢٥٠، ١٥٠، ١٢٥، ٢٢٥.', hl: ['v0', 'v1', 'v2', 'v3'] },
+            { text: 'نَقْرَأُ كُلَّ نُقْطَةٍ: ٢٥٠، ١٥٠، ١٢٥، ٢٢٥.', hl: ['v0', 'v1', 'v2', 'v3'] },
             { text: <Eq>٢٥٠ + ١٥٠ + ١٢٥ + ٢٢٥ = ٧٥٠</Eq> },
-            { text: '٧٥٠ طالبًا', kind: 'ans' },
+            { label: 'الْمَجْمُوعُ', text: '٧٥٠ طَالِبًا', kind: 'ans' },
           ]}
           chart={<Chart spec={C.bus} />}
         />
@@ -435,8 +393,8 @@ export default defineLesson({
           question="كَيفَ أجبتَ عَنِ السُّؤالِ الخامسِ؟"
           hint="ابدأ جوابك بـ: «أولًا قرأتُ… ثم…»."
           steps={[
-            { text: 'قرأتُ عدد الطلاب عند كل نقطة في التمثيل،', hl: ['pts', 'v0', 'v1', 'v2', 'v3'] },
-            { text: 'ثم جمعتُ الأعداد الأربعة معًا فكان الناتج ٧٥٠.', kind: 'ans' },
+            { text: 'نَقْرَأُ عَدَدَ الطُّلَّابِ عِنْدَ كُلِّ نُقْطَةٍ.', hl: ['pts', 'v0', 'v1', 'v2', 'v3'] },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'قَرَأْتُ الْأَعْدَادَ الْأَرْبَعَةَ ثُمَّ جَمَعْتُهَا: ٧٥٠', kind: 'ans' },
           ]}
           chart={<Chart spec={C.bus} />}
         />
@@ -455,7 +413,8 @@ export default defineLesson({
           hint="ابحث عن أدنى نقطة."
           steps={[
             { text: 'أدنى نقطة فوق الأسبوع الثالث.', hl: ['p2', 'g2', 'x2'] },
-            { text: 'الأسبوع الثالث؛ إذ بلغ عدد الزوار ٥٠٠ زائر.', hl: ['v2', 'h2'], kind: 'ans' },
+            { text: 'عَدَدُ الزُّوَّارِ فِيهِ ٥٠٠ زَائِرٍ.', hl: ['v2', 'h2'] },
+            { label: 'الْأُسْبُوعُ', text: 'الْأُسْبُوعُ الثَّالِثُ', kind: 'ans' },
           ]}
           chart={<Chart spec={C.visit} />}
         />
@@ -473,7 +432,7 @@ export default defineLesson({
             { text: 'الأسبوع الرابع: ٢٧٥٠ زائرًا.', hl: ['p3', 'h3', 'v3'] },
             { text: 'الأسبوع الثالث: ٥٠٠ زائر.', hl: ['p2', 'h2', 'v2'] },
             { text: <Eq>٢٧٥٠ − ٥٠٠ = ٢٢٥٠</Eq> },
-            { text: '٢٢٥٠ زائرًا', kind: 'ans' },
+            { label: 'الزِّيَادَةُ', text: '٢٢٥٠ زَائِرًا', kind: 'ans' },
           ]}
           chart={<Chart spec={C.visit} />}
         />
@@ -491,7 +450,7 @@ export default defineLesson({
             { text: 'الأسبوع الأول: ٣٥٠٠ زائر.', hl: ['p0', 'h0', 'v0'] },
             { text: 'الأسبوع الثاني: ١٦٥٠ زائرًا.', hl: ['p1', 'h1', 'v1'] },
             { text: <Eq>٣٥٠٠ − ١٦٥٠ = ١٨٥٠</Eq> },
-            { text: '١٨٥٠ زائرًا', kind: 'ans' },
+            { label: 'الِانْخِفَاضُ', text: '١٨٥٠ زَائِرًا', kind: 'ans' },
           ]}
           chart={<Chart spec={C.visit} />}
         />
@@ -509,7 +468,7 @@ export default defineLesson({
             { text: 'الأعلى: الأسبوع الأول ٣٥٠٠ زائر.', hl: ['p0', 'v0', 'x0'] },
             { text: 'الأقل: الأسبوع الثالث ٥٠٠ زائر.', hl: ['p2', 'v2', 'x2'] },
             { text: <Eq>٣٥٠٠ − ٥٠٠ = ٣٠٠٠</Eq> },
-            { text: '٣٠٠٠ زائر', kind: 'ans' },
+            { label: 'الْفَرْقُ', text: '٣٠٠٠ زَائِرٍ', kind: 'ans' },
           ]}
           chart={<Chart spec={C.visit} />}
         />
@@ -523,16 +482,16 @@ export default defineLesson({
       content: (
         <QuestionSlide
           source={HOT} n={11} time={120}
-          question={<><b style={{ color: 'var(--ex)' }}>مَسألةٌ مَفتوحةٌ:</b> أكتبُ مَسألةً مِن واقعِ الحَياةِ تُعبِّرُ عنِ التَّمثيلِ بالخُطوطِ في الشَّكلِ المُجاورِ، وَضَعْ عُنوانًا لَه وأكملْ بياناتِه.</>}
+          question={<><BookLabel>مَسألةٌ مَفتوحةٌ:</BookLabel> أكتبُ مَسألةً مِن واقعِ الحَياةِ تُعبِّرُ عنِ التَّمثيلِ بالخُطوطِ في الشَّكلِ المُجاورِ، وَضَعْ عُنوانًا لَه وأكملْ بياناتِه.</>}
           hint="فكّر في شيء يتغير مع الزمن ويُعدّ: كتب، أهداف، ريالات… و«أ، ب، ج، د، ل» يمكن أن تكون أسابيع. اسحب عند «ل» لإكمال البيانات."
           steps={[
             { text: 'مثال من دليل المعلم — العنوان: عدد الكتب التي قرأها سعد في خمسة أسابيع.' },
             { text: 'البيانات: أ:٣، ب:٣، ج:٥، د:٧، وأكملها ل:٩.' },
-            { text: 'المسألة: كم كتابًا قرأ في الأسبوع ج؟ (الإجابة: ٥ كتب)', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'كَمْ كِتَابًا قَرَأَ سَعْدٌ فِي الْأُسْبُوعِ ج؟', kind: 'ans' },
           ]}
           chart={<OpenProblemChart />}
         >
-          <input className="inp" placeholder="اكتب عنوانًا للتمثيل…" aria-label="عنوان التمثيل" />
+          <WriteBox placeholder="نكتب عنوانًا للتمثيل…" label="عنوان التمثيل" />
         </QuestionSlide>
       ),
     },
@@ -546,7 +505,8 @@ export default defineLesson({
           hint="صِف الجزء الأول من الخط (من أ إلى ب)، ثم الجزء الثاني (من ب إلى د)."
           steps={[
             { text: 'بقي العدد ثابتًا عند ٣ من أ إلى ب؛ لأن الخط أفقي.', hl: ['p0', 'p1', 'h0'] },
-            { text: 'ثم ازداد من ٣ إلى ٧ من ب إلى د؛ لأن الخط مائل صاعدًا.', hl: ['p2', 'p3', 'v3'], kind: 'ans' },
+            { text: 'ثم ازداد من ٣ إلى ٧ من ب إلى د؛ لأن الخط مائل صاعدًا.', hl: ['p2', 'p3', 'v3'] },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'ثَبَتَ الْعَدَدُ ثُمَّ ازْدَادَ.', kind: 'ans' },
           ]}
           chart={<Chart spec={C.open} />}
         />
@@ -559,14 +519,14 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال الفراغات شفهيًا قبل أن تشير إلى كل فرع.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>التمثيل<br />بالخطوط</>}
             items={[
               { kind: 'rule', cap: 'متى أستعمله؟', text: 'لتوضيح كيف تتغير البيانات مع مرور الزمن.' },
               { kind: 'ex', cap: 'كيف أقرأ قيمة؟', text: 'من النقطة أتحرك أفقيًّا إلى المحور الرأسي.' },
               { kind: 'qs', cap: 'كيف أصف التغير؟', text: 'صعود (يزداد)، هبوط (يقل)، ثبات (لا يتغير).' },
-              { kind: 'warn', cap: 'ماذا أحسب؟', text: 'الأكبر والأقل · الفرق والزيادة والانخفاض بالطرح · المجموع بالجمع.' },
+              { kind: 'warn', cap: 'ماذا أحسب؟', text: 'الأكبر والأقل، الفرق والزيادة والانخفاض بالطرح، المجموع بالجمع.' },
             ]}
           />
         </>
@@ -578,13 +538,13 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">مكتبة المدرسة</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.25fr' }}>
+          <Cols>
             <Chart spec={C.lib} />
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="كم كتابًا استُعير يوم الأحد؟" options={['٩', '١٢', '١٥']} answer="١٢" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="في أي يومين بقي العدد ثابتًا؟" options={['الأحد والاثنين', 'الاثنين والثلاثاء', 'الأربعاء والخميس']} answer="الاثنين والثلاثاء" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="ما الفرق بين أكبر عدد وأقل عدد من الكتب المستعارة؟" options={['٣', '٦', '٩']} answer="٩" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q="كم كتابًا استُعير يوم الأحد؟" options={['٩', '١٢', '١٥']} answer="١٢" />
+              <MCQ q="في أي يومين بقي العدد ثابتًا؟" options={['الأحد والاثنين', 'الاثنين والثلاثاء', 'الأربعاء والخميس']} answer="الاثنين والثلاثاء" />
+              <MCQ q="ما الفرق بين أكبر عدد وأقل عدد من الكتب المستعارة؟" options={['٣', '٦', '٩']} answer="٩" />
+            </ExitTicket>
           </Cols>
         </>
       ),

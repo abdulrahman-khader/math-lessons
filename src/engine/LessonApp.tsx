@@ -391,6 +391,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         wheelOut: picked,
         wheelRemove,
         wheelTeam: teamFilter,
+        v2,
         teamsShown,
       };
       if (klass && state.stars) state.teamOf = state.stars.list.map(([n]) => (n in klass.team && klass.team[n] < st.nTeams ? klass.team[n] : -1));

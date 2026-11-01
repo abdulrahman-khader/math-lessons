@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
-  Card, Chart, Cols, Ctrls, DragChart, Eq, GoHomeButton, HBars, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead,
-  Solution, Stack, Step, Winner, defineChart, defineLesson, num,
+  BookLabel, Card, Chart, Cols, Ctrls, Definition, DragChart, Eq, ExitTicket, Goals, GoHomeButton, HBars, IfTeams, Intro, Mark, MCQ,
+  MindMap, NextButton, QCol, QText, QuestionSlide, SlideHead, Solution, Stack, Step, Winner, defineChart, defineLesson, num,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -29,15 +29,11 @@ const contest = defineChart({
 
 /** تأكّد ١–٦ (ص ٨٥): القيم مقروءة من الرسم (أطراف الأعمدة على خطوط الشبكة) */
 const TITLES = { title: 'البطولاتُ الرياضيةُ للصفوفِ', labels: ['السادسُ', 'الخامسُ', 'الرابعُ', 'الثالثُ'], values: [6, 8, 3, 5], max: 12, grid: 1, lab: 2, xTitle: 'عددُ البطولاتِ', yTitle: 'الصفُّ' };
-const Titles = () => (
-  <div className="chart">
-    <HBars {...TITLES} />
-  </div>
-);
+const Titles = () => <HBars {...TITLES} />;
 
-const CHECK = 'تأكَّدْ · ص ٨٥';
-const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ · ص ٨٥';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٨٥';
+const CHECK = 'تأكَّدْ، ص ٨٥';
+const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ٨٥';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٨٥';
 
 /** مستكشف: الطلاب يحرّكون الأعمدة، والجملة تصف الأكثر والأقل */
 const sports = defineChart({
@@ -55,7 +51,7 @@ function BarExplorer() {
   const lo = Math.min(...vals);
   const names = (t: number) => sports.labels.filter((_, i) => vals[i] === t).join(' و');
   return (
-    <Cols style={{ gridTemplateColumns: '1fr 1.1fr', alignItems: 'center' }}>
+    <Cols>
       <Stack>
         <Card kind="ex" cap="الأكثر">
           {names(hi)} ({num(hi)})
@@ -77,26 +73,27 @@ function BarExplorer() {
 export default defineLesson({
   meta: {
     id: 'g4-3-3-bar-graphs',
+    design: 'v2',
     code: '٣-٣',
     title: 'التَّمثيلُ بالأعمدةِ',
     shortTitle: 'التمثيل بالأعمدة',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الثالث: تنظيم البيانات وعرضها وتفسيرها',
-    source: 'الجزء الأول · ص ٨٤–٨٥',
+    source: 'الجزء الأول، ص ٨٤–٨٥',
     minutes: 45,
     idea: 'أُفسِّرُ التَّمثِيلَ بالأعمدة.',
     bookQuestions: 13,
   },
   sectionDesc: {
-    engage: 'ربط بالدرس السابق · أطوال الطلاب',
+    engage: 'ربط بالدرس السابق، أطوال الطلاب',
     explore: 'اسحب الأعمدة',
-    explain: 'القاعدة · مثال ١',
+    explain: 'القاعدة، مثال ١',
     elab: 'نعمل معًا',
     check: 'الأسئلة ١–٦',
     practice: 'الأسئلة ٧–١٠',
     hot: 'الأسئلة ١١–١٣',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -114,12 +111,14 @@ export default defineLesson({
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أقرأ قيمة عمود من التمثيل.</li>
-                <li>أحدد الأكثر والأقل.</li>
-                <li>أحسب الفرق والمجموع من التمثيل.</li>
-                <li>أكتب جملة تصف البيانات.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أقرأ قيمة عمود من التمثيل.',
+                  'أحدد الأكثر والأقل.',
+                  'أحسب الفرق والمجموع من التمثيل.',
+                  'أكتب جملة تصف البيانات.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -132,10 +131,10 @@ export default defineLesson({
       notes: 'ربط بالدرس ٣-١: من الجدول التكراري إلى الأعمدة. ثم «استعد» من الكتاب: ما الطول الأكثر تكرارًا؟',
       content: (
         <>
-          <SlideHead tag="اسْتَعِدَّ · ص ٨٤" kind="qs">أطوال طلاب الصف الرابع</SlideHead>
+          <SlideHead tag="اسْتَعِدَّ، ص ٨٤" kind="qs">أطوال طلاب الصف الرابع</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">قاسَ طُلَّابُ الصَّفِّ الرَّابعِ أطوالَهُمْ، وَكانتْ كَمَا هيَ مُبيَّنةٌ في التَّمثِيلِ المُجاورِ. مَا الطُّولُ الأكثرُ تكرارًا؟</p>
+              <QText>قاسَ طُلَّابُ الصَّفِّ الرَّابعِ أطوالَهُمْ، وَكانتْ كَمَا هيَ مُبيَّنةٌ في التَّمثِيلِ المُجاورِ. مَا الطُّولُ الأكثرُ تكرارًا؟</QText>
               <MCQ q="ما الطول الأكثر تكرارًا؟" options={['١٤٠ سم', '١٤٥ سم', '١٥٠ سم']} answer="١٤٥ سم" award />
               <Card kind="qs" cap="سؤال للتفكير">كيف عرفت بسرعة دون أن تقرأ كل الأعداد؟</Card>
             </QCol>
@@ -152,7 +151,7 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">الرياضة المفضّلة في صفّنا</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>اسحب أعلى كل عمود إلى عدد الطلاب الذين يفضّلون تلك الرياضة.</p>
+          <Intro>اسحب أعلى كل عمود إلى عدد الطلاب الذين يفضّلون تلك الرياضة.</Intro>
           <BarExplorer />
         </>
       ),
@@ -164,10 +163,10 @@ export default defineLesson({
       notes: 'اقرأ القاعدة من الكتاب. أشر: كل عمود فئة، وطوله قيمتها.',
       content: (
         <>
-          <SlideHead tag="القاعدة · ص ٨٤" kind="rule">ما التمثيل بالأعمدة؟</SlideHead>
-          <Card kind="rule" style={{ fontSize: '1.05em', fontWeight: 700, lineHeight: 1.85 }}>
+          <SlideHead tag="القاعدة، ص ٨٤" kind="rule">ما التمثيل بالأعمدة؟</SlideHead>
+          <Definition kind="rule">
             يُستعملُ <Mark>التَّمثيلُ بالأعمدةِ</Mark> للمقارنَةِ بينَ البياناتِ باستعمالِ أعمدةٍ ذاتِ أطوالٍ مختلفةٍ لتمثيلِ القيَمِ المُعْطَاة. يُمكنُكَ تفسيرُ البياناتِ المُمَثَّلةِ بالأعمدةِ.
-          </Card>
+          </Definition>
           <Cols even>
             <Card kind="ex" cap="العمود الأطول">القيمة الأكبر.</Card>
             <Card kind="ex" cap="العمود الأقصر">القيمة الأصغر.</Card>
@@ -183,12 +182,12 @@ export default defineLesson({
       notes: 'أنا أعمل: أشر إلى العمود الأطول، ثم تحرك إلى المحور الرأسي (٧ طلاب)، ثم إلى الأسفل (١٤٥).',
       content: (
         <>
-          <SlideHead tag="مثالٌ من واقعِ الحياةِ · ص ٨٤" kind="ex">تفسير التمثيل بالأعمدة</SlideHead>
+          <SlideHead tag="مثالٌ من واقعِ الحياةِ، ص ٨٤" kind="ex">تفسير التمثيل بالأعمدة</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">
-                <b style={{ color: 'var(--ex)' }}>القِياسُ:</b> ما الطُّولُ الأكثرُ تكرارًا؟
-              </p>
+              <QText>
+                <BookLabel>القِياسُ:</BookLabel> ما الطُّولُ الأكثرُ تكرارًا؟
+              </QText>
               <Ctrls>
                 <NextButton />
               </Ctrls>
@@ -196,7 +195,7 @@ export default defineLesson({
                 <Step hl={['p3']}>يُمثِّلُ العمودُ الأطولُ الطُّولَ الأكثرَ تكرارًا.</Step>
                 <Step hl={['h3', 'v3']}>عدد الطلاب: ٧</Step>
                 <Step hl={['g3', 'x3']}>والطول تحت العمود: ١٤٥</Step>
-                <Step kind="ans">لِذَا فإنَّ الطُّولَ الأكثرَ تكرارًا هوَ: ١٤٥ سنتمترًا.</Step>
+                <Step kind="ans" label="الطُّولُ الْأَكْثَرُ تَكْرَارًا">١٤٥ سَنْتِمِتْرًا</Step>
               </Solution>
             </QCol>
             <Chart spec={heights} />
@@ -225,7 +224,7 @@ export default defineLesson({
         <>
           <SlideHead tag="نعمل معًا" kind="ex">أقرأ التمثيل</SlideHead>
           <Cols>
-            <QCol style={{ gap: '.3em' }}>
+            <QCol>
               <MCQ q="أ) كم طالبًا طوله ١٥٠ سم؟" options={['٣', '٥', '٧']} answer="٥" award />
               <MCQ q="ب) ما الطولان اللذان لم يسجّلهما أي طالب؟" options={['١٣٥ و١٥٥', '١٣٠ و١٦٠', '١٤٠ و١٥٠']} answer="١٣٥ و١٥٥" award />
               <MCQ q="ج) كم طالبًا قاس طوله؟" options={['١٥', '٢٠', '٢٥']} answer="٢٠" award />
@@ -248,8 +247,8 @@ export default defineLesson({
           hint="ابحث عن أطول عمود."
           steps={[
             { text: 'أطول عمود: الصفّ الخامس.', hl: ['p1'] },
-            { text: 'أتحرك إلى الأسفل: ٨ بطولات.', hl: ['g1', 'v1'] },
-            { text: 'الصَّفُّ الخامسُ (٨ بطولات).', kind: 'ans' },
+            { text: 'نَقْرَأُ نِهَايَتَهُ: ٨ بُطُولَاتٍ.', hl: ['g1', 'v1'] },
+            { label: 'الصَّفُّ', text: 'الصَّفُّ الْخَامِسُ', kind: 'ans' },
           ]}
           chart={<Titles />}
         />
@@ -265,7 +264,7 @@ export default defineLesson({
           hint="العدد ٣ بين ٢ و٤ على المحور الأفقي."
           steps={[
             { text: 'العمود الذي ينتهي عند ٣:', hl: ['g2', 'v2'] },
-            { text: 'الصَّفُّ الرَّابعُ', hl: ['p2'], kind: 'ans' },
+            { label: 'الصَّفُّ', text: 'الصَّفُّ الرَّابِعُ', hl: ['p2'], kind: 'ans' },
           ]}
           chart={<Titles />}
         />
@@ -283,7 +282,7 @@ export default defineLesson({
             { text: 'الخامسُ: ٨', hl: ['p1', 'v1'] },
             { text: 'السادسُ: ٦', hl: ['p0', 'v0'] },
             { text: <Eq>٨ − ٦ = ٢</Eq> },
-            { text: 'بطولتان', kind: 'ans' },
+            { label: 'الزِّيَادَةُ', text: 'بُطُولَتَانِ', kind: 'ans' },
           ]}
           chart={<Titles />}
         />
@@ -301,7 +300,7 @@ export default defineLesson({
             { text: 'الثالثُ: ٥', hl: ['p3', 'v3'] },
             { text: 'الرابعُ: ٣', hl: ['p2', 'v2'] },
             { text: <Eq>٥ + ٣ = ٨</Eq> },
-            { text: '٨ بطولاتٍ', kind: 'ans' },
+            { label: 'الْمَجْمُوعُ', text: '٨ بُطُولَاتٍ', kind: 'ans' },
           ]}
           chart={<Titles />}
         />
@@ -318,7 +317,7 @@ export default defineLesson({
           steps={[
             { text: 'الصف الخامس حصل على أكبر عدد من البطولات (٨).', hl: ['p1', 'v1'] },
             { text: 'والصف الرابع حصل على أقل عدد (٣).', hl: ['p2', 'v2'] },
-            { text: 'مثال: حصل الصف الخامس على أكثر البطولات، وحصل الصف الرابع على أقلها.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'الْخَامِسُ أَكْثَرُ الصُّفُوفِ بُطُولَاتٍ، وَالرَّابِعُ أَقَلُّهَا.', kind: 'ans' },
           ]}
           chart={<Titles />}
         />
@@ -333,9 +332,9 @@ export default defineLesson({
           question="كيفَ أجبْتَ عَنِ السُّؤَالِ الرَّابعِ ؟"
           hint="ابدأ بـ: «قرأتُ…ثم…»."
           steps={[
-            { text: 'قرأتُ عدد بطولات الصف الثالث من نهاية عموده: ٥', hl: ['p3', 'g3', 'v3'] },
-            { text: 'وقرأتُ عدد بطولات الصف الرابع: ٣', hl: ['p2', 'g2', 'v2'] },
-            { text: 'ثم جمعتُ العددين: ٥ + ٣ = ٨ بطولات.', kind: 'ans' },
+            { text: 'نَقْرَأُ الثَّالِثَ مِنْ نِهَايَةِ عَمُودِهِ: ٥', hl: ['p3', 'g3', 'v3'] },
+            { text: 'وَنَقْرَأُ الرَّابِعَ: ٣', hl: ['p2', 'g2', 'v2'] },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'قَرَأْتُ الْعَدَدَيْنِ ثُمَّ جَمَعْتُهُمَا: ٥ + ٣ = ٨', kind: 'ans' },
           ]}
           chart={<Titles />}
         />
@@ -355,7 +354,8 @@ export default defineLesson({
           steps={[
             { text: 'هُدى ورهف وريم: ٦٠ درجة لكل منهن.', hl: ['p1', 'p3', 'p6', 'v1', 'v3', 'v6'] },
             { text: 'مشاعل ومنى: ١٠٠ درجة لكل منهما.', hl: ['p4', 'p5', 'v4', 'v5'] },
-            { text: 'هُدى ورهف وريم (٦٠)، ومشاعل ومنى (١٠٠).', kind: 'ans' },
+            { label: 'الدَّرَجَةُ ٦٠', text: 'هُدَى وَرَهَفُ وَرِيمُ', kind: 'ans' },
+            { label: 'الدَّرَجَةُ ١٠٠', text: 'مَشَاعِلُ وَمُنَى', kind: 'ans' },
           ]}
           chart={<Chart spec={contest} />}
         />
@@ -373,7 +373,7 @@ export default defineLesson({
             { text: 'هيا: ١٤٠', hl: ['p2', 'h2', 'v2'] },
             { text: 'سمر: ٨٠', hl: ['p0', 'h0', 'v0'] },
             { text: <Eq>١٤٠ − ٨٠ = ٦٠</Eq> },
-            { text: '٦٠ درجةً', kind: 'ans' },
+            { label: 'الزِّيَادَةُ', text: '٦٠ دَرَجَةً', kind: 'ans' },
           ]}
           chart={<Chart spec={contest} />}
         />
@@ -391,7 +391,7 @@ export default defineLesson({
             { text: 'مشاعل: ١٠٠', hl: ['p4', 'h4', 'v4'] },
             { text: 'ريم: ٦٠', hl: ['p6', 'h6', 'v6'] },
             { text: <Eq>١٠٠ − ٦٠ = ٤٠</Eq> },
-            { text: '٤٠ درجةً', kind: 'ans' },
+            { label: 'النُّقْصَانُ', text: '٤٠ دَرَجَةً', kind: 'ans' },
           ]}
           chart={<Chart spec={contest} />}
         />
@@ -409,7 +409,8 @@ export default defineLesson({
             { text: 'أعلى درجة: هيا ١٤٠', hl: ['p2', 'v2'] },
             { text: <Eq>٢٢٠ − ١٤٠ = ٨٠</Eq> },
             { text: 'الدرجة ٨٠ لسمر', hl: ['p0', 'v0'] },
-            { text: 'هيا وسمر: ١٤٠ + ٨٠ = ٢٢٠', kind: 'ans' },
+            { text: <Eq>١٤٠ + ٨٠ = ٢٢٠</Eq> },
+            { label: 'الطَّالِبَتَانِ', text: 'هَيَا وَسَمَرُ', kind: 'ans' },
           ]}
           chart={<Chart spec={contest} />}
         />
@@ -425,13 +426,13 @@ export default defineLesson({
           source={HOT} n={11}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>مَسْأَلَةٌ مَفْتُوحَةٌ:</b> هلْ شاهدْتَ تمثيلًا بالأعمدةِ خارجَ غُرفةِ الصَّفِّ؟ صِفِ البياناتِ الَّتِي يَعْرِضُهَا ذلكَ التَّمثيلُ؟
+              <BookLabel>مَسْأَلَةٌ مَفْتُوحَةٌ:</BookLabel> هلْ شاهدْتَ تمثيلًا بالأعمدةِ خارجَ غُرفةِ الصَّفِّ؟ صِفِ البياناتِ الَّتِي يَعْرِضُهَا ذلكَ التَّمثيلُ؟
             </>
           }
           hint="فكّر في الأخبار، والتطبيقات، والمتاجر، ولوحات المدرسة."
           steps={[
             { text: 'مثال: تمثيل في نشرة الأخبار لعدد زوار مدينة في كل شهر.' },
-            { text: 'يعرض فئات (الأشهر) وقيمة كل فئة (عدد الزوار)، فنقارن بينها.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'يُقَارِنُ عَدَدَ الزُّوَّارِ فِي الْأَشْهُرِ.', kind: 'ans' },
           ]}
           chart={<Chart spec={heights} />}
         />
@@ -445,13 +446,13 @@ export default defineLesson({
           source={HOT} n={12}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>الحِسُّ العدديُّ:</b> لماذَا يكونُ التَّقديرُ ضروريًّا أحيانًا عندَ قراءةِ البياناتِ الَّتي يعرِضُها التَّمثيلُ بالأعمدةِ؟
+              <BookLabel>الحِسُّ العدديُّ:</BookLabel> لماذَا يكونُ التَّقديرُ ضروريًّا أحيانًا عندَ قراءةِ البياناتِ الَّتي يعرِضُها التَّمثيلُ بالأعمدةِ؟
             </>
           }
           hint="ماذا نفعل إذا انتهى العمود بين خطّين من خطوط الشبكة؟"
           steps={[
             { text: 'أحيانًا ينتهي العمود بين خطّين من خطوط الشبكة، أو بين عددين على المحور.' },
-            { text: 'فلا نعرف القيمة بالضبط، فنقدّرها بأقرب عدد.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'لَا نَعْرِفُ الْقِيمَةَ بِالضَّبْطِ، فَنُقَدِّرُهَا.', kind: 'ans' },
           ]}
           chart={<Titles />}
         />
@@ -469,7 +470,8 @@ export default defineLesson({
           steps={[
             { text: 'بتدريج ١٠٠ يكون على المحور ٠ و١٠٠ و٢٠٠ فقط.' },
             { text: 'فتقع معظم الدرجات (٦٠، ٨٠، ١٤٠) بين الخطوط، ونضطر إلى التقدير.', hl: ['p0', 'p1', 'p2'] },
-            { text: 'لا، تصبح القراءة أصعب؛ التدريج بزيادة ٢٠ أنسب لهذه البيانات.', kind: 'ans' },
+            { text: 'التَّدْرِيجُ بِزِيَادَةِ ٢٠ أَنْسَبُ لِهَذِهِ الْبَيَانَاتِ.' },
+            { label: 'هَلْ تُصْبِحُ أَسْهَلَ؟', text: 'لَا، تُصْبِحُ أَصْعَبَ', kind: 'ans' },
           ]}
           chart={<Chart spec={contest} />}
         />
@@ -482,7 +484,7 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>التمثيل<br />بالأعمدة</>}
             items={[
@@ -501,13 +503,13 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">مسابقة الرياضيات</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.15fr' }}>
+          <Cols>
             <Chart spec={contest} />
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="ما درجة مشاعل؟" options={['٨٠', '١٠٠', '١٤٠']} answer="١٠٠" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="من حصلت على أعلى درجة؟" options={['سمَر', 'هيا', 'منى']} answer="هيا" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="كم تزيد درجة منى على درجة هُدى؟" options={['٢٠', '٤٠', '٦٠']} answer="٤٠" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q="ما درجة مشاعل؟" options={['٨٠', '١٠٠', '١٤٠']} answer="١٠٠" />
+              <MCQ q="من حصلت على أعلى درجة؟" options={['سمَر', 'هيا', 'منى']} answer="هيا" />
+              <MCQ q="كم تزيد درجة منى على درجة هُدى؟" options={['٢٠', '٤٠', '٦٠']} answer="٤٠" />
+            </ExitTicket>
           </Cols>
         </>
       ),

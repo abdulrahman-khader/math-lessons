@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import {
-  Card, Cols, Ctrls, Eq, Frac, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, Pie, QCol, QuestionSlide, SlideHead, Solution, Stack,
-  Step, Winner, defineLesson, num, useRemoteWidget, type Slice,
+  BookLabel, Card, FractionPies, PicBox, PieBox, PieExplorer, Cols, Ctrls, Definition, Eq, ExitTicket, Frac, Goals, GoHomeButton, IfTeams, Intro, Mark, MCQ, MindMap, NextButton, Pie,
+  QCol, QText, QuestionSlide, SlideHead, Solution, Stack, Step, Winner, defineLesson, num, type Slice,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -40,71 +39,24 @@ const colors6 = (sub: (n: number) => string): Slice[] => [
   { label: 'أزرق', sub: sub(3), value: 3, color: '#45b0d0' },
 ];
 
-const CHECK = 'تأكَّدْ · ص ٩١';
-const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ · ص ٩١';
-const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا · ص ٩٢';
+const CHECK = 'تأكَّدْ، ص ٩١';
+const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ٩١';
+const HOT = 'مسائلُ مهاراتِ التفكيرِ العُليا، ص ٩٢';
 
-const PieBox = ({ title, slices, size = 440, fs = 24 }: { title?: string; slices: Slice[]; size?: number; fs?: number }) => (
-  <div className="chart pic">
-    <Pie title={title} slices={slices} size={size} fs={fs} />
-  </div>
-);
 const Trips = () => <PieBox title="الرِّحلاتُ المَيدانيَّةُ المُفضَلة لِطلَّابِ الصَّفِّ الرَّابِعِ" slices={TRIPS} />;
 const Fruit = () => <PieBox title="الفاكهةُ المفضلةُ لِطُلابِ المَدْرسَة" slices={FRUIT} fs={21} />;
-
-/** مستكشف: عدد الطلاب في كل فئة، فيتغيّر حجم كل قطاع */
-const NAMES = ['القراءة', 'الرسم', 'الرياضة'];
-const COLS = ['#45b0d0', '#ffab4a', '#8fbf5a'];
-function PieExplorer() {
-  const [n, setN] = useState([6, 3, 3]);
-  const total = n.reduce((a, b) => a + b, 0);
-  const set = (i: number, v: number) => setN((x) => x.map((y, j) => (j === i ? Math.max(0, Math.min(12, v)) : y)));
-  useRemoteWidget(
-    () => ({
-      title: 'القطاعات الدائرية',
-      info: n.map((v, i) => `${NAMES[i]} ${num(v)} من ${num(total)}`).join(' · '),
-      steppers: NAMES.map((l, i) => ({ key: String(i), label: l, value: n[i], min: 0, max: 12, color: COLS[i] })),
-      buttons: [],
-    }),
-    (k, v) => v !== undefined && set(+k, v),
-    [n],
-  );
-  return (
-    <Cols style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'center' }}>
-      <Stack>
-        {NAMES.map((l, i) => (
-          <div key={l} className="ffstep" style={{ borderColor: COLS[i] }}>
-            <span>{l}</span>
-            <button aria-label={`إنقاص ${l}`} disabled={n[i] <= 0} onClick={() => set(i, n[i] - 1)}>
-              −
-            </button>
-            <b>{num(n[i])}</b>
-            <button aria-label={`زيادة ${l}`} disabled={n[i] >= 12} onClick={() => set(i, n[i] + 1)}>
-              +
-            </button>
-            <span className="pex-f">
-              {total ? <Frac n={n[i]} d={total} /> : null}
-            </span>
-          </div>
-        ))}
-      </Stack>
-      <div className="chart pic">
-        <Pie title="الهواية المفضّلة" slices={NAMES.map((l, i) => ({ label: l, value: n[i], color: COLS[i] }))} size={340} />
-      </div>
-    </Cols>
-  );
-}
 
 export default defineLesson({
   meta: {
     id: 'g4-3-5-circle-graphs',
+    design: 'v2',
     code: '٣-٥',
     title: 'التَّمثيلُ بِالقِطاعاتِ الدَّائريَّةِ',
     shortTitle: 'التمثيل بالقطاعات الدائرية',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الثالث: تنظيم البيانات وعرضها وتفسيرها',
-    source: 'الجزء الأول · ص ٩٠–٩٢',
+    source: 'الجزء الأول، ص ٩٠–٩٢',
     minutes: 45,
     idea: 'أُفسِّرُ التَّمثيلَ بِالقِطاعاتِ الدَّائريَّة.',
     bookQuestions: 12,
@@ -112,12 +64,12 @@ export default defineLesson({
   sectionDesc: {
     engage: 'الغلاف الجوي',
     explore: 'كيف يتغيّر القطاع؟',
-    explain: 'القاعدة · الأمثلة ١–٣',
+    explain: 'القاعدة، الأمثلة ١–٣',
     elab: 'نعمل معًا',
     check: 'الأسئلة ١–٤',
     practice: 'الأسئلة ٥–١١',
     hot: 'السؤال ١٢',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -135,11 +87,13 @@ export default defineLesson({
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أحدد الجزء الأكبر والأصغر.</li>
-                <li>أصف القطاع بكسر: نصف، ربع، ثلاثة أرباع.</li>
-                <li>أقرأ الأعداد من القطاعات وأحسب بها.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أحدد الجزء الأكبر والأصغر.',
+                  'أصف القطاع بكسر: نصف، ربع، ثلاثة أرباع.',
+                  'أقرأ الأعداد من القطاعات وأحسب بها.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -152,10 +106,10 @@ export default defineLesson({
       notes: 'اقرأ «استعد» من الكتاب. اسأل: أيّ الغازين يأخذ مساحة أكبر من الدائرة؟',
       content: (
         <>
-          <SlideHead tag="اسْتَعِدَّ · ص ٩٠" kind="qs">الغلاف الجوي</SlideHead>
+          <SlideHead tag="اسْتَعِدَّ، ص ٩٠" kind="qs">الغلاف الجوي</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">يَتكوَّنُ الغِلافُ الجَّويُّ لِلأرضِ مِن عَددٍ مِن الغَازَاتِ. ويمثِّلُ النيتُروجينُ والأُكسجينُ النِّسبةَ الأعْلى مِن هَذه الغَازَاتِ.</p>
+              <QText>يَتكوَّنُ الغِلافُ الجَّويُّ لِلأرضِ مِن عَددٍ مِن الغَازَاتِ. ويمثِّلُ النيتُروجينُ والأُكسجينُ النِّسبةَ الأعْلى مِن هَذه الغَازَاتِ.</QText>
               <MCQ q="أيّ الغازات يأخذ الجزء الأكبر من الدائرة؟" options={['الأكسجين', 'النيتروجين', 'غازات أخرى']} answer="النيتروجين" award />
               <Card kind="qs" cap="سؤال للتفكير">لماذا نرسم البيانات هنا في دائرة، لا في أعمدة؟</Card>
             </QCol>
@@ -172,8 +126,8 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">كيف يتغيّر القطاع؟</SlideHead>
-          <p style={{ fontSize: '.82em', fontWeight: 700, margin: 0 }}>غيّر عدد الطلاب في كل هواية، وراقب حجم كل قطاع والكسر بجانبه.</p>
-          <PieExplorer />
+          <Intro>غيّر عدد الطلاب في كل هواية، وراقب حجم كل قطاع والكسر بجانبه.</Intro>
+          <PieExplorer title="الهواية المفضّلة" names={['القراءة', 'الرسم', 'الرياضة']} colors={['#45b0d0', '#ffab4a', '#8fbf5a']} start={[6, 3, 3]} />
           <Card kind="rule" cap="لاحظ">الدائرة كلها = كل الطلاب. وكل قطاع جزء من الكل.</Card>
         </>
       ),
@@ -185,25 +139,11 @@ export default defineLesson({
       notes: 'اقرأ القاعدة، ثم بطاقة «تذكّر» عن الكسور في الدائرة.',
       content: (
         <>
-          <SlideHead tag="القاعدة · ص ٩٠" kind="rule">ما التمثيل بالقطاعات الدائرية؟</SlideHead>
-          <Card kind="rule" style={{ fontSize: '1.05em', fontWeight: 700, lineHeight: 1.85 }}>
+          <SlideHead tag="القاعدة، ص ٩٠" kind="rule">ما التمثيل بالقطاعات الدائرية؟</SlideHead>
+          <Definition kind="rule">
             يُستعملُ <Mark>التَّمثيلُ بالقِطاعَاتِ الدَّائريَّةِ</Mark> لِلمقارَنةِ بَينَ البَيانَاتِ كَجزءٍ مِنَ الكُلِّ باستعمالِ أجزاءٍ مِنَ الدَّائرة.
-          </Card>
-          <div className="qgrid four">
-            {[
-              [1, 4],
-              [1, 2],
-              [3, 4],
-              [1, 3],
-            ].map(([a, d]) => (
-              <Card key={`${a}${d}`} kind="ex">
-                <Pie slices={[{ label: '', value: a, color: '#f4813f' }, { label: '', value: d - a, color: '#f1d9c4' }]} size={130} />
-                <p style={{ margin: 0, textAlign: 'center', fontSize: '1.2em', fontWeight: 800 }}>
-                  <Frac n={a} d={d} />
-                </p>
-              </Card>
-            ))}
-          </div>
+          </Definition>
+          <FractionPies fracs={[[1, 4], [1, 2], [3, 4], [1, 3]]} />
         </>
       ),
     },
@@ -214,12 +154,12 @@ export default defineLesson({
       notes: 'أنا أعمل: أمثلة الكتاب الثلاثة بالترتيب. مع كل مثال يبرز القطاع المقصود.',
       content: (
         <>
-          <SlideHead tag="أمثلةٌ من واقعِ الحياةِ · ص ٩٠" kind="ex">تفسير التمثيل بالقطاعات الدائرية</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1.25fr 1fr' }}>
+          <SlideHead tag="أمثلةٌ من واقعِ الحياةِ، ص ٩٠" kind="ex">تفسير التمثيل بالقطاعات الدائرية</SlideHead>
+          <Cols>
             <QCol>
-              <p className="qtext" style={{ fontSize: '.9em' }}>
-                <b style={{ color: 'var(--ex)' }}>علوم:</b> أَستخدمُ التَّمثيلَ بالقِطاعَاتِ الدَّائريَّة الَّذي يُوضِّحُ الغَازَاتِ المُكوِّنةَ للغِلافِ الجوِّيِّ لِلأرضِ.
-              </p>
+              <QText long>
+                <BookLabel>علوم:</BookLabel> أَستخدمُ التَّمثيلَ بالقِطاعَاتِ الدَّائريَّة الَّذي يُوضِّحُ الغَازَاتِ المُكوِّنةَ للغِلافِ الجوِّيِّ لِلأرضِ.
+              </QText>
               <Ctrls>
                 <NextButton />
               </Ctrls>
@@ -230,7 +170,7 @@ export default defineLesson({
                 <Step hl={['p2']}>
                   <b>٢ ما أكثرُ الغازاتِ انتشارًا بعدَ النيتروجين؟</b> يَأتِي الأُكسجينُ في المرتَبَةِ الثَّانيَةِ.
                 </Step>
-                <Step hl={['p0', 'p2']} kind="ans">
+                <Step hl={['p0', 'p2']}>
                   <b>٣</b> النيتُروجين حوالي ثَلاثَةِ أرباعِ (<Frac n={3} d={4} />) الدَّائرةِ، والأُكسجينُ حوالي رُبعِ (<Frac n={1} d={4} />) الدَّائرَةِ.
                 </Step>
               </Solution>
@@ -261,7 +201,7 @@ export default defineLesson({
         <>
           <SlideHead tag="نعمل معًا" kind="ex">كم من الدائرة؟</SlideHead>
           <Cols>
-            <QCol style={{ gap: '.3em' }}>
+            <QCol>
               <MCQ q="أ) ما الجزء الذي تمثّله «جدة»؟" options={['ربع', 'نصف', 'ثلاثة أرباع']} answer="نصف" award />
               <MCQ q="ب) ما الجزء الذي تمثّله «الرياض»؟" options={['ربع', 'نصف', 'ثُمن']} answer="ربع" award />
               <MCQ q="ج) «الخبر» و«حائل» معًا يساويان:" options={['ربعًا', 'نصفًا', 'الدائرة كلها']} answer="ربعًا" award />
@@ -284,7 +224,7 @@ export default defineLesson({
           hint="ابحث عن أكبر قطاع."
           steps={[
             { text: 'أكبر قطاع: جدة.', hl: ['p0'] },
-            { text: 'جدة', kind: 'ans' },
+            { label: 'الرِّحْلَةُ', text: 'جُدَّةُ', kind: 'ans' },
           ]}
           chart={<Trips />}
         />
@@ -300,7 +240,7 @@ export default defineLesson({
           hint="هل يأخذ قطاع جدة ربع الدائرة؟ أم نصفها؟"
           steps={[
             { text: 'قطاع جدة يملأ نصف الدائرة.', hl: ['p0'] },
-            { text: <>النصف (<Frac n={1} d={2} />)</>, kind: 'ans' },
+            { label: 'الْجُزْءُ', text: <>النِّصْفُ <Frac n={1} d={2} /></>, kind: 'ans' },
           ]}
           chart={<Trips />}
         />
@@ -321,7 +261,7 @@ export default defineLesson({
           steps={[
             { text: 'الربع الأعلى من النصف الأيسر مقسوم بين الخبر وحائل.', hl: ['p2', 'p3'] },
             { text: 'فقطاع الخبر أصغر من ربع الدائرة (ثُمنها تقريبًا).', hl: ['p2'] },
-            { text: 'لا، الخبر أقل من ربع الصف.', kind: 'ans' },
+            { label: 'أَكْثَرُ مِنْ رُبْعٍ؟', text: 'لَا، أَقَلُّ مِنْ رُبْعِ الصَّفِّ', kind: 'ans' },
           ]}
           chart={<Trips />}
         />
@@ -342,7 +282,8 @@ export default defineLesson({
           steps={[
             { text: 'جدة نصف الدائرة.', hl: ['p0'] },
             { text: 'الخبر وحائل معًا ربع الدائرة.', hl: ['p0', 'p2', 'p3'] },
-            { text: 'جدة والخبر وحائل: نصف + ربع = ثلاثة أرباع.', kind: 'ans' },
+            { text: 'نِصْفٌ + رُبْعٌ = ثَلَاثَةُ أَرْبَاعٍ.' },
+            { label: 'الرِّحْلَاتُ الثَّلَاثُ', text: 'جُدَّةُ وَالْخُبَرُ وَحَائِلُ', kind: 'ans' },
           ]}
           chart={<Trips />}
         />
@@ -359,7 +300,7 @@ export default defineLesson({
           intro="يُبيِّنُ التَّمثيلُ بالقِطاعاتِ الدَّائريَّةِ فِي الشَّكلِ المُجاورِ الفَاكِهةَ المُفضَّلةَ عِندَ طُلَّابِ المَدرسَةِ:"
           question="مَا الفَاكِهةُ المُفضَّلةُ لَدى ١١٠ من طلابِ المَدرسة؟"
           hint="ابحث عن العدد ١١٠."
-          steps={[{ text: 'التفاح', hl: ['p0'], kind: 'ans' }]}
+          steps={[{ label: 'الْفَاكِهَةُ', text: 'التُّفَّاحُ', hl: ['p0'], kind: 'ans' }]}
           chart={<Fruit />}
         />
       ),
@@ -372,7 +313,7 @@ export default defineLesson({
           source={PRACTICE} n={6} time={30}
           question="كَمْ عَددُ الطُّلابِ الَّذينَ يُفضِّلُونَ البَطِّيخَ؟"
           hint="اقرأ العدد في قطاع البطيخ."
-          steps={[{ text: '٦٠ طالبًا', hl: ['p5'], kind: 'ans' }]}
+          steps={[{ label: 'عَدَدُ الطُّلَّابِ', text: '٦٠ طَالِبًا', hl: ['p5'], kind: 'ans' }]}
           chart={<Fruit />}
         />
       ),
@@ -389,7 +330,7 @@ export default defineLesson({
             { text: <Eq>١١٠ + ١٢٥ + ٥٠ + ٧٥ + ٣٠ + ٦٠ + ٥٠ = ٥٠٠</Eq> },
             { text: <>ربع ٥٠٠ = ١٢٥ (لأن ١٢٥ + ١٢٥ + ١٢٥ + ١٢٥ = ٥٠٠)</> },
             { text: <Eq>٧٥ + ٥٠ = ١٢٥</Eq>, hl: ['p3', 'p6'] },
-            { text: 'العنب والموز (أو العنب والكمثرى).', hl: ['p3', 'p6', 'p2'], kind: 'ans' },
+            { label: 'النَّوْعَانِ', text: 'الْعِنَبُ وَالْمَوْزُ، أَوِ الْعِنَبُ وَالْكُمَّثْرَى', hl: ['p3', 'p6', 'p2'], kind: 'ans' },
           ]}
           chart={<Fruit />}
         />
@@ -405,7 +346,8 @@ export default defineLesson({
           hint="ابحث عن أكبر قطاع."
           steps={[
             { text: 'أكبر قطاع: البرتقال.', hl: ['p1'] },
-            { text: 'البرتقال، ١٢٥ طالبًا.', kind: 'ans' },
+            { label: 'الْفَاكِهَةُ', text: 'الْبُرْتُقَالُ', kind: 'ans' },
+            { label: 'عَدَدُ الطُّلَّابِ', text: '١٢٥ طَالِبًا', kind: 'ans' },
           ]}
           chart={<Fruit />}
         />
@@ -421,7 +363,8 @@ export default defineLesson({
           hint="ابحث عن أصغر قطاع."
           steps={[
             { text: 'أصغر قطاع: الكرز.', hl: ['p4'] },
-            { text: 'الكرز، ٣٠ طالبًا.', kind: 'ans' },
+            { label: 'الْفَاكِهَةُ', text: 'الْكَرَزُ', kind: 'ans' },
+            { label: 'عَدَدُ الطُّلَّابِ', text: '٣٠ طَالِبًا', kind: 'ans' },
           ]}
           chart={<Fruit />}
         />
@@ -438,7 +381,7 @@ export default defineLesson({
           steps={[
             { text: <Eq>٥٠ + ٥٠ = ١٠٠</Eq>, hl: ['p6', 'p2'] },
             { text: 'التفاح ١١٠، و١١٠ أكبر من ١٠٠.', hl: ['p0'] },
-            { text: 'التفاح مفضّل أكثر.', kind: 'ans' },
+            { label: 'التُّفَّاحُ', text: 'مُفَضَّلٌ أَكْثَرَ', kind: 'ans' },
           ]}
           chart={<Fruit />}
         />
@@ -454,7 +397,7 @@ export default defineLesson({
           hint="الدائرة كلها = كل الطلاب. اجمع الأعداد كلها."
           steps={[
             { text: <Eq>١١٠ + ١٢٥ + ٥٠ + ٧٥ + ٣٠ + ٦٠ + ٥٠</Eq>, hl: ['p0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6'] },
-            { text: '٥٠٠ طالبٍ', kind: 'ans' },
+            { label: 'عَدَدُ الطُّلَّابِ', text: '٥٠٠ طَالِبٍ', kind: 'ans' },
           ]}
           chart={<Fruit />}
         />
@@ -470,22 +413,23 @@ export default defineLesson({
           source={HOT} n={12}
           question={
             <>
-              <b style={{ color: 'var(--ex)' }}>اكتشف الخَطأ:</b> مَثَّلَ كُلٌّ مِنْ أَحمدَ وسَعدٍ نَتائجَ اِستطلَاعِ رَأيِ ٦ طُلابٍ حَولَ اللَّونِ المُفضَّلِ لَديْهِم. أَيُّهمَا كَانَ تَمْثيلُهُ صَحيْحًا؟ أُذكرِ السَّببَ.
+              <BookLabel>اكتشف الخَطأ:</BookLabel> مَثَّلَ كُلٌّ مِنْ أَحمدَ وسَعدٍ نَتائجَ اِستطلَاعِ رَأيِ ٦ طُلابٍ حَولَ اللَّونِ المُفضَّلِ لَديْهِم. أَيُّهمَا كَانَ تَمْثيلُهُ صَحيْحًا؟ أُذكرِ السَّببَ.
             </>
           }
           hint="كم جزءًا متساويًا في كل دائرة؟ وكم عدد الطلاب؟"
           steps={[
             { text: 'كل دائرة مقسّمة إلى ٦ أجزاء متساوية، لأن الطلاب ٦.' },
             { text: <>أحمد كتب الكسور من ٨ (<Frac n={2} d={8} />، <Frac n={3} d={8} />، <Frac n={1} d={8} />)، ومجموعها لا يساوي الدائرة كلها.</> },
-            { text: <>سعدٌ؛ لأن كل طالب جزء من ٦، و<Frac n={2} d={6} /> + <Frac n={1} d={6} /> + <Frac n={3} d={6} /> = الدائرة كلها.</>, kind: 'ans' },
+            { text: <>كُلُّ طَالِبٍ جُزْءٌ مِنْ ٦، وَ<Frac n={2} d={6} /> + <Frac n={1} d={6} /> + <Frac n={3} d={6} /> = الدَّائِرَةُ كُلُّهَا.</> },
+            { label: 'الصَّحِيحُ', text: 'تَمْثِيلُ سَعْدٍ', kind: 'ans' },
           ]}
           chart={
-            <div className="chart pic">
+            <PicBox>
               <Cols even>
                 <Pie title="أحمدُ" slices={colors6((n) => `${num(n)}/${num(8)}`)} size={320} fs={24} />
                 <Pie title="سَعدُ" slices={colors6((n) => `${num(n)}/${num(6)}`)} size={320} fs={24} />
               </Cols>
-            </div>
+            </PicBox>
           }
         />
       ),
@@ -497,7 +441,7 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>التمثيل بالقطاعات<br />الدائرية</>}
             items={[
@@ -516,13 +460,13 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">الرحلات المفضّلة</SlideHead>
-          <Cols style={{ gridTemplateColumns: '1fr 1.25fr' }}>
+          <Cols>
             <Trips />
-            <div className="ticket">
-              <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="ما الرحلة الأقل تفضيلًا مع الخبر؟" options={['حائل', 'الرياض', 'جدة']} answer="حائل" /></Card>
-              <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="الرياض وجدة معًا تمثلان:" options={['نصفًا', 'ثلاثة أرباع', 'ربعًا']} answer="ثلاثة أرباع" /></Card>
-              <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="إذا كان طلاب الصف ٢٤، فكم طالبًا يفضّل جدة؟" options={['٦', '١٢', '١٨']} answer="١٢" /></Card>
-            </div>
+            <ExitTicket>
+              <MCQ q="ما الرحلة الأقل تفضيلًا مع الخبر؟" options={['حائل', 'الرياض', 'جدة']} answer="حائل" />
+              <MCQ q="الرياض وجدة معًا تمثلان:" options={['نصفًا', 'ثلاثة أرباع', 'ربعًا']} answer="ثلاثة أرباع" />
+              <MCQ q="إذا كان طلاب الصف ٢٤، فكم طالبًا يفضّل جدة؟" options={['٦', '١٢', '١٨']} answer="١٢" />
+            </ExitTicket>
           </Cols>
         </>
       ),

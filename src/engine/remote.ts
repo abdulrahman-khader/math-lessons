@@ -204,6 +204,8 @@ export interface RemoteState {
   wheelOut?: string[];
   wheelRemove?: boolean;
   wheelTeam?: number;
+  /** الدرس بالتصميم الجديد (المؤقت ثابت في الرأس) */
+  v2?: boolean;
   /** الفرق ظاهرة على الشاشة */
   teamsShown?: boolean;
   /** المؤقت. لا تُرسل الحالة كل ثانية: الجوال يعدّ تنازليًا وحده من آخر حالة وصلته */

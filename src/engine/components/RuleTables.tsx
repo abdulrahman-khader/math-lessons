@@ -1,7 +1,9 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { num } from '../digits';
 import { Blank } from './Cubes';
 import { Step } from './Steps';
+import { Card, type Kind } from './Layout';
+import { MCQ } from './MCQ';
 
 /* ---------- جداول القاعدة والدالة كما في الكتاب: الخانات الناقصة تمتلئ مع «الخطوة التالية» ---------- */
 
@@ -73,5 +75,99 @@ export function FnTable({
         ))}
       </tbody>
     </table>
+  );
+}
+
+/** آلة القاعدة: يختار الطالب مدخلة فتخرج المخرجة، والقاعدة مخفية حتى يخمّنها الصف (بعد ثلاث مدخلات) */
+export function RuleMachine({ inputs, times, options, answer }: { inputs: number[]; times: number; options: string[]; answer: string }) {
+  const [shown, setShown] = useState<number[]>([]);
+  return (
+    <div className="machine">
+      <div className="row mpick">
+        <b>اختر مدخلة:</b>
+        {inputs.map((x) => (
+          <button key={x} className="btn" disabled={shown.includes(x)} onClick={() => setShown((s) => [...s, x])}>
+            {num(x)}
+          </button>
+        ))}
+        {shown.length > 0 && (
+          <button className="btn hide" onClick={() => setShown([])}>
+            من جديد
+          </button>
+        )}
+      </div>
+      <div className="mbody">
+        <span className="mlabel">المدخلة</span>
+        <span className="mbox">؟ القاعدة</span>
+        <span className="mlabel">المخرجة</span>
+      </div>
+      <table className="data">
+        <tbody>
+          <tr>
+            <th>المدخلة △</th>
+            {shown.map((x) => (
+              <td key={x}>{num(x)}</td>
+            ))}
+          </tr>
+          <tr>
+            <th>المخرجة □</th>
+            {shown.map((x) => (
+              <td key={x}>{num(x * times)}</td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+      {shown.length >= 3 && <MCQ q="ما القاعدة؟" options={options} answer={answer} award />}
+    </div>
+  );
+}
+
+/** بطاقات متتالية بينها أسهم: المدخلة ← القاعدة ← المخرجة */
+export function Flow({ items }: { items: { kind: Exclude<Kind, 'ink'>; cap: string; text: ReactNode }[] }) {
+  return (
+    <div className="row flow">
+      {items.map((it, i) => (
+        <span key={i} className="flowitem">
+          {i > 0 && <span className="flowarrow">←</span>}
+          <Card kind={it.kind} cap={it.cap}>
+            {it.text}
+          </Card>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** مثلثات من الأقلام في صف واحد */
+export function PencilTriangles({ n }: { n: number }) {
+  return (
+    <svg viewBox={`0 0 ${n * 100 + 20} 140`} className="pentri" role="img" aria-label={`${num(n)} مثلثات من الأقلام`}>
+      {Array.from({ length: n }, (_, i) => {
+        const x = n * 100 - i * 100;
+        return <polygon key={i} points={`${x},120 ${x - 80},120 ${x - 40},40`} fill="none" stroke="#2f3f9e" strokeWidth={9} strokeLinejoin="round" />;
+      })}
+    </svg>
+  );
+}
+
+/** آلة الدالة كما في الكتاب: مدخلة ← قاعدة الدالة ← مخرجة */
+export function FnMachine({ rule = 'قاعدةُ الدالَّةِ' }: { rule?: string }) {
+  return (
+    <div className="fnmach">
+      <div className="fncol">
+        <b className="fin">مُدخَلةٌ ▲</b>
+        <span>ابدأْ بعددٍ يُسمَّى المُدخَلةَ</span>
+      </div>
+      <span className="farrow">←</span>
+      <div className="fncol">
+        <b className="fbox">{rule}</b>
+        <span>أجْرِ عمليةً أوْ أكثرَ على المُدخَلةِ</span>
+      </div>
+      <span className="farrow">←</span>
+      <div className="fncol">
+        <b className="fout">مُخرَجةٌ ■</b>
+        <span>العددُ الجديدُ الَّذي ينتجُ يُسمَّى المُخرَجةَ</span>
+      </div>
+    </div>
   );
 }

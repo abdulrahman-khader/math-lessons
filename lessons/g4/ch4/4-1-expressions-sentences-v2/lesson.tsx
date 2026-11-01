@@ -1,28 +1,9 @@
-import type { ReactNode } from 'react';
 import {
-  Card, Cols, Counters, Ctrls, Eq, GoHomeButton, HBars, IfTeams, MCQ, Mark, MindMap, NextButton, QCard, QCol, QuestionSlide,
-  NumMark, Sentence, SlideHead, Solution, Stack, Step, Tag, TimerButton, Winner, defineLesson, type HlKey, type Token,
+  BookLabel, BookSource, Card, ChartQuestion, Cols, Counters, Ctrls, Definition, Eq, Examples, ExitTicket, GoHomeButton, Goals, Grid, HBars,
+  IfTeams, Intro, Lines, MCQ, Mark, MindMap, NextButton, NumberRow, NumMark, OpQuestion, QCol, QText, QuestionGroup, QuestionSlide,
+  Sentence, SlideHead, Solution, Stack, Step, StepRow, TimerButton, Verdict, Winner, WordList, defineLesson, missingOp as op,
 } from '@engine';
 import { IntroClip } from './clip';
-
-/** خانة العملية المفقودة (الدائرة الرمادية في الكتاب) */
-const op = (b: '+' | '−'): Token => ({ b, box: true });
-
-/** سؤال «أكتب العملية»: الجملة على شريط أبيض، ثم العملية في الدائرة كما في الكتاب، ثم التحقق تحتها */
-function OpQ({ n, t, check }: { n: number; t: Token[]; check: ReactNode }) {
-  return (
-    <QCard n={n} className="opq">
-      <div className="flines">
-        <div className="strip">
-          <Sentence t={t} />
-        </div>
-        <Step>
-          <span style={{ fontSize: '.72em', fontWeight: 700, color: 'var(--ex)' }}>{check}</span>
-        </Step>
-      </div>
-    </QCard>
-  );
-}
 
 /** المذاقات من الأعلى إلى الأسفل كما في الكتاب */
 const ICE = {
@@ -35,24 +16,6 @@ const ICE = {
   xTitle: 'عددُ المشاركينَ في التصويتِ',
   yTitle: 'المذاقاتُ',
 };
-
-/** سؤال من أسئلة المثلجات: نص السؤال، ثم الحل خطوة بخطوة مع إبراز الأعمدة */
-function IceQ({ n, q, steps }: { n: number; q: string; steps: { text: ReactNode; hl: HlKey[]; ans?: boolean }[] }) {
-  return (
-    <QCard n={n} className="iceq">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '.2em', paddingInlineStart: '1.6em' }}>
-        <p className="qtext" style={{ margin: 0, fontSize: '.8em' }}>{q}</p>
-        <Solution>
-          {steps.map((s, i) => (
-            <Step key={i} hl={s.hl} kind={s.ans ? 'ans' : undefined}>
-              {s.text}
-            </Step>
-          ))}
-        </Solution>
-      </div>
-    </QCard>
-  );
-}
 
 const READY = 'اسْتَعِدَّ، ص ١٠٧';
 const CHECK = 'تأكَّدْ، ص ١٠٨';
@@ -107,12 +70,14 @@ export default defineLesson({
               </Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أميّز العبارة العددية من الجملة العددية.</li>
-                <li>أكتب عبارة وجملة عددية تمثّلان مسألة.</li>
-                <li>أختار العملية (+ أو −) التي تجعل الجملة صحيحة.</li>
-                <li>أكتب جملة عددية من بيانات تمثيل بالأعمدة.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أميّز العبارة العددية من الجملة العددية.',
+                  'أكتب عبارة وجملة عددية تمثّلان مسألة.',
+                  'أختار العملية (+ أو −) التي تجعل الجملة صحيحة.',
+                  'أكتب جملة عددية من بيانات تمثيل بالأعمدة.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -146,7 +111,7 @@ export default defineLesson({
           <SlideHead tag={READY} kind="qs">تفاحات هند</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext">في السَّلَّةِ ١٦ تُفَّاحةً. أكلتْ منهَا هندُ ٣ تُفاحاتٍ. العِبارةُ <Eq>١٦ - ٣</Eq> تُمثِّلُ عددَ التُّفَّاحاتِ المُتبقِّيةِ.</p>
+              <QText>في السَّلَّةِ ١٦ تُفَّاحةً. أكلتْ منهَا هندُ ٣ تُفاحاتٍ. العِبارةُ <Eq>١٦ - ٣</Eq> تُمثِّلُ عددَ التُّفَّاحاتِ المُتبقِّيةِ.</QText>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
                 <Step hl={['n0']}><NumMark>١٦</NumMark> كُلُّ التُّفَّاحَاتِ.</Step>
@@ -170,18 +135,18 @@ export default defineLesson({
           <SlideHead tag="اكتشف بنفسك" kind="ex">ما الفرق بين المجموعتين؟</SlideHead>
           <Cols even>
             <Card kind="rule" cap="المجموعة الأولى">
-              <div className="flines" style={{ alignItems: 'center' }}>
+              <Lines>
                 <Sentence t={[8, '+', 6]} />
                 <Sentence t={[20, '−', 5]} />
                 <Sentence t={[3, '+', 4, '+', 1]} />
-              </div>
+              </Lines>
             </Card>
             <Card kind="qs" cap="المجموعة الثانية">
-              <div className="flines" style={{ alignItems: 'center' }}>
+              <Lines>
                 <Sentence t={[8, '+', 6, '=', 14]} />
                 <Sentence t={[20, '−', 5, '>', 10]} />
                 <Sentence t={[3, '+', 4, '+', 1, '<', 9]} />
-              </div>
+              </Lines>
             </Card>
           </Cols>
           <Ctrls><NextButton /></Ctrls>
@@ -197,22 +162,22 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="القاعدة، ص ١٠٧" kind="rule">العبارة العددية والجملة العددية</SlideHead>
-          <Card kind="rule" style={{ fontSize: '.95em', fontWeight: 700, lineHeight: 1.85 }}>
+          <Definition kind="rule">
             تَتَضمَّنُ <Mark>العِبارةُ العدديَّةُ</Mark> أعدادًا وعمليَّاتٍ، وتمثِّلُ كمِّيَّةً رياضيَّةً، ومنْ أمثلتِها:
-            <div className="row examples">
+            <Examples>
               <Sentence t={[5, '+', 7]} />
               <Sentence t={[3, '+', 2, '+', 5]} />
               <Sentence t={[12, '−', 8]} />
-            </div>
-          </Card>
-          <Card kind="qs" style={{ fontSize: '.95em', fontWeight: 700, lineHeight: 1.85 }}>
+            </Examples>
+          </Definition>
+          <Definition kind="qs">
             أمَّا <Mark>الجملةُ العدديَّةُ</Mark> فهيَ عِبارةٌ تتضمَّنُ أعدادًا وإحدَى الإشارَاتِ (= أوْ &gt; أوْ &lt;)، ومِن أمثلتِهَا:
-            <div className="row examples">
+            <Examples>
               <Sentence t={[5, '+', 7, '=', 12]} />
               <Sentence t={[2, '+', 5, '<', 10]} />
               <Sentence t={[12, '−', 8, '=', 4]} />
-            </div>
-          </Card>
+            </Examples>
+          </Definition>
         </>
       ),
     },
@@ -226,20 +191,20 @@ export default defineLesson({
           <SlideHead tag="مثال ١، أنا أعمل، ص ١٠٧" kind="ex">كتابة جملة عددية</SlideHead>
           <Cols>
             <QCol>
-              <p className="qtext"><b style={{ color: 'var(--ex)' }}>تفاحٌ:</b> اِستعمِلِ المعلُوماتِ المُوضَّحةَ علَى الرَّسمِ، وَاكْتُبْ عبارةً عددِيَّةً عَنِ التُّفَّاحِ الأحمرِ و التُّفَّاحِ الأخضرِ، ثُمَّ أُكتُبْ جملةً عددِيَّةً تُمثِّلُ عددَ التُّفَّاحِ في السَّلَّةِ.</p>
+              <QText><BookLabel>تفاحٌ:</BookLabel> اِستعمِلِ المعلُوماتِ المُوضَّحةَ علَى الرَّسمِ، وَاكْتُبْ عبارةً عددِيَّةً عَنِ التُّفَّاحِ الأحمرِ و التُّفَّاحِ الأخضرِ، ثُمَّ أُكتُبْ جملةً عددِيَّةً تُمثِّلُ عددَ التُّفَّاحِ في السَّلَّةِ.</QText>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
-                <div className="row" style={{ gap: 40 }}>
+                <StepRow>
                   <Step hl={['n0']}><NumMark>٥</NumMark> التُّفَّاحُ الْأَحْمَرُ</Step>
                   <Step hl={['n1']}><NumMark>٤</NumMark> التُّفَّاحُ الْأَخْضَرُ</Step>
-                </div>
+                </StepRow>
                 <Step kind="ans" label="الْعِبَارَةُ الْعَدَدِيَّةُ"><Eq>٥ + ٤</Eq></Step>
                 <Step kind="ans" label="الْجُمْلَةُ الْعَدَدِيَّةُ"><Eq>٥ + ٤ = ٩</Eq></Step>
               </Solution>
             </QCol>
             <Stack>
               <Card kind="ex" cap="تفاح">
-                <span style={{ fontWeight: 700 }}>أحمرُ ٥، أخضرُ ٤، أصفرُ ٦</span>
+                <b>أحمرُ ٥، أخضرُ ٤، أصفرُ ٦</b>
               </Card>
               <Counters groups={[{ n: 5, label: 'أَحْمَرُ ٥', color: '#d8342c' }, { n: 4, label: 'أَخْضَرُ ٤', color: '#2e9a4e' }]} max={90} />
             </Stack>
@@ -255,29 +220,29 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="مثال ٢، ص ١٠٨" kind="ex">كتابة جملة عددية</SlideHead>
-          <div className="qtext row" style={{ margin: 0, gap: '.4em' }}>
+          <QText inline>
             أيٌّ مِنَ العمليَّتَيْنِ (+ أمْ -) تجعلُ الجملةَ العدديَّةَ <Sentence t={[4, { b: '+', box: true, empty: true }, 3, '=', 7]} /> صحيحةً؟
-          </div>
+          </QText>
           <Ctrls><NextButton /></Ctrls>
           <Cols even>
             <Step>
               <Card kind="warn" cap="أجرّب الطرح">
                 <Counters groups={[{ n: 4 }]} crossed={3} max={56} />
-                <div className="flines" style={{ alignItems: 'center' }}>
+                <Lines>
                   <Sentence t={[4, '−', 3, '=', 7]} />
                   <Sentence t={[7, '=', 1]} />
-                  <b style={{ color: 'var(--bad)' }}>خطأٌ</b>
-                </div>
+                  <Verdict ok={false}>خطأٌ</Verdict>
+                </Lines>
               </Card>
             </Step>
             <Step>
               <Card kind="ex" cap="أجرّب الجمع">
                 <Counters groups={[{ n: 4 }, { n: 3 }]} max={56} />
-                <div className="flines" style={{ alignItems: 'center' }}>
+                <Lines>
                   <Sentence t={[4, '+', 3, '=', 7]} />
                   <Sentence t={[7, '=', 7]} />
-                  <b style={{ color: 'var(--good)' }}>صحيحٌ</b>
-                </div>
+                  <Verdict ok>صحيحٌ</Verdict>
+                </Lines>
               </Card>
             </Step>
           </Cols>
@@ -305,12 +270,12 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="نعمل معًا" kind="ex">عبارة أم جملة؟ وأيّ عملية؟</SlideHead>
-          <div className="qgrid two">
+          <Grid>
             <MCQ q={<>ما نوع <Eq>١٥ + ٩</Eq>؟</>} options={['عبارة عددية', 'جملة عددية']} answer="عبارة عددية" award why="صَحِيحٌ! لَا تُوجَدُ إِشَارَةُ =." whyNot="هَلْ فِيهَا إِشَارَةُ =؟" />
             <MCQ q={<>ما نوع <Eq>٣٠ − ١٠ = ٢٠</Eq>؟</>} options={['عبارة عددية', 'جملة عددية']} answer="جملة عددية" award why="صَحِيحٌ! فِيهَا إِشَارَةُ =." whyNot="لَيْسَتْ عِبَارَةً: فِيهَا إِشَارَةُ =." />
             <MCQ q={<>أيّ عملية تجعل <Eq>١٢ ○ ٥ = ٧</Eq> صحيحة؟</>} options={['+', '−']} answer="−" award why={<>صَحِيحٌ! <Eq>١٢ − ٥ = ٧</Eq></>} whyNot={<>نُجَرِّبُ: <Eq>١٢ + ٥ = ١٧</Eq>، وَلَيْسَتْ ٧.</>} />
             <MCQ q={<>أيّ عملية تجعل <Eq>٦ ○ ٨ &gt; ١٣</Eq> صحيحة؟</>} options={['+', '−']} answer="+" award why={<>صَحِيحٌ! <Eq>٦ + ٨ = ١٤</Eq>، وَ<Eq>١٤ &gt; ١٣</Eq></>} whyNot="نُجَرِّبُ: لَا نَسْتَطِيعُ طَرْحَ ٨ مِنْ ٦." />
-          </div>
+          </Grid>
         </>
       ),
     },
@@ -379,24 +344,14 @@ export default defineLesson({
       sec: 'check', min: 4,
       notes: 'كل طالب يجرّب العمليتين على السبورة الصغيرة. كل ضغطة تُظهر العملية ثم التحقق. في ٣ و٥: الجمع يعطي عددًا يساوي الطرف الآخر، والمطلوب «أصغر من»، فالجمع لا يصلح.',
       content: (
-        <>
-          <div className="row bookrow">
-            <Tag kind="qs">{CHECK}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{WHICH_OP}</p>
-          <div className="qgrid three" style={{ fontSize: '1.3em' }}>
-            <OpQ n={3} t={[9, op('−'), 2, '<', 11]} check={<><Eq>٩ − ٢ = ٧</Eq> و <Eq>٧ &lt; ١١</Eq></>} />
-            <OpQ n={4} t={[18, '=', 28, op('−'), 10]} check={<><Eq>٢٨ − ١٠ = ١٨</Eq></>} />
-            <OpQ n={5} t={[14, op('−'), 7, '<', 10, '+', 11]} check={<><Eq>١٤ − ٧ = ٧</Eq> و <Eq>٧ &lt; ٢١</Eq></>} />
-            <OpQ n={6} t={[18, op('−'), 9, '=', 9]} check={<><Eq>١٨ − ٩ = ٩</Eq></>} />
-            <OpQ n={7} t={[19, op('+'), 20, '>', 38]} check={<><Eq>١٩ + ٢٠ = ٣٩</Eq> و <Eq>٣٩ &gt; ٣٨</Eq></>} />
-            <OpQ n={8} t={[45, op('−'), 40, '=', 5]} check={<><Eq>٤٥ − ٤٠ = ٥</Eq></>} />
-          </div>
-          <Ctrls>
-            <NextButton label="الخطوة التالية" />
-            <TimerButton sec={180} />
-          </Ctrls>
-        </>
+        <QuestionGroup source={CHECK} instruction={WHICH_OP} cols={3} time={180}>
+            <OpQuestion n={3} t={[9, op('−'), 2, '<', 11]} check={<><Eq>٩ − ٢ = ٧</Eq> و <Eq>٧ &lt; ١١</Eq></>} />
+            <OpQuestion n={4} t={[18, '=', 28, op('−'), 10]} check={<><Eq>٢٨ − ١٠ = ١٨</Eq></>} />
+            <OpQuestion n={5} t={[14, op('−'), 7, '<', 10, '+', 11]} check={<><Eq>١٤ − ٧ = ٧</Eq> و <Eq>٧ &lt; ٢١</Eq></>} />
+            <OpQuestion n={6} t={[18, op('−'), 9, '=', 9]} check={<><Eq>١٨ − ٩ = ٩</Eq></>} />
+            <OpQuestion n={7} t={[19, op('+'), 20, '>', 38]} check={<><Eq>١٩ + ٢٠ = ٣٩</Eq> و <Eq>٣٩ &gt; ٣٨</Eq></>} />
+            <OpQuestion n={8} t={[45, op('−'), 40, '=', 5]} check={<><Eq>٤٥ − ٤٠ = ٥</Eq></>} />
+        </QuestionGroup>
       ),
     },
 
@@ -494,24 +449,14 @@ export default defineLesson({
       sec: 'practice', min: 3,
       notes: 'احسب الطرف المعلوم أولًا، ثم جرّب العمليتين. في ١٦ و١٧ و١٨ انتبه لاتجاه إشارة المقارنة.',
       content: (
-        <>
-          <div className="row bookrow">
-            <Tag kind="qs">{PRACTICE_109}</Tag>
-          </div>
-          <p className="qtext" style={{ margin: 0 }}>{WHICH_OP}</p>
-          <div className="qgrid two" style={{ fontSize: '1.05em' }}>
-            <OpQ n={13} t={[444, op('+'), 6, '=', 460, '−', 10]} check={<><Eq>٤٤٤ + ٦ = ٤٥٠</Eq> و <Eq>٤٦٠ − ١٠ = ٤٥٠</Eq></>} />
-            <OpQ n={14} t={[74, op('−'), 47, '=', 17, '+', 10]} check={<><Eq>٧٤ − ٤٧ = ٢٧</Eq> و <Eq>١٧ + ١٠ = ٢٧</Eq></>} />
-            <OpQ n={15} t={[125, '−', 27, '=', 23, op('+'), 75]} check={<><Eq>١٢٥ − ٢٧ = ٩٨</Eq> و <Eq>٢٣ + ٧٥ = ٩٨</Eq></>} />
-            <OpQ n={16} t={[345, '−', 126, '>', 217, op('−'), 4]} check={<><Eq>٣٤٥ − ١٢٦ = ٢١٩</Eq> و <Eq>٢١٧ − ٤ = ٢١٣</Eq></>} />
-            <OpQ n={17} t={[520, op('−'), 317, '<', 400, '+', 150]} check={<><Eq>٥٢٠ − ٣١٧ = ٢٠٣</Eq> و <Eq>٤٠٠ + ١٥٠ = ٥٥٠</Eq></>} />
-            <OpQ n={18} t={[715, '−', 617, '<', 25, op('+'), 75]} check={<><Eq>٧١٥ − ٦١٧ = ٩٨</Eq> و <Eq>٢٥ + ٧٥ = ١٠٠</Eq></>} />
-          </div>
-          <Ctrls>
-            <NextButton label="الخطوة التالية" />
-            <TimerButton sec={240} />
-          </Ctrls>
-        </>
+        <QuestionGroup source={PRACTICE_109} instruction={WHICH_OP} time={240}>
+            <OpQuestion n={13} t={[444, op('+'), 6, '=', 460, '−', 10]} check={<><Eq>٤٤٤ + ٦ = ٤٥٠</Eq> و <Eq>٤٦٠ − ١٠ = ٤٥٠</Eq></>} />
+            <OpQuestion n={14} t={[74, op('−'), 47, '=', 17, '+', 10]} check={<><Eq>٧٤ − ٤٧ = ٢٧</Eq> و <Eq>١٧ + ١٠ = ٢٧</Eq></>} />
+            <OpQuestion n={15} t={[125, '−', 27, '=', 23, op('+'), 75]} check={<><Eq>١٢٥ − ٢٧ = ٩٨</Eq> و <Eq>٢٣ + ٧٥ = ٩٨</Eq></>} />
+            <OpQuestion n={16} t={[345, '−', 126, '>', 217, op('−'), 4]} check={<><Eq>٣٤٥ − ١٢٦ = ٢١٩</Eq> و <Eq>٢١٧ − ٤ = ٢١٣</Eq></>} />
+            <OpQuestion n={17} t={[520, op('−'), 317, '<', 400, '+', 150]} check={<><Eq>٥٢٠ − ٣١٧ = ٢٠٣</Eq> و <Eq>٤٠٠ + ١٥٠ = ٥٥٠</Eq></>} />
+            <OpQuestion n={18} t={[715, '−', 617, '<', 25, op('+'), 75]} check={<><Eq>٧١٥ − ٦١٧ = ٩٨</Eq> و <Eq>٢٥ + ٧٥ = ١٠٠</Eq></>} />
+        </QuestionGroup>
       ),
     },
 
@@ -521,13 +466,11 @@ export default defineLesson({
       notes: 'اقرأ الأعداد عند أطراف الأعمدة. الأكثر تفضيلًا: أطول عمودين.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{LIFE}</Tag>
-          </div>
+          <BookSource>{LIFE}</BookSource>
           <Cols>
             <QCol>
-              <p className="intro">{ICE_INTRO}</p>
-              <IceQ
+              <Intro>{ICE_INTRO}</Intro>
+              <ChartQuestion
                 n={19}
                 q="مَا المذاقانِ الأكثرُ تَفْضيلًا ؟ أُكتُبْ جملةً عددِيَّةً تُعبِّرُ عنِ الفرقِ بينَ عَدَدَي الَّذِينَ يُفضِّلونَهُمَا."
                 steps={[
@@ -535,7 +478,7 @@ export default defineLesson({
                   { text: <><Eq>١٣٣ − ٩٧ = ٣٦</Eq></>, hl: [], ans: true },
                 ]}
               />
-              <IceQ
+              <ChartQuestion
                 n={20}
                 q="أُكتُبْ جملةً عددِيَّةً تُعبِّرُ عنْ مجموعِ الَّذِينَ يُفضِّلونَ مذاقَ الفَانِيليا والَّذِينَ يُفَضِّلونَ مذاقَ التُّوتِ."
                 steps={[
@@ -557,12 +500,10 @@ export default defineLesson({
       notes: 'في ٢٢ يجمع الطلاب خمسة أعداد: شجّع الجمع على مراحل وكتابة المجاميع الجزئية.',
       content: (
         <>
-          <div className="row bookrow">
-            <Tag kind="qs">{LIFE}</Tag>
-          </div>
+          <BookSource>{LIFE}</BookSource>
           <Cols>
             <QCol>
-              <IceQ
+              <ChartQuestion
                 n={21}
                 q="أُكتُبْ جملةً عددِيَّةً تُعبِّرُ عنِ الفرقِ بينَ عددِ الَّذِينَ يُفضِّلُونَ الفَانِيليا وعددِ الَّذِينَ يُفضِّلُونَ الفراوِلةَ."
                 steps={[
@@ -570,7 +511,7 @@ export default defineLesson({
                   { text: <><Eq>٨٨ − ٥١ = ٣٧</Eq></>, hl: [], ans: true },
                 ]}
               />
-              <IceQ
+              <ChartQuestion
                 n={22}
                 q="أُكتُبْ جملةً عددِيَّةً تُعبِّرُ عنْ مجموعِ كلِّ المشاركِينَ في التَّصويتِ."
                 steps={[
@@ -602,9 +543,7 @@ export default defineLesson({
           ]}
           chart={
             <Card kind="qs" cap="الأعداد">
-              <div className="row" style={{ justifyContent: 'space-around', fontSize: '1.6em', fontWeight: 800 }}>
-                <span>١٣</span><span>١٦</span><span>٢٩</span>
-              </div>
+              <NumberRow nums={[13, 16, 29]} />
             </Card>
           }
         />
@@ -641,7 +580,7 @@ export default defineLesson({
           ]}
           chart={
             <Card kind="ex" cap="كلمات تدل على الطرح">
-              <span style={{ fontWeight: 700, lineHeight: 1.9 }}>أنفق، أعطى، أكل، باع، بقي، تتبقّى، الفرق</span>
+              <WordList words={['أنفق', 'أعطى', 'أكل', 'باع', 'بقي', 'تتبقّى', 'الفرق']} />
             </Card>
           }
         />
@@ -673,11 +612,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">ثلاثة أسئلة</SlideHead>
-          <div className="ticket">
-            <Card kind="qs"><span className="lvl">١، سهل</span><MCQ q="أيّها جملة عددية؟" options={['٧ + ٨', '٧ + ٨ = ١٥', '١٥ − ٨']} answer="٧ + ٨ = ١٥" why="صَحِيحٌ! فِيهَا إِشَارَةُ =." whyNot="هَلْ فِيهَا إِشَارَةُ =؟" /></Card>
-            <Card kind="qs"><span className="lvl">٢، متوسط</span><MCQ q={<>أيّ عملية تجعل <Eq>٢٤ ○ ٦ = ١٨</Eq> صحيحة؟</>} options={['+', '−']} answer="−" why={<>صَحِيحٌ! <Eq>٢٤ − ٦ = ١٨</Eq></>} whyNot={<>نُجَرِّبُ: <Eq>٢٤ + ٦ = ٣٠</Eq></>} /></Card>
-            <Card kind="qs"><span className="lvl">٣، صعب</span><MCQ q="مع سعد ٥٠ ريالًا، اشترى كتابًا بـ ٣٥ ريالًا. أيّ جملة عددية تمثّل ما تبقّى معه؟" options={['٥٠ + ٣٥ = ٨٥', '٥٠ − ٣٥ = ١٥', '٣٥ − ١٥ = ٢٠']} answer="٥٠ − ٣٥ = ١٥" why="صَحِيحٌ! اشْتَرَى، فَنَطْرَحُ." whyNot="اشْتَرَى كِتَابًا: هَلْ زَادَ مَا مَعَهُ أَمْ نَقَصَ؟" /></Card>
-          </div>
+          <ExitTicket>
+            <MCQ q="أيّها جملة عددية؟" options={['٧ + ٨', '٧ + ٨ = ١٥', '١٥ − ٨']} answer="٧ + ٨ = ١٥" why="صَحِيحٌ! فِيهَا إِشَارَةُ =." whyNot="هَلْ فِيهَا إِشَارَةُ =؟" />
+            <MCQ q={<>أيّ عملية تجعل <Eq>٢٤ ○ ٦ = ١٨</Eq> صحيحة؟</>} options={['+', '−']} answer="−" why={<>صَحِيحٌ! <Eq>٢٤ − ٦ = ١٨</Eq></>} whyNot={<>نُجَرِّبُ: <Eq>٢٤ + ٦ = ٣٠</Eq></>} />
+            <MCQ q="مع سعد ٥٠ ريالًا، اشترى كتابًا بـ ٣٥ ريالًا. أيّ جملة عددية تمثّل ما تبقّى معه؟" options={['٥٠ + ٣٥ = ٨٥', '٥٠ − ٣٥ = ١٥', '٣٥ − ١٥ = ٢٠']} answer="٥٠ − ٣٥ = ١٥" why="صَحِيحٌ! اشْتَرَى، فَنَطْرَحُ." whyNot="اشْتَرَى كِتَابًا: هَلْ زَادَ مَا مَعَهُ أَمْ نَقَصَ؟" />
+          </ExitTicket>
         </>
       ),
     },

@@ -218,6 +218,17 @@ const pageOf = (source: string) => source.split(/[·،]/).map((x) => x.trim()).f
  * التصميم الجديد: رقم السؤال وصفحة الكتاب، ثم السؤال، ثم صناديق الإجابة ظاهرة من البداية.
  * لا أزرار على السبورة: الخطوات والتلميح والمؤقت من الجوال (أو المسافة وH ولوحة المفاتيح).
  */
+/** الخطوات مقسّمة: كل إجابتين متتاليتين أو أكثر معًا، وكل خطوة أخرى وحدها */
+function runs(steps: StepDef[]): [StepDef, number][][] {
+  const out: [StepDef, number][][] = [];
+  steps.forEach((s, i) => {
+    const last = out.at(-1);
+    if (s.kind === 'ans' && last && last[0][0].kind === 'ans') last.push([s, i]);
+    else out.push([[s, i]]);
+  });
+  return out;
+}
+
 function QuestionV2({ source, n, tags, intro, question, long, hint, steps, chart, children }: Omit<Props, 'time'>) {
   return (
     <>
@@ -241,11 +252,24 @@ function QuestionV2({ source, n, tags, intro, question, long, hint, steps, chart
           {hint && <Hint>{hint}</Hint>}
           {steps.length > 0 && (
             <Solution>
-              {steps.map((s, i) => (
-                <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
-                  {s.text}
-                </Step>
-              ))}
+              {/* إجابتان متتاليتان (العبارة والجملة مثلًا) في صف واحد حين يتسع */}
+              {runs(steps).map((r, k) =>
+                r.length > 1 ? (
+                  <div key={k} className="ansrow">
+                    {r.map(([s, i]) => (
+                      <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
+                        {s.text}
+                      </Step>
+                    ))}
+                  </div>
+                ) : (
+                  r.map(([s, i]) => (
+                    <Step key={i} hl={s.hl} kind={s.kind} label={s.label}>
+                      {s.text}
+                    </Step>
+                  ))
+                ),
+              )}
             </Solution>
           )}
         </QCol>

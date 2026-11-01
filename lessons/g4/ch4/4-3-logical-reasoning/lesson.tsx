@@ -1,126 +1,26 @@
-import { useState } from 'react';
 import {
-  Card, Cols, Ctrls, Eq, GoHomeButton, IfTeams, MCQ, Mark, MindMap, NextButton, QCol, QuestionSlide, SlideHead, Solution, Stack, Step,
-  Winner, defineLesson,
+  Card, Cols, CubeFace, Heights, Lines, OrderPuzzle, OrderRows, QText, Ctrls, Eq, ExitTicket, Goals, GoHomeButton, IfTeams, Mark, MCQ, MindMap, NextButton, QCol, QuestionSlide, SlideHead,
+  Solution, Stack, Step, Winner, defineLesson,
 } from '@engine';
 import { IntroClip } from './clip';
 
-/* ---------- جدول الترتيب كما في الكتاب: كل معلومة سطر، الأطول يمينًا والأقصر يسارًا ---------- */
-
-function OrderRows({ rows, head = ['الأطولُ', 'الأقصرُ'] }: { rows: { clue: string; order: string[] }[]; head?: [string, string] }) {
-  return (
-    <div className="orows">
-      <div className="orow ohead">
-        <span />
-        <span className="oends">
-          <b>{head[0]}</b>
-          <b>{head[1]}</b>
-        </span>
-      </div>
-      {rows.map((r, i) => (
-        <Step key={i}>
-          <div className="orow">
-            <span className="oclue">{r.clue}</span>
-            <span className="oletters">
-              {r.order.map((x) => (
-                <b key={x}>{x}</b>
-              ))}
-            </span>
-          </div>
-        </Step>
-      ))}
-    </div>
-  );
-}
-
-/** أعمدة بأطوال مختلفة تحت كل منها اسم، الأطول يمينًا */
-function Heights({ names, colors }: { names: string[]; colors?: string[] }) {
-  const n = names.length;
-  return (
-    <svg viewBox={`0 0 ${n * 110} 300`} className="heights" role="img" aria-label={names.join('، ')}>
-      {names.map((name, i) => {
-        const h = 240 - i * (160 / Math.max(1, n - 1));
-        const x = (n - 1 - i) * 110 + 20;
-        return (
-          <g key={name}>
-            <rect x={x} y={260 - h} width={70} height={h} rx={10} fill={colors?.[i] ?? '#4f9be0'} stroke="#13213b" strokeWidth={3} />
-            <text x={x + 35} y={292} textAnchor="middle" fontSize={26} fontWeight={800} fill="#13213b">
-              {name}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-/** لعبة ترتيب: يضغط الطالب الأسماء بالترتيب من الأطول، ثم «تحقق» */
-function OrderPuzzle({ names, answer, clues }: { names: string[]; answer: string[]; clues: string[] }) {
-  const [pick, setPick] = useState<string[]>([]);
-  const [checked, setChecked] = useState(false);
-  const ok = checked && pick.join('،') === answer.join('،');
-  return (
-    <div className="opuzzle">
-      <Card kind="qs" cap="المعطيات">
-        <ul style={{ margin: 0, paddingInlineStart: '1.2em', lineHeight: 1.8, fontWeight: 700 }}>
-          {clues.map((c) => (
-            <li key={c}>{c}</li>
-          ))}
-        </ul>
-      </Card>
-      <p style={{ margin: 0, fontWeight: 700 }}>اضغط الأسماء بالترتيب من الأطول إلى الأقصر:</p>
-      <div className="row" style={{ gap: '.5em' }}>
-        {names.map((x) => (
-          <button key={x} className="btn" disabled={pick.includes(x)} onClick={() => (setPick((p) => [...p, x]), setChecked(false))}>
-            {x}
-          </button>
-        ))}
-      </div>
-      <div className="oslots">
-        {answer.map((_, i) => (
-          <span key={i} className={'oslot' + (checked ? (pick[i] === answer[i] ? ' good' : ' bad') : '')}>
-            {pick[i] ?? '…'}
-          </span>
-        ))}
-      </div>
-      <div className="row" style={{ gap: '.5em' }}>
-        <button className="btn primary" disabled={pick.length < answer.length} onClick={() => setChecked(true)}>
-          تحقّق
-        </button>
-        <button className="btn hide" onClick={() => (setPick([]), setChecked(false))}>
-          من جديد
-        </button>
-        {checked && <b style={{ color: ok ? 'var(--good)' : 'var(--bad)' }}>{ok ? 'أحسنت! الترتيب صحيح' : 'راجع المعطيات وحاول مرة أخرى'}</b>}
-      </div>
-    </div>
-  );
-}
-
-/** وجه المكعب في السؤال ٨: ٣ × ٣ والمربع الأوسط أحمر */
-const CubeFace = () => (
-  <svg viewBox="0 0 300 300" style={{ width: '9em', alignSelf: 'center' }} role="img" aria-label="وجه مكعب: ٨ مربعات زرقاء ومربع أحمر في الوسط">
-    {Array.from({ length: 9 }, (_, i) => (
-      <rect key={i} x={(i % 3) * 100} y={Math.floor(i / 3) * 100} width={100} height={100} fill={i === 4 ? '#e8372b' : '#6aaee6'} stroke="#13213b" strokeWidth={6} />
-    ))}
-  </svg>
-);
-
 const PROBLEM = 'يضعُ خمسةٌ منْ طُلَّابِ الفصلِ قُصاصاتِ الورقِ في سلَّةِ المُهمَلاتِ، وقدْ اصْطَفُّوا بعضُهُمْ خلفَ بعضٍ مبتدئِينَ بالأطولِ. فإذَا كان عبدُاللهِ أطولَ مِن بدرٍ، وأقصرَ مِن فهدٍ. وكانَ محمدٌ أقصرَ مِن سُعودٍ، وأطولَ مِن فهدٍ. فمَا التَّرتيبُ الَّذِي اصطفُّوا بهِ؟';
-const ANALYZE = 'حَلِّلِ الخُطَّةَ · ص ١١٥';
-const PRACTICE = 'تَدَرَّبْ عَلَى الخُطَّةِ · ص ١١٥';
+const ANALYZE = 'حَلِّلِ الخُطَّةَ، ص ١١٥';
+const PRACTICE = 'تَدَرَّبْ عَلَى الخُطَّةِ، ص ١١٥';
 const ANALYZE_INTRO = 'ارجعْ إلى المسألةِ السابقةِ، ثُمَّ أَجِبْ عنِ الأسئلةِ ١ - ٤ :';
 const PRACTICE_INTRO = 'اِستعمِلْ خُطَّةَ الاستدلالِ المنطقيِّ لحلِّ المسائلِ التَّاليَةِ:';
 
 export default defineLesson({
   meta: {
     id: 'g4-4-3-logical-reasoning',
+    design: 'v2',
     code: '٤-٣',
     title: 'خُطَّةُ حَلِّ الْمَسْأَلَةِ: الاستدلالُ المنطقيُّ',
     shortTitle: 'خطة حل المسألة: الاستدلال المنطقي',
     subject: 'الرياضيات',
     grade: 'الصف الرابع الابتدائي',
     chapter: 'الفصل الرابع: الأنماط والجبر',
-    source: 'الجزء الأول · ص ١١٤–١١٥',
+    source: 'الجزء الأول، ص ١١٤–١١٥',
     minutes: 45,
     idea: 'أَستعملُ خطَّةَ الاستدلالِ المنطقيِّ لأحلَّ المسألةَ.',
     bookQuestions: 11,
@@ -128,11 +28,11 @@ export default defineLesson({
   sectionDesc: {
     engage: 'من الأطول؟',
     explore: 'لعبة الترتيب',
-    explain: 'افهم · خطط · حل · تحقق',
+    explain: 'افهم، خطط، حل، تحقق',
     elab: 'نعمل معًا',
     check: 'حلل الخطة ١–٤',
     practice: 'تدرب على الخطة ٥–١١',
-    close: 'ملخص · تذكرة الخروج',
+    close: 'ملخص، تذكرة الخروج',
   },
   slides: [
     /* ================= الأهداف ================= */
@@ -145,15 +45,17 @@ export default defineLesson({
           <Cols even>
             <Stack>
               <Card kind="rule" cap="فكرة الدرس">أَستعملُ خطَّةَ الاستدلالِ المنطقيِّ لأحلَّ المسألةَ.</Card>
-              <Card kind="rule" cap="خطوات حل المسألة"><Mark>افْهَمْ · خَطِّطْ · حُلَّ · تَحَقَّقْ</Mark></Card>
+              <Card kind="rule" cap="خطوات حل المسألة"><Mark>افْهَمْ، خَطِّطْ، حُلَّ، تَحَقَّقْ</Mark></Card>
             </Stack>
             <Card kind="ex" cap="في نهاية الدرس أستطيع أن…">
-              <ol style={{ margin: 0, paddingInlineStart: '1.2em', fontWeight: 700, fontSize: '.9em', lineHeight: 1.7 }}>
-                <li>أستخرج المعطيات والمطلوب من المسألة.</li>
-                <li>أرتّب أشياء من معلومات مثل «أطول من» و«أقصر من».</li>
-                <li>أبدأ من النهاية عندما أعرف النتيجة.</li>
-                <li>أتحقق أن الحل يتفق مع كل المعطيات.</li>
-              </ol>
+              <Goals
+                items={[
+                  'أستخرج المعطيات والمطلوب من المسألة.',
+                  'أرتّب أشياء من معلومات مثل «أطول من» و«أقصر من».',
+                  'أبدأ من النهاية عندما أعرف النتيجة.',
+                  'أتحقق أن الحل يتفق مع كل المعطيات.',
+                ]}
+              />
             </Card>
           </Cols>
         </>
@@ -163,7 +65,7 @@ export default defineLesson({
     /* ================= تهيئة ================= */
     {
       sec: 'engage', min: 2,
-      notes: 'لغز سريع قبل الدرس. لا تشرح الطريقة؛ اجمع إجابات وتعليلات الطلاب فقط.',
+      notes: 'لغز سريع قبل الدرس. لا تشرح الطريقة؛ اجمع إجابات وتعليلات الطلاب فقط. ثم اسأل: لم يقل أحد إن ريان أطول من مازن، كيف عرفنا؟',
       content: (
         <>
           <SlideHead tag="لغز" kind="qs">من الأطول؟</SlideHead>
@@ -172,7 +74,6 @@ export default defineLesson({
               <Card kind="qs">ريان أطول من زياد، وزياد أطول من مازن.</Card>
               <MCQ q="من الأطول بين الثلاثة؟" options={['زياد', 'مازن', 'ريان']} answer="ريان" award />
               <MCQ q="ومن الأقصر؟" options={['مازن', 'ريان', 'زياد']} answer="مازن" award />
-              <Card kind="ex" cap="سؤال للتفكير">لم يقل أحد إن ريان أطول من مازن. كيف عرفنا؟</Card>
             </QCol>
             <Heights names={['ريان', 'زياد', 'مازن']} colors={['#e8635a', '#4f9be0', '#4fae3a']} />
           </Cols>
@@ -198,33 +99,43 @@ export default defineLesson({
 
     /* ================= خطة حل المسألة ================= */
     {
-      sec: 'explain', min: 6,
-      notes: 'أنا أعمل: نفّذ الخطوات الأربع كما في الكتاب. في «حُلَّ» يظهر سطر لكل معلومة: نضع الحرف الجديد في مكانه دون أن نغيّر ما قبله.',
+      sec: 'explain', min: 2,
+      notes: 'أنا أعمل: اقرأ المسألة، ثم «افهم» و«خطّط» كما في الكتاب.',
       content: (
         <>
-          <SlideHead tag="خُطَّةُ حَلِّ المسألةِ · ص ١١٤" kind="ex">افهم · خطّط · حلّ · تحقّق</SlideHead>
-          <p className="qtext" style={{ margin: 0, fontSize: '.82em' }}>{PROBLEM}</p>
-          <Cols style={{ gridTemplateColumns: '1fr 1.1fr' }}>
+          <SlideHead tag="خُطَّةُ حَلِّ المسألةِ، ص ١١٤" kind="ex">افهم، خطّط</SlideHead>
+          <QText long>{PROBLEM}</QText>
+          <Ctrls><NextButton /></Ctrls>
+          <Solution>
+            <Step><b>افْهَمْ:</b> المعطيات: عبدُالله أطولُ مِن بدرٍ، وأقصرُ مِن فهدٍ. محمدٌ أقصرُ مِن سُعودٍ، وأطولُ مِن فهدٍ. المطلوب: تحديدُ التَّرتيبِ الَّذِي اصطفَّ بِهِ الأصدقاءُ الخمسةُ.</Step>
+            <Step><b>خَطِّطْ:</b> ابدأْ باستعمالِ المعلوماتِ المنطقيةِ المعطاةِ لتتوصّلَ إلى الترتيبِ المطلوبِ.</Step>
+          </Solution>
+        </>
+      ),
+    },
+    {
+      sec: 'explain', min: 4,
+      notes: 'في «حُلَّ» يظهر سطر لكل معلومة: نضع الحرف الجديد في مكانه دون أن نغيّر ما قبله.',
+      content: (
+        <>
+          <SlideHead tag="خُطَّةُ حَلِّ المسألةِ، ص ١١٤" kind="ex">حلّ، تحقّق</SlideHead>
+          <Cols>
             <QCol>
               <Ctrls><NextButton /></Ctrls>
               <Solution>
-                <Step><b>افْهَمْ:</b> المعطيات: عبدُالله أطولُ مِن بدرٍ، وأقصرُ مِن فهدٍ. محمدٌ أقصرُ مِن سُعودٍ، وأطولُ مِن فهدٍ. المطلوب: تحديدُ التَّرتيبِ الَّذِي اصطفَّ بِهِ الأصدقاءُ الخمسةُ.</Step>
-                <Step><b>خَطِّطْ:</b> ابدأْ باستعمالِ المعلوماتِ المنطقيةِ المعطاةِ لتتوصّلَ إلى الترتيبِ المطلوبِ.</Step>
                 <Step><b>حُلَّ:</b> اِستعمِلْ مُعطياتِ المسألةِ لتُرَتِّبَ الأصدقاءَ، حيثُ تبدأُ باستعمالِ المعلوماتِ المَنطِقيَّةِ.</Step>
+                <Step kind="ans" label="التَّرْتِيبُ">سُعُودٌ، مُحَمَّدٌ، فَهْدٌ، عَبْدُ اللَّهِ، بَدْرٌ</Step>
+                <Step><b>تَحَقَّقْ:</b> راجعِ الحلَّ، سَتجِدُهُ يتَّفِقُ منطقِيًّا مع معطياتِ المسألةِ.</Step>
               </Solution>
             </QCol>
-            <Stack>
-              <OrderRows
-                rows={[
-                  { clue: 'عبدُاللهِ أطولُ من بدرٍ', order: ['ع', 'ب'] },
-                  { clue: 'عبدُاللهِ أقصرُ من فهدٍ', order: ['ف', 'ع', 'ب'] },
-                  { clue: 'محمدٌ أطولُ من فهدٍ', order: ['م', 'ف', 'ع', 'ب'] },
-                  { clue: 'محمدٌ أقصرُ من سُعودٍ', order: ['س', 'م', 'ف', 'ع', 'ب'] },
-                ]}
-              />
-              <Step kind="ans">إِذَنِ التَّرتيبُ هوَ: سُعودٌ، محمدٌ، فهدٌ، عبدُاللهِ، بدرٌ.</Step>
-              <Step><b>تَحَقَّقْ:</b> راجعِ الحلَّ، سَتجِدُهُ يتَّفِقُ منطقِيًّا مع معطياتِ المسألةِ.</Step>
-            </Stack>
+            <OrderRows
+              rows={[
+                { clue: 'عبدُاللهِ أطولُ من بدرٍ', order: ['ع', 'ب'] },
+                { clue: 'عبدُاللهِ أقصرُ من فهدٍ', order: ['ف', 'ع', 'ب'] },
+                { clue: 'محمدٌ أطولُ من فهدٍ', order: ['م', 'ف', 'ع', 'ب'] },
+                { clue: 'محمدٌ أقصرُ من سُعودٍ', order: ['س', 'م', 'ف', 'ع', 'ب'] },
+              ]}
+            />
           </Cols>
         </>
       ),
@@ -285,9 +196,9 @@ export default defineLesson({
           hint="احذف معلومة واحدة، وحاول أن ترتّب الخمسة."
           steps={[
             { text: 'لو حذفنا «محمدٌ أقصرُ من سعودٍ» لما عرفنا مكان سعود: قد يكون أولًا أو في أي مكان آخر.' },
-            { text: 'نعم؛ فبنقصِ أيِّ معطًى لا نستطيعُ تحديدَ ترتيبٍ واحدٍ، ويصبحُ أكثرُ من ترتيبٍ ممكنًا.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'نَعَمْ، يُصْبِحُ أَكْثَرُ مِنْ تَرْتِيبٍ مُمْكِنًا.', kind: 'ans' },
           ]}
-          chart={<Card kind="qs" cap="المسألة"><p style={{ margin: 0, fontSize: '.8em', lineHeight: 1.8 }}>{PROBLEM}</p></Card>}
+          chart={<Card kind="qs" cap="المسألة">{PROBLEM}</Card>}
         />
       ),
     },
@@ -301,7 +212,7 @@ export default defineLesson({
           hint="ما نوع المعلومات في المسألة: أعداد أم مقارنات؟"
           steps={[
             { text: 'المعطياتُ مقارناتٌ منطقيةٌ (أطولُ / أقصرُ) وليست أعدادًا.' },
-            { text: 'فالاستدلالُ المنطقيُّ يرتّبهم خطوةً خطوةً، كلُّ معلومةٍ تضعُ شخصًا في مكانه.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'كُلُّ مَعْلُومَةٍ تَضَعُ شَخْصًا فِي مَكَانِهِ.', kind: 'ans' },
           ]}
           chart={
             <OrderRows
@@ -324,7 +235,7 @@ export default defineLesson({
           hint="ابدأ ببدر: هو الأطول، فهو أولًا."
           steps={[
             { text: 'بدرٌ أطولُهم فهو الأول، ثم نرتّب الباقين سطرًا بعد سطر.' },
-            { text: 'من الأطول إلى الأقصر: بدرٌ، عبدُاللهِ، فهدٌ، سعودٌ، محمدٌ.', kind: 'ans' },
+            { label: 'مِنَ الْأَطْوَلِ إِلَى الْأَقْصَرِ', text: 'بَدْرٌ، عَبْدُ اللَّهِ، فَهْدٌ، سُعُودٌ، مُحَمَّدٌ', kind: 'ans' },
           ]}
           chart={
             <Stack>
@@ -351,7 +262,7 @@ export default defineLesson({
           hint="هل يمكن أن نرسم؟ هل يمكن أن نخمّن ثم نتحقق؟"
           steps={[
             { text: 'نعم، مثلًا: التمثيلُ بالرسمِ بأعمدةٍ متدرجةِ الطولِ، أو التخمينُ والتحققُ.' },
-            { text: 'لكنَّ الاستدلالَ المنطقيَّ أسرعُ؛ لأنه يضعُ كلَّ شخصٍ في مكانه مباشرةً.', kind: 'ans' },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'نَعَمْ، التَّمْثِيلُ بِالرَّسْمِ أَوِ التَّخْمِينُ وَالتَّحَقُّقُ.', kind: 'ans' },
           ]}
           chart={<Heights names={['سعود', 'محمد', 'فهد', 'عبدالله', 'بدر']} colors={['#e8635a', '#f28a1d', '#f6c21c', '#4fae3a', '#4f9be0']} />}
         />
@@ -371,15 +282,16 @@ export default defineLesson({
           steps={[
             { text: <>نرجع عن هدية الوالد: <Eq>٨ − ٤ = ٤</Eq></> },
             { text: <>نرجع عن ما أعطته أخاها: <Eq>٤ + ٢ = ٦</Eq></> },
-            { text: <>كان معها ٦ ريالات. تحقّق: <Eq>٦ + ٤ − ٢ = ٨</Eq></>, kind: 'ans' },
+            { text: <>نَتَحَقَّقُ: <Eq>٦ + ٤ − ٢ = ٨</Eq></> },
+            { label: 'كَانَ مَعَهَا', text: '٦ رِيَالَاتٍ', kind: 'ans' },
           ]}
           chart={
             <Card kind="ex" cap="من النهاية إلى البداية">
-              <div className="flines" style={{ alignItems: 'center', fontSize: '1.1em', fontWeight: 800 }}>
+              <Lines>
                 <span>الآن: ٨</span>
                 <span>↑ ونعكس كل خطوة</span>
                 <span>البداية: ؟</span>
-              </div>
+              </Lines>
             </Card>
           }
         />
@@ -396,14 +308,14 @@ export default defineLesson({
           steps={[
             { text: <><Eq>٤٠٠ − ٦ = ٣٩٤</Eq></> },
             { text: <><Eq>٣٩٤ − ٨٠ = ٣١٤</Eq> ، <Eq>٣١٤ − ٦٠ = ٢٥٤</Eq></> },
-            { text: <>بقِيَ <Eq>٢٥٤</Eq> مترًا.</>, kind: 'ans' },
+            { label: 'الْبَاقِي', text: '٢٥٤ مِتْرًا', kind: 'ans' },
           ]}
           chart={
             <Card kind="ex" cap="المضمار ٤٠٠ متر">
-              <div className="flines" style={{ alignItems: 'center', fontSize: '1.1em', fontWeight: 800 }}>
+              <Lines>
                 <span>٦ م + ٨٠ م + ٦٠ م قطعها</span>
                 <span>والباقي = ؟</span>
-              </div>
+              </Lines>
             </Card>
           }
         />
@@ -415,21 +327,21 @@ export default defineLesson({
       content: (
         <QuestionSlide
           source={PRACTICE} n={7} time={90}
-          question="رِكبَ ٥ أشخاصٍ الحافلة في المحطَّةِ الأُولى. وفِي المحطَّةِ الثَّانيةِ ركِبَ ٤ أشخاصٍ ونزلَ شخصانِ. وفي المحطَّةِ الثَّالثةِ رَكِبَ ٥ أشخاصٍ. وفي المحطَّةِ قبل الأخيرةِ رَكِبَ شخصٌ واحدٌ ونزلَ ٤ أشخاصٍ، فكم شخصًا أصبحَ في الحافلةِ؟"
+          long question="رِكبَ ٥ أشخاصٍ الحافلة في المحطَّةِ الأُولى. وفِي المحطَّةِ الثَّانيةِ ركِبَ ٤ أشخاصٍ ونزلَ شخصانِ. وفي المحطَّةِ الثَّالثةِ رَكِبَ ٥ أشخاصٍ. وفي المحطَّةِ قبل الأخيرةِ رَكِبَ شخصٌ واحدٌ ونزلَ ٤ أشخاصٍ، فكم شخصًا أصبحَ في الحافلةِ؟"
           hint="ركب = نضيف، نزل = نطرح. تابع محطة بمحطة."
           steps={[
-            { text: <>الأولى: ٥ · الثانية: <Eq>٥ + ٤ − ٢ = ٧</Eq></> },
-            { text: <>الثالثة: <Eq>٧ + ٥ = ١٢</Eq> · قبل الأخيرة: <Eq>١٢ + ١ − ٤ = ٩</Eq></> },
-            { text: 'أصبحَ في الحافلةِ ٩ أشخاصٍ.', kind: 'ans' },
+            { text: <>الأولى: ٥، الثانية: <Eq>٥ + ٤ − ٢ = ٧</Eq></> },
+            { text: <>الثالثة: <Eq>٧ + ٥ = ١٢</Eq>، قبل الأخيرة: <Eq>١٢ + ١ − ٤ = ٩</Eq></> },
+            { label: 'فِي الْحَافِلَةِ', text: '٩ أَشْخَاصٍ', kind: 'ans' },
           ]}
           chart={
             <Card kind="ex" cap="الركاب">
-              <div className="flines" style={{ fontWeight: 700, lineHeight: 1.8 }}>
+              <Lines>
                 <span>المحطة ١: ركب ٥</span>
                 <span>المحطة ٢: ركب ٤، نزل ٢</span>
                 <span>المحطة ٣: ركب ٥</span>
                 <span>قبل الأخيرة: ركب ١، نزل ٤</span>
-              </div>
+              </Lines>
             </Card>
           }
         />
@@ -446,7 +358,7 @@ export default defineLesson({
           steps={[
             { text: 'في كل وجه ٩ مربعات، منها مربع أحمر واحد: ٨ مربعات زرقاء.' },
             { text: <>للمكعب ٦ أوجه: <Eq>٨ + ٨ + ٨ + ٨ + ٨ + ٨ = ٤٨</Eq></> },
-            { text: '٤٨ مربعًا أزرق.', kind: 'ans' },
+            { label: 'الْمُرَبَّعَاتُ الزَّرْقَاءُ', text: '٤٨ مُرَبَّعًا', kind: 'ans' },
           ]}
           chart={<CubeFace />}
         />
@@ -461,18 +373,18 @@ export default defineLesson({
           question="يَهْوَى كُلٌّ مِن عليٍّ وعمرَ لعبَ كُرةِ القدمِ، وكُرةِ تنسِ الطَّاوِلةِ، والسِّباحةِ. فكمْ ترتِيبًا لِتلْكَ الألعابِ يمكنُهما القيامُ بِهِ؟"
           hint="اختر اللعبة الأولى، ثم كم خيارًا يبقى للثانية؟"
           steps={[
-            { text: 'القدمُ أولًا: قدم، تنس، سباحة · قدم، سباحة، تنس' },
-            { text: 'التنسُ أولًا: تنس، قدم، سباحة · تنس، سباحة، قدم' },
-            { text: 'السباحةُ أولًا: سباحة، قدم، تنس · سباحة، تنس، قدم' },
-            { text: '٦ ترتيبات.', kind: 'ans' },
+            { text: 'القدمُ أولًا: قدم، تنس، سباحة، قدم، سباحة، تنس' },
+            { text: 'التنسُ أولًا: تنس، قدم، سباحة، تنس، سباحة، قدم' },
+            { text: 'السباحةُ أولًا: سباحة، قدم، تنس، سباحة، تنس، قدم' },
+            { label: 'عَدَدُ التَّرْتِيبَاتِ', text: '٦ تَرْتِيبَاتٍ', kind: 'ans' },
           ]}
           chart={
             <Card kind="ex" cap="الألعاب">
-              <div className="flines" style={{ alignItems: 'center', fontSize: '1.2em', fontWeight: 800 }}>
+              <Lines>
                 <span>⚽ كرة القدم</span>
                 <span>🏓 تنس الطاولة</span>
                 <span>🏊 السباحة</span>
-              </div>
+              </Lines>
             </Card>
           }
         />
@@ -489,13 +401,15 @@ export default defineLesson({
           steps={[
             { text: <>الباقي: <Eq>١٠ − ٤ = ٦</Eq> سمكات.</> },
             { text: <>ثلاثة أعداد مختلفة مجموعها ٦: <Eq>١ + ٢ + ٣ = ٦</Eq></> },
-            { text: 'بقيت سمكة في حوض، وسمكتان في الثاني، و٣ في الثالث.', kind: 'ans' },
+            { label: 'فِي الْأَحْوَاضِ', text: '١ وَ٢ وَ٣ سَمَكَاتٍ', kind: 'ans' },
           ]}
           chart={
             <Card kind="ex" cap="الأحواض الثلاثة">
-              <div className="row" style={{ justifyContent: 'space-around', fontSize: '1.5em' }}>
-                <span>🐟</span><span>🐟🐟</span><span>🐟🐟🐟</span>
-              </div>
+              <Lines>
+                <span>🐟</span>
+                <span>🐟🐟</span>
+                <span>🐟🐟🐟</span>
+              </Lines>
             </Card>
           }
         />
@@ -510,8 +424,8 @@ export default defineLesson({
           question="كيفَ يمكنُكَ حلُّ المسألةِ رَقْمِ ١٠ باستعمالِ خُطَّةِ الاستدلالِ المنطقيِّ؟"
           hint="ما أول شيء نعرفه؟ وما الشرط الذي يحدد الأعداد؟"
           steps={[
-            { text: <>أطرحُ المباعَ: <Eq>١٠ − ٤ = ٦</Eq></> },
-            { text: 'ثم أبحثُ عن ثلاثةِ أعدادٍ مختلفةٍ (ليس فيها صفر) مجموعُها ٦، فلا يصحُّ إلا ١ و٢ و٣.', kind: 'ans' },
+            { text: <>نَطْرَحُ الْمَبِيعَ: <Eq>١٠ − ٤ = ٦</Eq></> },
+            { label: 'إِجَابَةٌ مُقْتَرَحَةٌ', text: 'نَبْحَثُ عَنْ ٣ أَعْدَادٍ مُخْتَلِفَةٍ مَجْمُوعُهَا ٦.', kind: 'ans' },
           ]}
           chart={<Card kind="rule" cap="الشرط">أعداد <b>مختلفة</b> في كل حوض، ومجموعها ٦.</Card>}
         />
@@ -524,7 +438,7 @@ export default defineLesson({
       notes: 'اطلب من الطلاب إكمال كل فرع شفهيًا قبل أن تشير إليه.',
       content: (
         <>
-          <SlideHead tag="ملخص الدرس" kind="rule">خريطة ذهنية</SlideHead>
+          <SlideHead tag="أهمّ الأفكار" kind="rule">ملخص الدرس</SlideHead>
           <MindMap
             center={<>الاستدلال<br />المنطقي</>}
             items={[
@@ -543,11 +457,11 @@ export default defineLesson({
       content: (
         <>
           <SlideHead tag="تذكرة الخروج" kind="qs">ثلاثة أسئلة</SlideHead>
-          <div className="ticket">
-            <Card kind="qs"><span className="lvl">١ · سهل</span><MCQ q="سلطان أطول من ماجد، وماجد أطول من ناصر. من الأقصر؟" options={['سلطان', 'ماجد', 'ناصر']} answer="ناصر" /></Card>
-            <Card kind="qs"><span className="lvl">٢ · متوسط</span><MCQ q="مع هند الآن ١٠ ريالات بعد أن أعطتها أمها ٣ ريالات. كم كان معها قبل ذلك؟" options={['١٣', '٧', '١٠']} answer="٧" /></Card>
-            <Card kind="qs"><span className="lvl">٣ · صعب</span><MCQ q="وصل فهد قبل بدر، ووصل علي بعد بدر، ووصل سعد قبل فهد. من وصل ثانيًا؟" options={['سعد', 'فهد', 'بدر', 'علي']} answer="فهد" /></Card>
-          </div>
+          <ExitTicket>
+            <MCQ q="سلطان أطول من ماجد، وماجد أطول من ناصر. من الأقصر؟" options={['سلطان', 'ماجد', 'ناصر']} answer="ناصر" />
+            <MCQ q="مع هند الآن ١٠ ريالات بعد أن أعطتها أمها ٣ ريالات. كم كان معها قبل ذلك؟" options={['١٣', '٧', '١٠']} answer="٧" />
+            <MCQ q="وصل فهد قبل بدر، ووصل علي بعد بدر، ووصل سعد قبل فهد. من وصل ثانيًا؟" options={['سعد', 'فهد', 'بدر', 'علي']} answer="فهد" />
+          </ExitTicket>
         </>
       ),
     },

@@ -282,7 +282,7 @@ function StarsSheet({ stars, send }: { stars: NonNullable<RemoteState['stars']>;
 }
 
 /** المؤقت: يعدّ تنازليًا وحده من آخر حالة وصلت من الآيباد */
-function TimerSheet({ t, at, send }: { t: RemoteState['timer']; at: number; send: (c: RemoteCmd) => void }) {
+function TimerSheet({ t, at, send, fixed }: { t: RemoteState['timer']; at: number; send: (c: RemoteCmd) => void; /** التصميم الجديد: المؤقت في رأس الشاشة، فلا مكان ولا حجم يُغيَّر */ fixed?: boolean }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!t.run) return;
@@ -319,6 +319,7 @@ function TimerSheet({ t, at, send }: { t: RemoteState['timer']; at: number; send
               إغلاق المؤقت
             </button>
           </div>
+          {!fixed && (
           <Fold title="مكان المؤقت وحجمه" className="rtview">
             <div className="r2row">
               <button className="r2btn" disabled={(t.view?.s ?? 1) <= SCALE_MIN} onClick={() => send({ c: 'timerView', v: { s: (t.view?.s ?? 1) - SCALE_STEP } })}>
@@ -335,6 +336,7 @@ function TimerSheet({ t, at, send }: { t: RemoteState['timer']; at: number; send
               })}
             </div>
           </Fold>
+          )}
         </>
       )}
     </div>
@@ -846,7 +848,7 @@ export function RemoteApp({ channel }: { channel: string }) {
           {st.stars ? <StarsSheet stars={st.stars} send={send} /> : <p className="r2note">لا فصل مختار. أضف الفصل وأسماء طلابه من الآيباد، ثم اختره من صفحة الإعداد.</p>}
       </Sheet>
       <Sheet open={sheet === 'timer'} title="المؤقت" onClose={() => setSheet(null)}>
-          <TimerSheet t={st.timer} at={stAt} send={send} />
+          <TimerSheet t={st.timer} at={stAt} send={send} fixed={st.v2} />
       </Sheet>
       <Sheet open={sheet === 'slides'} title="الشرائح" onClose={() => setSheet(null)}>
           <div className="r2slides">

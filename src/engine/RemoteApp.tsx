@@ -381,7 +381,15 @@ function TeamStars({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => void
   const [ask, setAsk] = useState(false);
   const stars = st.stars;
   if (st.teams.length < 2 || !stars) return null;
-  if (st.teamStarsDone) return <p className="r2note">وُزِّعت نجوم الفرق في هذه الحصة</p>;
+  if (st.teamStarsDone)
+    return (
+      <>
+        <p className="r2note">وُزِّعت نجوم الفرق في هذه الحصة</p>
+        <button className="r2btn" onClick={() => send({ c: 'teamPodium', open: !st.teamPodium })}>
+          {st.teamPodium ? 'إغلاق ترتيب الفرق' : 'إظهار ترتيب الفرق'}
+        </button>
+      </>
+    );
   if (!ask)
     return (
       <button className="r2btn rsup" onClick={() => setAsk(true)}>

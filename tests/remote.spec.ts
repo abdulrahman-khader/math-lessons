@@ -417,6 +417,10 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   // مع الفرق: من خرج اسمه يكسب نقطة لفريقه بدل نجمة
   await expect(phone.locator('.r2btn', { hasText: '★ نجمة' })).toHaveCount(0);
   await phone.locator(`[aria-label="نقطة لفريق ${team0}"]`).click();
+  // إعلان على الشاشة كالنجمة، باسم الفريق، ورمزه نقطة
+  await expect(ipad.locator('.cheer .cheer-msg')).toHaveText('نقطة');
+  await expect(ipad.locator('.cheer .cheer-pt')).toHaveText('+١');
+  await expect(ipad.locator('.cheer-name')).toHaveText(team0);
   await closeSheet(phone);
   await sheet(phone, 'الفرق');
   await expect(phone.locator('.rteam', { hasText: team0 }).locator('b')).toHaveText('١');
@@ -507,6 +511,16 @@ test('نهاية الحصة: الجوال يوزّع نجوم الفرق حسب 
   await expect(phone.locator('.rtstars .rteam small').first()).toHaveText('الحاضرون ١');
   await phone.locator('.r2btn', { hasText: 'تأكيد التوزيع' }).click();
   await expect(phone.locator('.r2note', { hasText: 'وُزِّعت' })).toBeVisible();
+  // ترتيب الفرق على الشاشة: كلها معًا، والأول في الوسط
+  const pod = ipad.getByRole('dialog', { name: 'ترتيب الفرق' });
+  // يظهر بعد انتهاء إعلان النقطة
+  await expect(pod.locator('.pstep.on')).toHaveCount(2, { timeout: 10000 });
+  await expect(pod.locator('.p1 .pwho b')).toHaveText(await phone.locator('.rteam').nth(1).locator('span').textContent() ?? '');
+  await expect(pod.locator('.p1 .pwho small')).toContainText('٢ لكل طالب');
+  await phone.locator('.r2btn', { hasText: 'إغلاق ترتيب الفرق' }).click();
+  await expect(pod).toHaveCount(0);
+  await phone.locator('.r2btn', { hasText: 'إظهار ترتيب الفرق' }).click();
+  await expect(pod).toBeVisible();
   await closeSheet(phone);
   await sheet(phone, 'النجوم');
   await expect(phone.locator('.rstar', { hasText: 'خالد' }).locator('.r2cnt.star')).toHaveText('★٢');

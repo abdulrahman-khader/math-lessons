@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { num } from '../digits';
 import type { Klass } from '../classes';
-import { backup, isThursday, MAX_MISTAKES, lastEvent, pastWeeks, restore, starCounts, tally, topRows, weekLabel, weekRows, weekStart, type StarEvent, type StarRow } from '../stars';
+import { backup, isThursday, MAX_MISTAKES, lastEvent, pastWeeks, rankRows, restore, starCounts, tally, topRows, weekLabel, weekRows, weekStart, type StarEvent, type StarRow } from '../stars';
 import { sPlace } from '../sound';
 import { IconStar } from './icons';
 
@@ -265,12 +265,54 @@ function Podium({ rows, label, soFar = false, next = 0 }: { rows: StarRow[]; lab
   );
 }
 
+/** نهاية الحصة: الفرق على المنصة كلها معًا، مرتبة بنقاطها، ومع كل فريق نجوم كل طالب فيه */
+export function TeamPodium({ teams, onClose }: { teams: { name: string; score: number; color: string; stars: number }[]; onClose: () => void }) {
+  const levels = [...new Set(teams.map((t) => t.score))].sort((a, b) => b - a);
+  const ranked = teams.map((t) => ({ ...t, rank: levels.indexOf(t.score) + 1 })).sort((a, b) => a.rank - b.rank);
+  /** الأول في الوسط، ثم يمينه ويساره بالتناوب */
+  const cols: typeof ranked = [];
+  ranked.forEach((t, i) => (i % 2 ? cols.unshift(t) : cols.push(t)));
+  useEffect(() => {
+    sPlace(1);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className="tpod" role="dialog" aria-label="ترتيب الفرق" onClick={onClose}>
+      <h2>ترتيب الفرق</h2>
+      <div className="psteps" style={{ gridTemplateColumns: `repeat(${cols.length}, 1fr)` }}>
+        <Confetti />
+        {cols.map((t) => (
+          <div key={t.name} className={`pstep p${t.rank} on`} style={{ '--tc': t.color } as React.CSSProperties}>
+            <div className="pnames">
+              <span className="pwho">
+                <b>{t.name}</b>
+                <small>
+                  النقاط {num(t.score)} — <IconStar /> {num(t.stars)} لكل طالب
+                </small>
+              </span>
+            </div>
+            <div className="pblock">
+              <IconStar />
+              <span>{num(t.rank)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** إعلان على الشاشة: d = ١ نجمة، و−١ غلطة */
 export interface Cheer {
   name: string;
   d: 1 | -1;
   /** يزداد مع كل ضغطة فيُعاد الإعلان حتى للطالب نفسه */
   n: number;
+  /** نقطة لفريق: العنوان بدل «نجمة جديدة»، ولون الفريق للنجمة والاسم */
+  msg?: string;
+  color?: string;
 }
 
 /** إعلان على الشاشة حين يأخذ طالب نجمة أو غلطة (من اللوحة أو العجلة أو الجوال): الرمز كبيرًا واسمه، بلا عدد نجومه. لا يعترض الضغطات فتتوالى الإعلانات. */
@@ -343,9 +385,9 @@ export function StarCheer({ cheer, klass, onDone }: { cheer: Cheer | null; klass
     const t = setTimeout(onDone, bad ? 2400 : 4000);
     return () => clearTimeout(t);
   }, [cheer, onDone, bad]);
-  if (!cheer || !klass) return null;
+  if (!cheer || (!klass && !cheer.msg)) return null;
   return (
-    <div key={cheer.n} className={'cheer' + (bad ? ' bad' : ' good')} role="status">
+    <div key={cheer.n} className={'cheer' + (bad ? ' bad' : ' good')} role="status" style={cheer.color ? ({ '--cc': cheer.color } as React.CSSProperties) : undefined}>
       {!bad && <Confetti />}
       <div className="cheer-card">
         <div className="cheer-star" aria-hidden="true">
@@ -356,13 +398,17 @@ export function StarCheer({ cheer, klass, onDone }: { cheer: Cheer | null; klass
               <circle cx="50" cy="50" r="46" />
               <path d="M34 34 L66 66 M66 34 L34 66" />
             </svg>
+          ) : cheer.msg ? (
+            <span className="cheer-pt">
+              <bdi dir="ltr">+١</bdi>
+            </span>
           ) : (
             <svg viewBox="0 0 24 24" className="cheer-svg">
               <path d="M12 2.2l2.95 6.2 6.8.86-5 4.7 1.28 6.74L12 17.4l-6.03 3.3 1.28-6.74-5-4.7 6.8-.86z" />
             </svg>
           )}
         </div>
-        {!bad && <div className="cheer-msg">نجمة جديدة</div>}
+        {!bad && <div className="cheer-msg">{cheer.msg ?? 'نجمة جديدة'}</div>}
         <div className="cheer-name">{cheer.name}</div>
       </div>
     </div>
@@ -378,7 +424,9 @@ const presses = (n: number) => (n === 1 ? 'ضغطة واحدة' : n === 2 ? 'ض�
  */
 function History({ events, klass, weeks, onOpen }: { events: StarEvent[]; klass: Klass; weeks: number[]; onOpen: (i: number) => void }) {
   const [msg, setMsg] = useState('');
-  const counts = starCounts(events, klass.id, klass.students);
+  // كل طلاب الفصل، ومن لم يكن نجمًا بعدُ عددُه صفر
+  const won = starCounts(events, klass.id, klass.students);
+  const counts = [...won, ...klass.students.filter((n) => !won.some((c) => c.name === n)).map((name) => ({ name, n: 0 }))];
   const save = () => {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([backup()], { type: 'application/json' }));
@@ -416,7 +464,12 @@ function History({ events, klass, weeks, onOpen }: { events: StarEvent[]; klass:
         <div className="shcols">
           <ol className="sweeks">
             {weeks.map((w, i) => {
-              const top = topRows(weekRows(events, klass.id, klass.students, w));
+              const rows = weekRows(events, klass.id, klass.students, w);
+              const top = topRows(rows);
+              /** بقية الطلاب بعد النجوم، بمجموعهم في ذلك الأسبوع */
+              const rest = rankRows(rows)
+                .filter((r) => !top.some((t) => t.name === r.name))
+                .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name, 'ar'));
               return (
                 <li key={w}>
                   <button onClick={() => onOpen(i)}>
@@ -431,6 +484,17 @@ function History({ events, klass, weeks, onOpen }: { events: StarEvent[]; klass:
                           ))
                         : 'لا نجوم في هذا الأسبوع'}
                     </span>
+                    {rest.length > 0 && (
+                      <span className="srest">
+                        {rest.map((r, j) => (
+                          <span key={r.name}>
+                            {j > 0 && '، '}
+                            <bdi>{r.name}</bdi> {num(r.total)}
+                            {r.barred && ' ✕'}
+                          </span>
+                        ))}
+                      </span>
+                    )}
                   </button>
                 </li>
               );

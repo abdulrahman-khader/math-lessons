@@ -284,6 +284,9 @@ test('سجل الأسابيع: كل الأسابيع محفوظة ولا يُح�
   await expect(box.locator('.sweeks li').last()).toContainText('محمد');
   await expect(box.locator('.sweeks li').first()).toContainText('سالم');
   await expect(box.locator('.scounts')).toContainText('محمد');
+  // كل طلاب الفصل في الأسبوع، لا الفائزون فقط
+  await expect(box.locator('.sweeks li').first().locator('.srest')).toContainText('أحمد');
+  await expect(box.locator('.scounts tr')).toHaveCount(4);
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('stars')!).events.length);
   expect(kept).toBe(6);
   // أسبوع من السجل يُفتح على منصته

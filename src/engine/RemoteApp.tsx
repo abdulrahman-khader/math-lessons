@@ -422,6 +422,9 @@ function TeamStars({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => void
 function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => void }) {
   const out = st.wheelOut ?? [];
   const picked = st.stars?.list.find(([n]) => n === st.wheelResult);
+  /* مع الفرق: من خرج اسمه يكسب نقطة لفريقه بدل نجمة له */
+  const ti = picked && st.stars ? (st.teamOf?.[st.stars.list.indexOf(picked)] ?? -1) : -1;
+  const team = ti >= 0 ? st.teams[ti] : undefined;
   return (
     <>
       {!!st.klasses?.length && <KlassPicker st={st} send={send} />}
@@ -478,10 +481,16 @@ function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => voi
         </div>
       )}
       <div className="r2row">
-        {picked && (
-          <button className="r2btn rsup" aria-label={`نجمة لـ${picked[0]}`} onClick={() => send({ c: 'star', s: picked[0], d: 1 })}>
-            ★ نجمة
+        {team ? (
+          <button className="r2btn rsup rtpoint" style={{ '--tc': team.color } as React.CSSProperties} aria-label={`نقطة لفريق ${team.name}`} onClick={() => send({ c: 'score', team: ti, d: 1 })}>
+            + نقطة لفريق {team.name}
           </button>
+        ) : (
+          picked && (
+            <button className="r2btn rsup" aria-label={`نجمة لـ${picked[0]}`} onClick={() => send({ c: 'star', s: picked[0], d: 1 })}>
+              ★ نجمة
+            </button>
+          )
         )}
         <button className="r2btn r2pri r2grow" onClick={() => send({ c: 'spin' })}>
           أدِر العجلة

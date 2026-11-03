@@ -414,10 +414,16 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   await expect(who).toHaveText('محمد', { timeout: 15000 });
   const name = (await who.textContent())!;
   const before = name === 'محمد' ? 2 : 0;
-  await phone.locator('.r2btn.rsup').click();
-  await expect(phone.locator('.rpicked small').last()).toContainText(`★ ${'٠١٢٣'[before + 1]}`);
+  // مع الفرق: من خرج اسمه يكسب نقطة لفريقه بدل نجمة
+  await expect(phone.locator('.r2btn', { hasText: '★ نجمة' })).toHaveCount(0);
+  await phone.locator(`[aria-label="نقطة لفريق ${team0}"]`).click();
+  await closeSheet(phone);
+  await sheet(phone, 'الفرق');
+  await expect(phone.locator('.rteam', { hasText: team0 }).locator('b')).toHaveText('١');
+  await closeSheet(phone);
+  await sheet(phone, 'النجوم');
+  await phone.locator(`[aria-label="نجمة لـ${name}"]`).click();
   await expect(ipad.locator('.cheer-name')).toHaveText(name);
-  await phone.locator('.r2btn', { hasText: 'إغلاق العجلة' }).click();
   await closeSheet(phone);
   // حذف النجمة التي أُعطيت للتو: من صف الطالب في لوحة النجوم
   await sheet(phone, 'النجوم');

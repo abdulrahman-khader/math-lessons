@@ -221,3 +221,4 @@ body.remote-body:has(.remote.r2) { background: #fff; }
 .r2panel .rtstars { display: grid; gap: 8px; }
 .r2panel .rtstars small { color: var(--ink2, #5b6475); font-size: 15px; }
 .r2panel .rtstars b { min-inline-size: 3.2rem; text-align: end; }
+.remote.r2 .rtpoint, .r2panel .rtpoint { background: var(--tc); color: #fff; }

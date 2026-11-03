@@ -480,3 +480,31 @@ test('جدول الإشارات الفارغ: الجوال يضيف الإشار
   await expect(ipad.locator('section.slide.active .ltally svg.tally')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test('نهاية الحصة: الجوال يوزّع نجوم الفرق حسب الترتيب، والغائب لا يأخذ', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  await ipad.evaluate(() => {
+    localStorage.setItem('classes', JSON.stringify({ grades: { g4: { classes: [{ id: 'k1', name: 'الفصل الأول', students: ['محمد', 'خالد', 'سعد'], team: { محمد: 0, خالد: 1, سعد: 1 } }] } } }));
+    localStorage.setItem('stars', JSON.stringify({ events: [{ t: Date.now(), k: 'k1', s: 'سعد', d: 0 }] }));
+    window.dispatchEvent(new Event('classes-changed'));
+    window.dispatchEvent(new Event('stars-changed'));
+  });
+  await sheet(phone, 'العجلة');
+  await phone.locator('.r2seg', { hasText: 'الفصل الأول' }).click();
+  await closeSheet(phone);
+  await sheet(phone, 'الفرق');
+  await phone.locator('.rteam').nth(1).locator('.r2plus').click();
+  await expect(phone.locator('.rteam').nth(1).locator('b')).toHaveText('١');
+  await phone.locator('.r2btn', { hasText: 'توزيع نجوم الفرق' }).click();
+  // المعاينة: الفريق الثاني أولًا بنجمتين، والأول نجمة؛ خالد وحده حاضر في الثاني
+  await expect(phone.locator('.rtstars .rteam b')).toHaveText(['★ ٢', '★ ١']);
+  await expect(phone.locator('.rtstars .rteam small').first()).toHaveText('الحاضرون ١');
+  await phone.locator('.r2btn', { hasText: 'تأكيد التوزيع' }).click();
+  await expect(phone.locator('.r2note', { hasText: 'وُزِّعت' })).toBeVisible();
+  await closeSheet(phone);
+  await sheet(phone, 'النجوم');
+  await expect(phone.locator('.rstar', { hasText: 'خالد' }).locator('.r2cnt.star')).toHaveText('★٢');
+  await expect(phone.locator('.rstar', { hasText: 'محمد' }).locator('.r2cnt.star')).toHaveText('★١');
+  await expect(phone.locator('.rstar', { hasText: 'سعد' }).locator('.r2cnt.star')).toHaveText('★٠');
+  expect(errors).toEqual([]);
+});

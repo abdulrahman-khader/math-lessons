@@ -194,6 +194,12 @@ function save(events: StarEvent[]) {
 }
 
 /** سجل النجوم، وإضافة نجمة أو غلطة، والتراجع عن آخر ضغطة في فصل */
+/** نجوم كل فريق من نقاطه: الأول بعدد الفرق، ثم أقل بنجمة لكل مرتبة، والمتعادلون يأخذون العدد نفسه */
+export function teamStarCounts(scores: number[]): number[] {
+  const levels = [...new Set(scores)].sort((a, b) => b - a);
+  return scores.map((v) => scores.length - levels.indexOf(v));
+}
+
 export function useStars() {
   const [events, setEvents] = useState<StarEvent[]>(load);
   useEffect(() => {

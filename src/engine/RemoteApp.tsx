@@ -8,7 +8,7 @@ import { ToggleGroup } from '@base-ui/react/toggle-group';
 import { SECTION_NAMES } from './sections';
 import { clock, duration, num } from './digits';
 import { PRESETS, SCALE_MAX, SCALE_MIN, SCALE_STEP } from './components/Timer';
-import { MAX_MISTAKES, rankRows, topRows } from './stars';
+import { MAX_MISTAKES, rankRows, teamStarCounts, topRows } from './stars';
 import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } from './remote';
 import { IconNextRtl, IconPrevRtl, IconReset, IconStar, IconTimer } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
@@ -376,6 +376,49 @@ function TimerSheet({ t, at, send, fixed }: { t: RemoteState['timer']; at: numbe
 }
 
 /** العجلة: الفصل، ومن خرجوا منها (مطويّة)، وخيار إخراج الاسم بعد ظهوره، والاسم الذي خرج، وزر الإدارة */
+/** نهاية الحصة: نجوم الفرق حسب ترتيبها، تُعرض أولًا ثم تُؤكَّد */
+function TeamStars({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => void }) {
+  const [ask, setAsk] = useState(false);
+  const stars = st.stars;
+  if (st.teams.length < 2 || !stars) return null;
+  if (st.teamStarsDone) return <p className="r2note">وُزِّعت نجوم الفرق في هذه الحصة</p>;
+  if (!ask)
+    return (
+      <button className="r2btn rsup" onClick={() => setAsk(true)}>
+        ★ توزيع نجوم الفرق
+      </button>
+    );
+  const per = teamStarCounts(st.teams.map((t) => t.score));
+  const order = st.teams.map((_, i) => i).sort((a, b) => st.teams[b].score - st.teams[a].score);
+  const present = (i: number) => stars.list.filter((r, j) => st.teamOf?.[j] === i && !r[4]).length;
+  return (
+    <div className="rtstars">
+      {order.map((i) => (
+        <div key={i} className="rteam" style={{ '--tc': st.teams[i].color } as React.CSSProperties}>
+          <span>{st.teams[i].name}</span>
+          <small>الحاضرون {num(present(i))}</small>
+          <b>★ {num(per[i])}</b>
+        </div>
+      ))}
+      <p className="r2note">النجوم لكل طالبٍ حاضرٍ في الفريق، والغائب لا يأخذ.</p>
+      <div className="r2row">
+        <button className="r2btn" onClick={() => setAsk(false)}>
+          إلغاء
+        </button>
+        <button
+          className="r2btn r2pri r2grow"
+          onClick={() => {
+            send({ c: 'teamStars' });
+            setAsk(false);
+          }}
+        >
+          تأكيد التوزيع
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => void }) {
   const out = st.wheelOut ?? [];
   const picked = st.stars?.list.find(([n]) => n === st.wheelResult);
@@ -887,6 +930,7 @@ export function RemoteApp({ channel }: { channel: string }) {
           ) : (
             <p className="r2note">لا فرق في هذه الحصة. اخترها من صفحة الإعداد.</p>
           )}
+          <TeamStars st={st} send={send} />
       </Sheet>
       <Sheet open={sheet === 'wheel'} title="العجلة" onClose={() => setSheet(null)}>
           <WheelSheet st={st} send={send} />

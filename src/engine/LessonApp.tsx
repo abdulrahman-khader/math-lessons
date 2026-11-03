@@ -4,7 +4,7 @@ import { TimerPill, V2Header, V2Progress } from './components/V2Chrome';
 import { num } from './digits';
 import { SECTION_NAMES, TEAM_COLORS, V2_TEAM_COLORS } from './sections';
 import { sBad, setMuted, sGood, sStar } from './sound';
-import { absentToday, useStars, tally, weekStart } from './stars';
+import { absentToday, teamStarCounts, useStars, tally, weekStart } from './stars';
 import { useSaved } from './store';
 import { classesOf, gradeOf, setClass, setGrade, shuffleTeams, useRoster, type Klass } from './classes';
 import { ClassesModal, GroupsModal } from './components/Classes';
@@ -47,6 +47,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const klass = classes.find((c) => c.id === klassId);
   /** أسماء خرجت من العجلة في هذه الحصة فلا تتكرر */
   const [picked, setPicked] = useState<string[]>([]);
+  /** الفرق التي خرج منها اسم في جولة العجلة الحالية */
+  const [round, setRound] = useState<number[]>([]);
+  /** وُزّعت نجوم الفرق في هذه الحصة */
+  const [teamStarsDone, setTeamStarsDone] = useState(false);
   const [teamFilter, setTeamFilter] = useState(-1);
   /** يخرج الاسم من العجلة بعد ظهوره (مع الفصل) */
   const [wheelRemove, setWheelRemove] = useState(true);
@@ -57,6 +61,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const chooseKlass = (id: string) => {
     setKlassId(id);
     setPicked([]);
+    setRound([]);
     setTeamFilter(-1);
     updateRoster((r) => setGrade(r, grade, (g) => ({ ...g, last: id })));
   };
@@ -66,6 +71,18 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [starsReq, setStarsReq] = useState<{ n: number; a: 'podium' | 'next' }>({ n: 0, a: 'next' });
   const [cheer, setCheer] = useState<Cheer | null>(null);
   const endCheer = useCallback(() => setCheer(null), []);
+  /** نهاية الحصة: كل طالب حاضر في الفريق الأول نجوم بعدد الفرق، والذي بعده أقل بنجمة، والمتعادلون سواء */
+  const giveTeamStars = () => {
+    if (!klass || st.nTeams < 2 || teamStarsDone) return;
+    const per = teamStarCounts(st.scores.slice(0, st.nTeams));
+    for (const s of klass.students) {
+      const t = klass.team[s];
+      if (!(s in klass.team) || t >= st.nTeams || absentToday(starEvents, klass.id, s)) continue;
+      for (let i = 0; i < per[t]; i++) addStarEvent(klass.id, s, 1);
+    }
+    setTeamStarsDone(true);
+    sStar();
+  };
   const giveStar = (name: string, d: 1 | -1) => {
     if (!klass?.students.includes(name)) return;
     addStarEvent(klass.id, name, d);
@@ -250,6 +267,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         break;
       case 'wheelRestore':
         setPicked([]);
+        setRound([]);
         break;
       case 'stars':
         setStarsOpen(c.open);
@@ -263,6 +281,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         break;
       case 'starUndo':
         if (klass) undoStar(klass.id);
+        break;
+      case 'teamStars':
+        giveTeamStars();
         break;
       case 'absent':
         if (klass?.students.includes(c.s)) toggleAbsent(klass.id, c.s);
@@ -396,6 +417,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         wheelTeam: teamFilter,
         v2,
         teamsShown,
+        teamStarsDone,
       };
       if (klass && state.stars) state.teamOf = state.stars.list.map(([n]) => (n in klass.team && klass.team[n] < st.nTeams ? klass.team[n] : -1));
       state.slides = slideTitles(mainRef.current, slides.length).map((t, i) => [t, sections.findIndex((o) => i >= o.first && i <= o.last)] as [string, number]);
@@ -407,7 +429,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown, teamStarsDone]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -701,8 +723,13 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             nTeams={st.nTeams}
             teamFilter={teamFilter}
             picked={picked}
-            onPick={(n) => setPicked((p) => [...p, n])}
-            onRestore={() => setPicked([])}
+            onPick={(n) => setPicked((p) => (p.includes(n) ? p : [...p, n]))}
+            onRestore={() => {
+              setPicked([]);
+              setRound([]);
+            }}
+            round={round}
+            onRound={setRound}
             remove={wheelRemove}
             autoClose={2500}
             absent={klass ? klass.students.filter((n) => absentToday(starEvents, klass.id, n)) : []}

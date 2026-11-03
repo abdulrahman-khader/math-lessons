@@ -218,3 +218,6 @@ body.remote-body:has(.remote.r2) { background: #fff; }
 .r2absent button.on span { color: #fff; }
 .r2absentbtn { display: flex; justify-content: space-between; align-items: center; }
 .r2absentbtn small { font-size: 14px; font-weight: 600; color: var(--soft); }
+.r2panel .rtstars { display: grid; gap: 8px; }
+.r2panel .rtstars small { color: var(--ink2, #5b6475); font-size: 15px; }
+.r2panel .rtstars b { min-inline-size: 3.2rem; text-align: end; }

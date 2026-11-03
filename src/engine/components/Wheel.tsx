@@ -40,6 +40,9 @@ interface Props {
   remove?: boolean;
   /** بعد ظهور الاسم بهذه المدة (ملّي ثانية) تُغلق العجلة ويعود الدرس ليجيب الطالب */
   autoClose?: number;
+  /** الفرق التي خرج منها اسم في هذه الجولة: لا تدخل العجلة حتى تأخذ كل الفرق دورها */
+  round?: number[];
+  onRound?: (teams: number[]) => void;
 }
 
 /**
@@ -47,7 +50,7 @@ interface Props {
  * المعلم يديرها من الجوال، أو يلمس العجلة (أو المسافة)، ويغلقها بلمسة خارجها أو Esc.
  * النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة.
  */
-export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp, absent = [], autoClose }: Props) {
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp, absent = [], autoClose, round = [], onRound }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
@@ -63,7 +66,19 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
   const hasTeams = !!klass && nTeams > 0 && Object.values(klass.team).some((t) => t < nTeams);
   const filter = hasTeams ? teamFilter : -1;
   const pool = klass ? klass.students.filter((s) => (filter < 0 || klass.team[s] === filter) && !absent.includes(s)) : [];
-  const list = klass
+  /* مع الفرق والفصل كله: يخرج اسم من فريق فيغيب فريقه حتى تأخذ الفرق كلها دورها.
+     فريق خرج كل طلابه والفرق الأخرى فيها من لم يخرج: يعود منه طالب عشوائي لتتساوى الفرص */
+  const groupOf = (s: string) => (klass && s in klass.team && klass.team[s] < nTeams ? klass.team[s] : -1);
+  // فقط حين يكون كل طالب حاضر في فريق
+  const byTeam = klass && hasTeams && filter < 0 && remove && pool.every((s) => groupOf(s) >= 0);
+  const groups = byTeam ? [...new Set(pool.map(groupOf))] : [];
+  const fresh = (g: number) => pool.filter((s) => groupOf(s) === g && !picked.includes(s));
+  const list = byTeam
+    ? // الجولة تكتمل دائمًا، ولا تبدأ جولة جديدة إلا وفيها من لم يخرج
+      round.length || groups.some((g) => fresh(g).length)
+      ? groups.filter((g) => !round.includes(g)).flatMap((g) => (fresh(g).length ? fresh(g) : pool.filter((s) => groupOf(s) === g)))
+      : []
+    : klass
     ? pool.filter((s) => !picked.includes(s))
     : text
         .split('\n')
@@ -155,8 +170,9 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
   useEffect(() => {
     if (!open) return;
     const win = shown.current && shown.current.list[shown.current.win];
-    // خروج الفائز وحده لا يمحو الرسمة الحالية
-    if (lastKey.current !== key && !(win && !list.includes(win) && shown.current!.list.filter((n) => n !== win).join('\n') === list.join('\n'))) {
+    // خروج الفائز (ومعه فريقه) لا يمحو الرسمة الحالية؛ تغيّر الفصل أو الفريق يمحوها
+    const same = lastKey.current.split('|').slice(0, 2).join('|') === key.split('|').slice(0, 2).join('|');
+    if (lastKey.current !== key && !(win && same && (!list.includes(win) || picked.includes(win)))) {
       shown.current = null;
       if (!spinning) setLive('');
     }
@@ -215,6 +231,10 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       onResult?.(N[pick]);
       sGood();
       if (remove) (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n')));
+      if (byTeam) {
+        const next = [...round, groupOf(N[pick])];
+        onRound?.(groups.every((g) => next.includes(g)) ? [] : next);
+      }
       if (autoClose) closeTimer.current = window.setTimeout(() => closeRef.current(), autoClose);
     };
     requestAnimationFrame(f);

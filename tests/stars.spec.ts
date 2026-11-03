@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { tally, topRows, weekStart, type StarEvent } from '../src/engine/stars';
+import { tally, teamStarCounts, topRows, weekStart, type StarEvent } from '../src/engine/stars';
 
 // نجم الأسبوع: حساب الأسبوع والرتب، ثم اللوحة والعجلة في درس واحد من الصف الثاني
 const dist = path.resolve(process.cwd(), 'dist');
@@ -340,5 +340,44 @@ test('من أخذ ٣ أغلاط تظهر بطاقته بعلامة الحرما�
   await box.getByRole('button', { name: 'إظهار النجوم' }).click();
   await expect(card(page, 'أحمد')).toHaveClass(/barred/);
   await expect(card(page, 'أحمد')).toContainText('لا يدخل نجم الأسبوع');
+  expect(errors).toEqual([]);
+});
+
+test('نجوم الفرق: الأول بعدد الفرق، ثم أقل بنجمة، والمتعادلون سواء', () => {
+  expect(teamStarCounts([5, 9, 9, 2])).toEqual([3, 4, 4, 2]);
+  expect(teamStarCounts([1, 7, 4])).toEqual([1, 3, 2]);
+  expect(teamStarCounts([0, 0])).toEqual([2, 2]);
+});
+
+test('العجلة مع الفرق: يغيب فريق من خرج اسمه حتى تأخذ كل الفرق دورها، والفريق الأصغر يعيد طالبًا', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  await page.goto(pathToFileURL(path.join(dist, file)).href);
+  const team: Record<string, number> = { أ1: 0, أ2: 0, أ3: 0, ب1: 1, ب2: 1 };
+  await page.evaluate((team) => {
+    localStorage.clear();
+    localStorage.setItem('classes', JSON.stringify({ grades: { g2: { last: 'k1', classes: [{ id: 'k1', name: 'ف', students: Object.keys(team), team } ] } } }));
+  }, team);
+  await page.reload();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openTool(page, 'عجلة الأسماء');
+  const wheel = page.getByRole('dialog', { name: 'عجلة الأسماء' });
+  const picks: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    // بعد اسم من فريق: العجلة على الفريق الآخر وحده
+    if (i % 2) expect(await wheel.getAttribute('data-left')).toBe(String(i === 1 ? (team[picks[0]] ? 3 : 2) : i === 3 ? (team[picks[2]] ? 2 : 1) : team[picks[4]] ? 1 : 2));
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(300);
+    await expect(wheel.locator('.wname.done')).toBeVisible();
+    picks.push((await wheel.locator('.wname').textContent())!);
+  }
+  // كل جولة فيها اسم من كل فريق
+  for (let r = 0; r < 3; r++) expect(new Set(picks.slice(r * 2, r * 2 + 2).map((n) => team[n])).size).toBe(2);
+  // أسماء الفريق الأول لا تتكرر؛ الفريق الثاني (اثنان) يعيد واحدًا في الجولة الثالثة
+  expect(new Set(picks.filter((n) => team[n] === 0)).size).toBe(3);
+  expect(picks.filter((n) => team[n] === 1)).toHaveLength(3);
+  // خرجت كل الأسماء ثم تُغلق العجلة وحدها وتعود إلى الدرس
+  await expect(wheel).toHaveAttribute('data-left', '0');
+  await expect(wheel).toHaveCount(0, { timeout: 5000 });
   expect(errors).toEqual([]);
 });

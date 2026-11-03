@@ -86,6 +86,8 @@ export type RemoteCmd =
   | { c: 'stars'; open: boolean }
   | { c: 'star'; s: string; d: number }
   | { c: 'starUndo' }
+  /** نهاية الحصة: نجوم الفرق حسب ترتيبها */
+  | { c: 'teamStars' }
   /** يحذف آخر نجمة (d=١) أو آخر غلطة (d=−١) لطالب في هذا الأسبوع */
   | { c: 'starRemove'; s: string; d: number }
   /** غياب اليوم لطالب (يُلغى بالضغط ثانيةً) */
@@ -211,6 +213,8 @@ export interface RemoteState {
   v2?: boolean;
   /** الفرق ظاهرة على الشاشة */
   teamsShown?: boolean;
+  /** وُزّعت نجوم الفرق في هذه الحصة */
+  teamStarsDone?: boolean;
   /** المؤقت. لا تُرسل الحالة كل ثانية: الجوال يعدّ تنازليًا وحده من آخر حالة وصلته */
   timer: { show: boolean; run: boolean; left: number; view?: { s: number; ax: number; ay: number } };
 }

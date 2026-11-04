@@ -52,7 +52,7 @@ function scene(t: number) {
           </g>
         ))}
         <ClipCard x={60} y={330} w={700} h={100} op={fade(t, 17, 26)} color="var(--qs)">
-          <SvgEq x={410} y={400} size={50} parts={['□', '=', '△', '×', 6]} />
+          <SvgEq x={410} y={400} size={50} parts={['△', '×', 6, '=', '□']} />
         </ClipCard>
       </g>
 

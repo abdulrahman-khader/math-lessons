@@ -7,28 +7,72 @@ export const setMuted = (m: boolean) => {
 };
 export const isMuted = () => muted;
 
-function tone(freqs: number[], dur = 0.12, type: OscillatorType = 'sine', peak = 0.18) {
+/** السياق الوحيد للصوت. المتصفح يوقفه إن أُنشئ بلا لمسة، أو بعد ترك الصفحة، فيُستأنف كل مرة */
+function ctx() {
+  const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  actx = actx ?? new Ctx();
+  if (actx.state !== 'running') void actx.resume().catch(() => {});
+  return actx;
+}
+
+/** يعزف الآن، أو فور استئناف السياق. وما تأخر كثيرًا يُترك، فلا تتراكم الأصوات حتى أول لمسة */
+function play(fn: (ac: AudioContext) => void) {
   if (muted) return;
   try {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    actx = actx ?? new Ctx();
-    let t = actx.currentTime;
+    const ac = ctx();
+    if (ac.state === 'running') return fn(ac);
+    const at = performance.now();
+    void ac
+      .resume()
+      .then(() => {
+        if (performance.now() - at < 400) fn(ac);
+      })
+      .catch(() => {});
+  } catch {
+    /* الصوت تحسين اختياري */
+  }
+}
+
+/**
+ * يُفتح الصوت مع كل لمسة أو ضغطة على الصفحة: ما يبدأ بعدها من الجوال أو من دوران العجلة لا لمسة معه،
+ * وSafari لا يفتحه إلا داخل لمسة. والصوت الصامت القصير يفتحه على الآيباد.
+ */
+function unlock() {
+  try {
+    if (actx?.state === 'running') return;
+    const ac = ctx();
+    const src = ac.createBufferSource();
+    src.buffer = ac.createBuffer(1, 1, 22050);
+    src.connect(ac.destination);
+    src.start();
+  } catch {
+    /* الصوت تحسين اختياري */
+  }
+}
+if (typeof document !== 'undefined') {
+  for (const e of ['pointerdown', 'pointerup', 'touchend', 'keydown']) document.addEventListener(e, unlock, { capture: true, passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && actx && actx.state !== 'running') void actx.resume().catch(() => {});
+  });
+}
+
+function tone(freqs: number[], dur = 0.12, type: OscillatorType = 'sine', peak = 0.18) {
+  play((ac) => {
+    let t = ac.currentTime;
     for (const f of freqs) {
-      const o = actx.createOscillator();
-      const g = actx.createGain();
+      const o = ac.createOscillator();
+      const g = ac.createGain();
       o.type = type;
       o.frequency.value = f;
       g.gain.setValueAtTime(0.0001, t);
       g.gain.exponentialRampToValueAtTime(peak, t + Math.min(0.02, dur / 3));
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g).connect(actx.destination);
+      o.connect(g).connect(ac.destination);
       o.start(t);
       o.stop(t + dur + 0.02);
       t += dur * 0.9;
     }
-  } catch {
-    /* الصوت تحسين اختياري */
-  }
+  });
 }
 
 export const sGood = () => tone([660, 880], 0.13);
@@ -38,11 +82,7 @@ export const sEnd = () => tone([523, 659, 784, 1046], 0.18);
 export const sAns = () => tone([784, 1175], 0.11);
 /** نجمة لطالب: صعود سريع، ثم وتر يرنّ، ثم لمعات عالية (هو نفسه في كل نجمة) */
 export function sStar() {
-  if (muted) return;
-  try {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    actx = actx ?? new Ctx();
-    const ac = actx;
+  play((ac) => {
     const t0 = ac.currentTime + 0.01;
     const out = ac.createGain();
     out.gain.value = 0.9;
@@ -66,9 +106,7 @@ export function sStar() {
     note(262, t0 + 0.3, 1.1, 0.1, 'triangle');
     // لمعات
     [2093, 2637, 3136, 2349, 2794, 3520].forEach((f, i) => note(f, t0 + 0.42 + i * 0.09, 0.18, 0.05, 'sine'));
-  } catch {
-    /* الصوت تحسين اختياري */
-  }
+  });
 }
 /** آخر ثوانٍ في المؤقت: طقة هادئة */
 export const sTick = () => tone([1200], 0.04);

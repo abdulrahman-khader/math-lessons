@@ -384,3 +384,43 @@ test('العجلة مع الفرق: يغيب فريق من خرج اسمه حت�
   await expect(wheel).toHaveCount(0, { timeout: 5000 });
   expect(errors).toEqual([]);
 });
+
+test('الصوت: نقرات العجلة وفانفار النجمة تُعزف', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as Record<string, unknown>;
+    const O = window.AudioContext;
+    const made: AudioContext[] = [];
+    let notes = 0;
+    w.__made = made;
+    w.__notes = () => notes;
+    w.AudioContext = class extends O {
+      constructor() {
+        super();
+        made.push(this);
+      }
+      createOscillator() {
+        if (this.state === 'running') notes++;
+        return super.createOscillator();
+      }
+    };
+  });
+  const errors: string[] = [];
+  await openWithClass(page, errors);
+  const notes = () => page.evaluate(() => (window as unknown as { __notes: () => number }).__notes());
+  const state = () => page.evaluate(() => (window as unknown as { __made: AudioContext[] }).__made.map((a) => a.state));
+  await openTool(page, 'عجلة الأسماء');
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(1500);
+  expect(await state()).toEqual(['running']);
+  expect(await notes()).toBeGreaterThan(0); // نقرات الدوران
+  await expect(page.locator('.wname.done')).toBeVisible({ timeout: 6000 });
+  await expect(page.locator('.wheel2')).toHaveCount(0, { timeout: 5000 });
+  const before = await notes();
+  await openTool(page, 'نجم الأسبوع');
+  const box = page.locator('.sbox');
+  await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
+  await box.locator('[aria-label="نجمة لـأحمد"]').click();
+  await page.waitForTimeout(300);
+  expect((await notes()) - before).toBeGreaterThan(5); // فانفار النجمة
+  expect(errors).toEqual([]);
+});

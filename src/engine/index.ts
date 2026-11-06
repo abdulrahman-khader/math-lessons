@@ -28,4 +28,4 @@ export { useSlide } from './context';
 export { CubeChip, WordChoice, CircleRow, CompareQ, DrawTally, DrawCard, ColorPair, DrawExplorer, CUBE_COLORS, type ColorDef } from './components/ChanceBook';
 export { CubeBox, LineBox, SentenceCard, SumCard, FamilyCard, DominoCard, TriFamilyCard, TowerCard, TrainFactCard, DominoLinesCard, TriangleCard, FactGrid, Countdown } from './components/BookDrill';
 export { Frogs, FrogExplorer, DoublesExplorer, MissingExplorer } from './components/G2Explorers';
-export { DotArray, DotArrays, MonthCal, PlaceRows, TimesTable, type PlaceKind } from './components/Multiply';
+export { AreaModel, DotArray, DotArrays, MonthCal, PlaceRows, TimesTable, VMul, type PlaceKind } from './components/Multiply';

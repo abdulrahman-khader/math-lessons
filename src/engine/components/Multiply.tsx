@@ -1,5 +1,6 @@
 import { num } from '../digits';
 import { useSlide } from '../context';
+import { Blank } from './Cubes';
 
 /* ---------- قطع الضرب في الصف الرابع: ترتيب النقاط في صفوف، وجدول الضرب ---------- */
 
@@ -127,5 +128,41 @@ export function MonthCal({ days, marked, start }: { days: number; marked: number
         ))}
       </tbody>
     </table>
+  );
+}
+
+/** الضرب الرأسي كما في الكتاب: خانات الناتج تمتلئ من الآحاد إلى اليسار */
+export function VMul({ a, b }: { a: number; b: number }) {
+  const out = String(a * b).split('').reverse().map(Number);
+  return (
+    <div className="vmul" role="img" aria-label={`${num(a)} × ${num(b)}`}>
+      <span className="vrow">{num(a)}</span>
+      <span className="vrow">× {num(b)}</span>
+      <span className="vrow vres">
+        {out.map((d, i) => <Blank key={i} v={d} box />)}
+      </span>
+    </div>
+  );
+}
+
+/** نموذج المستطيل: جزء لكل مكوّن من العدد، الآحاد ثم العشرات كما في الكتاب. grid يرسم الوحدات، والناتج الجزئي يظهر مع الخطوة (hl: n{i}) */
+export function AreaModel({ h, parts, grid }: { h: number; parts: number[]; grid?: boolean }) {
+  const { activeHl, nowHl } = useSlide();
+  return (
+    <div className="areaw">
+      <div className="atop">
+        {parts.map((p, i) => <span key={i} style={{ flexGrow: grid ? p : Math.max(p, 4) }}>{num(p)}</span>)}
+      </div>
+      <div className="arow">
+        <b>{num(h)}</b>
+        <div className={'area' + (grid ? ' grid' : '')} style={{ '--h': h } as React.CSSProperties}>
+          {parts.map((p, i) => (
+            <div key={i} className={`apart a${i}` + (nowHl.has(`n${i}`) ? ' now' : '')} style={{ flexGrow: grid ? p : Math.max(p, 4) }}>
+              {activeHl.has(`n${i}`) && <span className="eq">{num(h)} × {num(p)} = {num(h * p)}</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

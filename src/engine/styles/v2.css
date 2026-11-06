@@ -724,3 +724,16 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] table.mcal td { inline-size: 76px; block-size: 56px; text-align: center; border: 2px solid var(--ink); }
 #app[data-design="v2"] table.mcal td.on { background: #ffe680; font-weight: 700; }
 #app[data-design="v2"] .qgrid .qcard .step.aslot.long { min-block-size: 84px; }
+#app[data-design="v2"] .vmul { display: inline-flex; flex-direction: column; align-items: flex-end; align-self: center; direction: ltr; font-size: 52px; font-weight: 700; line-height: 1.3; }
+#app[data-design="v2"] .vmul .vrow { display: flex; gap: 6px; }
+#app[data-design="v2"] .vmul .vres { flex-direction: row-reverse; border-block-start: 4px solid var(--ink); padding-block-start: 6px; margin-block-start: 4px; inline-size: 100%; justify-content: flex-start; }
+#app[data-design="v2"] .areaw { display: flex; flex-direction: column; gap: 6px; inline-size: 560px; font-size: var(--t-label); font-weight: 700; }
+#app[data-design="v2"] .atop { display: flex; text-align: center; padding-inline-start: 44px; }
+#app[data-design="v2"] .atop span { flex-basis: 0; }
+#app[data-design="v2"] .arow { display: flex; align-items: center; gap: 16px; }
+#app[data-design="v2"] .area { display: flex; flex: 1; block-size: 150px; border: 3px solid var(--ink); }
+#app[data-design="v2"] .area.grid { block-size: calc(var(--h) * 36px); }
+#app[data-design="v2"] .apart { flex-basis: 0; display: grid; place-items: center; background: #f8cf9f; font-size: var(--t-small); }
+#app[data-design="v2"] .apart.a0 { background: #a9c8ec; border-inline-end: 3px solid var(--ink); }
+#app[data-design="v2"] .area.grid .apart { background-image: linear-gradient(var(--ink) 1px, transparent 1px), linear-gradient(90deg, var(--ink) 1px, transparent 1px); background-size: 36px 36px; }
+#app[data-design="v2"] .apart.now { outline: 5px solid var(--sec); outline-offset: -5px; }

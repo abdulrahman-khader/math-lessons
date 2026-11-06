@@ -693,3 +693,34 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .ruletbl .rulev.shown { background: var(--ans); color: #fff; animation: none; }
 /* سجل الأسابيع: بقية الطلاب تحت نجوم الأسبوع، أصغر */
 #app[data-design="v2"] .sweeks .srest { font-size: 20px; font-weight: 600; color: #4a5468; line-height: 1.6; }
+
+/* قطع الضرب: ترتيب النقاط وجدول الضرب */
+#app[data-design="v2"] .dotarr { display: grid; grid-template-columns: repeat(var(--c), 20px); gap: 4px; justify-content: start; }
+#app[data-design="v2"] .dotarr i { inline-size: 20px; block-size: 20px; border-radius: 50%; background: #f2b705; border: 2px solid #a87000; box-sizing: border-box; }
+#app[data-design="v2"] .dotarr.big { grid-template-columns: repeat(var(--c), 44px); gap: 10px; }
+#app[data-design="v2"] .dotarr.big i { inline-size: 44px; block-size: 44px; }
+#app[data-design="v2"] .dotlist { display: flex; flex-direction: column; gap: 10px; }
+#app[data-design="v2"] .dotrow { display: flex; flex-direction: column; gap: 4px; padding: 6px 12px; border-radius: 12px; visibility: hidden; }
+#app[data-design="v2"] .dotrow.shown { visibility: visible; }
+#app[data-design="v2"] .dotrow.now { background: var(--sec-t); }
+#app[data-design="v2"] .dotrow .eq { font-size: var(--t-label); font-weight: 700; }
+#app[data-design="v2"] table.times { border-collapse: collapse; font-size: 24px; font-weight: 600; }
+#app[data-design="v2"] table.times th, #app[data-design="v2"] table.times td { inline-size: 52px; block-size: 44px; padding: 0; text-align: center; border: 2px solid var(--ink); }
+#app[data-design="v2"] table.times th { background: #e9f0fb; font-weight: 700; }
+#app[data-design="v2"] table.times td.on { background: #ffe680; font-weight: 700; }
+/* جواب داخل بطاقة سؤال: أبيض بحجم يُقرأ من آخر الفصل */
+#app[data-design="v2"] .qgrid .qcard .step.aslot:not(.long), #app[data-design="v2"] .qgrid .qcard .step.aslot:not(.long) span { font-size: 44px !important; }
+#app[data-design="v2"] .qgrid .qcard .step.aslot.long, #app[data-design="v2"] .qgrid .qcard .step.aslot.long span { font-size: 34px !important; }
+#app[data-design="v2"] .qgrid .qcard .step.aslot:not(.off), #app[data-design="v2"] .qgrid .qcard .step.aslot:not(.off) span { color: #fff !important; }
+#app[data-design="v2"] .dotrow.prow { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; padding: 4px 12px; }
+#app[data-design="v2"] .prow small { font-size: var(--t-small); font-weight: 600; min-inline-size: 90px; }
+#app[data-design="v2"] .pblocks { display: flex; gap: 6px; align-items: center; min-inline-size: 300px; }
+#app[data-design="v2"] .pb.one { inline-size: 26px; block-size: 26px; }
+#app[data-design="v2"] .pb.ten { inline-size: 11px; block-size: 92px; }
+#app[data-design="v2"] .pb.hundred { inline-size: 70px; block-size: 70px; }
+#app[data-design="v2"] .pb.thousand { inline-size: 74px; block-size: 74px; }
+#app[data-design="v2"] table.mcal { border-collapse: collapse; font-size: 24px; font-weight: 600; }
+#app[data-design="v2"] table.mcal th { font-size: 18px; padding: 6px 4px; background: #e9f0fb; border: 2px solid var(--ink); }
+#app[data-design="v2"] table.mcal td { inline-size: 76px; block-size: 56px; text-align: center; border: 2px solid var(--ink); }
+#app[data-design="v2"] table.mcal td.on { background: #ffe680; font-weight: 700; }
+#app[data-design="v2"] .qgrid .qcard .step.aslot.long { min-block-size: 84px; }

@@ -2,7 +2,7 @@ import { Fragment, useState, type ReactNode } from 'react';
 import { num } from '../digits';
 import { useSlide } from '../context';
 import type { SlideDef } from '../types';
-import { Blank } from './Cubes';
+import { Blank, VSum } from './Cubes';
 import { Card, Cols, QCard, SlideHead, Stack, IfTeams, GoHomeButton, MindMap, Winner } from './Layout';
 import { ExitTicket, Goals, Grid } from './Blocks';
 import { MCQ } from './MCQ';
@@ -16,16 +16,21 @@ import { WordChoice } from './ChanceBook';
 const T = (x: number) => Math.floor(x / 10) % 10;
 const O = (x: number) => x % 10;
 
-/** مجموعات من العشرات والآحاد، الأولى يمينًا كما تُقرأ الجملة */
-export function TenOnes({ values, big }: { values: number[]; big?: boolean }) {
+/** مجموعات من العشرات والآحاد، الأولى يمينًا كما تُقرأ الجملة. cross: [عشرات، آحاد] مشطوبة من المجموعة الأولى كما في الكتاب */
+export function TenOnes({ values, big, cross }: { values: number[]; big?: boolean; cross?: [number, number] }) {
+  const x = (kind: 'ten' | 'one', k: number, n: number, take: number) => <span key={k} className={'xb' + (k >= n - take ? ' on' : '')}><Block kind={kind} /></span>;
   return (
     <div className={'tenones' + (big ? ' big' : '')} role="img" aria-label={values.map((v) => num(v)).join(' و')}>
-      {values.map((v, i) => (
-        <div key={i} className="tgroup">
-          <div className="bones">{Array.from({ length: O(v) }, (_, k) => <Block key={k} kind="one" />)}</div>
-          {Array.from({ length: Math.floor(v / 10) }, (_, k) => <Block key={k} kind="ten" />)}
-        </div>
-      ))}
+      {values.map((v, i) => {
+        const [tt, to] = i === 0 && cross ? cross : [0, 0];
+        const tens = Math.floor(v / 10);
+        return (
+          <div key={i} className="tgroup">
+            <div className="bones">{Array.from({ length: O(v) }, (_, k) => x('one', k, O(v), to))}</div>
+            {Array.from({ length: tens }, (_, k) => x('ten', k, tens, tt))}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -35,7 +40,7 @@ export function TensCard({ n, a, b, op = '+', rods }: { n: number; a: number; b:
   const v = op === '+' ? a + b : a - b;
   return (
     <QCard n={n} className="tenscard">
-      {rods && <TenOnes values={op === '+' ? [a, b] : [a]} />}
+      {rods && <TenOnes values={op === '+' ? [a, b] : [a]} cross={op === '−' ? [b / 10, 0] : undefined} />}
       <div className="tenline">
         <b>{num(a / 10)}</b> عَشَرَاتٍ <span>{op}</span> <b>{num(b / 10)}</b> عَشَرَاتٍ <span>=</span> <Blank v={v / 10} /> عَشَرَاتٍ
       </div>
@@ -52,11 +57,12 @@ export function PlaceSum({ nums, op = '+', table, carry, rings, wrong, matHl }: 
   const total = op === '+' ? nums.reduce((s, x) => s + x, 0) : nums[0] - nums[1];
   const onesSum = nums.reduce((s, x) => s + O(x), 0);
   const c = op === '+' ? Math.floor(onesSum / 10) : 0;
+  const borrow = op === '−' && O(nums[0]) < O(nums[1]);
   const row0 = (table ? 1 : 0) + (carry ? 1 : 0) + 1;
   const last = row0 + nums.length - 1;
   const cell = (r: number, col: number) => ({ gridRow: r + 1, gridColumn: col });
   return (
-    <div className={'psum' + (table ? ' tb' : '') + (total > 99 ? ' h' : '')} role="img" aria-label={nums.map((x) => num(x)).join(` ${op} `)} style={{ '--n': nums.length } as React.CSSProperties}>
+    <div className={'psum' + (table ? ' tb' : '') + (total > 99 ? ' h' : '') + (borrow ? ' borrow' : '')} role="img" aria-label={nums.map((x) => num(x)).join(` ${op} `)} style={{ '--n': nums.length } as React.CSSProperties}>
       {table && (
         <>
           <span className="ph t" style={cell(0, 2)}>عَشَرَاتٌ</span>
@@ -65,8 +71,8 @@ export function PlaceSum({ nums, op = '+', table, carry, rings, wrong, matHl }: 
       )}
       {nums.map((x, i) => (
         <Fragment key={i}>
-          <span className="pd" style={cell(row0 + i, 2)}>{x >= 10 ? num(T(x)) : ''}</span>
-          <span className="pd" style={cell(row0 + i, 3)}>
+          <span className={'pd' + (i === 0 ? ' top' : '')} style={cell(row0 + i, 2)}>{x >= 10 ? num(T(x)) : ''}</span>
+          <span className={'pd' + (i === 0 ? ' top' : '')} style={cell(row0 + i, 3)}>
             {wrong && O(x) === 0 ? '' : num(O(x))}
             {rings?.includes(i) && <Step className="dring">{num(O(x))}</Step>}
           </span>
@@ -81,13 +87,19 @@ export function PlaceSum({ nums, op = '+', table, carry, rings, wrong, matHl }: 
         </>
       ) : (
         <>
-          <span className="pd" style={cell(last + 2, 3)}><Blank v={O(total)} box hl={matHl ? ['n0'] : undefined} /></span>
-          {carry && (
+          {op === '−' && carry && (
+            <>
+              <span className="pd pc" style={cell(table ? 1 : 0, 2)}>{borrow ? <Blank v={T(nums[0]) - 1} box hl={matHl ? ['n0'] : undefined} /> : <Blank v="" box empty />}</span>
+              <span className="pd pc" style={cell(table ? 1 : 0, 3)}>{borrow ? <Blank v={O(nums[0]) + 10} box /> : <Blank v="" box empty />}</span>
+            </>
+          )}
+          <span className="pd" style={cell(last + 2, 3)}><Blank v={O(total)} box hl={matHl ? [op === '+' ? 'n0' : 'n1'] : undefined} /></span>
+          {op === '+' && carry && (
             <span className="pd pc" style={cell(table ? 1 : 0, 2)}>
               {c ? <Blank v={c} box hl={matHl ? ['n1'] : undefined} /> : <Blank v="" box empty />}
             </span>
           )}
-          <span className="pd" style={cell(last + 2, 2)}><Blank v={T(total)} box /></span>
+          <span className="pd" style={cell(last + 2, 2)}>{total >= 10 && <Blank v={T(total)} box hl={matHl && op === '−' ? ['n2'] : undefined} />}</span>
           {total > 99 && <span className="pd" style={cell(last + 2, 1)}><Blank v={Math.floor(total / 100)} box /></span>}
         </>
       )}
@@ -103,6 +115,69 @@ export function PlaceCard({ n, nums, op, table, carry, blocks, rings }: { n: num
     <QCard n={n} className="vcard pcard">
       <PlaceSum nums={nums} op={op} table={table} carry={carry} rings={rings} />
       {blocks && <TenOnes values={nums} />}
+    </QCard>
+  );
+}
+
+/** لوحة الطرح بالقطع: hl n0 نفك عشرة إلى ١٠ آحاد، n1 نشطب آحاد المطروح، n2 نشطب عشراته */
+export function SubMat({ a, b, big }: { a: number; b: number; big?: boolean }) {
+  const { activeHl } = useSlide();
+  const borrow = O(a) < O(b);
+  const open = borrow && activeHl.has('n0');
+  const tens = T(a) - (open ? 1 : 0);
+  const ones = O(a) + (open ? 10 : 0);
+  const xo = activeHl.has('n1') ? O(b) : 0;
+  const xt = activeHl.has('n2') ? T(b) : 0;
+  return (
+    <div className={'pmat' + (big ? ' big' : '')}>
+      <div className="pmh t">عَشَرَاتٌ</div>
+      <div className="pmh o">آحَادٌ</div>
+      <div className="pmc t">{Array.from({ length: tens }, (_, k) => <span key={k} className={'xb' + (k >= tens - xt ? ' on' : '')}><Block kind="ten" /></span>)}</div>
+      <div className="pmc o"><div className="pmring">{Array.from({ length: ones }, (_, k) => <span key={k} className={'xb' + (k >= ones - xo ? ' on' : '')}><Block kind="one" /></span>)}</div></div>
+    </div>
+  );
+}
+
+/** جدول «أطرح الآحاد: هل هناك ضرورة لإعادة التجميع؟» */
+export function SubRegroupTable({ rows }: { rows: { n: number; a: number; b: number }[] }) {
+  return (
+    <table className="data rgt">
+      <thead>
+        <tr>
+          <th />
+          <th>أَطْرَحُ الآحَادَ. هَلْ هُنَاكَ ضَرُورَةٌ لِإِعَادَةِ التَّجْمِيعِ؟ (أُحَوِّطُ الإِجَابَةَ)</th>
+          <th>أَكْتُبُ نَاتِجَ الطَّرْحِ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(({ n, a, b }) => (
+          <tr key={n} data-qnum={n}>
+            <th><span className="qnum">{num(n)}</span> <span className="eq">{num(a)} − {num(b)}</span></th>
+            <td><WordChoice words={['نَعَمْ', 'لَا']} ans={O(a) < O(b) ? 'نَعَمْ' : 'لَا'} /></td>
+            <td><Sentence t={[a, '−', b, '=', { b: a - b }]} /></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** «أجد ناتج الطرح، ثم أتحقق مستعملًا الجمع»: الطرح رأسيًّا، وبجانبه الجمع للتحقق */
+export function CheckCard({ n, a, b }: { n: number; a: number; b: number }) {
+  return (
+    <QCard n={n} className="vcard">
+      <div className="vrow">
+        <VSum a={a} op="−" b={b} v={a - b} />
+        <div className="vsum" aria-label="التحقق">
+          <span />
+          <span className="vn"><Blank v={a - b} /></span>
+          <span className="vop">+</span>
+          <span className="vn">{num(b)}</span>
+          <span className="vline" />
+          <span />
+          <span className="vn vans"><Blank v={a} /></span>
+        </div>
+      </div>
     </QCard>
   );
 }
@@ -172,7 +247,7 @@ export function PlaceMat({ a, b, big }: { a: number; b?: number; big?: boolean }
 }
 
 /** المستكشف: نضيف قطعًا إلى اللوحة، فإذا بلغت الآحاد عشرة أو أكثر نعيد التجميع */
-export function RegroupExplorer({ start = 17, tensOnly }: { start?: number; tensOnly?: boolean }) {
+export function RegroupExplorer({ start = 17, tensOnly, open }: { start?: number; tensOnly?: boolean; open?: boolean }) {
   const [t, setT] = useState(Math.floor(start / 10));
   const [o, setO] = useState(start % 10);
   const btn = (label: ReactNode, on: () => void, off?: boolean) => (
@@ -188,9 +263,11 @@ export function RegroupExplorer({ start = 17, tensOnly }: { start?: number; tens
       </div>
       <Stack>
         <div className="pnow"><b>{num(t)}</b> عَشَرَاتٍ وَ<b>{num(o)}</b> {onesWord(o)}</div>
-        {!tensOnly && btn('أُضِيفُ آحَادًا', () => setO(o + 1), o >= 18)}
-        {btn('أُضِيفُ عَشَرَةً', () => setT(t + 1), t >= 8)}
-        {!tensOnly && btn('أُعِيدُ التَّجْمِيعَ', () => { setO(o - 10); setT(t + 1); }, o < 10 || t >= 9)}
+        {open && btn('أَطْرَحُ آحَادًا', () => setO(o - 1), o <= 0)}
+        {open && btn('أَفُكُّ عَشَرَةً', () => { setT(t - 1); setO(o + 10); }, t <= 0 || o >= 10)}
+        {!tensOnly && !open && btn('أُضِيفُ آحَادًا', () => setO(o + 1), o >= 18)}
+        {!open && btn('أُضِيفُ عَشَرَةً', () => setT(t + 1), t >= 8)}
+        {!tensOnly && !open && btn('أُعِيدُ التَّجْمِيعَ', () => { setO(o - 10); setT(t + 1); }, o < 10 || t >= 9)}
         {btn('أَبْدَأُ مِنْ جَدِيدٍ', () => { setT(Math.floor(start / 10)); setO(start % 10); })}
       </Stack>
     </div>
@@ -342,7 +419,7 @@ export function SvgBlocks({ x, y, tens = 0, ones = 0, s = 18, op = 1, tenColor =
 }
 
 /** جمع أو طرح رأسي داخل مقطع: رقما كل عدد في منزلتيهما، والإشارة يمين العدد الأخير */
-export function SvgVertical({ x, y, nums, op = '+', size = 76, ones, tens, carry, opacity = 1 }: { x: number; y: number; nums: number[]; op?: string; size?: number; ones?: number; tens?: number; carry?: number; opacity?: number }) {
+export function SvgVertical({ x, y, nums, op = '+', size = 76, ones, tens, carry, borrow = 0, opacity = 1 }: { x: number; y: number; nums: number[]; op?: string; size?: number; ones?: number; tens?: number; carry?: number; borrow?: number; opacity?: number }) {
   const gap = size * 1.25;
   const D = (cx: number, cy: number, v: number | string, o = 1, color = 'var(--ink)', sz = size) =>
     o <= 0.01 ? null : <text x={cx} y={cy} opacity={o} fontSize={sz} textAnchor="middle" fill={color} direction="ltr" style={{ fontWeight: 800 }}>{typeof v === 'number' ? num(v) : v}</text>;
@@ -358,6 +435,13 @@ export function SvgVertical({ x, y, nums, op = '+', size = 76, ones, tens, carry
       {D(x + size * 1.5, y + (nums.length - 1) * gap, op)}
       <line x1={x - size * 1.2} x2={x + size * 2} y1={line} y2={line} stroke="var(--ink)" strokeWidth={5} />
       {carry !== undefined && D(x - size * 0.5, y - size, 1, carry, 'var(--bad)', size * 0.6)}
+      {borrow > 0.01 && (
+        <g opacity={borrow}>
+          {D(x - size * 0.5, y - size, T(nums[0]) - 1, 1, 'var(--bad)', size * 0.6)}
+          {D(x + size * 0.5, y - size, O(nums[0]) + 10, 1, 'var(--bad)', size * 0.6)}
+          {[-0.5, 0.5].map((k) => <line key={k} x1={x + size * (k - 0.35)} x2={x + size * (k + 0.35)} y1={y + 6} y2={y - size * 0.7} stroke="var(--bad)" strokeWidth={5} />)}
+        </g>
+      )}
       {ones !== undefined && D(x + size * 0.5, line + size * 1.1, ones >= 0 ? ones : 0, 1, 'var(--good)')}
       {tens !== undefined && D(x - size * 0.5, line + size * 1.1, tens, 1, 'var(--good)')}
     </g>

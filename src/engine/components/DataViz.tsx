@@ -161,7 +161,7 @@ export function HBars({ title, labels, values, max, grid, lab, xTitle, yTitle, c
   const on = (k: string) => (activeHl.has(k) ? ' on' : '');
   const W = 760;
   const H = 440;
-  const m = { l: 150, r: ends ? 70 : 30, t: title ? 56 : 20, b: xTitle ? 86 : 50 };
+  const m = { l: 150, r: ends || v2 ? 70 : 30, t: title ? 56 : 20, b: xTitle ? 86 : 50 };
   const pw = W - m.l - m.r;
   const ph = H - m.t - m.b;
   const n = labels.length;

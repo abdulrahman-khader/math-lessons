@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { num } from '../digits';
 import { useSlide } from '../context';
 import { Blank } from './Cubes';
+import { Step } from './Steps';
 
 /* ---------- قطع الضرب في الصف الرابع: ترتيب النقاط في صفوف، وجدول الضرب ---------- */
 
@@ -217,6 +218,69 @@ export function AreaModel({ h, parts, grid }: { h: number; parts: number[]; grid
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** سطر أرقام في الضرب الرأسي، محاذى إلى اليمين؛ يمتلئ مع الخطوة التالية، أو مع hl إن أُعطي on */
+function VLine({ v, row, w, on, pad = 0 }: { v: number; row: number; w: number; on?: boolean; pad?: number }) {
+  const digits = String(v).split('').map(Number);
+  const cells = digits.map((d, i) => <span key={i}>{num(d)}</span>);
+  const style = { gridRow: row, gridColumn: `1 / ${w + 1}` };
+  if (on === undefined) return <Step className="vpart" style={style}>{cells}{Array.from({ length: pad }, (_, i) => <span key={`p${i}`} />)}</Step>;
+  return <div className="vpart vfix" style={{ ...style, visibility: on ? 'visible' : 'hidden' }}>{cells}</div>;
+}
+
+/**
+ * الضرب الرأسي في عدد من رقمين كما في الكتاب: ناتج ضرب الآحاد، ثم ناتج ضرب العشرات، ثم الجمع.
+ * إذا كان المضروب فيه من مضاعفات العشرة فالناتج سطر واحد. byHl: تظهر السطور مع الخطوات (hl: n0، n1، n2) في مثال الشرح.
+ */
+export function VMul2({ a, b, byHl }: { a: number; b: number; byHl?: boolean }) {
+  const { activeHl } = useSlide();
+  const ones = b % 10;
+  const p1 = a * ones;
+  const p2 = a * (b - ones);
+  const w = Math.max(String(a * b).length, String(a).length, String(b).length);
+  const on = (k: string) => (byHl ? activeHl.has(k) : undefined);
+  const top = (v: number, row: number) => <div className="vpart" style={{ gridRow: row, gridColumn: `1 / ${w + 1}` }}>{String(v).split('').map((d, i) => <span key={i}>{num(Number(d))}</span>)}</div>;
+  return (
+    <div className="vmul2" style={{ '--w': w } as React.CSSProperties} role="img" aria-label={`${num(a)} × ${num(b)}`}>
+      {top(a, 1)}
+      {top(b, 2)}
+      <span className="vo" style={{ gridRow: 2 }}>×</span>
+      <i style={{ gridRow: 3 }} />
+      {ones === 0 ? (
+        <VLine v={a * b} row={4} w={w} on={on('n0')} />
+      ) : (
+        <>
+          <VLine v={p1} row={4} w={w} on={on('n0')} />
+          <VLine v={p2} row={5} w={w} on={on('n1')} />
+          <span className="vo" style={{ gridRow: 5 }}>+</span>
+          <i style={{ gridRow: 6 }} />
+          <VLine v={a * b} row={7} w={w} on={on('n2')} />
+        </>
+      )}
+    </div>
+  );
+}
+
+/** نموذج المستطيل بأربعة أجزاء: عشرات وآحاد في كل بُعد؛ ناتج كل جزء يظهر مع الخطوة (hl: n0…n3) */
+export function Area4({ w, h }: { w: [number, number]; h: [number, number] }) {
+  const { activeHl, nowHl } = useSlide();
+  const part = (i: number, x: number, y: number) => (
+    <div key={i} className={`a4 a${i}` + (nowHl.has(`n${i}`) ? ' now' : '')} style={{ flexGrow: Math.max(x, 4) }}>
+      {activeHl.has(`n${i}`) && <span className="eq">{num(y)} × {num(x)} = {num(x * y)}</span>}
+    </div>
+  );
+  return (
+    <div className="area4">
+      <div className="a4top">{w.map((x, i) => <span key={i} style={{ flexGrow: Math.max(x, 4) }}>{num(x)}</span>)}</div>
+      {h.map((y, r) => (
+        <div key={r} className="a4row" style={{ flexGrow: Math.max(y, 3) }}>
+          <b>{num(y)}</b>
+          {w.map((x, c) => part(r * 2 + c, x, y))}
+        </div>
+      ))}
     </div>
   );
 }

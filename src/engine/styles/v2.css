@@ -839,3 +839,18 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .qgrid .qcard .vmul2 .step.vpart:not(.bv) { font-size: 38px; }
 #app[data-design="v2"] .qgrid .qcard .vmul2 .step.vpart:not(.bv) span { font-size: 38px !important; color: inherit !important; }
 #app[data-design="v2"] .vmul2 .vpart.vfix { color: var(--ans); }
+
+/* ---------- الأعداد حتى ١٠٠ ---------- */
+#app[data-design="v2"] .pv { display: inline-flex; gap: 2px; font-size: 44px; font-weight: 700; line-height: 1.2; }
+#app[data-design="v2"] .pv .on { padding-inline: 6px; border-radius: 6px; background: #ffe39b; color: #c8281e; }
+#app[data-design="v2"] .tenline.wn { font-size: var(--t-body); }
+#app[data-design="v2"] .jars { display: flex; justify-content: center; gap: 22px; }
+#app[data-design="v2"] .jarw { display: flex; flex-direction: column; align-items: center; font-size: var(--t-small); font-weight: 700; }
+#app[data-design="v2"] .jar { inline-size: 150px; block-size: 196px; }
+#app[data-design="v2"] .seq { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 40px; font-weight: 700; }
+#app[data-design="v2"] .grow { display: flex; align-items: flex-end; justify-content: center; gap: 22px; direction: rtl; }
+#app[data-design="v2"] .gcol { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: var(--t-label); }
+#app[data-design="v2"] .gmarks { display: grid; justify-content: center; gap: 2px; }
+#app[data-design="v2"] .gm { inline-size: 22px; block-size: 22px; }
+#app[data-design="v2"] table.hundred { border-collapse: collapse; direction: rtl; font-size: 26px; font-weight: 700; }
+#app[data-design="v2"] table.hundred td { inline-size: 54px; block-size: 46px; border: 2px solid var(--ink); text-align: center; line-height: 1; }

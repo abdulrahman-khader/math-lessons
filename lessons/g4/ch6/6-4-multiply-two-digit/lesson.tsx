@@ -1,5 +1,5 @@
 import {
-  BookGroup, BookLabel, Cols, DataTable, Eq, QCard, QCol, QText, QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, VMul2, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  BookGroup, BookLabel, Cols, Eq, FnTable, QCard, QCol, QText, QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, VMul2, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -57,7 +57,7 @@ export default defineLesson({
           <SlideHead tag="مثالٌ منْ واقعِ الحياةِ، ص ١٨٩" kind="rule">الفواتير</SlideHead>
           <Cols>
             <QCol>
-              <QText>تبلغُ فاتورةُ الماءِ لمنزلِ محمَّدٍ ٣٨ ريالًا شهريًّا، وهناكَ ٢٤ شهرًا في السَّنتينِ. كمْ ريالًا يُسدِّدُ لفاتورةِ الماءِ في سنتينِ؟</QText>
+              <QText>كمْ ريالًا يُسدِّدُ لفاتورةِ الماءِ في سنتينِ؟ تبلغُ فاتورةُ الماءِ لمنزلِ محمَّدٍ ٣٨ ريالًا شهريًّا، وهناكَ ٢٤ شهرًا في السَّنتينِ.</QText>
               <Solution>
                 <Step><BookLabel>قدِّرْ:</BookLabel> <Eq>٤٠ × ٢٠ = ٨٠٠</Eq></Step>
                 <Step hl={['n0']}><BookLabel>الخطوةُ ١:</BookLabel> <Eq>٤ × ٣٨ = ١٥٢</Eq></Step>
@@ -175,7 +175,7 @@ export default defineLesson({
       sec: 'practice', min: 5,
       notes: 'نقرأ المسألة معًا، ثم نحل كل سؤال.',
       content: (
-        <BookGroup source={REAL} intro="سيَّاراتٌ: يُبيِّنُ الجدولُ المجاورُ عددَ السيَّاراتِ الصَّغيرةِ والسيَّاراتِ الكبيرةِ الَّتي يتمُّ فحصُها في ورشةٍ خلالَ شهرٍ:" chart={<DataTable rows={[['الصغيرةُ', 60], ['الكبيرةُ', 46]]} />} qs={[
+        <BookGroup source={REAL} intro="سيَّاراتٌ: يُبيِّنُ الجدولُ المجاورُ عددَ السيَّاراتِ الصَّغيرةِ والسيَّاراتِ الكبيرةِ الَّتي يتمُّ فحصُها في ورشةٍ خلالَ شهرٍ:" chart={<FnTable title="الصيانةُ الدوريَّةُ" heads={['السيَّاراتُ', 'العددُ']} rows={[['الصغيرةُ', 60], ['الكبيرةُ', 46]]} />} qs={[
             { n: 16, question: "كمْ سيَّارةً صغيرةً يتمُّ فحصُها في ١١ شهرًا؟", steps: [{ text: <Eq>٦٠ × ١١ = ٦٦٠</Eq> }, { text: '٦٦٠ سيَّارةً', kind: 'ans' }] },
             { n: 17, question: "كمْ سيَّارةً كبيرةً يتمُّ فحصُها في ١٢ شهرًا؟", steps: [{ text: <Eq>٤٦ × ١٢ = ٥٥٢</Eq> }, { text: '٥٥٢ سيَّارةً', kind: 'ans' }] },
             { n: 18, question: "كمْ يزيدُ عددُ السيَّاراتِ الصَّغيرةِ الَّتي يتمُّ فحصُها في ١٥ سنةً على عددِ السيَّاراتِ الكبيرةِ؟", steps: [{ text: '١٥ سنةً = ١٨٠ شهرًا' }, { text: <Eq>٦٠ − ٤٦ = ١٤</Eq> }, { text: <Eq>١٤ × ١٨٠ = ٢٥٢٠</Eq> }, { text: '٢٥٢٠ سيَّارةً', kind: 'ans' }] },

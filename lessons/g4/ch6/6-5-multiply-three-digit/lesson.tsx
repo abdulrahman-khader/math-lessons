@@ -1,5 +1,5 @@
 import {
-  BookGroup, BookLabel, BookSource, Cols, DataTable, DotArray, Eq, Grid, Lines, MCQ, QCard, QCol, QText, QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Step, VMul2, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  BookGroup, BookLabel, BookSource, Cols, DataTable, Eq, FnTable, Grid, Lines, MCQ, QCard, QCol, QText, QuestionGroup, QuestionSlide, Sentence, ShapeRow, SlideHead, Solution, Step, VMul2, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -188,7 +188,7 @@ export default defineLesson({
       sec: 'practice', min: 5,
       notes: 'نقرأ المسألة معًا، ثم نحل كل سؤال.',
       content: (
-        <BookGroup source={REAL} intro="رياضةٌ: يُبيِّنُ الجدولُ المجاورُ معلوماتٍ عنِ الكراتِ المستعملَةِ في بعضِ الألعابِ الرياضيَّةِ:" chart={<DataTable rows={[['الجولفِ', '٤٥٠ نقطةً'], ['البيسبولِ', '١٠٨ غرزاتٍ'], ['القدمِ', '٣٢ دائرةً']]} />} qs={[
+        <BookGroup source={REAL} intro="رياضةٌ: يُبيِّنُ الجدولُ المجاورُ معلوماتٍ عنِ الكراتِ المستعملَةِ في بعضِ الألعابِ الرياضيَّةِ:" chart={<FnTable heads={['الكرةُ', 'المعلومةُ']} rows={[['الجولفِ', '٤٥٠ نقطةً'], ['البيسبولِ', '١٠٨ غرزاتٍ'], ['القدمِ', '٣٢ دائرةً']]} />} qs={[
             { n: 18, question: "كمْ نقطةً توجدُ على ١٢ كرةَ جولفٍ؟", steps: [{ text: <Eq>٤٥٠ × ١٢ = ٥٤٠٠</Eq> }, { text: '٥٤٠٠ نقطةٍ', kind: 'ans' }] },
             { n: 19, question: "كمْ غرزةً توجدُ على ٧٥ كرةَ بيسبولٍ؟", steps: [{ text: <Eq>١٠٨ × ٧٥ = ٨١٠٠</Eq> }, { text: '٨١٠٠ غرزةٍ', kind: 'ans' }] },
             { n: 20, question: "أوجدِ الفرقَ بينَ عددِ النُّقطِ على ٢٥ كرةَ جولفٍ وعددِ الغرزِ على ٢٥ كرةَ بيسبولٍ.", steps: [{ text: <Eq>٤٥٠ × ٢٥ = ١١٢٥٠</Eq> }, { text: <Eq>١٠٨ × ٢٥ = ٢٧٠٠</Eq> }, { text: <Eq>١١٢٥٠ − ٢٧٠٠ = ٨٥٥٠</Eq> }, { text: '٨٥٥٠', kind: 'ans' }] },
@@ -257,7 +257,7 @@ export default defineLesson({
       notes: 'نقرأ المسألة معًا، ثم نحلها خطوة خطوة.',
       content: (
         <QuestionSlide
-          source={REVIEW} n={28} chart={<DotArray rows={2} cols={3} big />} time={120}
+          source={REVIEW} n={28} chart={<ShapeRow items={['square', 'square', 'square', 'square', 'square', 'square']} />} time={120}
           question={"أعِدْ ترتيبَ الطَّاولاتِ المجاورةِ، بحيثُ يجلسُ ٢٠ طالبًا في اجتماعِ مجلسِ الطُّلابِ؛ كلُّ طالبينِ معًا."}
           hint="كمْ ضلعًا خارجيًّا نحتاجُ؟"
           steps={[
@@ -273,10 +273,11 @@ export default defineLesson({
       notes: 'نقرأ المسألة معًا، ثم نحلها خطوة خطوة.',
       content: (
         <QuestionSlide
-          source={REVIEW} n={29} chart={<DataTable rows={[['المجلاتُ', 4, 8, 12, 16, 20], ['المبالغُ', 2, 4, 6, 8, '؟']]} />} time={120}
+          source={REVIEW} n={29} chart={<DataTable rows={[['عددُ المجلاتِ المبيعةِ', 4, 8, 12, 16, 20], ['المبالغُ المعادةُ للمشتري (ريال)', 2, 4, 6, '؟', '؟']]} />} time={120}
           question={"لكلِّ ٤ مجلاتٍ يتمُّ بيعُها يُعادُ ريالانِ منْ ثمنِها للمشتري. استعملِ الجدولَ المجاورَ لإيجادِ كمْ ريالًا سيتمُّ إرجاعُها للمشتري إذا اشترى ٢٠ مجلةً؟"}
           hint="ما النمطُ في الجدولِ؟"
           steps={[
+            { text: 'كلُّ ٤ مجلاتٍ: ريالانِ.' },
             { text: <Eq>٢٠ ÷ ٤ = ٥</Eq> },
             { text: <Eq>٥ × ٢ = ١٠</Eq> },
             { text: '١٠ ريالاتٍ', kind: 'ans' },

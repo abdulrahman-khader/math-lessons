@@ -1,5 +1,5 @@
 import {
-  BookLabel, BookSource, Cols, DataTable, Eq, Grid, Lines, MCQ, QCard, QCol, QText, QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, VMul2, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  BookLabel, BookSource, Cols, DataTable, Eq, FnTable, Grid, Lines, MCQ, QCard, QCol, QText, QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, VMul2, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -190,7 +190,7 @@ export default defineLesson({
       notes: 'نقرأ المسألة معًا، ثم نحلها خطوة خطوة.',
       content: (
         <QuestionSlide
-          source={PRACTICE} n={18} chart={<DataTable rows={[['الفواكهُ الطَّازجةُ', 113], ['الخضرواتُ الطَّازجةُ', 72], ['الحليبُ', 47]]} />} time={60}
+          source={PRACTICE} n={18} chart={<FnTable title="معدلُ الاستهلاكِ السنويِّ للفردِ السعوديِّ منَ الطعامِ" heads={['نوعُ الطعامِ', 'الكميةُ (كجم)']} rows={[['الفواكهُ الطَّازجةُ', 113], ['الخضرواتُ الطَّازجةُ', 72], ['الحليبُ', 47]]} />} time={60}
           question={<><BookLabel>القياسُ:</BookLabel> كمْ كيلوجرامًا تقريبًا منَ الفواكهِ الطَّازجةِ يستهلكُ الفردُ السُّعوديُّ خلالَ ١٢ سنةً؟</>}
           hint="ما الكميةُ في الجدولِ؟"
           steps={[
@@ -255,7 +255,7 @@ export default defineLesson({
         <>
           <BookSource>{TEST}</BookSource>
           <Grid cols={2}>
-            <QCard n={22}><MCQ q="كمْ يبلغُ طولُ ٣٥ أفعى منْ نوعِ الأناكوندا؟ طولُ الواحدةِ ٦٠٠ سم (الدرس ٦-١)" options={["أ) ١٨٠٠٠ سم", "ب) ٢١٠٠٠ سم", "جـ) ٢٤٠٠٠ سم", "د) ٣٠٠٠٠ سم"]} answer="ب) ٢١٠٠٠ سم" /></QCard>
+            <QCard n={22}><div className="tenline">طولُ الأفعى في الصورةِ: ٦٠٠ سم</div><MCQ q="كمْ يبلغُ طولُ ٣٥ أفعى منْ نوعِ الأناكوندا؟ (الدرس ٦-١)" options={["أ) ١٨٠٠٠ سم", "ب) ٢١٠٠٠ سم", "جـ) ٢٤٠٠٠ سم", "د) ٣٠٠٠٠ سم"]} answer="ب) ٢١٠٠٠ سم" /></QCard>
             <QCard n={23}><MCQ q="عددُ أيامِ السنةِ الهجريةِ يُساوي ٣٥٤ يومًا تقريبًا، ما أفضلُ تقديرٍ لعددِ أيامِ ١٢ سنةً؟ (الدرس ٦-٢)" options={["أ) ٤٠٠٠", "ب) ٥٠٠٠", "جـ) ٦٠٠٠", "د) ٧٠٠٠"]} answer="أ) ٤٠٠٠" /></QCard>
           </Grid>
         </>

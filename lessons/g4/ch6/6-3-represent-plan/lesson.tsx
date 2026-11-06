@@ -1,5 +1,5 @@
 import {
-  BookLabel, Cols, DotArray, Eq, QCol, QText, QuestionSlide, SlideHead, Solution, Step, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  BookLabel, Cols, Eq, QCol, QText, QuestionSlide, ShapeRow, SlideHead, Solution, Stack, Step, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -181,7 +181,7 @@ export default defineLesson({
       notes: 'نقرأ المسألة معًا، ثم نحلها خطوة خطوة.',
       content: (
         <QuestionSlide
-          source={PRACTICE} n={9} chart={<DotArray rows={2} cols={6} big />} time={120}
+          source={PRACTICE} n={9} chart={<Stack><ShapeRow items={['square', 'square', 'square', 'square', 'square', 'square']} /><ShapeRow items={['square', 'square', 'square', 'square', 'square', 'square']} /></Stack>} time={120}
           question={<><BookLabel>الهندسةُ:</BookLabel> كمْ مستطيلًا مختلفًا يمكنُكَ أنْ تصنعَ باستعمالِ جميعِ المربَّعاتِ التَّاليةِ؟</>}
           hint="ما العددانِ اللَّذانِ ناتجُ ضربِهِما ١٢؟"
           steps={[

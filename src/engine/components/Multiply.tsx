@@ -71,7 +71,7 @@ export function TimesTable({ n, size = 10 }: { n: number; size?: number }) {
 export type PlaceKind = 'one' | 'ten' | 'hundred' | 'thousand';
 
 /** قطعة قاعدة العشرة: آحاد، عشرة، مئة، ألف */
-function Block({ kind }: { kind: PlaceKind }) {
+export function Block({ kind }: { kind: PlaceKind }) {
   const line = { stroke: '#7a3b00', strokeWidth: 1 };
   if (kind === 'one') return <svg viewBox="0 0 12 12" className="pb one"><rect x={1} y={1} width={10} height={10} fill="#e8701a" {...line} /></svg>;
   if (kind === 'ten')

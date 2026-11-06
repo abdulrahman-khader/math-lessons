@@ -749,3 +749,65 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .apart.a0 { background: #a9c8ec; border-inline-end: 3px solid var(--ink); }
 #app[data-design="v2"] .area.grid .apart { background-image: linear-gradient(var(--ink) 1px, transparent 1px), linear-gradient(90deg, var(--ink) 1px, transparent 1px); background-size: 36px 36px; }
 #app[data-design="v2"] .apart.now { outline: 5px solid var(--sec); outline-offset: -5px; }
+
+/* ---------- قطع الجمع والطرح في الصف الثاني ---------- */
+#app[data-design="v2"] .tenones { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 22px; }
+#app[data-design="v2"] .tgroup { display: flex; flex-direction: row-reverse; align-items: flex-end; gap: 3px; direction: ltr; }
+#app[data-design="v2"] .tgroup .bones { display: grid; grid-auto-flow: column; grid-template-rows: repeat(5, 16px); grid-auto-columns: 16px; gap: 2px; align-content: end; }
+#app[data-design="v2"] .tgroup .pb.one { inline-size: 16px; block-size: 16px; }
+#app[data-design="v2"] .tgroup .pb.ten { inline-size: 10px; block-size: 88px; }
+#app[data-design="v2"] .tenones.big .tgroup .pb.ten { inline-size: 18px; block-size: 160px; }
+#app[data-design="v2"] .tenones.big .tgroup .bones { grid-template-rows: repeat(5, 28px); grid-auto-columns: 28px; gap: 4px; }
+#app[data-design="v2"] .tenones.big .tgroup .pb.one { inline-size: 28px; block-size: 28px; }
+#app[data-design="v2"] .qcard.tenscard { flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+#app[data-design="v2"] .tenline { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; font-size: var(--t-label); font-weight: 700; }
+#app[data-design="v2"] .tenline b { display: inline-grid; place-items: center; min-width: 1.4em; border-radius: 8px; background: #ffe39b; font-weight: 700; }
+
+#app[data-design="v2"] .psum { position: relative; display: inline-grid; grid-template-columns: 0 minmax(70px, auto) minmax(70px, auto) 40px; grid-auto-rows: auto; justify-items: center; align-items: center; align-self: center; direction: ltr; font-size: 42px; font-weight: 700; line-height: 1.3; row-gap: 2px; }
+#app[data-design="v2"] .psum.h { grid-template-columns: minmax(70px, auto) minmax(70px, auto) minmax(70px, auto) 40px; }
+#app[data-design="v2"] .psum .ph { justify-self: stretch; padding: 2px 6px; border-radius: 6px 6px 0 0; font-size: 22px; line-height: 1.4; text-align: center; }
+#app[data-design="v2"] .psum .ph.t { background: #fbd6ab; }
+#app[data-design="v2"] .psum .ph.o { background: #c2e8cd; }
+#app[data-design="v2"] .psum .pd { position: relative; display: grid; place-items: center; justify-self: stretch; min-block-size: 54px; }
+#app[data-design="v2"] .psum .blank.box { min-width: 52px; min-height: 52px; font-size: 36px; }
+#app[data-design="v2"] .psum .pc .blank.box { min-width: 38px; min-height: 38px; border-width: 3px; font-size: 26px; }
+#app[data-design="v2"] .psum .pc .blank.box::before { content: none !important; }
+#app[data-design="v2"] .psum .pline { align-self: start; inline-size: 100%; grid-column: 1 / -1 !important; border-block-start: 4px solid var(--ink); }
+#app[data-design="v2"] .psum .pcol { justify-self: start; block-size: 100%; border-inline-start: 3px solid var(--ink); pointer-events: none; }
+#app[data-design="v2"] .psum .pdash { justify-self: start; block-size: 100%; border-inline-start: 3px dashed var(--muted); pointer-events: none; }
+#app[data-design="v2"] .psum .dring { position: absolute; inset: 2px; display: block; border: 4px solid var(--ans); border-radius: 50%; background: none; color: transparent; visibility: hidden; font-size: 0; }
+#app[data-design="v2"] .psum .dring.shown { visibility: visible; }
+#app[data-design="v2"] .qcard.pcard { justify-content: center; }
+
+#app[data-design="v2"] table.rgt { font-size: var(--t-body); }
+#app[data-design="v2"] table.rgt th, #app[data-design="v2"] table.rgt td { padding: 14px 10px; text-align: center; }
+#app[data-design="v2"] table.rgt thead th { font-size: var(--t-small); }
+#app[data-design="v2"] table.rgt .qnum { position: static; display: inline-grid; }
+#app[data-design="v2"] table.rgt .blank { min-width: 64px; }
+#app[data-design="v2"] table.rgt .cwords { justify-content: center; gap: 28px; }
+
+#app[data-design="v2"] .pmat { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; direction: ltr; min-inline-size: 300px; border: 4px solid var(--ink); border-radius: 12px; overflow: hidden; background: #fff; }
+#app[data-design="v2"] .pmat.big { min-inline-size: 460px; min-block-size: 330px; }
+#app[data-design="v2"] .pmh { padding: 4px; font-size: var(--t-label); font-weight: 700; text-align: center; }
+#app[data-design="v2"] .pmh.t { background: #fbd6ab; }
+#app[data-design="v2"] .pmh.o { background: #c2e8cd; }
+#app[data-design="v2"] .pmc { display: flex; flex-wrap: wrap; align-content: center; justify-content: center; align-items: center; gap: 6px; padding: 12px; }
+#app[data-design="v2"] .pmc.o { border-inline-start: 4px solid var(--ink); flex-direction: column; flex-wrap: nowrap; }
+#app[data-design="v2"] .pmc .pb.ten { inline-size: 18px; block-size: 170px; }
+#app[data-design="v2"] .pmc .pb.one { inline-size: 26px; block-size: 26px; }
+#app[data-design="v2"] .pmring { display: grid; grid-auto-flow: column; grid-template-rows: repeat(5, 26px); grid-auto-columns: 26px; gap: 4px; padding: 6px; border: 4px dashed transparent; border-radius: 14px; }
+#app[data-design="v2"] .pmring.on { border-color: var(--ans); }
+#app[data-design="v2"] .newten { display: inline-flex; filter: grayscale(1) brightness(.75); }
+#app[data-design="v2"] .pexplore { display: flex; justify-content: center; align-items: stretch; gap: 36px; }
+#app[data-design="v2"] .pnow { font-size: var(--t-body); font-weight: 700; }
+
+#app[data-design="v2"] .rsum { display: inline-grid; grid-template-columns: auto 34px 56px auto 34px; grid-template-rows: auto auto 6px auto; column-gap: 4px; row-gap: 3px; justify-items: center; align-items: center; align-self: center; direction: ltr; font-size: 38px; font-weight: 700; line-height: 1.2; }
+#app[data-design="v2"] .rsum i { align-self: start; inline-size: 100%; border-block-start: 4px solid var(--ink); }
+#app[data-design="v2"] .rsum .rar { color: var(--muted); font-size: 34px; }
+#app[data-design="v2"] .rsum .blank.box { min-width: 76px; min-height: 50px; font-size: 34px; }
+#app[data-design="v2"] .pmat.two .pmc { flex-direction: column; flex-wrap: nowrap; gap: 14px; }
+#app[data-design="v2"] .pmat.two .pmc .pb.ten { block-size: 118px; inline-size: 14px; }
+#app[data-design="v2"] .pmat.two .pmring { grid-template-rows: repeat(5, 20px); grid-auto-columns: 20px; padding: 0; gap: 3px; }
+#app[data-design="v2"] .pmat.two .pmc .pb.one { inline-size: 20px; block-size: 20px; }
+#app[data-design="v2"] .pmr { display: flex; justify-content: center; gap: 6px; }
+#app[data-design="v2"] .psum, #app[data-design="v2"] .rsum { inline-size: max-content; justify-self: center; }

@@ -29,3 +29,4 @@ export { CubeChip, WordChoice, CircleRow, CompareQ, DrawTally, DrawCard, ColorPa
 export { CubeBox, LineBox, SentenceCard, SumCard, FamilyCard, DominoCard, TriFamilyCard, TowerCard, TrainFactCard, DominoLinesCard, TriangleCard, FactGrid, Countdown } from './components/BookDrill';
 export { Frogs, FrogExplorer, DoublesExplorer, MissingExplorer } from './components/G2Explorers';
 export { AreaModel, DotArray, DotArrays, MonthCal, PlaceRows, TimesTable, VMul, BlockGroups, ShapeRow, type PlaceKind } from './components/Multiply';
+export { TenOnes, TensCard, PlaceSum, PlaceCard, RegroupTable, PlaceMat, RegroupExplorer, RoundSum, RoundCard, SvgBlocks, SvgVertical, clipSlide, askSlide, goalsSlide, mindSlide, exitSlide, endSlide } from './components/Place';

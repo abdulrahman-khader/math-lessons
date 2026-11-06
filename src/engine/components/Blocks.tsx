@@ -43,11 +43,12 @@ export function Grid({ cols = 2, children }: { cols?: 1 | 2 | 3 | 4; children: R
 }
 
 /** مجموعة أسئلة من الكتاب تحت تعليمات واحدة: المصدر، ثم التعليمات، ثم البطاقات */
-export function QuestionGroup({ source, instruction, cols = 2, time, children }: { source: ReactNode; instruction?: ReactNode; cols?: 1 | 2 | 3 | 4; time?: number; children: ReactNode }) {
+export function QuestionGroup({ source, instruction, above, cols = 2, time, children }: { source: ReactNode; instruction?: ReactNode; above?: ReactNode; cols?: 1 | 2 | 3 | 4; time?: number; children: ReactNode }) {
   return (
     <>
       <BookSource>{source}</BookSource>
       {instruction && <QText>{instruction}</QText>}
+      {above}
       <Grid cols={cols}>{children}</Grid>
       <Ctrls>
         <NextButton />

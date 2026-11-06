@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { num } from '../digits';
 import { useSlide } from '../context';
 import { Blank } from './Cubes';
@@ -91,7 +92,7 @@ function Block({ kind }: { kind: PlaceKind }) {
 }
 
 /** صفوف من قطع قاعدة العشرة مع جملتها؛ كل صف مخفي ومكانه محفوظ حتى تذكره خطوة (hl: n{i}) */
-export function PlaceRows({ items }: { items: { kind: PlaceKind; count: number; label: string; eq: string }[] }) {
+export function PlaceRows({ items }: { items: { kind: PlaceKind; count: number; plus?: { kind: PlaceKind; count: number }; label: string; eq: string }[] }) {
   const { activeHl, nowHl } = useSlide();
   return (
     <div className="dotlist">
@@ -99,6 +100,7 @@ export function PlaceRows({ items }: { items: { kind: PlaceKind; count: number; 
         <div key={i} className={'dotrow prow' + (activeHl.has(`n${i}`) ? ' shown' : '') + (nowHl.has(`n${i}`) ? ' now' : '')}>
           <div className="pblocks">
             {Array.from({ length: it.count }, (_, k) => <Block key={k} kind={it.kind} />)}
+            {it.plus && Array.from({ length: it.plus.count }, (_, k) => <Block key={`p${k}`} kind={it.plus!.kind} />)}
           </div>
           <span className="eq">{it.eq}</span>
           <small>{it.label}</small>
@@ -131,16 +133,68 @@ export function MonthCal({ days, marked, start }: { days: number; marked: number
   );
 }
 
-/** الضرب الرأسي كما في الكتاب: خانات الناتج تمتلئ من الآحاد إلى اليسار */
-export function VMul({ a, b }: { a: number; b: number }) {
+/**
+ * الضرب الرأسي كما في الكتاب: علامة × على يمين الرقم، وخانات الناتج تمتلئ من الآحاد إلى اليسار، وكل رقم يُحمل يظهر فوق منزلته
+ * بعد الخانة التي نتج عنها. مكان الرقم المحمول فارغ قبل ظهوره حتى لا يكشف الحاجة إلى إعادة التجميع.
+ * regroup يحفظ سطر الأرقام المحمولة في البطاقات كلها.
+ */
+export function VMul({ a, b, regroup }: { a: number; b: number; regroup?: boolean }) {
+  const top = String(a).split('').reverse().map(Number);
   const out = String(a * b).split('').reverse().map(Number);
+  const w = Math.max(top.length, out.length);
+  /** عمود الخانة i من اليمين */
+  const col = (i: number) => w - i;
+  let carry = 0;
+  const cells = out.map((d, i) => {
+    const next = i < top.length ? Math.floor((top[i] * b + carry) / 10) : 0;
+    carry = next;
+    const show = next > 0 && i + 1 < top.length;
+    return (
+      <Fragment key={i}>
+        <span className="vd" style={{ gridRow: 5, gridColumn: col(i) }}><Blank v={d} box /></span>
+        {show && <span className="vd vc" style={{ gridRow: 1, gridColumn: col(i + 1) }}><Blank v={next} box /></span>}
+      </Fragment>
+    );
+  });
   return (
-    <div className="vmul" role="img" aria-label={`${num(a)} × ${num(b)}`}>
-      <span className="vrow">{num(a)}</span>
-      <span className="vrow">× {num(b)}</span>
-      <span className="vrow vres">
-        {out.map((d, i) => <Blank key={i} v={d} box />)}
-      </span>
+    <div className={'vmul' + (regroup ? ' room' : '')} style={{ '--w': w } as React.CSSProperties} role="img" aria-label={`${num(a)} × ${num(b)}`}>
+      {top.map((d, i) => <span key={i} className="vd" style={{ gridRow: 2, gridColumn: col(i) }}>{num(d)}</span>)}
+      <span className="vd" style={{ gridRow: 3, gridColumn: col(0) }}>{num(b)}</span>
+      <span className="vd" style={{ gridRow: 3, gridColumn: w + 1 }}>×</span>
+      <i className="vline" />
+      {cells}
+    </div>
+  );
+}
+
+/** مجموعات متساوية من العشرات والآحاد كما في نماذج الكتاب */
+export function BlockGroups({ groups, tens, ones, big }: { groups: number; tens: number; ones: number; big?: boolean }) {
+  return (
+    <div className={'bgroups' + (big ? ' big' : '')} role="img" aria-label={`${num(groups)} × ${num(tens * 10 + ones)}`}>
+      {Array.from({ length: groups }, (_, g) => (
+        <div key={g} className="bgroup">
+          {Array.from({ length: tens }, (_, k) => <Block key={k} kind="ten" />)}
+          <div className="bones">
+            {Array.from({ length: ones }, (_, k) => <Block key={k} kind="one" />)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** نمط أشكال كما في الكتاب، يُقرأ من اليمين */
+export function ShapeRow({ items }: { items: ('circle' | 'triangle' | 'square')[] }) {
+  const line = { stroke: 'var(--ink)', strokeWidth: 3 };
+  return (
+    <div className="shaperow" role="img" aria-label="نمط أشكال">
+      {items.map((k, i) => (
+        <svg key={i} viewBox="0 0 60 60">
+          {k === 'circle' && <circle cx={30} cy={30} r={26} fill="#6fa8dc" {...line} />}
+          {k === 'triangle' && <path d="M30 5 L56 55 H4 Z" fill="#6cbb8c" {...line} />}
+          {k === 'square' && <rect x={5} y={5} width={50} height={50} fill="#ef7f6a" {...line} />}
+        </svg>
+      ))}
     </div>
   );
 }

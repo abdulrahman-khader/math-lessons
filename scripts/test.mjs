@@ -26,6 +26,11 @@ const SAMPLE = [
   'g4/ch6/6-4-multiply-two-digit',
   'g5/ch4/4-4-divide-two-digits',
 ];
+/**
+ * على GitHub عيّنة أصغر ليبقى النشر بضع دقائق: الاختبار الكامل يُشغَّل على الجهاز قبل رفع تغيير في المحرك.
+ * (فحوص النجوم والفصول والجوال تفتح دروسها بنفسها، وكل الدروس مبنية هناك.)
+ */
+const CI_SAMPLE = ['g2/ch3/3-7-fact-families', 'g4/ch3/3-6-probability', 'g4/ch6/6-4-multiply-two-digit', 'g5/ch4/4-4-divide-two-digits'];
 
 const sh = (cmd) => execSync(cmd, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
 const run = (cmd, cmdArgs, env = {}) => {
@@ -64,7 +69,7 @@ else {
     lessons = every.filter((l) => files.some((f) => f.startsWith(`lessons/${l}/`)));
     // المحرك: كل ما يؤثر في الدروس خارج مجلداتها (لا ملفات الشرح ولا الصور)
     engine = files.some((f) => !f.startsWith('lessons/') && !/\.md$/.test(f) && !/^(shots|\.impeccable|\.claude|dist)\//.test(f));
-    if (engine) lessons = [...new Set([...lessons, ...SAMPLE.filter((l) => every.includes(l))])];
+    if (engine) lessons = [...new Set([...lessons, ...(process.env.CI ? CI_SAMPLE : SAMPLE).filter((l) => every.includes(l))])];
     console.log(`تغيّر ${files.length} ملفًا${engine ? '، منها ملفات المحرك أو الاختبارات' : ''}.`);
   }
 }

@@ -64,7 +64,8 @@ export default defineLesson({
                 <Step hl={['n0']}><BookLabel>الخطوةُ ١:</BookLabel> كمْ ٣٦ في ٣٩؟ ١</Step>
                 <Step hl={['n1']}>نضربُ: <Eq>١ × ٣٦ = ٣٦</Eq></Step>
                 <Step hl={['n2']}>نطرحُ: <Eq>٣٩ − ٣٦ = ٣</Eq></Step>
-                <Step hl={['n3', 'n4']}><BookLabel>الخطوةُ ٢:</BookLabel> نُنزِلُ ٦: كمْ ٣٦ في ٣٦؟ ١</Step>
+                <Step hl={['n3']}><BookLabel>الخطوةُ ٢:</BookLabel> نُنزِلُ ٦</Step>
+                <Step hl={['n4']}>كمْ ٣٦ في ٣٦؟ ١</Step>
                 <Step hl={['n5']}>نضربُ: <Eq>١ × ٣٦ = ٣٦</Eq></Step>
                 <Step hl={['n6']}>نطرحُ: <Eq>٣٦ − ٣٦ = ٠</Eq></Step>
                 <Step kind="ans" label="نحتاجُ إلى">١١ كعكةً</Step>
@@ -88,7 +89,8 @@ export default defineLesson({
                 <Step hl={['n0']}><BookLabel>الخطوةُ ١:</BookLabel> كمْ ٣٠ في ٧٥؟ ٢</Step>
                 <Step hl={['n1']}>نضربُ: <Eq>٢ × ٣٠ = ٦٠</Eq></Step>
                 <Step hl={['n2']}>نطرحُ: <Eq>٧٥ − ٦٠ = ١٥</Eq></Step>
-                <Step hl={['n3', 'n4']}><BookLabel>الخطوةُ ٢:</BookLabel> نُنزِلُ ١: كمْ ٣٠ في ١٥١؟ ٥</Step>
+                <Step hl={['n3']}><BookLabel>الخطوةُ ٢:</BookLabel> نُنزِلُ ١</Step>
+                <Step hl={['n4']}>كمْ ٣٠ في ١٥١؟ ٥</Step>
                 <Step hl={['n5']}>نضربُ: <Eq>٥ × ٣٠ = ١٥٠</Eq></Step>
                 <Step hl={['n6']}>نطرحُ: <Eq>١٥١ − ١٥٠ = ١</Eq></Step>
                 <Step kind="ans" label="الناتجُ والباقي">٢٥ والباقي ١</Step>
@@ -149,7 +151,8 @@ export default defineLesson({
             { text: 'كمْ ١٣ في ٩٨؟ ٧', hl: ['n0'] },
             { text: <>نضربُ: <Eq>٧ × ١٣ = ٩١</Eq></>, hl: ['n1'] },
             { text: <>نطرحُ: <Eq>٩٨ − ٩١ = ٧</Eq></>, hl: ['n2'] },
-            { text: 'نُنزِلُ ٨: كمْ ١٣ في ٧٨؟ ٦', hl: ['n3', 'n4'] },
+            { text: 'نُنزِلُ ٨', hl: ['n3'] },
+            { text: 'كمْ ١٣ في ٧٨؟ ٦', hl: ['n4'] },
             { text: <>نضربُ: <Eq>٦ × ١٣ = ٧٨</Eq></>, hl: ['n5'] },
             { text: <>نطرحُ: <Eq>٧٨ − ٧٨ = ٠</Eq></>, hl: ['n6'] },
             { text: '٧٦ مترًا مربَّعًا', kind: 'ans' },
@@ -209,7 +212,8 @@ export default defineLesson({
             { text: 'كمْ ٢٤ في ٣٨؟ ١', hl: ['n0'] },
             { text: <>نضربُ: <Eq>١ × ٢٤ = ٢٤</Eq></>, hl: ['n1'] },
             { text: <>نطرحُ: <Eq>٣٨ − ٢٤ = ١٤</Eq></>, hl: ['n2'] },
-            { text: 'نُنزِلُ ٤: كمْ ٢٤ في ١٤٤؟ ٦', hl: ['n3', 'n4'] },
+            { text: 'نُنزِلُ ٤', hl: ['n3'] },
+            { text: 'كمْ ٢٤ في ١٤٤؟ ٦', hl: ['n4'] },
             { text: <>نضربُ: <Eq>٦ × ٢٤ = ١٤٤</Eq></>, hl: ['n5'] },
             { text: <>نطرحُ: <Eq>١٤٤ − ١٤٤ = ٠</Eq></>, hl: ['n6'] },
             { text: '١٦ كيلومترًا', kind: 'ans' },
@@ -230,7 +234,8 @@ export default defineLesson({
             { text: 'كمْ ١٢ في ٢٨؟ ٢', hl: ['n0'] },
             { text: <>نضربُ: <Eq>٢ × ١٢ = ٢٤</Eq></>, hl: ['n1'] },
             { text: <>نطرحُ: <Eq>٢٨ − ٢٤ = ٤</Eq></>, hl: ['n2'] },
-            { text: 'نُنزِلُ ٨: كمْ ١٢ في ٤٨؟ ٤', hl: ['n3', 'n4'] },
+            { text: 'نُنزِلُ ٨', hl: ['n3'] },
+            { text: 'كمْ ١٢ في ٤٨؟ ٤', hl: ['n4'] },
             { text: <>نضربُ: <Eq>٤ × ١٢ = ٤٨</Eq></>, hl: ['n5'] },
             { text: <>نطرحُ: <Eq>٤٨ − ٤٨ = ٠</Eq></>, hl: ['n6'] },
             { text: '٢٤ صفحةً', kind: 'ans' },

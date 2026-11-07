@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, SvgEq, lerp, num, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: نبتة دوّار الشمس تنمو كل أسبوع ← نقاط ← خط (مثال غير مثال الكتاب) */
 
@@ -103,6 +104,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={42}
     scene={scene}
     captions={[

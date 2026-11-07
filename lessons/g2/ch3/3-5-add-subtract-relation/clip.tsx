@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, Cube, SvgEq, lerp, tw, type EqPart } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: ٦ مكعبات و٢ (مثال غير مثال الكتاب) ← أربع حقائق مترابطة */
 
@@ -54,6 +55,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={40}
     scene={scene}
     captions={[

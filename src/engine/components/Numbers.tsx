@@ -3,9 +3,13 @@ import { num } from '../digits';
 import { useSlide } from '../context';
 import { WordChoice } from './ChanceBook';
 import { Blank } from './Cubes';
-import { QCard } from './Layout';
+import { QCard, Stack } from './Layout';
+import { Block } from './Multiply';
 import { TenOnes } from './Place';
 import { Sentence } from './Primary';
+import { Step } from './Steps';
+
+const StepAns = ({ label, children }: { label: string; children: ReactNode }) => <Step kind="ans" label={label}>{children}</Step>;
 
 /* ---------- قطع الأعداد حتى ١٠٠ في الصف الثاني: القيمة المنزلية، التقدير، الترتيب، المقارنة، الأنماط ---------- */
 
@@ -181,6 +185,123 @@ export function HundredChart({ sets, max = 100 }: { sets?: { nums: number[]; col
             })}
           </tr>
         ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** إطارا عشرة بقطع حمراء وصفراء؛ moved: تنتقل الصفراء لتكمل الإطار الأول مع الخطوة (hl: n0). hidden: تظهر القطع مع الخطوة (hl: n{k}) */
+export function TenFrames({ a, b, moved, k }: { a: number; b: number; moved?: boolean; k?: number }) {
+  const { activeHl } = useSlide();
+  const go = moved && activeHl.has('n0');
+  const hide = k !== undefined && !activeHl.has(`n${k}`);
+  const shift = go ? Math.min(10 - a, b) : 0;
+  const frame = (reds: number, yellows: number) => (
+    <div className="tframe">
+      {Array.from({ length: 10 }, (_, i) => (
+        <i key={i}>{!hide && i < reds + yellows && <b className={i < reds ? 'r' : 'y'} />}</i>
+      ))}
+    </div>
+  );
+  return (
+    <div className="tframes">
+      {frame(a, shift)}
+      {frame(0, b - shift)}
+    </div>
+  );
+}
+
+/** ثلاثة أعداد رأسيًّا؛ rings: العددان اللذان نبدأ بهما، pair: مجموعهما في مربع الكتاب */
+export function ThreeCard({ n, nums, rings, pair }: { n: number; nums: [number, number, number]; rings?: [number, number]; pair?: number }) {
+  return (
+    <QCard n={n} className="vcard">
+      <div className="v3">
+        {nums.map((x, i) => (
+          <span key={i} className="v3d">
+            {num(x)}
+            {rings?.includes(i) && <Step className="dring">{num(x)}</Step>}
+            {i === 2 && <em>+</em>}
+          </span>
+        ))}
+        <i />
+        <Blank v={nums[0] + nums[1] + nums[2]} hl={undefined} />
+      </div>
+      {pair !== undefined && <Blank v={pair} box />}
+    </QCard>
+  );
+}
+
+const PLACES = ['الآحادِ', 'العشراتِ', 'المئاتِ', 'الألوفِ', 'عشراتِ الألوفِ', 'مئاتِ الألوفِ', 'الملايينِ', 'عشراتِ الملايينِ', 'مئاتِ الملايينِ'];
+
+/** «اكتب القيمة المنزلية للرقم الذي تحته خط»: at موضع الرقم من اليمين عند القراءة (٠ أكبر منزلة) */
+export function ValueQ({ n, v, at }: { n: number; v: number; at: number }) {
+  const s = String(v);
+  const power = s.length - at - 1;
+  return (
+    <QCard n={n}>
+      <Stack>
+        <div className="bignum" dir="ltr">{s.split('').map((d, i) => (i === at ? <u key={i}>{num(Number(d))}</u> : <span key={i}>{num(Number(d))}</span>))}</div>
+        <Stack><StepAns label={`منزلةُ ${PLACES[power]}`}>{num(Number(s[at]) * 10 ** power)}</StepAns></Stack>
+      </Stack>
+    </QCard>
+  );
+}
+
+/** عدد مطلوب كتابته بصيغ أخرى؛ كل صيغة خانة إجابة */
+export function FormQ({ n, show, rows }: { n: number; show: ReactNode; rows: [string, ReactNode][] }) {
+  return (
+    <QCard n={n}>
+      <Stack>
+        <div className="formshow">{show}</div>
+        {rows.map(([label, text]) => <Stack key={label}><StepAns label={label}>{text}</StepAns></Stack>)}
+      </Stack>
+    </QCard>
+  );
+}
+
+/** ترتيب أعداد؛ asc من الأصغر إلى الأكبر */
+export function OrderQ({ n, nums, asc }: { n: number; nums: number[]; asc?: boolean }) {
+  const sorted = [...nums].sort((a, b) => (asc ? a - b : b - a));
+  return (
+    <QCard n={n}>
+      <Stack>
+        <div className="formshow">{nums.map((x) => num(x)).join('، ')}</div>
+        <Stack><StepAns label="التَّرتيبُ">{sorted.map((x) => num(x)).join('، ')}</StepAns></Stack>
+      </Stack>
+    </QCard>
+  );
+}
+
+/** تقريب عدد إلى منزلة: step عشرة أو مئة أو ألف… */
+export function NearQ({ n, v, step, name }: { n: number; v: number; step: number; name: string }) {
+  return (
+    <QCard n={n}>
+      <Stack>
+        <div className="formshow">{num(v)}؛ {name}</div>
+        <Stack><StepAns label="التَّقريبُ">{num(Math.round(v / step) * step)}</StepAns></Stack>
+      </Stack>
+    </QCard>
+  );
+}
+
+/** مكعبات الألف */
+export function Thousands({ count }: { count: number }) {
+  return <div className="thous" role="img" aria-label={`${num(count)} × ${num(1000)}`}>{Array.from({ length: count }, (_, i) => <Block key={i} kind="thousand" />)}</div>;
+}
+
+/** جدول منازل كبير: الدورات والمنازل، والعدد في خاناته */
+export function PeriodTable({ v, ring }: { v: number; ring?: number }) {
+  const heads: [string, string[]][] = [['دورةُ الملايينِ', ['مئاتٌ', 'عشراتٌ', 'آحادٌ']], ['دورةُ الألوفِ', ['مئاتٌ', 'عشراتٌ', 'آحادٌ']], ['دورةُ الواحداتِ', ['مئاتٌ', 'عشراتٌ', 'آحادٌ']]];
+  const s = String(v).padStart(9, ' ');
+  const from = String(v).length > 6 ? 0 : 3;
+  return (
+    <table className="data ptable" dir="ltr">
+      <thead>
+        <tr>{heads.slice(from / 3).map(([h]) => <th key={h} colSpan={3}>{h}</th>)}</tr>
+        <tr>{heads.slice(from / 3).flatMap(([h, c]) => c.map((x) => <th key={h + x}>{x}</th>))}</tr>
+      </thead>
+      <tbody>
+        <tr>{s.slice(from).split('').map((d, i) => <td key={i} className={ring === i + from ? 'on' : undefined}>{d === ' ' ? '' : num(Number(d))}</td>)}</tr>
       </tbody>
     </table>
   );

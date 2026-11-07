@@ -54,13 +54,15 @@ interface LineProps {
    */
   problems?: (Jump & { k: number })[];
   label?: string;
+  /** المسافة بين علامتين، للأعداد الكبيرة */
+  step?: number;
 }
 
 /**
  * خط أعداد كما في الكتاب: من اليسار إلى اليمين، بسهمين، والقفزات أقواس متقطعة إلى الخلف
  * مرقّمة ١، ٢، ٣ فوقها، ودائرة حول عدد البداية، ونقطة عند الناتج.
  */
-export function NumberLine({ max, min = 0, jump, problems, label }: LineProps) {
+export function NumberLine({ max, min = 0, jump, problems, label, step: gap = 1 }: LineProps) {
   const { activeHl } = useSlide();
   const pi = problems ? latestKey(activeHl, 'p', problems.map((p) => p.k)) : null;
   const j = jump ?? (pi !== null && problems ? problems[pi] : null);
@@ -70,15 +72,15 @@ export function NumberLine({ max, min = 0, jump, problems, label }: LineProps) {
   const pad = 46;
   const base = 108;
   const X = (v: number) => pad + ((v - min) * (W - pad * 2)) / (max - min);
-  const step = X(min + 1) - X(min);
+  const step = X(min + gap) - X(min);
   const shown = j ? Math.min(j.back, j.shown ?? j.back) : 0;
   const end = j ? j.from - shown : null;
   return (
     <svg className="nline" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label ?? `خط الأعداد من ${num(min)} إلى ${num(max)}`}>
       <line x1={12} x2={W - 12} y1={base} y2={base} className="nl-axis" />
       <path d={`M12 ${base} l18 -11 v22 z M${W - 12} ${base} l-18 -11 v22 z`} className="nl-arrow" />
-      {Array.from({ length: max - min + 1 }, (_, i) => {
-        const v = min + i;
+      {Array.from({ length: (max - min) / gap + 1 }, (_, i) => {
+        const v = min + i * gap;
         return (
           <g key={v}>
             <line x1={X(v)} x2={X(v)} y1={base - 14} y2={base + 14} className="nl-tick" />

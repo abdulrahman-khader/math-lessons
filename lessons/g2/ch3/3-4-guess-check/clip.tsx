@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, num, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: ١١ قطة (مثال غير مثال الكتاب)، السوداء أكثر من البنية بـ ٣ */
 
@@ -73,6 +74,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={37}
     scene={scene}
     captions={[

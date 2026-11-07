@@ -49,16 +49,19 @@ export function RuleTable({ rule, ruleStep = true, rows, color = '#f4a582' }: { 
 
 /** جدول دالة رأسي: عمود للمدخلة △ وعمود للمخرجة □، وعمود أوسط اختياري يكتب القاعدة على كل مدخلة */
 export function FnTable({
-  rule, ruleStep = false, title, heads = ['المُدخلةُ △', 'المُخرجةُ □'], rows, color = '#f4a582',
+  rule, ruleStep = false, title, heads: customHeads, rows, color = '#f4a582',
 }: { rule?: ReactNode; ruleStep?: boolean; /** عنوان الجدول بدل سطر القاعدة */ title?: ReactNode; heads?: ReactNode[]; rows: RuleCell[][]; color?: string }) {
+  const heads = customHeads ?? ['المُدخلةُ △', 'المُخرجةُ □'];
   return (
     <table className="data ruletbl col">
       <thead>
-        <tr>
-          <th colSpan={heads.length} style={{ background: color }}>
-            {title ?? <RuleHead rule={rule} ruleStep={ruleStep} />}
-          </th>
-        </tr>
+        {(title || rule || !customHeads) && (
+          <tr>
+            <th colSpan={heads.length} style={{ background: color }}>
+              {title ?? <RuleHead rule={rule} ruleStep={ruleStep} />}
+            </th>
+          </tr>
+        )}
         <tr>
           {heads.map((h, i) => (
             <th key={i}>{h}</th>

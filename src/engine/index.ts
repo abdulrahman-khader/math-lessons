@@ -29,5 +29,5 @@ export { CubeChip, WordChoice, CircleRow, CompareQ, DrawTally, DrawCard, ColorPa
 export { CubeBox, LineBox, SentenceCard, SumCard, FamilyCard, DominoCard, TriFamilyCard, TowerCard, TrainFactCard, DominoLinesCard, TriangleCard, FactGrid, Countdown } from './components/BookDrill';
 export { Frogs, FrogExplorer, DoublesExplorer, MissingExplorer } from './components/G2Explorers';
 export { Area4, VMul2, AreaModel, DotArray, DotArrays, MonthCal, PlaceRows, TimesTable, VMul, BlockGroups, ShapeRow, type PlaceKind } from './components/Multiply';
-export { TenOnes, TensCard, PlaceSum, PlaceCard, RegroupTable, PlaceMat, RegroupExplorer, RoundSum, RoundCard, SubMat, SubRegroupTable, CheckCard, SvgBlocks, SvgVertical, clipSlide, askSlide, goalsSlide, mindSlide, exitSlide, endSlide } from './components/Place';
-export { ValueCard, OnesTensCard, WriteBlocksCard, WordNumCard, JarCard, SeqCard, CompareCard, GrowCard, HundredChart, JarPair, SeqLine } from './components/Numbers';
+export { TenOnes, TensCard, PlaceSum, PlaceCard, RegroupTable, PlaceMat, RegroupExplorer, RoundSum, RoundCard, SubMat, SubRegroupTable, CheckCard, CheckRow, EstAddCard, Blocks3, SvgBlocks, SvgVertical, clipSlide, askSlide, goalsSlide, mindSlide, exitSlide, endSlide } from './components/Place';
+export { ValueCard, OnesTensCard, WriteBlocksCard, WordNumCard, JarCard, SeqCard, CompareCard, GrowCard, HundredChart, JarPair, SeqLine, TenFrames, ThreeCard, ValueQ, FormQ, OrderQ, NearQ, Thousands, PeriodTable } from './components/Numbers';

@@ -162,8 +162,8 @@ export function SubRegroupTable({ rows }: { rows: { n: number; a: number; b: num
   );
 }
 
-/** «أجد ناتج الطرح، ثم أتحقق مستعملًا الجمع»: الطرح رأسيًّا، وبجانبه الجمع للتحقق */
-export function CheckCard({ n, a, b }: { n: number; a: number; b: number }) {
+/** «أجد ناتج الطرح، ثم أتحقق مستعملًا الجمع»: الطرح رأسيًّا، وبجانبه الجمع للتحقق؛ est: التقدير إن طلبه الكتاب */
+export function CheckCard({ n, a, b, est }: { n: number; a: number; b: number; est?: ReactNode }) {
   return (
     <QCard n={n} className="vcard">
       <div className="vrow">
@@ -178,7 +178,40 @@ export function CheckCard({ n, a, b }: { n: number; a: number; b: number }) {
           <span className="vn vans"><Blank v={a} /></span>
         </div>
       </div>
+      {est && <Stack><Step kind="ans" label="التَّقديرُ">{est}</Step></Stack>}
     </QCard>
+  );
+}
+
+/** الطرح وجمع التحقق بلا بطاقة: تحت صورة الكتاب */
+export function CheckRow({ a, b }: { a: number; b: number }) {
+  return (
+    <div className="vrow">
+      <VSum a={a} op="−" b={b} v={a - b} />
+      <VSum a={a - b} op="+" b={b} v={a} />
+    </div>
+  );
+}
+
+/** «أوجد ناتج الجمع، ثم تحقق من معقولية الإجابة بالتقدير» */
+export function EstAddCard({ n, a, b, est }: { n: number; a: number; b: number; est: ReactNode }) {
+  return (
+    <QCard n={n} className="vcard">
+      <VSum a={a} op="+" b={b} v={a + b} />
+      <Stack><Step kind="ans" label="التَّقديرُ">{est}</Step></Stack>
+    </QCard>
+  );
+}
+
+/** عدد بقطع المئات والعشرات والآحاد */
+export function Blocks3({ v }: { v: number }) {
+  const h = Math.floor(v / 100);
+  return (
+    <div className="blocks3" role="img" aria-label={num(v)}>
+      <div className="b3o">{Array.from({ length: O(v) }, (_, k) => <Block key={k} kind="one" />)}</div>
+      <div className="b3t">{Array.from({ length: T(v) }, (_, k) => <Block key={k} kind="ten" />)}</div>
+      <div className="b3h">{Array.from({ length: h }, (_, k) => <Block key={k} kind="hundred" />)}</div>
+    </div>
   );
 }
 

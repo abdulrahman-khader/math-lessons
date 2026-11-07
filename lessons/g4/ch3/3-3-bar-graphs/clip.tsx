@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, SvgEq, fade, num, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: من الجدول التكراري إلى الأعمدة، ثم الأكثر والأقل والفرق (مثال غير مثال الكتاب) */
 
@@ -91,6 +92,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={43}
     scene={scene}
     captions={[

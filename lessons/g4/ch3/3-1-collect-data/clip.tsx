@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, Person, fade, num, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: مسح ١٢ طالبًا عن لونهم المفضل ← لوحة إشارات ← جدول تكراري (مثال غير مثال الكتاب) */
 
@@ -102,6 +103,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={46}
     scene={scene}
     captions={[

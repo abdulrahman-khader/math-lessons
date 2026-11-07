@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, SvgEq, fade, num, tw } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: النحلة تقفز إلى الخلف على خط الأعداد (مثال غير مثال الكتاب): ٩ − ٤ = ٥، ثم ٧ − ٣ = ٤ */
 
@@ -82,6 +83,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={43}
     scene={scene}
     captions={[

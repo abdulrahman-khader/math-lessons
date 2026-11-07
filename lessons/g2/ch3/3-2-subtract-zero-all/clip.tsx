@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, SvgEq, tw, type EqPart } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: ٦ ضفادع على أوراق اللوتس (مثال غير مثال الكتاب): ٦ − ٦ = ٠، ثم ٦ − ٠ = ٦ */
 
@@ -71,6 +72,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={38}
     scene={scene}
     captions={[

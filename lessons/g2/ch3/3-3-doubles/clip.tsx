@@ -1,4 +1,5 @@
 import { Clip, ClipTitle, Cube, SvgEq, tw, type EqPart } from '@engine';
+import voice from './voice';
 
 /* مقطع فكرة الدرس: برجان متساويان (مثال غير مثال الكتاب): ٧ + ٧ = ١٤، إذن ١٤ − ٧ = ٧ */
 
@@ -44,6 +45,7 @@ function scene(t: number) {
 
 export const IntroClip = () => (
   <Clip
+    voice={voice}
     duration={34}
     scene={scene}
     captions={[

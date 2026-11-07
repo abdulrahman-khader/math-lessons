@@ -976,3 +976,9 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .blank.box:has(.hstep.shown)::before { content: none !important; }
 #app[data-design="v2"] .blank.box .hstep { display: inline; font-size: 1em; font-weight: 700; visibility: hidden; }
 #app[data-design="v2"] .blank.box .hstep.shown { visibility: visible; color: #fff; }
+
+/* شرائح القسمة المطوّلة بخطوات الحل المفصّلة (قسمة، ضرب، طرح، إنزال): خطوات أصغر قليلًا لتتسع الشاشة */
+#app[data-design="v2"] section.slide:has(.ldiv.noted) .sol { gap: 4px; }
+#app[data-design="v2"] section.slide:has(.ldiv.noted) .step.sstep { font-size: 30px; line-height: 1.45; }
+#app[data-design="v2"] section.slide:has(.ldiv.noted) .step.aslot { min-height: 84px; font-size: 56px; }
+#app[data-design="v2"] section.slide:has(.ldiv.noted) .qtext { font-size: 40px; }

@@ -46,20 +46,21 @@ export default defineLesson({
     ], 'ربط بالدرس ٥-٥.'),
     {
       sec: 'explain', min: 5,
-      notes: 'أنا أعمل: الرقم المحمول يُكتب في المربع فوق العشرات، ثم يُجمع معها.',
+      notes: 'أنا أعمل: نكتب ١٢ كاملة في منزلة الآحاد، ونسأل: هل يتّسع المكان لرقمين؟ لا، فيصعد ١ إلى المربع فوق العشرات ثم يُجمع معها.',
       content: (
         <>
           <SlideHead tag="أستعدُّ، ص ١٢٢" kind="rule">أجد ناتج الجمع ١٧ + ٥</SlideHead>
           <Cols even>
             <QCol>
               <Solution>
-                <Step><BookLabel>الْخُطْوَةُ ١:</BookLabel> نَجْمَعُ الآحَادَ: <Eq>٧ + ٥ = ١٢</Eq></Step>
-                <Step><BookLabel>الْخُطْوَةُ ٢:</BookLabel> نُعِيدُ التَّجْمِيعَ، ثُمَّ نَكْتُبُ الْمَجْمُوعَ.</Step>
-                <Step><BookLabel>الْخُطْوَةُ ٣:</BookLabel> نَجْمَعُ الْعَشَرَاتِ: <Eq>١ + ١ = ٢</Eq></Step>
+                <Step hl={['n0']}><BookLabel>الْخُطْوَةُ ١:</BookLabel> نَجْمَعُ الآحَادَ: <Eq>٧ + ٥ = ١٢</Eq></Step>
+                <Step>لَا يَكُونُ فِي الْمَنْزِلَةِ رَقْمَانِ</Step>
+                <Step hl={['n1']}><BookLabel>الْخُطْوَةُ ٢:</BookLabel> نُعِيدُ التَّجْمِيعَ: يَصْعَدُ ١ إِلَى الْعَشَرَاتِ</Step>
+                <Step hl={['n2']}><BookLabel>الْخُطْوَةُ ٣:</BookLabel> نَجْمَعُ الْعَشَرَاتِ: <Eq>١ + ١ = ٢</Eq></Step>
               </Solution>
             </QCol>
             <Stack>
-              <PlaceSum nums={[17, 5]} table carry matHl />
+              <PlaceSum nums={[17, 5]} table carry sync />
             </Stack>
             <PlaceMat a={17} b={5} />
           </Cols>

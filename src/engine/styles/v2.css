@@ -918,3 +918,61 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .ldiv .dar circle { fill: #e8701a; }
 #app[data-design="v2"] .ldiv .dar.div circle { fill: var(--dblue); }
 #app[data-design="v2"] .ldiv .dar text { fill: #fff; font-size: 32px; font-weight: 800; }
+
+/* إعادة التجميع في الجمع: ناتج الآحاد كاملًا (١٢) داخل منزلة الآحاد، ثم يطير رقم العشرات إلى خانة الحمل */
+#app[data-design="v2"] .psum .pghost { z-index: 2; visibility: hidden; pointer-events: none; }
+#app[data-design="v2"] .psum.fly .pc { z-index: 3; }
+#app[data-design="v2"] .psum .pghost .pgv { display: flex; align-items: center; justify-content: center; gap: 2px; min-height: 52px; padding: 0 8px; border: 4px solid var(--ans); border-radius: 12px; background: var(--ans); color: #fff; font-size: 36px; font-weight: 700; }
+#app[data-design="v2"] .psum .pghost .pgv b { font-weight: 700; }
+#app[data-design="v2"] .psum.fly:has(.pones :is(.step, .hstep).shown):not(:has(.pc :is(.step, .hstep).shown)) .pghost { visibility: visible; }
+#app[data-design="v2"] .psum.fly:has(.pones :is(.step, .hstep).shown):not(:has(.pc :is(.step, .hstep).shown)) .pones .blank.box { visibility: hidden; }
+#app[data-design="v2"] .psum.fly .pc .blank.box:has(:is(.step, .hstep).shown) { animation: carryfly 1s cubic-bezier(.45, 0, .2, 1); }
+@keyframes carryfly {
+  0% { transform: translate(var(--fly-x, 0), var(--fly, 0)) scale(1.2); }
+  30% { transform: translate(var(--fly-x, 0), var(--fly, 0)) scale(1.2); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { #app[data-design="v2"] .psum.fly .pc .blank.box { animation: none !important; } }
+
+/* الجمع العمودي منزلةً منزلة (ColAdd): ناتج المنزلة كاملًا ثم يصعد رقم العشرات إلى أعلى المنزلة التالية */
+#app[data-design="v2"] .cadd { --cw: 46px; display: inline-grid; grid-template-columns: repeat(var(--w), var(--cw)) 40px; grid-auto-rows: auto; align-items: center; justify-items: center; align-self: center; justify-self: center; direction: ltr; font-size: 52px; font-weight: 700; line-height: 1.2; }
+#app[data-design="v2"] .cadd .crow { min-block-size: 40px; }
+#app[data-design="v2"] .cadd .ccol { display: contents; }
+#app[data-design="v2"] .cadd .cline { grid-column: 1 / -1; justify-self: stretch; block-size: 0; border-block-start: 4px solid var(--ink); margin-block: 4px; }
+#app[data-design="v2"] .cadd .cpiece, #app[data-design="v2"] .qgrid .qcard .cadd .cpiece { display: flex !important; justify-content: space-around; justify-self: stretch; margin: 0; padding: 0; min-height: 0; background: none !important; border-radius: 0; font-size: 52px; font-weight: 700; line-height: 1.2; color: transparent; }
+#app[data-design="v2"] .cadd .cpiece span, #app[data-design="v2"] .qgrid .qcard .cadd .cpiece span { font-size: 52px !important; color: inherit !important; }
+#app[data-design="v2"] .cadd .cres.shown { color: var(--ans); }
+#app[data-design="v2"] .cadd .ccar, #app[data-design="v2"] .qgrid .qcard .cadd .ccar { justify-content: center; font-size: 32px; }
+#app[data-design="v2"] .cadd .ccar.shown { color: var(--bad); }
+#app[data-design="v2"] .cadd .cghost { z-index: 2; display: flex; gap: 0; visibility: hidden; color: var(--ans); font-size: 44px; pointer-events: none; white-space: nowrap; }
+#app[data-design="v2"] .cadd .cghost b { font-weight: 700; }
+#app[data-design="v2"] .cadd .ccol:has(.cres.shown):not(:has(.ccar.shown)) .cghost { visibility: visible; }
+#app[data-design="v2"] .cadd .ccol:has(.cghost):has(.cres.shown):not(:has(.ccar.shown)) .cres { visibility: hidden; }
+#app[data-design="v2"] .cadd .ccar.shown { position: relative; z-index: 3; animation: carryfly2 1s cubic-bezier(.45, 0, .2, 1); }
+@keyframes carryfly2 {
+  0% { transform: translate(var(--fly-x, 0), var(--fly, 0)) scale(1.35); }
+  30% { transform: translate(var(--fly-x, 0), var(--fly, 0)) scale(1.35); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { #app[data-design="v2"] .cadd .ccar { animation: none !important; } }
+#app[data-design="v2"] .qcard .cadd { --cw: 36px; font-size: 42px; }
+#app[data-design="v2"] .qgrid .qcard .cadd .cpiece, #app[data-design="v2"] .qgrid .qcard .cadd .cpiece span, #app[data-design="v2"] .qcard .cadd .cpiece span { font-size: 42px !important; }
+#app[data-design="v2"] .qcard .cadd .cghost { font-size: 36px; }
+#app[data-design="v2"] .qgrid .qcard .cadd .ccar, #app[data-design="v2"] .qgrid .qcard .cadd .ccar span { font-size: 28px !important; }
+
+/* الضرب مع إعادة التجميع (VMul): ناتج المنزلة كاملًا (٢١) ثم يصعد رقم العشرات */
+#app[data-design="v2"] .vmul .vcol { display: contents; }
+#app[data-design="v2"] .vmul .vghost { z-index: 2; visibility: hidden; pointer-events: none; }
+#app[data-design="v2"] .vmul .vghost .vgv { display: flex; align-items: center; justify-content: center; min-height: 64px; padding: 0 10px; border: 4px solid var(--ans); border-radius: 12px; background: var(--ans); color: #fff; font-size: 52px; font-weight: 700; white-space: nowrap; }
+#app[data-design="v2"] .vmul .vghost .vgv b { font-weight: 700; }
+#app[data-design="v2"] .vmul .vcol:has(.vghost):has(.vres .step.shown):not(:has(.vc .step.shown)) .vghost { visibility: visible; }
+#app[data-design="v2"] .vmul .vcol:has(.vghost):has(.vres .step.shown):not(:has(.vc .step.shown)) .vres .blank.box { visibility: hidden; }
+#app[data-design="v2"] .vmul .vcol .vc { z-index: 3; }
+#app[data-design="v2"] .vmul .vcol:has(.vghost) .vc .blank.box:has(.step.shown) { animation: carryfly2 1s cubic-bezier(.45, 0, .2, 1); }
+@media (prefers-reduced-motion: reduce) { #app[data-design="v2"] .vmul .vc .blank.box { animation: none !important; } }
+
+/* خانات الجدول المربوطة بخطوات الحل (sync): شكل الخانة نفسه، وليست خطوات بضغطات */
+#app[data-design="v2"] .blank.box:has(.hstep.shown) { border-style: solid; border-color: var(--ans); background: var(--ans); }
+#app[data-design="v2"] .blank.box:has(.hstep.shown)::before { content: none !important; }
+#app[data-design="v2"] .blank.box .hstep { display: inline; font-size: 1em; font-weight: 700; visibility: hidden; }
+#app[data-design="v2"] .blank.box .hstep.shown { visibility: visible; color: #fff; }

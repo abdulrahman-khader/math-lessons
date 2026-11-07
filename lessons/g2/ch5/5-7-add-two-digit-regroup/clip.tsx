@@ -8,7 +8,7 @@ function scene(t: number) {
     <>
       <ClipTitle t={t} title="جَمْعُ عَدَدَيْنِ بِإِعَادَةِ التَّجْمِيعِ" q="٣٧ + ٢٦" size={68} />
       <g opacity={fade(t, 4.5, 99)}>
-        <SvgVertical x={900} y={150} nums={[37, 26]} carry={tw(t, 18, 18.5)} ones={t > 13 ? 3 : undefined} tens={t > 24 ? 6 : undefined} />
+        <SvgVertical x={900} y={150} nums={[37, 26]} sum={13} carry={tw(t, 18.5, 20)} ones={t > 13 ? 3 : undefined} tens={t > 24 ? 6 : undefined} />
         <ClipCard x={160} y={110} w={560} h={100} op={fade(t, 7, 99)} color="var(--good)">
           <text x={440} y={175} fontSize={38} textAnchor="middle" direction="rtl" style={{ fontWeight: 800 }}>الآحاد: ٧ + ٦ = ١٣</text>
         </ClipCard>
@@ -31,8 +31,8 @@ export const IntroClip = () => (
     captions={[
       [0, 'فكرة الدرس'],
       [7, 'نجمع الآحاد: ٧ + ٦ = **١٣**'],
-      [13, 'نكتب **٣** في الآحاد'],
-      [18, 'ونكتب العشرة **١** فوق العشرات'],
+      [13, 'نكتب **١٣** في منزلة الآحاد'],
+      [18, 'لا يكون في المنزلة رقمان: يصعد **١** إلى العشرات'],
       [24, 'نجمع العشرات: ١ + ٣ + ٢ = **٦**'],
       [30, '٣٧ + ٢٦ = **٦٣**'],
     ]}

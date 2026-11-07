@@ -47,19 +47,20 @@ export default defineLesson({
     ], 'ربط بالدرسين ٥-٤ و٥-٦.'),
     {
       sec: 'explain', min: 5,
-      notes: 'أنا أعمل: في العشرات ثلاثة أرقام: المحمول والرقمان.',
+      notes: 'أنا أعمل: نكتب ١٣ كاملة في منزلة الآحاد، ولأن المنزلة لا تتّسع لرقمين يصعد ١ إلى العشرات؛ في العشرات ثلاثة أرقام: المحمول والرقمان.',
       content: (
         <>
           <SlideHead tag="أستعدُّ، ص ١٢٤" kind="rule">أجد ناتج الجمع ١٨ + ٢٥</SlideHead>
           <Cols even>
             <QCol>
               <Solution>
-                <Step><BookLabel>الْخُطْوَةُ ١:</BookLabel> نَجْمَعُ الآحَادَ: <Eq>٨ + ٥ = ١٣</Eq></Step>
-                <Step><BookLabel>الْخُطْوَةُ ٢:</BookLabel> نُعِيدُ التَّجْمِيعَ، ثُمَّ نَكْتُبُ النَّاتِجَ.</Step>
-                <Step><BookLabel>الْخُطْوَةُ ٣:</BookLabel> نَجْمَعُ الْعَشَرَاتِ: <Eq>١ + ١ + ٢ = ٤</Eq></Step>
+                <Step hl={['n0']}><BookLabel>الْخُطْوَةُ ١:</BookLabel> نَجْمَعُ الآحَادَ: <Eq>٨ + ٥ = ١٣</Eq></Step>
+                <Step>لَا يَكُونُ فِي الْمَنْزِلَةِ رَقْمَانِ</Step>
+                <Step hl={['n1']}><BookLabel>الْخُطْوَةُ ٢:</BookLabel> نُعِيدُ التَّجْمِيعَ: يَصْعَدُ ١ إِلَى الْعَشَرَاتِ</Step>
+                <Step hl={['n2']}><BookLabel>الْخُطْوَةُ ٣:</BookLabel> نَجْمَعُ الْعَشَرَاتِ: <Eq>١ + ١ + ٢ = ٤</Eq></Step>
               </Solution>
             </QCol>
-            <PlaceSum nums={[18, 25]} table carry matHl />
+            <PlaceSum nums={[18, 25]} table carry sync />
             <PlaceMat a={18} b={25} />
           </Cols>
         </>

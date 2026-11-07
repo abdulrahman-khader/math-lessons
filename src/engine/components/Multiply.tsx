@@ -1,4 +1,5 @@
-import { Fragment } from 'react';
+import { useRef } from 'react';
+import { useCarryFly } from './Columns';
 import { num } from '../digits';
 import { useSlide } from '../context';
 import { Blank } from './Cubes';
@@ -140,6 +141,9 @@ export function MonthCal({ days, marked, start }: { days: number; marked: number
  * regroup يحفظ سطر الأرقام المحمولة في البطاقات كلها.
  */
 export function VMul({ a, b, regroup }: { a: number; b: number; regroup?: boolean }) {
+  const box = useRef<HTMLDivElement>(null);
+  // إعادة التجميع: ناتج ضرب المنزلة كاملًا (٢١) في منزلته أولًا، ثم يصعد رقم العشرات إلى أعلى المنزلة التالية
+  useCarryFly(box, '.vcol', '.vghost .vg1', '.vc .blank');
   const top = String(a).split('').reverse().map(Number);
   const out = String(a * b).split('').reverse().map(Number);
   const w = Math.max(top.length, out.length);
@@ -147,18 +151,24 @@ export function VMul({ a, b, regroup }: { a: number; b: number; regroup?: boolea
   const col = (i: number) => w - i;
   let carry = 0;
   const cells = out.map((d, i) => {
-    const next = i < top.length ? Math.floor((top[i] * b + carry) / 10) : 0;
+    const p = i < top.length ? top[i] * b + carry : 0;
+    const next = i < top.length ? Math.floor(p / 10) : 0;
     carry = next;
     const show = next > 0 && i + 1 < top.length;
     return (
-      <Fragment key={i}>
-        <span className="vd" style={{ gridRow: 5, gridColumn: col(i) }}><Blank v={d} box /></span>
+      <span key={i} className="vcol">
+        <span className="vd vres" style={{ gridRow: 5, gridColumn: col(i) }}><Blank v={d} box /></span>
+        {show && regroup && (
+          <span className="vd vghost" style={{ gridRow: 5, gridColumn: col(i) }} aria-hidden="true">
+            <span className="vgv"><b className="vg1">{num(next)}</b><b>{num(d)}</b></span>
+          </span>
+        )}
         {show && <span className="vd vc" style={{ gridRow: 1, gridColumn: col(i + 1) }}><Blank v={next} box /></span>}
-      </Fragment>
+      </span>
     );
   });
   return (
-    <div className={'vmul' + (regroup ? ' room' : '')} style={{ '--w': w } as React.CSSProperties} role="img" aria-label={`${num(a)} × ${num(b)}`}>
+    <div ref={box} className={'vmul' + (regroup ? ' room' : '')} style={{ '--w': w } as React.CSSProperties} role="img" aria-label={`${num(a)} × ${num(b)}`}>
       {top.map((d, i) => <span key={i} className="vd" style={{ gridRow: 2, gridColumn: col(i) }}>{num(d)}</span>)}
       <span className="vd" style={{ gridRow: 3, gridColumn: col(0) }}>{num(b)}</span>
       <span className="vd" style={{ gridRow: 3, gridColumn: w + 1 }}>×</span>

@@ -1,5 +1,5 @@
 import {
-  Blocks3, BookLabel, BookSource, Cols, Eq, EstAddCard, FnTable, FormQ, Grid, MCQ, NearQ, QCard, QCol, QText, QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, VSum, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  Blocks3, BookLabel, BookSource, Cols, Eq, EstAddCard, FnTable, FormQ, Grid, MCQ, NearQ, QCard, QCol, QText, QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, ColAdd, askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 
@@ -55,13 +55,15 @@ export default defineLesson({
           <Cols>
             <Solution>
               <Step><BookLabel>قدِّرْ:</BookLabel> <Eq>٦٨٠٠ + ٣٠٠ = ٧١٠٠</Eq></Step>
-              <Step><BookLabel>الخطوةُ ١:</BookLabel> الآحادُ <Eq>٤ + ٩ = ١٣</Eq></Step>
-              <Step><BookLabel>الخطوةُ ٢:</BookLabel> العشراتُ <Eq>١ + ٢ + ٤ = ٧</Eq></Step>
-              <Step><BookLabel>الخطوةُ ٣:</BookLabel> المئاتُ <Eq>٨ + ٣ = ١١</Eq></Step>
-              <Step><BookLabel>الخطوةُ ٤:</BookLabel> الألوفُ <Eq>١ + ٦ = ٧</Eq></Step>
+              <Step hl={['n0']}><BookLabel>الخطوةُ ١:</BookLabel> الآحادُ <Eq>٤ + ٩ = ١٣</Eq></Step>
+              <Step hl={['n1']}>لا تتَّسعُ المنزلةُ لرقمينِ: يصعدُ ١</Step>
+              <Step hl={['n2']}><BookLabel>الخطوةُ ٢:</BookLabel> العشراتُ <Eq>١ + ٢ + ٤ = ٧</Eq></Step>
+              <Step hl={['n4']}><BookLabel>الخطوةُ ٣:</BookLabel> المئاتُ <Eq>٨ + ٣ = ١١</Eq></Step>
+              <Step hl={['n5']}>يصعدُ ١ إلى الألوفِ</Step>
+              <Step hl={['n6']}><BookLabel>الخطوةُ ٤:</BookLabel> الألوفُ <Eq>١ + ٦ = ٧</Eq></Step>
               <Step kind="ans" label="الناتجُ">٧١٧٣</Step>
             </Solution>
-            <VSum a={6824} op="+" b={349} v={7173} />
+            <ColAdd nums={[6824, 349]} sync />
           </Cols>
         </>
       ),
@@ -77,12 +79,13 @@ export default defineLesson({
               <QText><BookLabel>تذاكرُ:</BookLabel> يمثِّلُ الجدولُ المجاورُ عددَ التذاكرِ المبيعةِ يومَيِ الأربعاءِ والخميسِ لحضورِ مباراتَيْ كرةِ قدمٍ. فما مجموعُ التذاكرِ المبيعةِ؟</QText>
               <Solution>
                 <Step><BookLabel>قدِّرْ:</BookLabel> <Eq>٦٠٠٠ + ٥٠٠٠ = ١١٠٠٠</Eq></Step>
-                <Step kind="ans" label="المجموعُ">١٠٥٤٠ تذكرةً</Step>
               </Solution>
             </QCol>
             <Stack>
               <FnTable title="مبيعاتُ التذاكرِ" heads={['اليومُ', 'العددُ']} rows={[['الأربعاءُ', '٥٧١٣'], ['الخميسُ', '٤٨٢٧']]} />
-              <VSum a={5713} op="+" b={4827} v={10540} />
+              {/* كل ضغطة منزلة، ثم الإجابة بعد الجمع */}
+              <ColAdd nums={[5713, 4827]} />
+              <Step kind="ans" label="المجموعُ">١٠٥٤٠ تذكرةً</Step>
             </Stack>
           </Cols>
         </>

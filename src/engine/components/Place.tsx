@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from 'react';
+import { Fragment, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { num } from '../digits';
 import { useSlide } from '../context';
 import type { SlideDef } from '../types';
@@ -9,6 +9,7 @@ import { MCQ } from './MCQ';
 import { Block } from './Multiply';
 import { Sentence } from './Primary';
 import { Step } from './Steps';
+import { ColAdd } from './Columns';
 import { WordChoice } from './ChanceBook';
 
 /* ---------- قطع الجمع والطرح في الصف الثاني: العشرات والآحاد، وجدول المنازل ---------- */
@@ -53,7 +54,22 @@ export function TensCard({ n, a, b, op = '+', rods }: { n: number; a: number; b:
  * جمع أو طرح في جدول المنازل كما في الكتاب: خانة الآحاد ثم الرقم المحمول ثم خانة العشرات، كل ضغطة خانة.
  * table: جدول بعنواني آحاد وعشرات؛ وإلا خط منقط بين المنزلتين. carry: مربع الكتاب فوق العشرات.
  */
-export function PlaceSum({ nums, op = '+', table, carry, rings, wrong, matHl }: { nums: number[]; op?: '+' | '−'; table?: boolean; carry?: boolean; rings?: number[]; wrong?: [number, number]; matHl?: boolean }) {
+/** خانة تمتلئ مع خطوة الحل التي تحمل مفتاحها (sync)، لا بضغطة خاصة بها */
+function HlBlank({ v, on }: { v: number; on: boolean }) {
+  return (
+    <span className="blank box">
+      <span className={'bv hstep' + (on ? ' shown' : '')}>{num(v)}</span>
+    </span>
+  );
+}
+
+/**
+ * sync (الجمع في أمثلة الشرح): الجدول يمتلئ مع خطوات الحل نفسها بدل ضغطات منفصلة:
+ * hl n0 ناتج الآحاد كاملًا (١٢)، n1 صعود ١ إلى العشرات، n2 ناتج العشرات. وهي مفاتيح لوحة القطع PlaceMat نفسها.
+ */
+export function PlaceSum({ nums, op = '+', table, carry, rings, wrong, matHl, sync }: { nums: number[]; op?: '+' | '−'; table?: boolean; carry?: boolean; rings?: number[]; wrong?: [number, number]; matHl?: boolean; sync?: boolean }) {
+  const { activeHl } = useSlide();
+  const synced = sync === true && op === '+';
   const total = op === '+' ? nums.reduce((s, x) => s + x, 0) : nums[0] - nums[1];
   const onesSum = nums.reduce((s, x) => s + O(x), 0);
   const c = op === '+' ? Math.floor(onesSum / 10) : 0;
@@ -61,8 +77,30 @@ export function PlaceSum({ nums, op = '+', table, carry, rings, wrong, matHl }: 
   const row0 = (table ? 1 : 0) + (carry ? 1 : 0) + 1;
   const last = row0 + nums.length - 1;
   const cell = (r: number, col: number) => ({ gridRow: r + 1, gridColumn: col });
+  // إعادة التجميع في الجمع: يُكتب ناتج جمع الآحاد كاملًا (١٢) في منزلة الآحاد، ولأن المنزلة لا تتّسع لرقمين يطير ١ إلى خانة الحمل فوق العشرات
+  const fly = op === '+' && !!carry && c > 0 && !wrong;
+  const box = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!fly || !el) return;
+    const measure = () => {
+      // من رقم العشرات داخل «١٢» المكتوبة في منزلة الآحاد إلى خانة الحمل فوق العشرات (المسافة بلا تكبير المسرح)
+      const g = el.querySelector<HTMLElement>('.pghost .pg1');
+      const t = el.querySelector<HTMLElement>('.pc .blank');
+      if (!g || !t) return;
+      const k = el.getBoundingClientRect().width / (el.offsetWidth || 1) || 1;
+      const a = g.getBoundingClientRect();
+      const b = t.getBoundingClientRect();
+      el.style.setProperty('--fly-x', `${(a.left + a.width / 2 - (b.left + b.width / 2)) / k}px`);
+      el.style.setProperty('--fly', `${(a.top + a.height / 2 - (b.top + b.height / 2)) / k}px`);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [fly]);
   return (
-    <div className={'psum' + (table ? ' tb' : '') + (total > 99 ? ' h' : '') + (borrow ? ' borrow' : '')} role="img" aria-label={nums.map((x) => num(x)).join(` ${op} `)} style={{ '--n': nums.length } as React.CSSProperties}>
+    <div ref={box} className={'psum' + (table ? ' tb' : '') + (total > 99 ? ' h' : '') + (borrow ? ' borrow' : '') + (fly ? ' fly' : '')} role="img" aria-label={nums.map((x) => num(x)).join(` ${op} `)} style={{ '--n': nums.length } as React.CSSProperties}>
       {table && (
         <>
           <span className="ph t" style={cell(0, 2)}>عَشَرَاتٌ</span>
@@ -93,13 +131,21 @@ export function PlaceSum({ nums, op = '+', table, carry, rings, wrong, matHl }: 
               <span className="pd pc" style={cell(table ? 1 : 0, 3)}>{borrow ? <Blank v={O(nums[0]) + 10} box /> : <Blank v="" box empty />}</span>
             </>
           )}
-          <span className="pd" style={cell(last + 2, 3)}><Blank v={O(total)} box hl={matHl ? [op === '+' ? 'n0' : 'n1'] : undefined} /></span>
-          {op === '+' && carry && (
-            <span className="pd pc" style={cell(table ? 1 : 0, 2)}>
-              {c ? <Blank v={c} box hl={matHl ? ['n1'] : undefined} /> : <Blank v="" box empty />}
+          <span className="pd pones" style={cell(last + 2, 3)}>{synced ? <HlBlank v={onesSum % 10} on={activeHl.has('n0')} /> : <Blank v={fly ? onesSum % 10 : O(total)} box hl={matHl ? [op === '+' ? 'n0' : 'n1'] : undefined} />}</span>
+          {fly && (
+            <span className="pd pghost" style={cell(last + 2, 3)} aria-hidden="true">
+              <span className="pgv">
+                <b className="pg1">{num(c)}</b>
+                <b>{num(onesSum % 10)}</b>
+              </span>
             </span>
           )}
-          <span className="pd" style={cell(last + 2, 2)}>{total >= 10 && <Blank v={T(total)} box hl={matHl && op === '−' ? ['n2'] : undefined} />}</span>
+          {op === '+' && carry && (
+            <span className="pd pc" style={cell(table ? 1 : 0, 2)}>
+              {c ? synced ? <HlBlank v={c} on={activeHl.has('n1')} /> : <Blank v={c} box hl={matHl ? ['n1'] : undefined} /> : <Blank v="" box empty />}
+            </span>
+          )}
+          <span className="pd ptens" style={cell(last + 2, 2)}>{total >= 10 && (synced ? <HlBlank v={T(total)} on={activeHl.has('n2')} /> : <Blank v={T(total)} box hl={matHl && op === '−' ? ['n2'] : undefined} />)}</span>
           {total > 99 && <span className="pd" style={cell(last + 2, 1)}><Blank v={Math.floor(total / 100)} box /></span>}
         </>
       )}
@@ -197,7 +243,7 @@ export function CheckRow({ a, b }: { a: number; b: number }) {
 export function EstAddCard({ n, a, b, est }: { n: number; a: number; b: number; est: ReactNode }) {
   return (
     <QCard n={n} className="vcard">
-      <VSum a={a} op="+" b={b} v={a + b} />
+      <ColAdd nums={[a, b]} />
       <Stack><Step kind="ans" label="التَّقديرُ">{est}</Step></Stack>
     </QCard>
   );
@@ -452,11 +498,17 @@ export function SvgBlocks({ x, y, tens = 0, ones = 0, s = 18, op = 1, tenColor =
 }
 
 /** جمع أو طرح رأسي داخل مقطع: رقما كل عدد في منزلتيهما، والإشارة يمين العدد الأخير */
-export function SvgVertical({ x, y, nums, op = '+', size = 76, ones, tens, carry, borrow = 0, opacity = 1 }: { x: number; y: number; nums: number[]; op?: string; size?: number; ones?: number; tens?: number; carry?: number; borrow?: number; opacity?: number }) {
+/**
+ * الجمع العمودي في المقاطع. sum: ناتج جمع الآحاد كاملًا (١٤): يُكتب كله في منزلة الآحاد حين تظهر ones،
+ * ثم مع تقدّم carry من ٠ إلى ١ يصعد رقم العشرات إلى أعلى العشرات، لأن المنزلة لا تتّسع لرقمين.
+ */
+export function SvgVertical({ x, y, nums, op = '+', size = 76, ones, tens, carry, borrow = 0, opacity = 1, sum }: { x: number; y: number; nums: number[]; op?: string; size?: number; ones?: number; tens?: number; carry?: number; borrow?: number; opacity?: number; sum?: number }) {
   const gap = size * 1.25;
   const D = (cx: number, cy: number, v: number | string, o = 1, color = 'var(--ink)', sz = size) =>
     o <= 0.01 ? null : <text x={cx} y={cy} opacity={o} fontSize={sz} textAnchor="middle" fill={color} direction="ltr" style={{ fontWeight: 800 }}>{typeof v === 'number' ? num(v) : v}</text>;
   const line = y + (nums.length - 1) * gap + size * 0.35;
+  const fly = sum !== undefined && sum >= 10;
+  const lerpN = (a: number, b: number, k: number) => a + (b - a) * k;
   return (
     <g opacity={opacity}>
       {nums.map((v, i) => (
@@ -467,7 +519,7 @@ export function SvgVertical({ x, y, nums, op = '+', size = 76, ones, tens, carry
       ))}
       {D(x + size * 1.5, y + (nums.length - 1) * gap, op)}
       <line x1={x - size * 1.2} x2={x + size * 2} y1={line} y2={line} stroke="var(--ink)" strokeWidth={5} />
-      {carry !== undefined && D(x - size * 0.5, y - size, 1, carry, 'var(--bad)', size * 0.6)}
+      {!fly && carry !== undefined && D(x - size * 0.5, y - size, 1, carry, 'var(--bad)', size * 0.6)}
       {borrow > 0.01 && (
         <g opacity={borrow}>
           {D(x - size * 0.5, y - size, T(nums[0]) - 1, 1, 'var(--bad)', size * 0.6)}
@@ -475,7 +527,19 @@ export function SvgVertical({ x, y, nums, op = '+', size = 76, ones, tens, carry
           {[-0.5, 0.5].map((k) => <line key={k} x1={x + size * (k - 0.35)} x2={x + size * (k + 0.35)} y1={y + 6} y2={y - size * 0.7} stroke="var(--bad)" strokeWidth={5} />)}
         </g>
       )}
-      {ones !== undefined && D(x + size * 0.5, line + size * 1.1, ones >= 0 ? ones : 0, 1, 'var(--good)')}
+      {fly && ones !== undefined && (() => {
+        const k = carry ?? 0;
+        const ry = line + size * 1.1;
+        // «١٤» متلاصقان في منزلة الآحاد، ثم يصعد ١ (يكبر قليلًا عند انطلاقه) ويرجع الرقم الباقي إلى وسط المنزلة
+        const lift = Math.sin(Math.min(1, k * 1.6) * Math.PI) * 0.15;
+        return (
+          <>
+            {D(lerpN(x + size * 0.5 + size * 0.3, x + size * 0.5, k), ry, ones >= 0 ? ones : 0, 1, 'var(--good)')}
+            {D(lerpN(x + size * 0.5 - size * 0.3, x - size * 0.5, k), lerpN(ry, y - size, k), Math.floor((sum ?? 0) / 10), 1, k > 0.98 ? 'var(--bad)' : 'var(--good)', size * (lerpN(1, 0.6, k) + lift))}
+          </>
+        );
+      })()}
+      {!fly && ones !== undefined && D(x + size * 0.5, line + size * 1.1, ones >= 0 ? ones : 0, 1, 'var(--good)')}
       {tens !== undefined && D(x - size * 0.5, line + size * 1.1, tens, 1, 'var(--good)')}
     </g>
   );

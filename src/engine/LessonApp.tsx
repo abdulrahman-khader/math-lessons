@@ -491,7 +491,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       } else if (e.code === 'Space') {
         e.preventDefault();
         (document.activeElement as HTMLElement | null)?.blur?.();
-        slideApis.current[cur]?.reveal();
+        // Shift مع المسافة: كل خطوات الشريحة دفعة واحدة
+        if (e.shiftKey) while (slideApis.current[cur]?.reveal());
+        else slideApis.current[cur]?.reveal();
       } else if (e.code === 'KeyH') {
         e.preventDefault();
         slideApis.current[cur]?.toggleHint();

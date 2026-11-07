@@ -18,10 +18,10 @@ const READY = 25000;
 test.setTimeout(120000);
 
 /*
- * فحوص هذا الملف تعمل واحدًا بعد الآخر: تشغيل WebRTC في عدة متصفحات معًا يبطئه على Windows
- * حتى يتجاوز مهلة الاتصال أحيانًا. فحوص الدروس الأخرى تبقى متوازية.
+ * على Windows تعمل فحوص هذا الملف واحدًا بعد الآخر: تشغيل WebRTC في عدة متصفحات معًا يبطئه هناك
+ * حتى يتجاوز مهلة الاتصال أحيانًا. على الماك وخوادم GitHub تعمل معًا (لكل عامل خادماه على منفذين مختلفين).
  */
-test.describe.configure({ mode: 'default' });
+test.describe.configure({ mode: process.platform === 'win32' ? 'default' : 'parallel' });
 
 let relay: Awaited<ReturnType<typeof startRelay>>;
 let peers: Awaited<ReturnType<typeof startPeerServer>>;

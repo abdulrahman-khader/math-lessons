@@ -5,7 +5,16 @@ import { pathToFileURL } from 'node:url';
 
 // يفحص كل درس مبني في dist/. شغّل `npm run build` أولًا (npm test يفعل ذلك).
 const dist = path.resolve(process.cwd(), 'dist');
-const files = readdirSync(dist).filter((f) => f.endsWith('.html') && f !== 'index.html' && f !== 'stars.html');
+// LESSONS (يضبطه scripts/test.mjs): أسماء ملفات الدروس المطلوبة فقط، مفصولة بفواصل. بدونه: كل الدروس المبنية
+const only = process.env.LESSONS ? new Set(process.env.LESSONS.split(',')) : null;
+const files = readdirSync(dist).filter((f) => f.endsWith('.html') && f !== 'index.html' && f !== 'stars.html' && (!only || only.has(f)));
+
+// الحركة متوقفة في الاختبارات (الدروس تحترم prefers-reduced-motion)، فلا ننتظر انتهاء الحركات
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+});
+/** انتظار قصير حتى يرسم React ما تغيّر */
+const settle = (page: Page, ms = 60) => page.waitForTimeout(ms);
 
 async function open(page: Page, file: string, errors: string[]) {
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
@@ -39,68 +48,86 @@ async function goTo(page: Page, i: number) {
   return slide;
 }
 
-/** يفتح التلميح (قبل الحل)، ثم يُظهر كل الخطوات (يُغلق التلميح تلقائيًا). يعيد الحالتين للفحص. */
-async function eachState(page: Page, i: number, check: (state: string) => Promise<void>) {
-  const slide = await goTo(page, i);
-  const hint = slide.locator('.btn.hint');
-  if ((await isV2(page)) && (await slide.locator('.hintbox').count())) {
-    await page.keyboard.press('h');
-    await page.waitForTimeout(350);
-    await check('التلميح مفتوح');
-  } else if (await hint.count()) {
-    await hint.first().click();
-    await page.waitForTimeout(350);
-    await check('التلميح مفتوح');
-  }
+/** يُظهر كل خطوات الشريحة الحالية دفعة واحدة (Shift مع المسافة؛ يُغلق التلميح إن كان مفتوحًا) */
+async function revealAll(page: Page) {
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-  for (let k = 0; k < 40; k++) await page.keyboard.press('Space');
-  await page.waitForTimeout(350); // انتهاء حركة الظهور
-  await check('كل الخطوات ظاهرة');
+  await page.keyboard.press('Shift+Space');
+  await settle(page, 100);
+}
+
+/** ينتقل إلى الشريحة التالية (في الجولات التي تمر على الشرائح بالترتيب) */
+async function next(page: Page, i: number) {
+  if (i > 0) await page.keyboard.press('PageDown');
+  const slide = page.locator('section.slide.active');
+  await expect(slide).toHaveAttribute('data-index', String(i));
   return slide;
 }
 
-const showAll = (page: Page, i: number) => eachState(page, i, async () => {});
-
 for (const file of files) {
   test.describe(file, () => {
-    test('يفتح دون أخطاء', async ({ page }) => {
+    // جولة واحدة على كل الشرائح عند ١٦٠٠×٩٠٠ تجمع الفحوص التي تمر على كل الشرائح:
+    // لا أخطاء، لا فيض (مع التلميح ومع كل الخطوات)، أرقام هندية-عربية فقط، ولا شيء يتحرك عند إظهار الخطوات (التصميم الجديد)
+    test('جولة على كل الشرائح: لا أخطاء، لا فيض، أرقام عربية، لا حركة', async ({ page }) => {
+      await page.setViewportSize({ width: 1600, height: 900 });
       const errors: string[] = [];
       await open(page, file, errors);
-      const n = await slideCount(page);
-      for (let i = 0; i < n; i++) await showAll(page, i);
-      expect(errors).toEqual([]);
-    });
-
-    test('لا تفيض أي شريحة على مسرح ١٦٠٠×٩٠٠ (مع التلميح، ومع كل الخطوات)', async ({ page }) => {
-      await page.setViewportSize({ width: 1600, height: 900 });
-      await open(page, file, []);
+      const v2 = await isV2(page);
       const n = await slideCount(page);
       const overflow: string[] = [];
+      const bad: string[] = [];
+      const moved: string[] = [];
+      const rects = () =>
+        page.evaluate(() =>
+          [...document.querySelectorAll('section.slide.active .step, section.slide.active .blank.box, section.slide.active .mcq .fb')].map((e) => {
+            const r = e.getBoundingClientRect();
+            return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)];
+          }),
+        );
+      await goTo(page, 0);
       for (let i = 0; i < n; i++) {
-        await eachState(page, i, async (state) => {
-          const { sh, ch, wide } = await page.locator('section.slide.active').evaluate((el) => {
+        await next(page, i);
+        await settle(page);
+        const before = v2 && i > 0 ? await rects() : [];
+        const slide = page.locator('section.slide.active');
+        const check = async (state: string) => {
+          const { sh, ch, wide } = await slide.evaluate((el) => {
             // البطاقات التي يخرج محتواها عن عرضها (يُقصّ جانبيًا ولا يزيد الارتفاع)
             const wide = [...el.querySelectorAll<HTMLElement>('.card, .chart')].filter((c) => c.scrollWidth > c.clientWidth + 2).length;
             return { sh: el.scrollHeight, ch: el.clientHeight, wide: wide + (el.scrollWidth > el.clientWidth + 1 ? 1 : 0) };
           });
           if (sh > ch + 1) overflow.push(`الشريحة ${i + 1} (${state}): ${sh - ch}px زائدة`);
           if (wide) overflow.push(`الشريحة ${i + 1} (${state}): ${wide} بطاقة يفيض محتواها عن عرضها`);
-        });
-      }
-      expect(overflow).toEqual([]);
-    });
-
-    test('كل الأرقام الظاهرة هندية-عربية (٠–٩)', async ({ page }) => {
-      await open(page, file, []);
-      const n = await slideCount(page);
-      const bad: string[] = [];
-      for (let i = 0; i < n; i++) {
-        const slide = await showAll(page, i);
+        };
+        await revealAll(page);
+        await check('كل الخطوات ظاهرة');
+        if (before.length) {
+          const after = await rects();
+          before.forEach((x, j) => {
+            if (after[j] && x.some((v, q) => Math.abs(v - after[j][q]) > 1)) moved.push(`الشريحة ${i + 1}، العنصر ${j + 1}: ${x.join(',')} ← ${after[j].join(',')}`);
+          });
+        }
         const text = await page.locator('#stage').innerText();
         const svgText = await slide.evaluate((el) => [...el.querySelectorAll('svg text')].map((t) => t.textContent).join(' '));
         for (const m of (text + ' ' + svgText).matchAll(/.{0,15}[0-9].{0,15}/g)) bad.push(`الشريحة ${i + 1}: «${m[0]}»`);
+        // التلميح مفتوح قبل الحل: نعيد الشريحة ثم نفتحه
+        const hint = slide.locator('.btn.hint');
+        const hasHint = v2 ? (await slide.locator('.hintbox').count()) > 0 : (await hint.count()) > 0;
+        if (hasHint) {
+          await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+          await page.keyboard.press('r');
+          if (v2) await page.keyboard.press('h');
+          else await hint.first().click();
+          await settle(page);
+          await check('التلميح مفتوح');
+          // نُغلقه قبل الانتقال حتى تبدأ الشريحة التالية كما يراها المعلم
+          if (v2) await page.keyboard.press('h');
+          else await hint.first().click();
+        }
       }
-      expect([...new Set(bad)]).toEqual([]);
+      expect(errors, 'أخطاء أثناء الجولة').toEqual([]);
+      expect(overflow, 'فيض على مسرح ١٦٠٠×٩٠٠').toEqual([]);
+      expect([...new Set(bad)], 'أرقام غير هندية-عربية').toEqual([]);
+      expect(moved, 'عناصر تحركت عند إظهار الخطوات').toEqual([]);
     });
 
     test('كل أسئلة الكتاب موجودة بالترتيب', async ({ page }) => {
@@ -113,8 +140,9 @@ for (const file of files) {
     test('إعادة الشريحة تمحو الخطوات والإجابات', async ({ page }) => {
       await open(page, file, []);
       const n = await slideCount(page);
+      await goTo(page, 0);
       for (let i = 1; i < n; i++) {
-        const slide = await goTo(page, i);
+        const slide = await next(page, i);
         const hasStep = (await slide.locator('.step').count()) > 0;
         const hasMcq = (await slide.locator('.mcq').count()) > 0;
         if (!hasStep && !hasMcq) continue;
@@ -196,8 +224,9 @@ for (const file of files) {
       await expect(page.locator('#teams .team')).toHaveCount(0);
       await expect(page.locator('.teamset input')).toHaveCount(0);
       const n = await slideCount(page);
+      await goTo(page, 0);
       for (let i = 1; i < n; i++) {
-        const slide = await goTo(page, i);
+        const slide = await next(page, i);
         const q = slide.locator('.mcq:has(.award), .mcq').first();
         if (!(await q.count())) continue;
         for (const b of await q.locator('.opts button').all()) await b.click();
@@ -247,20 +276,22 @@ for (const file of files) {
     });
 
     // iPad أفقي وعمودي، iPad Pro، شاشات الحاسب الصغيرة، والسبورة
-    for (const [w, h] of [[1180, 820], [820, 1180], [1024, 768], [1366, 1024], [1280, 720], [1920, 1080]]) {
-      test(`المسرح كله داخل الشاشة ومتوسط عند ${w}×${h}`, async ({ page }) => {
+    test('المسرح كله داخل الشاشة ومتوسط في كل المقاسات', async ({ page }) => {
+      await open(page, file, []);
+      for (const [w, h] of [[1180, 820], [820, 1180], [1024, 768], [1366, 1024], [1280, 720], [1920, 1080]]) {
         await page.setViewportSize({ width: w, height: h });
-        await open(page, file, []);
+        await settle(page, 100);
         const box = (await page.locator('#stage').boundingBox())!;
-        expect(box.x).toBeGreaterThanOrEqual(-1);
-        expect(box.y).toBeGreaterThanOrEqual(-1);
-        expect(box.x + box.width).toBeLessThanOrEqual(w + 1);
-        expect(box.y + box.height).toBeLessThanOrEqual(h + 1);
+        const at = `عند ${w}×${h}`;
+        expect(box.x, at).toBeGreaterThanOrEqual(-1);
+        expect(box.y, at).toBeGreaterThanOrEqual(-1);
+        expect(box.x + box.width, at).toBeLessThanOrEqual(w + 1);
+        expect(box.y + box.height, at).toBeLessThanOrEqual(h + 1);
         // متوسط: الهامشان متساويان
-        expect(Math.abs(box.x - (w - box.x - box.width))).toBeLessThanOrEqual(2);
-        expect(Math.abs(box.y - (h - box.y - box.height))).toBeLessThanOrEqual(2);
-      });
-    }
+        expect(Math.abs(box.x - (w - box.x - box.width)), at).toBeLessThanOrEqual(2);
+        expect(Math.abs(box.y - (h - box.y - box.height)), at).toBeLessThanOrEqual(2);
+      }
+    });
 
     test('التصميم الجديد: السهمان يمشيان في الخطوات، و⌘/Ctrl مع السهم ينقل شريحة كاملة', async ({ page }) => {
       await open(page, file, []);
@@ -283,33 +314,6 @@ for (const file of files) {
       await expect(page.locator('section.slide.active')).toHaveAttribute('data-index', String(i + 1));
     });
 
-    test('التصميم الجديد: لا شيء يتحرك عند إظهار الخطوات (الهيكل بحجم المحتوى نفسه)', async ({ page }) => {
-      await page.setViewportSize({ width: 1600, height: 900 });
-      await open(page, file, []);
-      test.skip(!(await isV2(page)), 'للتصميم الجديد فقط');
-      const rects = () =>
-        page.evaluate(() =>
-          [...document.querySelectorAll('section.slide.active .step, section.slide.active .blank.box, section.slide.active .mcq .fb')].map((e) => {
-            const r = e.getBoundingClientRect();
-            return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)];
-          }),
-        );
-      const n = await slideCount(page);
-      const moved: string[] = [];
-      for (let i = 1; i < n; i++) {
-        await goTo(page, i);
-        await page.waitForTimeout(400); // الشريحة تدخل بحركة ٦px؛ نقيس بعد أن تستقر
-        const before = await rects();
-        for (let k = 0; k < 20; k++) await page.keyboard.press('Space');
-        await page.waitForTimeout(600);
-        const after = await rects();
-        before.forEach((x, j) => {
-          if (after[j] && x.some((v, q) => Math.abs(v - after[j][q]) > 1)) moved.push(`الشريحة ${i + 1}، العنصر ${j + 1}: ${x.join(',')} ← ${after[j].join(',')}`);
-        });
-      }
-      expect(moved).toEqual([]);
-    });
-
     test('زر الرئيسية يعمل دون اتصال (يعود إلى أول شريحة)', async ({ page }) => {
       await open(page, file, []);
       await goTo(page, 3);
@@ -323,8 +327,10 @@ for (const file of files) {
       await open(page, file, []);
       const n = await slideCount(page);
       const wide: string[] = [];
+      await goTo(page, 0);
       for (let i = 0; i < n; i++) {
-        await showAll(page, i);
+        await next(page, i);
+        await revealAll(page);
         const w = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         if (w > 1) wide.push(`الشريحة ${i + 1}: ${w}px`);
       }

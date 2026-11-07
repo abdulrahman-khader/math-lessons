@@ -1,4 +1,5 @@
-# يبني الدروس ويختبرها عند كل دفع إلى main، وينشرها على GitHub Pages فقط إذا نجحت كل الاختبارات.
+# يبني كل الدروس عند كل دفع إلى main، ويختبر ما تغيّر منذ آخر نشر (scripts/test.mjs)، وينشر على GitHub Pages إذا نجح.
+# الاختبار الكامل لكل الدروس يُشغَّل على الجهاز قبل الرفع حين يتغيّر المحرك: npm run test:all
 name: Publish lessons
 
 on:
@@ -20,13 +21,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # لمعرفة ما تغيّر منذ آخر نشر
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run build
       # الاختبارات تستعمل Google Chrome المثبّت مسبقًا على مشغّلات GitHub
-      - run: npm test
+      - run: node scripts/test.mjs --no-build
+        env:
+          TEST_BASE: ${{ github.event.before }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

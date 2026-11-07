@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "lint:css": "node scripts/check-css.mjs",
     "shots": "node scripts/shots.mjs",
-    "test": "npm run typecheck && npm run lint:css && npm run build && playwright test",
+    "test": "node scripts/test.mjs",
+    "test:all": "node scripts/test.mjs --all",
     "clip-shots": "node scripts/clip-shots.mjs",
     "voice": "node scripts/voice.mjs"
   },

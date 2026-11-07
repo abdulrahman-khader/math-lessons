@@ -8,7 +8,11 @@ Interactive smartboard presentations for Saudi elementary math lessons (Arabic, 
 
 - `npm run dev -- 3-4`: dev server for the lesson whose path contains `3-4`
 - `npm run build`: build every lesson to `dist/<grade>-<lesson>.html` (`npm run build -- 3-4` builds one)
-- `npm test`: typecheck, RTL CSS check, build, then the Playwright checks against the built files
+- `npm test`: typecheck, RTL CSS check, build, then the Playwright checks, **only for what changed** since `origin/main` (lessons whose folder changed; when the engine, tests or scripts changed, also a sample of varied lessons and the stars/remote/classes checks). `npm test -- 3-4 6-2` tests chosen lessons. A few minutes.
+- `npm run test:all`: every lesson and every check. Run it before pushing an engine change.
+- GitHub builds every lesson and runs the same `scripts/test.mjs` for what changed since the last deploy, so publishing takes minutes.
+- `npm run build -- 3-4 6-2` builds lessons matching any filter (`=g4/ch3/3-4-line-graphs` for an exact path; quote it in zsh). Builds run in parallel processes.
+- Shift+Space reveals every step of the current slide at once (teacher shortcut; the tests use it). Tests run with reduced motion, so every reveal animation must respect `prefers-reduced-motion`.
 - `npm run shots -- 3-4 [slide numbers]`: screenshot slides into `shots/` with every step revealed. Look at these before calling a lesson done.
 - `npm run clip-shots -- 3-4 [seconds]`: screenshot the lesson idea clip at given seconds (default every 5 s) into `shots/<lesson>/clip-<s>.png`.
 
@@ -96,4 +100,4 @@ Tests run hermetically: `tests/relay.ts` starts a local ntfy-compatible relay an
 
 ## Done means
 
-`npm test` passes (no errors, no overflow at 1600×900 with hint open and with all steps shown, Arabic digits only, all book questions present, no horizontal scroll at 375 px). After that, `npm run shots` reviewed by eye.
+`npm test` passes (and `npm run test:all` after engine changes) (no errors, no overflow at 1600×900 with hint open and with all steps shown, Arabic digits only, all book questions present, no horizontal scroll at 375 px). After that, `npm run shots` reviewed by eye.

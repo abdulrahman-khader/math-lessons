@@ -1,10 +1,15 @@
 // يبني كل درس (أو الدروس المطابقة لوسيط سطر الأوامر) إلى ملف HTML واحد يعمل دون اتصال في dist/،
 // ثم يكتب dist/index.html: فهرس الدروس الذي تنشره GitHub Pages.
-// الاستعمال: npm run build            ← كل الدروس
-//            npm run build -- 3-4     ← الدروس التي يحتوي مسارها على 3-4
+// الاستعمال: npm run build                 ← كل الدروس
+//            npm run build -- 3-4 6-2      ← الدروس التي يحتوي مسارها على أحد هذه
+//            npm run build -- =g4/ch3/3-4-line-graphs   ← هذا الدرس بالضبط
+// تُبنى عدة دروس في الوقت نفسه (BUILD_JOBS، الافتراضي نصف أنوية الجهاز).
 import { build } from 'vite';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { availableParallelism } from 'node:os';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { root, findLessons, pickLessons, outName, readMeta } from './lessons.mjs';
 import { lessonConfig, starsConfig } from '../vite.config.mjs';
 
@@ -13,9 +18,14 @@ mkdirSync(dist, { recursive: true });
 
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-for (const lesson of pickLessons(process.argv[2])) {
+const argv = process.argv.slice(2);
+const every = findLessons();
+const picks = argv.filter((a) => !a.startsWith('--'));
+const chosen = picks.length ? [...new Set(picks.flatMap((a) => (a.startsWith('=') ? every.filter((l) => l === a.slice(1)) : pickLessons(a))))] : every;
+
+async function buildOne(lesson) {
   const tmp = path.join(root, '.lesson-build', lesson.replace(/\//g, '_'));
-  await build(lessonConfig(lesson, tmp));
+  await build({ ...lessonConfig(lesson, tmp), logLevel: 'warn' });
   const m = readMeta(lesson);
   // العنوان الحقيقي من البداية، لا بعد تشغيل السكربت: للمفضلة ونتائج البحث ومعاينات الروابط
   const html = readFileSync(path.join(tmp, 'index.html'), 'utf8').replace('<title>درس</title>', `<title>${esc(`${m.shortTitle} ${m.code}`)}</title>`);
@@ -23,6 +33,25 @@ for (const lesson of pickLessons(process.argv[2])) {
   writeFileSync(out, html);
   console.log(`✓ ${lesson} → dist/${outName(lesson)} (${(statSync(out).size / 1024).toFixed(0)} KB)`);
 }
+// عدة عمليات بناء معًا (كل عملية Node تعمل على نواة واحدة تقريبًا)، ثم صفحة النجوم والفهرس هنا
+const part = argv.includes('--part');
+const jobs = Number(process.env.BUILD_JOBS) || Math.max(2, availableParallelism() - 1);
+if (part || chosen.length < 4 || jobs < 2) {
+  for (const l of chosen) await buildOne(l);
+} else {
+  const chunks = Array.from({ length: Math.min(jobs, chosen.length) }, (_, i) => chosen.filter((_, j) => j % jobs === i));
+  const codes = await Promise.all(
+    chunks.map(
+      (c) =>
+        new Promise((done) => {
+          const p = spawn(process.execPath, [fileURLToPath(import.meta.url), '--part', ...c.map((l) => `=${l}`)], { stdio: 'inherit' });
+          p.on('exit', done);
+        }),
+    ),
+  );
+  if (codes.some((c) => c !== 0)) process.exit(1);
+}
+if (part) process.exit(0);
 // صفحة نجم الأسبوع: تُفتح من قائمة الدروس دون درس
 {
   const tmp = path.join(root, '.lesson-build', '_stars');

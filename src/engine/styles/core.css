@@ -1095,3 +1095,6 @@ body.flow .shcols { grid-template-columns: 1fr; }
 .tpod .pwho b { font-family: inherit; font-size: 60px; font-weight: 700; line-height: 1.4; color: var(--tc); }
 .tpod .pwho small { font-size: 24px; color: #4a5468; }
 .sweeks .srest { font-size: .8em; color: var(--muted); }
+
+/* تقليل الحركة: ظهور الخطوات والشرائح والنص المرافق بلا حركة (آخر الملف و!important لأن قواعد الظهور تأتي بعد قاعدة السطر ٦١ وفي v2.css) */
+@media (prefers-reduced-motion: reduce) { .slide.active, .step.shown, .later.shown, .clip-cap { animation: none !important; } }

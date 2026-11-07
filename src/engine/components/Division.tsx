@@ -54,7 +54,7 @@ const G = (c: number) => c + 1;
  * كل ضغطة تُظهر قطعة واحدة: رقم الناتج، ثم ناتج الضرب، ثم الفرق، ثم الرقم النازل بسهمه،
  * وفي النهاية الناتج والباقي.
  * byHl: تظهر القطع مع خطوات الحل (hl: n0، n1، …) في أمثلة الشرح، ومعها ملاحظة بجانب الخطوة الحالية
- * («نقسمُ ٣٩ ÷ ٣٦»، «نضربُ ١ × ٣٦»…) كما في هوامش الكتاب، ويُبرز الجزء الذي نقسمه الآن.
+ * («كمْ ٣٦ في ٣٩؟ ١»، «نضربُ ١ × ٣٦»…) كما في هوامش الكتاب، ويُبرز الجزء الذي نقسمه الآن.
  */
 export function LongDiv({ a, d, byHl, noAns }: { a: number; d: number; byHl?: boolean; noAns?: boolean }) {
   const { activeHl, nowHl } = useSlide();
@@ -62,7 +62,10 @@ export function LongDiv({ a, d, byHl, noAns }: { a: number; d: number; byHl?: bo
   const pieces = divPieces(a, d);
   const q = Math.floor(a / d);
   const r = a % d;
-  const sign = G(n) + 1;
+  // أمثلة الشرح: عمود الملاحظة عن يسار المقسوم عليه، بجانب الأسهم
+  const off = byHl ? 1 : 0;
+  const g = (c: number) => G(c) + off;
+  const sign = g(n) + 1;
   const isNow = (j: number) => byHl === true && nowHl.has(`n${j}`);
   // الجزء الذي نقسمه الآن: أول أرقام المقسوم، أو الفرق السابق والرقم النازل
   const nowQ = pieces.findIndex((p, j) => p.t === 'q' && isNow(j));
@@ -86,12 +89,12 @@ export function LongDiv({ a, d, byHl, noAns }: { a: number; d: number; byHl?: bo
     );
   };
   const items = pieces.map((p, j) => {
-    if (p.t === 'q') return part(j, 'dq', { gridRow: 1, gridColumn: G(p.qi) }, cells(p.v));
+    if (p.t === 'q') return part(j, 'dq', { gridRow: 1, gridColumn: g(p.qi) }, cells(p.v));
     if (p.t === 'down')
       return part(
         j,
         'ddown',
-        { gridRow: `3 / ${p.row + 1}`, gridColumn: G(p.col) },
+        { gridRow: `3 / ${p.row + 1}`, gridColumn: g(p.col) },
         <>
           <i className="darrow" />
           {cells(p.v)}
@@ -99,11 +102,11 @@ export function LongDiv({ a, d, byHl, noAns }: { a: number; d: number; byHl?: bo
       );
     const len = String(p.v).length;
     const start = p.end - len + 1;
-    if (p.t === 'diff') return part(j, 'ddiff', { gridRow: p.row, gridColumn: `${G(start)} / ${G(p.end) + 1}` }, cells(p.v));
+    if (p.t === 'diff') return part(j, 'ddiff', { gridRow: p.row, gridColumn: `${g(start)} / ${g(p.end) + 1}` }, cells(p.v));
     return part(
       j,
       'dprod',
-      { gridRow: p.row, gridColumn: `${G(start)} / ${sign + 1}` },
+      { gridRow: p.row, gridColumn: `${g(start)} / ${sign + 1}` },
       <>
         <b className="dline">{cells(p.v)}</b>
         {Array.from({ length: n - p.end }, (_, i) => <span key={`s${i}`} />)}
@@ -115,10 +118,10 @@ export function LongDiv({ a, d, byHl, noAns }: { a: number; d: number; byHl?: bo
   const notes = byHl
     ? pieces.map((p, j) => {
         const text =
-          p.t === 'q' ? `نقسمُ ${num(p.cur)} ÷ ${num(d)}` : p.t === 'prod' ? `نضربُ ${num(p.q)} × ${num(d)}` : p.t === 'diff' ? `نطرحُ ${num(p.cur)} − ${num(p.prod)}` : `نُنزِلُ ${num(p.v)}`;
+          p.t === 'q' ? `كمْ ${num(d)} في ${num(p.cur)}؟ ${num(p.v)}` : p.t === 'prod' ? `نضربُ ${num(p.q)} × ${num(d)}` : p.t === 'diff' ? `نطرحُ ${num(p.cur)} − ${num(p.prod)}` : `نُنزِلُ ${num(p.v)}`;
         const row = p.t === 'q' ? 1 : p.row;
         return (
-          <span key={`note${j}`} className={'dnote d' + p.t} style={{ gridRow: row, gridColumn: sign + 1, visibility: isNow(j) ? 'visible' : 'hidden' }}>
+          <span key={`note${j}`} className={'dnote d' + p.t} style={{ gridRow: row, gridColumn: 1, visibility: isNow(j) ? 'visible' : 'hidden' }}>
             {text}
           </span>
         );
@@ -129,8 +132,8 @@ export function LongDiv({ a, d, byHl, noAns }: { a: number; d: number; byHl?: bo
   return (
     <div className="ldiv-wrap">
       <div ref={box} className={'ldiv' + (byHl ? ' noted' : '')} style={{ '--n': n } as CSSProperties} role="img" aria-label={`${num(a)} ÷ ${num(d)}`}>
-        <div className="ddivisor" style={{ gridRow: 2, gridColumn: 1 }}>{num(d)}</div>
-        <div className="ddividend" style={{ gridRow: 2, gridColumn: `${G(1)} / ${sign + 1}` }}>
+        <div className="ddivisor" style={{ gridRow: 2, gridColumn: 1 + off }}>{num(d)}</div>
+        <div className="ddividend" style={{ gridRow: 2, gridColumn: `${g(1)} / ${sign + 1}` }}>
           {String(a).split('').map((c, i) => <span key={i} className={i < srcDigits ? 'src' : undefined}>{num(Number(c))}</span>)}
           <span />
         </div>

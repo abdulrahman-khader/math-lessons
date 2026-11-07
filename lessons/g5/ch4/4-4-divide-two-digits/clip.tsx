@@ -58,14 +58,14 @@ const toRow = (x: number, y: number) => `M${DX} ${Y.div + 22} Q${DX} ${y - 20} $
 function scene(t: number) {
   const chair = fade(t, 4.5, 99);
   // ما يظهر من الكتابة
-  const q1 = fade(t, 15.5, 99);
-  const p1 = fade(t, 22.5, 99);
-  const d1 = fade(t, 24.5, 99);
-  const down = tw(t, 27, 28.5);
-  const q2 = fade(t, 31, 99);
-  const p2 = fade(t, 33.2, 99);
-  const d2 = fade(t, 34.4, 99);
-  const done = fade(t, 35.5, 99);
+  const q1 = fade(t, 8.5, 99);
+  const p1 = fade(t, 15.5, 99);
+  const d1 = fade(t, 17.5, 99);
+  const down = tw(t, 20, 21.5);
+  const q2 = fade(t, 24, 99);
+  const p2 = fade(t, 26.2, 99);
+  const d2 = fade(t, 27.4, 99);
+  const done = fade(t, 28.5, 99);
   const live = 1 - done; // الأسهم والإبراز تختفي عند الخاتمة
   return (
     <>
@@ -83,8 +83,8 @@ function scene(t: number) {
 
       <g opacity={chair}>
         {/* إبراز العدد الذي نقسمه الآن */}
-        <rect x={C[0] - CW / 2} y={Y.div - 58} width={CW * 2} height={76} rx={10} fill="#dbe8fb" opacity={fade(t, 13, 20) * live} />
-        <rect x={C[1] - CW / 2} y={Y.r4 - 58} width={CW * 2} height={76} rx={10} fill="#dbe8fb" opacity={fade(t, 29.5, 32.5) * live} />
+        <rect x={C[0] - CW / 2} y={Y.div - 58} width={CW * 2} height={76} rx={10} fill="#dbe8fb" opacity={fade(t, 6, 13) * live} />
+        <rect x={C[1] - CW / 2} y={Y.r4 - 58} width={CW * 2} height={76} rx={10} fill="#dbe8fb" opacity={fade(t, 22.5, 25.5) * live} />
 
         {/* كرسي القسمة */}
         <text x={DX} y={Y.div} fontSize={FS} textAnchor="middle" fill="#b3341a" style={{ fontWeight: 700 }}>٢٣</text>
@@ -108,7 +108,7 @@ function scene(t: number) {
 
         {/* الإنزال: سهم أزرق ثم ٢ */}
         <Arrow d={`M${C[2]} ${Y.div + 24} V${Y.r4 - 62}`} k={down} color={BLUE} />
-        {digit(C[2], Y.r4, '٢', fade(t, 28.3, 99), BLUE)}
+        {digit(C[2], Y.r4, '٢', fade(t, 21.3, 99), BLUE)}
 
         {/* الخطوة الثانية: ٩٢ ثم ٠ */}
         <g opacity={p2}>
@@ -120,26 +120,25 @@ function scene(t: number) {
         {digit(C[2], Y.r6, '٠', d2)}
 
         {/* أسهم الشرح */}
-        <Arrow d={mulArc(C[0])} k={tw(t, 20, 21.2)} color={ORANGE} op={fade(t, 20, 24.5)} />
-        <Badge x={(C[0] + DX) / 2} y={Y.q - 92} s="×" color={ORANGE} op={fade(t, 20.6, 24.5)} />
-        <Arrow d={toRow(C[0] - CW / 2, Y.r3)} k={tw(t, 21.6, 22.6)} color={ORANGE} op={fade(t, 21.6, 24.5)} />
+        <Arrow d={mulArc(C[0])} k={tw(t, 13, 14.2)} color={ORANGE} op={fade(t, 13, 17.5)} />
+        <Badge x={(C[0] + DX) / 2} y={Y.q - 92} s="×" color={ORANGE} op={fade(t, 13.6, 17.5)} />
+        <Arrow d={toRow(C[0] - CW / 2, Y.r3)} k={tw(t, 14.6, 15.6)} color={ORANGE} op={fade(t, 14.6, 17.5)} />
 
-        <Arrow d={toRow(C[1] - CW / 2, Y.r4)} k={tw(t, 29.5, 30.5)} color={BLUE} op={fade(t, 29.5, 32.5)} />
-        <Badge x={DX + 34} y={Y.r4 - 52} s="÷" color={BLUE} op={fade(t, 30, 32.5)} />
+        <Arrow d={toRow(C[1] - CW / 2, Y.r4)} k={tw(t, 22.5, 23.5)} color={BLUE} op={fade(t, 22.5, 25.5)} />
+        <Badge x={DX + 34} y={Y.r4 - 52} s="÷" color={BLUE} op={fade(t, 23, 25.5)} />
 
-        <Arrow d={mulArc(C[1])} k={tw(t, 32, 33)} color={ORANGE} op={fade(t, 32, 35.5)} />
-        <Badge x={(C[1] + DX) / 2} y={Y.q - 92} s="×" color={ORANGE} op={fade(t, 32.4, 35.5)} />
-        <Arrow d={toRow(C[1] - CW / 2, Y.r5)} k={tw(t, 32.6, 33.3)} color={ORANGE} op={fade(t, 32.6, 35.5)} />
+        <Arrow d={mulArc(C[1])} k={tw(t, 25, 26)} color={ORANGE} op={fade(t, 25, 28.5)} />
+        <Badge x={(C[1] + DX) / 2} y={Y.q - 92} s="×" color={ORANGE} op={fade(t, 25.4, 28.5)} />
+        <Arrow d={toRow(C[1] - CW / 2, Y.r5)} k={tw(t, 25.6, 26.3)} color={ORANGE} op={fade(t, 25.6, 28.5)} />
       </g>
 
       {/* ملاحظة كل خطوة */}
-      <Note t={t} a={6} b={13} text="نقدّر: ٥٠٠ ÷ ٢٠ = ٢٥" color="var(--ink)" />
-      <Note t={t} a={13} b={20} text="نقسم ٥٥ ÷ ٢٣ = ٢" />
-      <Note t={t} a={20} b={24.3} text="نضرب ٢ × ٢٣ = ٤٦" color={ORANGE} />
-      <Note t={t} a={24.3} b={27} text="نطرح ٥٥ − ٤٦ = ٩" />
-      <Note t={t} a={27} b={29.5} text="ننزل ٢ فيصبح ٩٢" />
-      <Note t={t} a={29.5} b={32} text="نقسم ٩٢ ÷ ٢٣ = ٤" />
-      <Note t={t} a={32} b={35.5} text="نضرب ٤ × ٢٣ = ٩٢" color={ORANGE} />
+      <Note t={t} a={6} b={13} text="كم ٢٣ في ٥٥؟ ٢" />
+      <Note t={t} a={13} b={17.3} text="نضرب ٢ × ٢٣ = ٤٦" color={ORANGE} />
+      <Note t={t} a={17.3} b={20} text="نطرح ٥٥ − ٤٦ = ٩" />
+      <Note t={t} a={20} b={22.5} text="ننزل ٢ فيصبح ٩٢" />
+      <Note t={t} a={22.5} b={25} text="كم ٢٣ في ٩٢؟ ٤" />
+      <Note t={t} a={25} b={28.5} text="نضرب ٤ × ٢٣ = ٩٢" color={ORANGE} />
       <ClipCard x={780} y={150} w={540} h={190} op={done} color="var(--good)">
         <text x={1050} y={225} fontSize={50} textAnchor="middle" direction="rtl" fill="var(--good)" style={{ fontWeight: 800 }}>الناتج ٢٤</text>
         <text x={1050} y={300} fontSize={40} textAnchor="middle" direction="rtl" style={{ fontWeight: 700 }}>نتحقق: ٢٤ × ٢٣ = ٥٥٢</text>
@@ -151,15 +150,14 @@ function scene(t: number) {
 export const IntroClip = () => (
   <Clip
     voice={voice}
-    duration={44}
+    duration={37}
     scene={scene}
     captions={[
       [0, 'فكرة الدرس'],
-      [6, 'نقدّر أولًا: **٢٥** تقريبًا'],
-      [13, 'نقسم ٥٥ على ٢٣: **٢**'],
-      [20, 'نضرب ونطرح: يبقى **٩**'],
-      [27, 'ننزل ٢ ونقسم ٩٢: **٤**'],
-      [35, 'الناتج **٢٤**، ونتحقق بالضرب'],
+      [6, 'كم ٢٣ في ٥٥؟ **٢**'],
+      [13, 'نضرب ونطرح: يبقى **٩**'],
+      [20, 'ننزل ٢: كم ٢٣ في ٩٢؟ **٤**'],
+      [28, 'الناتج **٢٤**، ونتحقق بالضرب'],
     ]}
   />
 );

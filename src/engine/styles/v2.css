@@ -888,7 +888,7 @@ body.flow .alabel { min-width: 0; }
 /* القسمة المطوّلة (الصف الخامس): كرسي القسمة كما في الكتاب، المقسوم عليه عن يسار الخط وتحته خط */
 #app[data-design="v2"] .ldiv-wrap { --dblue: #1f62b0; display: flex; flex-direction: column; align-items: center; gap: 8px; align-self: center; }
 #app[data-design="v2"] .ldiv { --cw: 40px; display: inline-grid; grid-template-columns: auto repeat(var(--n), var(--cw)) 34px; grid-auto-rows: auto; align-items: end; direction: ltr; font-size: 52px; font-weight: 700; line-height: 1.2; }
-#app[data-design="v2"] .ldiv.noted { grid-template-columns: auto repeat(var(--n), var(--cw)) 34px 290px; }
+#app[data-design="v2"] .ldiv.noted { grid-template-columns: 290px auto repeat(var(--n), var(--cw)) 34px; }
 #app[data-design="v2"] .ldiv span { display: inline-block; inline-size: var(--cw); text-align: center; }
 #app[data-design="v2"] .ldiv .dv, #app[data-design="v2"] .qgrid .qcard .ldiv .step.dv { display: flex !important; justify-content: flex-end; margin: 0; padding: 0; min-height: 0; background: none !important; border-radius: 6px; font-size: 52px; font-weight: 700; line-height: 1.2; }
 #app[data-design="v2"] .ldiv .dv span, #app[data-design="v2"] .qgrid .qcard .ldiv .step.dv span { font-size: 52px !important; color: inherit !important; }
@@ -904,7 +904,7 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .ldiv .darrow::after { content: ""; position: absolute; inset-block-end: -14px; inset-inline-start: -10px; border-inline: 8px solid transparent; border-block-start: 14px solid var(--dblue); }
 #app[data-design="v2"] .ldiv .dv.now { background: #fff3c4 !important; }
 #app[data-design="v2"] .ldiv .dv.src, #app[data-design="v2"] .ldiv .ddividend span.src { background: #dbe8fb !important; border-radius: 6px; }
-#app[data-design="v2"] .ldiv .dnote { inline-size: auto; align-self: center; justify-self: start; padding: 2px 12px; margin-inline-start: 12px; border-radius: 10px; background: #e8f0fb; direction: rtl; white-space: nowrap; font-size: 32px; font-weight: 700; color: var(--dblue); }
+#app[data-design="v2"] .ldiv .dnote { inline-size: auto; align-self: center; justify-self: end; padding: 2px 12px; margin-inline-start: 14px; border-radius: 10px; background: #e8f0fb; direction: rtl; white-space: nowrap; font-size: 32px; font-weight: 700; color: var(--dblue); }
 #app[data-design="v2"] .ldiv-wrap .step.dans, #app[data-design="v2"] .qgrid .qcard .ldiv-wrap .step.dans { margin: 0; padding: 2px 14px; min-height: 0; font-size: 40px; font-weight: 800; color: var(--ans); background: none; }
 #app[data-design="v2"] .ldiv.dwork .dq { color: var(--ink); }
 #app[data-design="v2"] .ldiv-wrap .dname { font-size: 30px; font-weight: 800; color: var(--ink); }

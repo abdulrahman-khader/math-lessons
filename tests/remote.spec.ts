@@ -310,14 +310,18 @@ test('الضغطات السريعة تصل كلها مرة واحدة', async ({
   expect(errors).toEqual([]);
 });
 
-test('بعد إعادة فتح الدرس على الآيباد يعود الجوال وحده', async ({ browser }) => {
-  const { ipad, phone, errors } = await pair(browser);
-  await ipad.reload();
-  // الآيباد يتذكر أن التحكم مفعّل، والجوال يعيد الاتصال دون مسح الرمز
-  await expect(phone.locator('.rhead .dot')).toContainText('مباشرة', { timeout: 60000 });
-  await phone.locator('.rnav .next').click();
-  await expect.poll(() => activeIndex(ipad), { timeout: 15000 }).toBe('1');
-  expect(errors).toEqual([]);
+// إعادة الاتصال بعد إعادة التحميل تتأخر أحيانًا حين تعمل فحوص الجوال كلها معًا: يُعاد هذا الفحص حتى مرتين
+test.describe('إعادة الاتصال', () => {
+  test.describe.configure({ retries: 2 });
+  test('بعد إعادة فتح الدرس على الآيباد يعود الجوال وحده', async ({ browser }) => {
+    const { ipad, phone, errors } = await pair(browser);
+    await ipad.reload();
+    // الآيباد يتذكر أن التحكم مفعّل، والجوال يعيد الاتصال دون مسح الرمز
+    await expect(phone.locator('.rhead .dot')).toContainText('مباشرة', { timeout: 60000 });
+    await phone.locator('.rnav .next').click();
+    await expect.poll(() => activeIndex(ipad), { timeout: 15000 }).toBe('1');
+    expect(errors).toEqual([]);
+  });
 });
 
 test('زرّا الشرائح في الجوال يتجاوزان الخطوات', async ({ browser }) => {

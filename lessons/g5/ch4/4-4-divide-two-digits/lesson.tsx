@@ -42,8 +42,8 @@ export default defineLesson({
               <QText>جهَّزَ مخبزٌ كعكةً كبيرةً تكفِي لإِطعامِ ٣٦ شَخصًا. كَمْ كعكةً يحتاجُ المخبزُ لإِطعامِ ٧٢ شَخصًا؟</QText>
               <Solution>
                 <Step>نقسمُ عددَ الأشخاصِ على ٣٦</Step>
-                <Step><Eq>٢ × ٣٦ = ٧٢</Eq></Step>
                 <Step><Eq>٧٢ ÷ ٣٦ = ٢</Eq></Step>
+                <Step><BookLabel>نتحقَّقُ:</BookLabel> <Eq>٢ × ٣٦ = ٧٢</Eq></Step>
                 <Step kind="ans" label="يحتاجُ المخبزُ">كعكتينِ</Step>
               </Solution>
             </QCol>

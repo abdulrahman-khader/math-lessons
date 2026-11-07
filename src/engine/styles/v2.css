@@ -881,3 +881,40 @@ body.flow .alabel { min-width: 0; }
 #app[data-design="v2"] .blocks3 .pb.ten { inline-size: 11px; block-size: 92px; }
 #app[data-design="v2"] .b3h { display: flex; flex-wrap: wrap; gap: 5px; max-inline-size: 300px; }
 #app[data-design="v2"] .blocks3 .pb.hundred { inline-size: 92px; block-size: 92px; }
+
+#app[data-design="v2"] .ribbon { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 36px; font-weight: 700; }
+#app[data-design="v2"] .ribbon i { display: block; inline-size: 300px; block-size: 46px; border-radius: 10px; background: linear-gradient(90deg, #c8102e, #ef4a5a 50%, #c8102e); }
+
+/* القسمة المطوّلة (الصف الخامس): كرسي القسمة كما في الكتاب، المقسوم عليه عن يسار الخط وتحته خط */
+#app[data-design="v2"] .ldiv-wrap { --dblue: #1f62b0; display: flex; flex-direction: column; align-items: center; gap: 8px; align-self: center; }
+#app[data-design="v2"] .ldiv { --cw: 40px; display: inline-grid; grid-template-columns: auto repeat(var(--n), var(--cw)) 34px; grid-auto-rows: auto; align-items: end; direction: ltr; font-size: 52px; font-weight: 700; line-height: 1.2; }
+#app[data-design="v2"] .ldiv.noted { grid-template-columns: auto repeat(var(--n), var(--cw)) 34px 290px; }
+#app[data-design="v2"] .ldiv span { display: inline-block; inline-size: var(--cw); text-align: center; }
+#app[data-design="v2"] .ldiv .dv, #app[data-design="v2"] .qgrid .qcard .ldiv .step.dv { display: flex !important; justify-content: flex-end; margin: 0; padding: 0; min-height: 0; background: none !important; border-radius: 6px; font-size: 52px; font-weight: 700; line-height: 1.2; }
+#app[data-design="v2"] .ldiv .dv span, #app[data-design="v2"] .qgrid .qcard .ldiv .step.dv span { font-size: 52px !important; color: inherit !important; }
+#app[data-design="v2"] .ldiv .ddividend { display: flex; border-block-start: 4px solid var(--ink); }
+#app[data-design="v2"] .ldiv .ddivisor { align-self: stretch; display: flex; align-items: end; padding-inline: 6px 12px; border-inline-end: 4px solid var(--ink); border-block-end: 4px solid var(--ink); color: var(--bad); }
+#app[data-design="v2"] .ldiv .dline { display: flex; font-weight: 700; border-block-end: 3px solid var(--ink); }
+#app[data-design="v2"] .ldiv .dminus { inline-size: 34px; }
+#app[data-design="v2"] .ldiv .step.dv.shown, #app[data-design="v2"] .ldiv .dv.vfix { color: var(--ink); }
+#app[data-design="v2"] .ldiv .step.dq.shown, #app[data-design="v2"] .ldiv .dq.vfix { color: var(--ans); }
+#app[data-design="v2"] .ldiv .dv.ddown { flex-direction: column; align-items: center; justify-content: flex-end; align-self: stretch; }
+#app[data-design="v2"] .ldiv .step.ddown.shown, #app[data-design="v2"] .ldiv .ddown.vfix { color: var(--dblue); }
+#app[data-design="v2"] .ldiv .darrow { position: relative; flex: 1 1 0; min-block-size: 18px; inline-size: 0; margin-block: 2px 14px; border-inline-start: 4px solid var(--dblue); }
+#app[data-design="v2"] .ldiv .darrow::after { content: ""; position: absolute; inset-block-end: -14px; inset-inline-start: -10px; border-inline: 8px solid transparent; border-block-start: 14px solid var(--dblue); }
+#app[data-design="v2"] .ldiv .dv.now { background: #fff3c4 !important; }
+#app[data-design="v2"] .ldiv .dv.src, #app[data-design="v2"] .ldiv .ddividend span.src { background: #dbe8fb !important; border-radius: 6px; }
+#app[data-design="v2"] .ldiv .dnote { inline-size: auto; align-self: center; justify-self: start; padding: 2px 12px; margin-inline-start: 12px; border-radius: 10px; background: #e8f0fb; direction: rtl; white-space: nowrap; font-size: 32px; font-weight: 700; color: var(--dblue); }
+#app[data-design="v2"] .ldiv-wrap .step.dans, #app[data-design="v2"] .qgrid .qcard .ldiv-wrap .step.dans { margin: 0; padding: 2px 14px; min-height: 0; font-size: 40px; font-weight: 800; color: var(--ans); background: none; }
+#app[data-design="v2"] .ldiv.dwork .dq { color: var(--ink); }
+#app[data-design="v2"] .ldiv-wrap .dname { font-size: 30px; font-weight: 800; color: var(--ink); }
+#app[data-design="v2"] .ldiv { position: relative; }
+#app[data-design="v2"] .ldiv.noted { padding-block-start: 60px; }
+#app[data-design="v2"] .ldiv .darrows { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; overflow: visible; pointer-events: none; }
+#app[data-design="v2"] .ldiv .dar path { fill: none; stroke: #e8701a; stroke-width: 4; stroke-linecap: round; }
+#app[data-design="v2"] .ldiv .dar.div path { stroke: var(--dblue); }
+#app[data-design="v2"] .ldiv .darrows marker path { fill: #e8701a; stroke: none; }
+#app[data-design="v2"] .ldiv .darrows marker.div path { fill: var(--dblue); }
+#app[data-design="v2"] .ldiv .dar circle { fill: #e8701a; }
+#app[data-design="v2"] .ldiv .dar.div circle { fill: var(--dblue); }
+#app[data-design="v2"] .ldiv .dar text { fill: #fff; font-size: 32px; font-weight: 800; }

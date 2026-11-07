@@ -90,7 +90,7 @@ function readCaptions(file) {
 }
 
 /** الدروس التي فيها صوت: آخر درسين في الفصل الثالث، والفصل الرابع كاملًا، للصفين */
-const VOICED = ['g2/ch1/', 'g4/ch1/', 'g2/ch2/', 'g4/ch2/', 'g2/ch3/', 'g4/ch3/', 'g2/ch4/', 'g4/ch4/', 'g2/ch5/', 'g4/ch5/', 'g2/ch6/', 'g4/ch6/'];
+const VOICED = ['g2/ch1/', 'g4/ch1/', 'g2/ch2/', 'g4/ch2/', 'g2/ch3/', 'g4/ch3/', 'g2/ch4/', 'g4/ch4/', 'g2/ch5/', 'g4/ch5/', 'g2/ch6/', 'g4/ch6/', 'g5/ch4/'];
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const wanted = process.argv.includes('--voiced') ? VOICED : args;
 const lessons = wanted.length ? [...new Set(wanted.flatMap((a) => pickLessons(a)))] : pickLessons();

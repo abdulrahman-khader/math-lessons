@@ -25,6 +25,7 @@ const EVENT = 'classes-changed';
 export const GRADES: { k: string; name: string }[] = [
   { k: 'g2', name: 'الصف الثاني' },
   { k: 'g4', name: 'الصف الرابع' },
+  { k: 'g5', name: 'الصف الخامس' },
 ];
 
 /** g4-3-1-collect-data ← g4 */

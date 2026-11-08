@@ -26,7 +26,8 @@ export const DEFAULT_SAVED: Saved = {
 function load(key: string): Saved {
   try {
     const s = JSON.parse(localStorage.getItem(key) ?? 'null');
-    if (s && typeof s === 'object') return { ...DEFAULT_SAVED, ...s };
+    // الكتم لا يُحفظ بين الحصص: كتمٌ نُسي في درس واحد كان يُسكت مقطعه في كل حصة بعدها
+    if (s && typeof s === 'object') return { ...DEFAULT_SAVED, ...s, muted: false };
   } catch {
     /* التخزين قد يكون محظورًا؛ الدرس يعمل دونه */
   }

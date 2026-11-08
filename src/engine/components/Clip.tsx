@@ -168,7 +168,14 @@ function voiceAudio() {
         if (a.src === SILENT) a.pause();
       });
   };
-  document.addEventListener('pointerdown', unlock, { once: true, capture: true });
+  // لوحة المفاتيح أو جهاز التقليب يكفيان أيضًا، فلا يلزم لمس السبورة قبل تشغيل المقطع من الجوال
+  const once = () => {
+    document.removeEventListener('pointerdown', once, true);
+    document.removeEventListener('keydown', once, true);
+    unlock();
+  };
+  document.addEventListener('pointerdown', once, true);
+  document.addEventListener('keydown', once, true);
   return shared;
 }
 
@@ -191,6 +198,8 @@ export function Clip({ duration, captions, scene, voice }: ClipProps) {
   const root = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const playingRef = useRef(false);
+  playingRef.current = playing;
   const tRef = useRef(0);
   tRef.current = t;
   /** الجملة المحمَّلة في عنصر الصوت الآن (-١ = لا شيء) */
@@ -241,7 +250,19 @@ export function Clip({ duration, captions, scene, voice }: ClipProps) {
       if (offset > 0.3 && offset < line.d) audio.currentTime = offset;
       if (offset >= line.d) return;
     }
-    if (audio.paused && !audio.ended) audio.play().catch(() => {});
+    if (audio.paused && !audio.ended) {
+      const src = audio.src;
+      audio.play().catch(() => {
+        // منعه المتصفح (لم تُلمس الصفحة بعد): يُعاد مع أول لمسة أو مفتاح والمقطع ما زال يعمل
+        const retry = () => {
+          document.removeEventListener('pointerdown', retry, true);
+          document.removeEventListener('keydown', retry, true);
+          if (audio.src === src && playingRef.current && audio.paused) audio.play().catch(() => {});
+        };
+        document.addEventListener('pointerdown', retry, true);
+        document.addEventListener('keydown', retry, true);
+      });
+    }
   }, [playing, ci]);
   // عند مغادرة الشريحة أو إزالة المقطع
   useEffect(() => () => audio?.pause(), []);

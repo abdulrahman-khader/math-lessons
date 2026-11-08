@@ -1,8 +1,8 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { num } from '../digits';
 import { Bag, type BagItem } from './DataViz';
 import { Card, Cols, QCard, QCol } from './Layout';
-import { LiveTally } from './LiveTally';
+import { LiveTally, useTallies } from './LiveTally';
 import { useRemoteWidget } from './Primary';
 import { Step } from './Steps';
 
@@ -68,16 +68,52 @@ export function CompareQ({ n, a, b, items, ans }: { n: number; a: string; b: str
   );
 }
 
-/** تجربة السحب: الطلاب يسحبون من كيس حقيقي، والمعلم يسجّل كل سحبة بإشارة (على الشاشة أو من الجوال) */
+/** عدد سحبات تجربة الكتاب: «أسحب مكعبًا وأعيده ١٠ مرات» */
+const DRAWS = 10;
+const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * تجربة السحب: «نسحبُ مكعبًا» يُخرج مكعبًا عشوائيًا من الكيس، وتُضاف إشارته في صف لونه،
+ * ثم يعود المكعب إلى الكيس مع السحبة التالية. لمس الصف يضيف إشارة يدويًا (إن سحبوا من كيس حقيقي).
+ */
 export function DrawTally({ id, items }: { id: string; items: BagItem[] }) {
+  const [v, set] = useTallies(id, items.length);
+  const vRef = useRef(v);
+  vRef.current = v;
+  const [out, setOut] = useState<{ k: number; id: number } | null>(null);
+  const busy = useRef(false);
+  const total = v.reduce((a, b) => a + b, 0);
+  const flat = items.flatMap((it, i) => Array.from({ length: it.n }, () => i));
+  const done = total >= DRAWS;
+  const draw = () => {
+    if (busy.current || done || !flat.length) return;
+    busy.current = true;
+    const k = Math.floor(Math.random() * flat.length);
+    setOut({ k, id: Date.now() });
+    // الإشارة بعد أن يخرج المكعب من الكيس
+    window.setTimeout(
+      () => {
+        set(vRef.current.map((x, j) => (j === flat[k] ? x + 1 : x)));
+        busy.current = false;
+      },
+      reduced() ? 0 : 700,
+    );
+  };
+  const label = done ? `سحبنا ${num(DRAWS)} مرات` : `نسحبُ مكعبًا (${num(total)} من ${num(DRAWS)})`;
   return (
     <div className="dtally">
-      <Bag items={items} shape="cube" size={240} />
+      <div className="dbag">
+        <Bag items={items} shape="cube" size={240} out={out} />
+        <button className="btn primary ddraw" onClick={(e) => (e.currentTarget.blur(), draw())} disabled={done}>
+          {label}
+        </button>
+      </div>
       <LiveTally
         id={id}
         head="اللَّوْنُ"
         count={false}
         title="نتائج السحب"
+        extra={{ label: done ? `سحبنا ${num(DRAWS)} مرات` : 'اسحب مكعبًا', disabled: done, on: draw }}
         rows={items.map((it) => ({
           name: it.name,
           label: (

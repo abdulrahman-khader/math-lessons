@@ -33,7 +33,7 @@ function write(id: string, v: number[]) {
 }
 
 /** إشارات جدول مشترك بين كل الشرائح التي تعرضه */
-function useTallies(id: string, len: number) {
+export function useTallies(id: string, len: number) {
   const [v, setV] = useState(() => read(id, len));
   useEffect(() => {
     const on = (e: Event) => {
@@ -85,9 +85,11 @@ interface Props {
   tone?: 'green' | 'blue' | 'orange' | 'salmon';
   /** اسم الأداة في الجوال */
   title?: string;
+  /** زر إضافي في الجوال (مثل «اسحب مكعبًا») */
+  extra?: { label: string; disabled?: boolean; on: () => void };
 }
 
-export function LiveTally({ id, head, rows, count = true, tone = 'green', title = 'جدول الإشارات' }: Props) {
+export function LiveTally({ id, head, rows, count = true, tone = 'green', title = 'جدول الإشارات', extra }: Props) {
   const [v, set] = useTallies(id, rows.length);
   const add = (i: number, d: number) => set(v.map((x, j) => (j === i ? Math.max(0, x + d) : x)));
   const total = v.reduce((a, b) => a + b, 0);
@@ -96,13 +98,17 @@ export function LiveTally({ id, head, rows, count = true, tone = 'green', title 
       title,
       info: `عدد الإشارات كلها: ${num(total)}`,
       steppers: rows.map((r, i) => ({ key: `r${i}`, label: r.name, value: v[i], min: 0, max: 99 })),
-      buttons: [{ key: 'clear', label: 'امسح الإشارات', disabled: total === 0 }],
+      buttons: [
+        ...(extra ? [{ key: 'extra', label: extra.label, on: true, disabled: extra.disabled }] : []),
+        { key: 'clear', label: 'امسح الإشارات', disabled: total === 0 },
+      ],
     }),
     (k, n) => {
-      if (k === 'clear') set(v.map(() => 0));
+      if (k === 'extra') extra?.on();
+      else if (k === 'clear') set(v.map(() => 0));
       else if (k.startsWith('r') && n !== undefined) set(v.map((x, j) => (j === Number(k.slice(1)) ? Math.max(0, n) : x)));
     },
-    [v.join(), total],
+    [v.join(), total, extra?.label, extra?.disabled],
   );
   const v2 = useV2();
   // التصميم الجديد: لا أزرار على السبورة؛ لمسُ الصف يضيف إشارة، والحذف والمسح من الجوال

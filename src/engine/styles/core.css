@@ -917,6 +917,8 @@ body.flow .clip-scene { flex: none; aspect-ratio: 1400 / 520; }
 .cbags > * { grid-area: 1 / 1; }
 .cbags .cover.shown { display: block; }
 .dtally { display: flex; gap: .6em; align-items: center; justify-content: center; }
+.dtally .dbag { display: flex; flex-direction: column; align-items: center; gap: .3em; }
+.dtally .ddraw { font-size: .8em; white-space: nowrap; }
 
 /* إعلان النجمة */
 

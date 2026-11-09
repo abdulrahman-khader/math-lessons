@@ -31,5 +31,6 @@ export { Frogs, FrogExplorer, DoublesExplorer, MissingExplorer } from './compone
 export { Area4, VMul2, AreaModel, DotArray, DotArrays, MonthCal, PlaceRows, TimesTable, VMul, BlockGroups, ShapeRow, type PlaceKind } from './components/Multiply';
 export { ColAdd, useCarryFly } from './components/Columns';
 export { LongDiv, DivWork, divPieces, divCount } from './components/Division';
+export { Alg, IneqCard, IneqLine, sgn, type IneqMark } from './components/Inequality';
 export { TenOnes, TensCard, PlaceSum, PlaceCard, RegroupTable, PlaceMat, RegroupExplorer, RoundSum, RoundCard, SubMat, SubRegroupTable, CheckCard, CheckRow, EstAddCard, Blocks3, SvgBlocks, SvgVertical, clipSlide, askSlide, goalsSlide, mindSlide, exitSlide, endSlide } from './components/Place';
 export { ValueCard, OnesTensCard, WriteBlocksCard, WordNumCard, JarCard, SeqCard, CompareCard, GrowCard, HundredChart, JarPair, SeqLine, TenFrames, ThreeCard, ValueQ, FormQ, OrderQ, NearQ, Thousands, PeriodTable } from './components/Numbers';

@@ -1,4 +1,4 @@
-import { Clip, ClipCard, ClipTitle, fade, lerp, tw } from '@engine';
+import { Clip, ClipCard, ClipTitle, fade, lerp, SvgSigned, tw } from '@engine';
 import voice from './voice';
 
 /*
@@ -47,12 +47,7 @@ function Line({ x, y, parts, size = FS, op = 1, color = 'var(--ink)' }: { x: num
         const w = width(p, size);
         const cx = edge - w / 2;
         edge -= w + gap;
-        if (typeof p === 'string')
-          return (
-            <text key={i} x={cx} y={y} fontSize={size} textAnchor="middle" direction="rtl" fill={color} style={{ fontWeight: 700 }}>
-              {p}
-            </text>
-          );
+        if (typeof p === 'string') return <SvgSigned key={i} x={cx} y={y} text={p} size={size} fill={color} />;
         return <Rel key={i} cx={cx} y={y} size={size} rel={p.rel} color={p.color ?? color} flip={p.flip} />;
       })}
     </g>
@@ -84,9 +79,7 @@ function NumLine({ t }: { t: number }) {
       {[-1, 0, 1, 2, 3, 4, 5, 6].map((v) => (
         <g key={v}>
           <line x1={X(v)} y1={y - 14} x2={X(v)} y2={y + 14} stroke="var(--ink)" strokeWidth={3} />
-          <text x={X(v)} y={y + 62} fontSize={40} textAnchor="middle" direction="rtl" fill="var(--ink)" style={{ fontWeight: 700 }}>
-            {label(v)}
-          </text>
+          <SvgSigned x={X(v)} y={y + 62} text={label(v)} size={40} />
         </g>
       ))}
       <line x1={X(2)} y1={y} x2={lerp(X(2), X(6) + 30, grow)} y2={y} stroke={BLUE} strokeWidth={14} strokeLinecap="round" />

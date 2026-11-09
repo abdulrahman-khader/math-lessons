@@ -80,7 +80,7 @@ export default defineLesson({
       ),
     },
     {
-      sec: 'elab', min: 3,
+      sec: 'explain', min: 3,
       notes: 'نعمل معًا: «بأقل من» تعني <. الرسوم ثابتة، والسعر يتغير بعدد النسخ.',
       content: (
         <>
@@ -124,7 +124,7 @@ export default defineLesson({
       ),
     },
     {
-      sec: 'elab', min: 3,
+      sec: 'explain', min: 3,
       notes: 'نعمل معًا: في ٢أ المتغير في الطرف الأيسر؛ نقسم على −٢ ونغيّر الاتجاه.',
       content: (
         <QuestionGroup source={`${UNDERSTAND}، ص ١٣٥`} instruction="حل كلًّا من المتباينتين الآتيتين:" cols={2}>
@@ -157,7 +157,7 @@ export default defineLesson({
       ),
     },
     {
-      sec: 'elab', min: 2,
+      sec: 'explain', min: 2,
       notes: 'نعمل معًا: «نصف عدد» تعني ن ÷ ٢. نضرب في ٢ في الخطوة الأخيرة.',
       content: (
         <QuestionGroup source={`${UNDERSTAND}، ص ١٣٦`} cols={1}>
@@ -190,7 +190,7 @@ export default defineLesson({
       ),
     },
     {
-      sec: 'elab', min: 4,
+      sec: 'explain', min: 4,
       notes: 'نعمل معًا: في ٤ب ننتبه لـ −٣ × −هـ = +٣هـ. نتحقق بالتعويض بعدد من الحل.',
       content: (
         <QuestionGroup source={`${UNDERSTAND}، ص ١٣٦`} instruction="حل كلًّا من المتباينتين الآتيتين، وتحقق من صحة الحل:" cols={2}>
@@ -233,7 +233,7 @@ export default defineLesson({
       ),
     },
     {
-      sec: 'elab', min: 3,
+      sec: 'explain', min: 3,
       notes: 'نعمل معًا: بعد التبسيط يختفي المتغير في الطرفين؛ نحكم على العبارة الباقية.',
       content: (
         <QuestionGroup source={`${UNDERSTAND}، ص ١٣٧`} instruction="حل كلًّا من المتباينتين الآتيتين، وتحقق من صحة الحل:" cols={2}>

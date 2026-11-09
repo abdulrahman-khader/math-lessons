@@ -44,6 +44,36 @@ interface LineProps {
 /** العدد بإشارة السالب كما في الكتاب: −٥ */
 export const sgn = (v: number) => (v < 0 ? '−' + num(-v) : num(v));
 
+/**
+ * نص في SVG قد يبدأ بإشارة السالب («−٦»، «−٣س»)، وسطه عند x.
+ * الإشارة خطٌّ مرسوم ملاصق لليمين: سفاري كان يُبعد «−» عن العدد حين يأتي نصًّا مع direction="rtl".
+ * بقية النص بلا رموز محايدة، فترتيبه واحد في كل المتصفحات.
+ */
+export function SvgSigned({ x, y, text, size, fill = 'var(--ink)', className, weight = 700 }: { x: number; y: number; text: string; size: number; fill?: string; className?: string; weight?: number }) {
+  const neg = text.startsWith('−');
+  const rest = neg ? text.slice(1) : text;
+  const style = { fontWeight: weight, fontSize: size };
+  if (!neg)
+    return (
+      <text x={x} y={y} textAnchor="middle" direction="rtl" fill={fill} className={className} style={style}>
+        {rest}
+      </text>
+    );
+  const m = size * 0.38;
+  const gap = size * 0.06;
+  const w = [...rest].length * size * 0.55;
+  const right = x + (w + gap + m) / 2;
+  const my = y - size * 0.3;
+  return (
+    <g>
+      <text x={right - m - gap} y={y} textAnchor="end" direction="ltr" fill={fill} className={className} style={style}>
+        {rest}
+      </text>
+      <line x1={right - m} y1={my} x2={right} y2={my} stroke={fill} strokeWidth={size * 0.085} strokeLinecap="round" />
+    </g>
+  );
+}
+
 const W = 600;
 const PAD = 40;
 const Y = 70;
@@ -86,11 +116,7 @@ export function IneqLine({ min, max, marks, shade, show, color = 'var(--sec)', s
       {ticks.map((v, i) => (
         <g key={v}>
           <line x1={x(v)} y1={Y - 10} x2={x(v)} y2={Y + 10} stroke="var(--ink)" strokeWidth={2.5} />
-          {i % every === 0 && (
-            <text x={x(v)} y={Y + 48} textAnchor="middle" direction="rtl" className="iqnum">
-              {sgn(v)}
-            </text>
-          )}
+          {i % every === 0 && <SvgSigned x={x(v)} y={Y + 48} text={sgn(v)} size={30} className="iqnum" />}
         </g>
       ))}
       {ray(marks, shade, color, Y, show)}

@@ -1,6 +1,6 @@
 import {
   BulletCard, Card, Cols, Ctrls, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, MonthCal, NextButton, QCol, QText,
-  QuestionSlide, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide,
+  QuestionSlide, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, trapSlide, ReasonCheck,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -67,7 +67,17 @@ export default defineLesson({
         </>
       ),
     },
-    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: لو كان في الفصل ٣٠ طالبًا، كم دفترًا تقريبًا؟'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: لو باع ٥٠ عصيرًا كل يوم، كم يبيع تقريبًا في ٥ أيام؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'مثال جديد غير القصة: ٦٢ × ٤. نقدّر أولًا (٦٠ × ٤ = ٢٤٠)، ثم يختار الطلاب إجابة ونحكم عليها: هل هي قريبة من التقدير؟',
+      content: (
+        <>
+          <SlideHead tag="نُجَرِّبُ مِثَالًا آخَرَ" kind="ex">مَعْقُولٌ أَمْ لَا؟</SlideHead>
+          <ReasonCheck a={62} b={4} options={[248, 2480, 24]} />
+        </>
+      ),
+    },
     {
       sec: 'explore', min: 2,
       notes: 'اقرأ المسألة، واطلب توقّع الطلاب قبل الحساب.',
@@ -136,6 +146,15 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٤٨ × ٥ = ٢٤٠', a: 'مَعْقُولٌ' },
+      { q: '٤٨ × ٥ = ٢٤٠٠', a: 'غَيْرُ مَعْقُولٍ' },
+      { q: '٥٢ × ٣ = ١٥٦', a: 'مَعْقُولٌ' },
+      { q: '٥٢ × ٣ = ١٥', a: 'غَيْرُ مَعْقُولٍ', trap: true },
+      ],
+      'نقدّر أولًا: ٥٠ × ٥ = ٢٥٠، و٥٠ × ٣ = ١٥٠. الأخير فخ: الإجابة الصغيرة جدًّا غير معقولة أيضًا.', '←',
+    ),
     {
       sec: 'check', min: 2,
       notes: 'نضرب لأن الصناديق متساوية.',

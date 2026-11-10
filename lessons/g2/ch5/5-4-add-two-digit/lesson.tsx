@@ -1,6 +1,6 @@
 import {
   BookLabel, Card, Cols, Eq, Goals, PlaceCard, PlaceMat, PlaceSum, QuestionGroup, QuestionSlide, Sentence, SlideHead, Stack,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -78,6 +78,16 @@ export default defineLesson({
       ['٣١ + ٤٦ = ؟', ['٧٧', '٧٦', '٣٧'], '٧٧'],
       ['مِنْ أَيْنَ نَبْدَأُ؟', ['الآحَادِ', 'الْعَشَرَاتِ', 'الْعَدَدِ الأَصْغَرِ'], 'الآحَادِ'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة.'),
+    trapSlide(
+      [
+      { q: '٢٣ + ٤', a: '٢٧' },
+      { q: '٢٣ + ٤٠', a: '٦٣' },
+      { q: '٢٣ + ٤٤', a: '٦٧' },
+      { q: '٢٣ + ٥٤', a: '٧٧' },
+      { q: '٤ + ٢٣', a: '٢٧', trap: true },
+      ],
+      'آحاد مع آحاد، وعشرات مع عشرات. الأخير فخ: الـ٤ آحاد، فلا نكتبها تحت الـ٢ (ليست ٦٣).',
+    ),
     {
       sec: 'check', min: 5,
       notes: 'كل ضغطة خانة: الآحاد ثم العشرات.',

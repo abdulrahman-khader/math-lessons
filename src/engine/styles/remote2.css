@@ -222,3 +222,7 @@ body.remote-body:has(.remote.r2) { background: #fff; }
 .r2panel .rtstars small { color: var(--ink2, #5b6475); font-size: 15px; }
 .r2panel .rtstars b { min-inline-size: 3.2rem; text-align: end; }
 .remote.r2 .rtpoint, .r2panel .rtpoint { background: var(--tc); color: #fff; }
+.r2hw { align-items: center; }
+.r2hw small { flex: none; color: var(--muted, #555); font-size: 15px; }
+.r2plan { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 14px 6px; border-radius: 12px; background: var(--tile); color: var(--ink); font-size: 16px; font-weight: 700; }
+.r2plan small { font-size: 14px; font-weight: 600; opacity: .75; }

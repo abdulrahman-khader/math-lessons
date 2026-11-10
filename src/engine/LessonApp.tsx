@@ -131,6 +131,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const onCmdRef = useRef<(c: RemoteCmd) => void>(() => {});
 
   const slides: SlideDef[] = useMemo(() => [{ sec: 'start', min: 1, notes: HOME_NOTES, content: null }, ...lesson.slides], [lesson]);
+  // خطة الحصة (٤٥ دقيقة) تُرسل إلى الجوال: وقت كل شريحة، وشرائح الواجب بلا وقت
+  const plan = useMemo(() => planMins(slides.map((x) => x.min), lesson.meta.minutes ?? 45, st.hw ?? []), [slides, lesson, st.hw]);
   const sections = useMemo(() => {
     const out: { k: SectionKey; first: number; last: number }[] = [];
     slides.forEach((s, i) => {
@@ -225,8 +227,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   };
 
   const engine = useMemo<EngineApi>(
-    () => ({ nTeams: st.nTeams, teamNames: st.names, scores: st.scores, addScore, startTimer, goto, registerSlide, slideChanged }),
-    [st.nTeams, st.names, st.scores, addScore, startTimer, goto, registerSlide, slideChanged],
+    () => ({ nTeams: st.nTeams, teamNames: st.names, scores: st.scores, addScore, startTimer, goto, registerSlide, slideChanged, hw: st.hw ?? [] }),
+    [st.nTeams, st.names, st.scores, addScore, startTimer, goto, registerSlide, slideChanged, st.hw],
   );
 
   /* أوامر الجوال: تُنفَّذ بأحدث حالة عبر المرجع */
@@ -258,6 +260,12 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         break;
       case 'resetSlide':
         resetSlide();
+        break;
+      case 'hw':
+        patch((s) => {
+          const hw = s.hw ?? [];
+          return { hw: hw.includes(c.i) ? hw.filter((x) => x !== c.i) : [...hw, c.i].sort((a, b) => a - b) };
+        });
         break;
       case 'score':
         if (c.team < 0 || c.team >= st.nTeams) break;
@@ -404,7 +412,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         sec: SECTION_NAMES[sl.sec],
         title: cur === 0 ? 'البداية' : (head ?? '').slice(0, 160),
         notes: sl.notes.slice(0, 900),
-        min: sl.min,
+        min: plan[cur] ?? sl.min,
+        hw: (st.hw ?? []).includes(cur),
+        hwCount: (st.hw ?? []).length,
         steps: [info.shown, info.total],
         hasHint: !!active?.querySelector('.btn.hint, .hintbox'),
         teams: Array.from({ length: st.nTeams }, (_, i) => ({ name: st.names[i], score: st.scores[i], color: (v2 ? V2_TEAM_COLORS : TEAM_COLORS)[i] })),
@@ -423,7 +433,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         mcqs: (slideApis.current[cur]?.mcqs() ?? []).map((m) => m.get()),
         timer: { show: timerNow.current.show, run: timerNow.current.run, left: timerNow.current.left, view: st.timerView },
         upNext: upNextText(active),
-        mins: slides.map((x) => x.min),
+        mins: plan,
         wheelOut: picked,
         wheelRemove,
         wheelTeam: teamFilter,
@@ -442,7 +452,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 250 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown, teamStarsDone, teamPodium]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, st.hw, plan, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown, teamStarsDone, teamPodium]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -811,6 +821,33 @@ function upNextText(active: Element | null | undefined): string | undefined {
 }
 
 /** عنوان كل شريحة كما يظهر فيها، لقائمة الشرائح في الجوال */
+/**
+ * خطة الحصة: دقائق كل شريحة بحيث يكون مجموعها مدة الحصة (٤٥ دقيقة).
+ * لكل شريحة دقيقة على الأقل، والباقي يُوزَّع بنسبة الدقائق المقترحة في الدرس.
+ * الشرائح التي اختارها المعلم واجبًا لا وقت لها، فيعود وقتها إلى الباقي.
+ */
+export function planMins(raw: number[], total: number, skip: number[] = []): number[] {
+  const out = raw.map(() => 0);
+  const idx = raw.map((_, i) => i).filter((i) => !skip.includes(i));
+  if (!idx.length) return out;
+  idx.forEach((i) => (out[i] = 1));
+  const extra = total - idx.length;
+  if (extra <= 0) return out;
+  const w = idx.reduce((a, i) => a + Math.max(0, raw[i]), 0) || idx.length;
+  const share = idx.map((i) => ((raw[i] > 0 ? raw[i] : w / idx.length) / w) * extra);
+  const floor = share.map(Math.floor);
+  let left = extra - floor.reduce((a, b) => a + b, 0);
+  // الكسور الأكبر تأخذ الدقائق الباقية
+  const order = share.map((v, k) => [v - floor[k], k] as const).sort((a, b) => b[0] - a[0]);
+  for (const [, k] of order) {
+    if (left <= 0) break;
+    floor[k]++;
+    left--;
+  }
+  idx.forEach((i, k) => (out[i] += floor[k]));
+  return out;
+}
+
 function slideTitles(main: Element | null, n: number): string[] {
   return Array.from({ length: n }, (_, i) => {
     if (i === 0) return 'البداية';

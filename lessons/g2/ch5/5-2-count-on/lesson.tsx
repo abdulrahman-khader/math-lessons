@@ -1,6 +1,6 @@
 import {
   BookLabel, Card, Cols, Eq, QCard, QText, QuestionGroup, QuestionSlide, RegroupExplorer, Sentence, SentenceCard, SlideHead, Solution, Step, SumCard, TenOnes,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, CountOnChart,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, CountOnChart, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -104,6 +104,16 @@ export default defineLesson({
       ['٤١ + ٢٠ = ؟', ['٤٣', '٥١', '٦١'], '٦١'],
       ['كَيْفَ أَعُدُّ لِأَجْمَعَ ٣٠؟', ['بِالآحَادِ', 'بِالْعَشَرَاتِ', 'بِالْمِئَاتِ'], 'بِالْعَشَرَاتِ'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة، واطلب منه العدّ بصوت عالٍ.'),
+    trapSlide(
+      [
+      { q: '٤٢ + ١', a: '٤٣' },
+      { q: '٤٢ + ٢', a: '٤٤' },
+      { q: '٤٢ + ١٠', a: '٥٢' },
+      { q: '٤٢ + ٢٠', a: '٦٢' },
+      { q: '٤٢ + ٣', a: '٤٥', trap: true },
+      ],
+      'نعدّ تصاعديًّا من ٤٢. الأخير فخ: بعد العدّ بالعشرات، ٣ آحاد لا ٣ عشرات (ليست ٧٢).',
+    ),
     {
       sec: 'check', min: 6,
       notes: 'اطلب من الطالب أن يعدّ بصوت عالٍ ويشير إلى القطع.',

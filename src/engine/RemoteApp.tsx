@@ -822,6 +822,16 @@ export function RemoteApp({ channel }: { channel: string }) {
 
       {timing?.start && timing.end ? <Pacing timing={timing} mins={st.mins ?? []} cur={st.cur} /> : null}
 
+      {/* خطة الحصة: وقت هذه الشريحة، وكم مضى من الدقائق الـ٤٥ حسب الخطة */}
+      {(st.mins?.length ?? 0) > 0 && (
+        <div className="r2plan">
+          <span>{st.hw ? 'وَاجِبٌ: بِلَا وَقْتٍ فِي الْحِصَّةِ' : `هذه الشريحة: ${(st.mins![st.cur] ?? st.min) === 2 ? 'دقيقتان' : minutesAr(st.mins![st.cur] ?? st.min)}`}</span>
+          <small>
+            حسب الخطة مضى {num((st.mins ?? []).slice(0, st.cur).reduce((x, y) => x + y, 0))} من {num((st.mins ?? []).reduce((x, y) => x + y, 0))} د
+          </small>
+        </div>
+      )}
+
       {total > 0 && (
         <div className="r2steps" aria-label={`الخطوة ${num(shown)} من ${num(total)}`}>
           {Array.from({ length: total }, (_, i) => (
@@ -840,11 +850,21 @@ export function RemoteApp({ channel }: { channel: string }) {
         </div>
       )}
 
+      {/* الواجب: المعلم يختار الشرائح التي يعطيها واجبًا، وتظهر قائمتها في شريحة الختام (لا شيء يُكتب على الشريحة نفسها) */}
+      {st.cur > 0 && (
+        <div className="r2row r2hw">
+          <button className={'r2btn' + (st.hw ? ' on' : '')} aria-pressed={!!st.hw} onClick={() => send({ c: 'hw', i: st.cur })}>
+            {st.hw ? '✓ هذه الشريحة في الواجب' : 'اجعلها واجبًا'}
+          </button>
+          {(st.hwCount ?? 0) > 0 && <small>في الواجب: {num(st.hwCount ?? 0)}</small>}
+        </div>
+      )}
+
       {/* ملاحظات المعلم: لا تظهر على شاشة العرض، بل هنا فقط */}
       {st.notes && (
         <section className="rcard notes">
           <h2>
-            ملاحظة <small>{num(st.min)} د</small>
+            ملاحظة
           </h2>
           <p>{st.notes}</p>
         </section>

@@ -1,6 +1,6 @@
 import {
   BookLabel, Card, Cols, Eq, ExitTicket, Goals, Grid, Lines, MCQ, MindMap, QText, QuestionGroup, QuestionSlide, RegroupExplorer, Sentence, SentenceCard,
-  SlideHead, SumCard, TenOnes, TensCard, Blank, defineLesson, endSlide, clipSlide, storySlide, Fingers,
+  SlideHead, SumCard, TenOnes, TensCard, Blank, defineLesson, endSlide, clipSlide, storySlide, Fingers, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -120,6 +120,16 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٣ + ٤', a: '٧' },
+      { q: '٣٠ + ٤٠', a: '٧٠' },
+      { q: '٣٠ + ٥٠', a: '٨٠' },
+      { q: '٦٠ + ٣٠', a: '٩٠' },
+      { q: '٣٠ + ٤', a: '٣٤', trap: true },
+      ],
+      'كل سطر يغيّر شيئًا واحدًا؛ اطلب الجواب قبل كشفه. الأخير فخ: ٣٠ + ٤ ليست ٧٠، فالـ٤ آحاد لا عشرات.',
+    ),
     {
       sec: 'check', min: 5,
       notes: 'كل ضغطة خانة: العشرات أولًا ثم الجملة بالأعداد.',

@@ -1,6 +1,6 @@
 import {
   BookLabel, Cols, DataTable, Eq, PlaceCard, PlaceMat, PlaceSum, QCol, QuestionGroup, QuestionSlide, SlideHead, Solution, Step, SumCard,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -84,6 +84,16 @@ export default defineLesson({
       ['٢٧ + ١٦: نَاتِجُ الْعَشَرَاتِ مَعَ الْمَحْمُولِ؟', ['٣', '٤', '٥'], '٤'],
       ['٢٧ + ١٦ = ؟', ['٣٣', '٤٣', '٤٤'], '٤٣'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة.'),
+    trapSlide(
+      [
+      { q: '٢٥ + ١٣', a: '٣٨' },
+      { q: '٢٥ + ١٤', a: '٣٩' },
+      { q: '٢٥ + ١٥', a: '٤٠' },
+      { q: '٢٥ + ٢٦', a: '٥١' },
+      { q: '٣٨ + ٤٥', a: '٨٣', trap: true },
+      ],
+      'نغيّر الآحاد ونرى متى نعيد التجميع. الأخير فخ: ٨ + ٥ = ١٣، نكتب ٣ ونحمل ١ (ليست ٧١٣).',
+    ),
     {
       sec: 'check', min: 5,
       notes: 'السؤال ٢ بلا إعادة تجميع: يبقى المربع فارغًا.',

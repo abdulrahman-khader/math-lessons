@@ -1,6 +1,6 @@
 import {
   Card, Cols, Eq, PlaceCard, PlaceSum, QuestionGroup, QuestionSlide, SlideHead, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, trapSlide, MakeTen,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -45,6 +45,16 @@ export default defineLesson({
     ], 'مراجعة: أسهل طريقة لجمع ثلاثة أعداد.'),
     storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: أي رقمين في الآحاد يصنعان عشرة؟'),
     {
+      sec: 'explore', min: 4,
+      notes: 'مثال جديد غير القصة: ٢٦ + ١٥ + ١٤. يضغط طالب رقمين في الآحاد مجموعهما ١٠ (٦ و٤)، ثم «نجمع». جرّب أيضًا اختيارًا خاطئًا ليرى الفصل الرسالة.',
+      content: (
+        <>
+          <SlideHead tag="نُجَرِّبُ مِثَالًا آخَرَ" kind="ex">نَصْنَعُ عَشَرَةً</SlideHead>
+          <MakeTen nums={[26, 15, 14]} />
+        </>
+      ),
+    },
+    {
       sec: 'explain', min: 6,
       notes: 'أنا أعمل: الطريقتان تعطيان الناتج نفسه. دع الطلاب يقولون أيهما أسهل.',
       content: (
@@ -71,6 +81,16 @@ export default defineLesson({
       ['٢٥ + ١٥ + ٣٤: أَيُّ رَقْمَيْنِ مُتَسَاوِيَانِ؟', ['٥ وَ٥', '٥ وَ٤', '٢ وَ٣'], '٥ وَ٥'],
       ['١٢ + ٣٨ + ٤١ = ؟', ['٩١', '٨١', '٩٠'], '٩١'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة.'),
+    trapSlide(
+      [
+      { q: '٣ + ٧ + ٥', a: '١٥' },
+      { q: '١٣ + ٧ + ٥', a: '٢٥' },
+      { q: '١٣ + ١٧ + ٥', a: '٣٥' },
+      { q: '١٣ + ١٧ + ١٥', a: '٤٥' },
+      { q: '٢٣ + ١٧ + ١٥', a: '٥٥', trap: true },
+      ],
+      'نبحث عن العشرة في الآحاد: ٣ + ٧. الأخير فخ: لا ننسى العشرة التي حملناها مع العشرات.',
+    ),
     {
       sec: 'check', min: 6,
       notes: 'كل ضغطة: تحويط رقم، ثم الآحاد، ثم المحمول، ثم العشرات.',

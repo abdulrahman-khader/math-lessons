@@ -1,6 +1,6 @@
 import {
   BookLabel, Cols, DataTable, Eq, LineBox, Mark, NumberLine, QText, QuestionGroup, QuestionSlide, RoundCard, RoundSum, SlideHead, Solution, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RoundExplorer,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RoundExplorer, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -79,6 +79,16 @@ export default defineLesson({
       ['٢٦ أَقْرَبُ إِلَى:', ['٢٠', '٣٠', '٤٠'], '٣٠'],
       ['٢٣ + ٢٦ يُسَاوِي تَقْرِيبًا:', ['٤٠', '٥٠', '٦٠'], '٥٠'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة.'),
+    trapSlide(
+      [
+      { q: 'أَقْرَبُ عَشَرَةٍ إِلَى ٢١', a: '٢٠' },
+      { q: 'أَقْرَبُ عَشَرَةٍ إِلَى ٢٤', a: '٢٠' },
+      { q: 'أَقْرَبُ عَشَرَةٍ إِلَى ٢٦', a: '٣٠' },
+      { q: 'أَقْرَبُ عَشَرَةٍ إِلَى ٢٩', a: '٣٠' },
+      { q: 'أَقْرَبُ عَشَرَةٍ إِلَى ٢٥', a: '٣٠', trap: true },
+      ],
+      'نقرّب أعدادًا بين ٢٠ و٣٠. الأخير فخ: ٢٥ في المنتصف تمامًا، ونقرّبها إلى العشرة الأكبر ٣٠.', '←',
+    ),
     {
       sec: 'check', min: 5,
       notes: 'اطلب من طالب أن يشير إلى العدد على خط الأعداد.',

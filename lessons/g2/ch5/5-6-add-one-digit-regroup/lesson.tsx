@@ -1,6 +1,6 @@
 import {
   BookLabel, Cols, Eq, PlaceCard, PlaceMat, PlaceSum, QCol, QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -85,6 +85,16 @@ export default defineLesson({
       ['وَأَيْنَ نَكْتُبُ الْعَشَرَةَ؟', ['فَوْقَ الْعَشَرَاتِ', 'فَوْقَ الآحَادِ', 'لَا نَكْتُبُهَا'], 'فَوْقَ الْعَشَرَاتِ'],
       ['٣٧ + ٤ = ؟', ['٤١', '٣١', '٣١١'], '٤١'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة.'),
+    trapSlide(
+      [
+      { q: '٣٨ + ١', a: '٣٩' },
+      { q: '٣٨ + ٢', a: '٤٠' },
+      { q: '٣٨ + ٥', a: '٤٣' },
+      { q: '٤٨ + ٥', a: '٥٣' },
+      { q: '٢٧ + ٥', a: '٣٢', trap: true },
+      ],
+      'متى نعيد التجميع؟ الأخير فخ مشهور: ٢٧ + ٥ ليست ٢١٢؛ الـ١٢ آحادًا عشرة و٢.',
+    ),
     {
       sec: 'check', min: 5,
       notes: 'كل ضغطة خانة: الآحاد، ثم الرقم المحمول إن وُجد، ثم العشرات. المربع يبقى فارغًا إذا لم نعد التجميع.',

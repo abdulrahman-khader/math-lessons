@@ -1,6 +1,6 @@
 import {
   BookLabel, Card, Cols, Ctrls, Definition, DotArray, DotArrays, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, NextButton, NumberRow, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, ShowLater, SlideHead, Solution, Stack, Step, StepRow, TimesTable, Winner, defineLesson, storySlide, ArrayExplorer,
+  QuestionGroup, QuestionSlide, ShowLater, SlideHead, Solution, Stack, Step, StepRow, TimesTable, Winner, defineLesson, storySlide, ArrayExplorer, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -222,6 +222,15 @@ export default defineLesson({
     },
 
     /* ================= تأكد ١–٤ ================= */
+    trapSlide(
+      [
+      { q: 'قَوَاسِمُ ٦', a: '١، ٢، ٣، ٦' },
+      { q: 'قَوَاسِمُ ١٢', a: '١، ٢، ٣، ٤، ٦، ١٢' },
+      { q: 'أَوَّلُ ٣ مُضَاعَفَاتٍ لِلْعَدَدِ ٦', a: '٦، ١٢، ١٨' },
+      { q: 'قَوَاسِمُ ٧', a: '١، ٧', trap: true },
+      ],
+      'قواسم أم مضاعفات؟ نقرأ السطر جيدًا قبل الجواب. الأخير فخ: للعدد ٧ قاسمان فقط، ولا ننسى ١ والعدد نفسه.', '←',
+    ),
     {
       sec: 'check', min: 3,
       notes: 'نبحث عن أزواج ناتج ضربها العدد. انتبه: ٣٦ فيها ٦ × ٦ زوج عدده واحد.',

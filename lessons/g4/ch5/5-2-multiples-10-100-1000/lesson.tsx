@@ -1,6 +1,6 @@
 import {
   BookLabel, Card, Cols, Ctrls, Definition, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, PlaceRows, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, type Token, storySlide, ZerosExplorer,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, type Token, storySlide, ZerosExplorer, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -233,6 +233,16 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٣ × ٤', a: '١٢' },
+      { q: '٣ × ٤٠', a: '١٢٠' },
+      { q: '٣ × ٤٠٠', a: '١٢٠٠' },
+      { q: '٣٠ × ٤٠', a: '١٢٠٠' },
+      { q: '٥ × ٦٠٠', a: '٣٠٠٠', trap: true },
+      ],
+      'نعدّ الأصفار في كل سطر. الأخير فخ: ٥ × ٦ = ٣٠ فيها صفر من الحقيقة، فالناتج ٣٠٠٠ لا ٣٠٠.',
+    ),
     {
       sec: 'check', min: 4,
       notes: 'كل ضغطة تملأ ناتجًا واحدًا. اسأل عن عدد الأصفار قبل الكشف.',

@@ -1,6 +1,6 @@
 import {
   BookLabel, Card, Cols, Ctrls, Definition, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, RoundExplorer,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, RoundExplorer, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -199,6 +199,16 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٢٣ × ٤', a: '٨٠' },
+      { q: '٢٧ × ٤', a: '١٢٠' },
+      { q: '٢٧ × ٦', a: '١٨٠' },
+      { q: '٤٧٣ × ٦', a: '٣٠٠٠' },
+      { q: '٢٥ × ٤', a: '١٢٠', trap: true },
+      ],
+      'نقرّب العامل الأكبر ثم نضرب. الأخير فخ: ٢٥ في المنتصف، فنقرّبها إلى ٣٠ لا إلى ٢٠.', '≈',
+    ),
     {
       sec: 'check', min: 3,
       notes: 'نقرّب إلى أكبر قيمة مكانية: إذا زدنا فالتقدير أكبر.',

@@ -75,6 +75,8 @@ export type RemoteCmd =
   | { c: 'goto'; i: number }
   | { c: 'hint' }
   | { c: 'resetSlide' }
+  /** يجعل الشريحة واجبًا أو يلغيه (يظهر الواجب في شريحة الختام) */
+  | { c: 'hw'; i: number }
   | { c: 'score'; team: number; d: number }
   | { c: 'wheel'; open: boolean }
   | { c: 'spin' }
@@ -181,6 +183,9 @@ export interface RemoteState {
   title: string;
   notes: string;
   min: number;
+  /** الشريحة الحالية واجب؟ وعدد شرائح الواجب */
+  hw?: boolean;
+  hwCount?: number;
   steps: [shown: number, total: number];
   hasHint: boolean;
   teams: { name: string; score: number; color: string }[];

@@ -1,6 +1,6 @@
 import {
   AreaModel, BookLabel, Card, Cols, Ctrls, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, RuleTable, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide,
+  QuestionGroup, QuestionSlide, RuleTable, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide, trapSlide, AreaExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -87,6 +87,16 @@ export default defineLesson({
       ),
     },
     storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: ماذا نعرف عن ضرب عدد من رقمين؟ وكيف نضيف المئات؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'مثال جديد غير القصة: ٣ × ٢٤١. اضغط «نجزّئ» فيظهر كل ناتج جزئي ثم المجموع. غيّر العددين وجرّب عددًا فيه صفر.',
+      content: (
+        <>
+          <SlideHead tag="نُجَرِّبُ مِثَالًا آخَرَ" kind="ex">نَمُوذَجُ الْمِسَاحَةِ</SlideHead>
+          <AreaExplorer a={241} b={3} />
+        </>
+      ),
+    },
     {
       sec: 'explore', min: 2,
       notes: 'نسأل: كيف نجد الناتج؟ ونترك الحل للمثال ١.',
@@ -193,6 +203,16 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٢ × ١٢٣', a: '٢٤٦' },
+      { q: '٣ × ١٢٣', a: '٣٦٩' },
+      { q: '٣ × ٢١٣', a: '٦٣٩' },
+      { q: '٤ × ١٢٣', a: '٤٩٢' },
+      { q: '٤ × ٢٠٦', a: '٨٢٤', trap: true },
+      ],
+      'آحاد ثم عشرات ثم مئات. الأخير فخ: الصفر في العشرات: ٤ × ٦ = ٢٤، نكتب ٤ ونحمل ٢ إلى العشرات.',
+    ),
     {
       sec: 'check', min: 5,
       notes: 'كل ضغطة تملأ خانة أو رقمًا محمولًا.',

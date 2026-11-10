@@ -1,6 +1,6 @@
 import {
   AreaModel, BlockGroups, BookLabel, BulletCard, Card, Cols, Ctrls, Definition, Eq, ExitTicket, GoHomeButton, Goals, Grid, HBars, IfTeams, Lines, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide, SplitArray,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide, SplitArray, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -203,6 +203,16 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٣ × ١٢', a: '٣٦' },
+      { q: '٣ × ١٤', a: '٤٢' },
+      { q: '٣ × ٢٤', a: '٧٢' },
+      { q: '٤ × ٢٤', a: '٩٦' },
+      { q: '٦ × ١٥', a: '٩٠', trap: true },
+      ],
+      'نغيّر عددًا واحدًا كل مرة. الأخير فخ: ٦ × ٥ = ٣٠، نكتب ٠ ونحمل ٣، فالناتج ٩٠ لا ٦٣٠.',
+    ),
     {
       sec: 'check', min: 4,
       notes: 'كل ضغطة تملأ خانة: الآحاد، ثم الرقم المحمول، ثم العشرات.',

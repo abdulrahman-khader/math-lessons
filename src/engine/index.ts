@@ -26,7 +26,8 @@ export { Frac, Tally, DataGrid, HBars, Pie, Bag, chanceWord, type Cell, type Sli
 export { Kid, Bubble, StoryBackdrop, Table, Item, SBag, Crate, STag, Story, StoryStage, BoardRow, type Mood, type ItemKind, type Speaker, type StoryLine, type StoryTalk } from './components/Cartoon';
 export { speak, hush, type ClipTalk } from './components/Clip';
 export { Fingers, tensText } from './components/Fingers';
-export { CountOnChart, RoundExplorer, ArrayExplorer, ZerosExplorer, SplitArray } from './components/Explorers5';
+export { TrapChain, trapSlide, type TrapItem } from './components/Trap';
+export { CountOnChart, RoundExplorer, ArrayExplorer, ZerosExplorer, SplitArray, MakeTen, Rewind, GuessTable, ReasonCheck, AreaExplorer } from './components/Explorers5';
 export { Clip, ClipCard, ClipTitle, Cube, Person, SvgEq, SvgFrac, CLIP_W, CLIP_H, tw, lerp, fade, ease, sector, type EqPart, type VoiceLine } from './components/Clip';
 export { useSlide } from './context';
 export { CubeChip, WordChoice, CircleRow, CompareQ, DrawTally, DrawCard, ColorPair, DrawExplorer, CUBE_COLORS, type ColorDef } from './components/ChanceBook';

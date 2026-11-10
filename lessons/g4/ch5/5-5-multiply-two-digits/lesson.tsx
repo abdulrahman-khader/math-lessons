@@ -1,6 +1,6 @@
 import {
   AreaModel, BookLabel, Card, Cols, Ctrls, Definition, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide, SplitArray,
+  QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide, SplitArray, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -191,6 +191,16 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٢ × ٢١', a: '٤٢' },
+      { q: '٣ × ٢١', a: '٦٣' },
+      { q: '٢ × ٣٣', a: '٦٦' },
+      { q: '٢ × ٤١', a: '٨٢' },
+      { q: '٣ × ٢٢', a: '٦٦', trap: true },
+      ],
+      'نضرب الآحاد ثم العشرات. الأخير فخ: لا ننسى ضرب العشرات (ليست ٦ فقط).',
+    ),
     {
       sec: 'check', min: 4,
       notes: 'كل ضغطة تملأ خانة: الآحاد ثم العشرات، ثم التقدير.',

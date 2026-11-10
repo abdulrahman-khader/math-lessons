@@ -1,6 +1,6 @@
 import {
   BookLabel, Cols, Eq, Mark, PlaceMat, QCol, QText, QuestionSlide, RegroupExplorer, RegroupTable, BookSource, SlideHead, Solution, Step, Ctrls, NextButton, TimerButton,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -97,6 +97,16 @@ export default defineLesson({
       ['٣١ + ٥: هَلْ نُعِيدُ التَّجْمِيعَ؟', ['نَعَمْ', 'لَا', 'لَا نَعْرِفُ'], 'لَا'],
       ['١٠ آحَادٍ تُسَاوِي:', ['١٠ عَشَرَاتٍ', 'عَشَرَةً وَاحِدَةً', '١ آحَادٍ'], 'عَشَرَةً وَاحِدَةً'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة، واطلب منه السبب.'),
+    trapSlide(
+      [
+      { q: '٣٤ + ٥', a: '٣٩' },
+      { q: '٣٤ + ٦', a: '٤٠' },
+      { q: '٣٤ + ٧', a: '٤١' },
+      { q: '٣٤ + ٨', a: '٤٢' },
+      { q: '٣٤ + ٩', a: '٤٣', trap: true },
+      ],
+      'نزيد واحدًا كل مرة؛ من السطر الثاني نعيد التجميع. الأخير فخ: ١٣ آحادًا = عشرة و٣، فالناتج ٤٣ لا ٣١٣.',
+    ),
     {
       sec: 'check', min: 4,
       notes: 'كل ضغطة خانة: الآحاد، العشرات، نعم أو لا، الناتج.',

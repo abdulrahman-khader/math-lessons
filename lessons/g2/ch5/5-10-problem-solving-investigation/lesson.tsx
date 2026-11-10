@@ -1,6 +1,6 @@
 import {
   BookLabel, Cols, Eq, QCol, QText, QuestionSlide, SlideHead, Solution, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, trapSlide, GuessTable,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -39,6 +39,16 @@ export default defineLesson({
     ], 'نراجع معنى المجموع والفرق قبل المسألة.'),
     storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: أي خطة تناسب؟ (التخمين والتحقق مثلًا) ودع الطلاب يجرّبون.'),
     {
+      sec: 'explore', min: 4,
+      notes: 'مثال جديد غير القصة: مجموعهما ٣٠ وفرقهما ٨. يقترح الطلاب تخمينًا، اضغط «نتحقق»، ثم اسأل: نكبّر التخمين أم نصغّره؟',
+      content: (
+        <>
+          <SlideHead tag="نُجَرِّبُ مِثَالًا آخَرَ" kind="ex">أُخَمِّنُ وَأَتَحَقَّقُ</SlideHead>
+          <GuessTable sum={30} diff={8} />
+        </>
+      ),
+    },
+    {
       sec: 'explain', min: 7,
       notes: 'أنا أعمل: التخمين الأول قد لا يصلح. هذا طبيعي: نغيّره ونتحقق من جديد.',
       content: (
@@ -66,6 +76,16 @@ export default defineLesson({
       ['مَعَ سَالِمٍ ١٢ قَلَمًا، وَمَعَ أَخِيهِ ١٠. كَمْ مَعَهُمَا؟', ['٢', '٢٢', '١٢'], '٢٢'],
       ['خُطَّةٌ لِمَسْأَلَةِ «عَدَدَانِ مَجْمُوعُهُمَا…»:', ['أُخَمِّنُ وَأَتَحَقَّقُ', 'أَرْسُمُ دَائِرَةً', 'أَعُدُّ الْعَشَرَاتِ'], 'أُخَمِّنُ وَأَتَحَقَّقُ'],
     ], 'نعمل معًا: اختر طالبًا بالعجلة.'),
+    trapSlide(
+      [
+      { q: 'مَجْمُوعُهُمَا ١٠ وَفَرْقُهُمَا ٠', a: '٥ وَ٥' },
+      { q: 'مَجْمُوعُهُمَا ١٠ وَفَرْقُهُمَا ٢', a: '٦ وَ٤' },
+      { q: 'مَجْمُوعُهُمَا ١٠ وَفَرْقُهُمَا ٤', a: '٧ وَ٣' },
+      { q: 'مَجْمُوعُهُمَا ١٢ وَفَرْقُهُمَا ٤', a: '٨ وَ٤' },
+      { q: 'مَجْمُوعُهُمَا ١٢ وَفَرْقُهُمَا ٢', a: '٧ وَ٥', trap: true },
+      ],
+      'نخمّن ونتحقق: هل المجموع صحيح؟ وهل الفرق صحيح؟ الأخير فخ: ٦ و٦ مجموعهما ١٢ لكن فرقهما ليس ٢.', '←',
+    ),
     {
       sec: 'practice', min: 5,
       notes: 'الخطة: جملة عددية.',

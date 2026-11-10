@@ -1,6 +1,6 @@
 import {
   BookLabel, Card, Cols, Eq, MCQ, Mark, QCol, QText, QuestionSlide, SlideHead, Solution, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, trapSlide, Rewind,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -41,6 +41,16 @@ export default defineLesson({
     ], 'السؤال الثالث يمهّد للدرس: لماذا جمعنا مع أن الأقلام نقصت؟'),
     storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: من أين نبدأ؟ دع الطلاب يقترحون الرجوع من ٢١ قبل الشرح.'),
     {
+      sec: 'explore', min: 4,
+      notes: 'مثال جديد غير القصة: معه مبلغ، أنفق ٧ ثم أخذ ١٠ فصار معه ٢٥. اضغط «نرجع خطوة» مرتين، واسأل قبل كل ضغطة: نجمع أم نطرح؟',
+      content: (
+        <>
+          <SlideHead tag="نُجَرِّبُ مِثَالًا آخَرَ" kind="ex">نَرْجِعُ إِلَى الْخَلْفِ</SlideHead>
+          <Rewind start={22} ops={[{ d: -7, label: 'أَنْفَقَ ٧' }, { d: 10, label: 'أَخَذَ ١٠' }]} />
+        </>
+      ),
+    },
+    {
       sec: 'explain', min: 7,
       notes: 'أنا أعمل: الخطوات الأربع كما في الكتاب. نبدأ من النهاية (٤٤) ونعيد ما أعطاه.',
       content: (
@@ -75,6 +85,15 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: 'أَعْطَى ٥ فَبَقِيَ ١٥', a: '٢٠' },
+      { q: 'أَعْطَى ٧ فَبَقِيَ ١٥', a: '٢٢' },
+      { q: 'أَعْطَى ٧ فَبَقِيَ ١٨', a: '٢٥' },
+      { q: 'أَخَذَ ٧ فَصَارَ مَعَهُ ١٨', a: '١١', trap: true },
+      ],
+      'نسأل في كل سطر: كم كان معه في البداية؟ الأخير فخ: «أخذ» فنرجع بالطرح لا بالجمع.', '←',
+    ),
     {
       sec: 'check', min: 5,
       notes: 'نبدأ بما بقي ونجمع ما وُزّع.',

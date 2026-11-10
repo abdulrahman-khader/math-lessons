@@ -1,6 +1,6 @@
 import {
   BlockGroups, Card, Cols, Ctrls, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, PlaceRows, QCard, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, SplitArray,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, SplitArray, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -147,6 +147,16 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٢ × ٢٦', a: '٥٢' },
+      { q: '٢ × ١٨', a: '٣٦' },
+      { q: '٢ × ١٩', a: '٣٨' },
+      { q: '٣ × ١٩', a: '٥٧' },
+      { q: '٤ × ١٥', a: '٦٠', trap: true },
+      ],
+      'متى نعيد التجميع؟ الأخير فخ: ٤ × ٥ = ٢٠، نكتب ٠ ونحمل ٢، فالناتج ٦٠ لا ٤٢٠.',
+    ),
     {
       sec: 'check', min: 2,
       notes: 'يشرح الطالب بنفسه قبل عرض الإجابة المقترحة.',

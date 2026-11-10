@@ -1,6 +1,6 @@
 import {
   AreaModel, BookLabel, BulletCard, Card, Cols, Ctrls, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, NextButton, QCol, QText,
-  QuestionSlide, ShapeRow, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide,
+  QuestionSlide, ShapeRow, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, trapSlide, GuessTable,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
@@ -65,6 +65,16 @@ export default defineLesson({
     },
     storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: أي خطة تناسب؟ ودع الطلاب يرسمون جدولًا بالأيام.'),
     {
+      sec: 'explore', min: 4,
+      notes: 'مثال جديد غير القصة: عددان مجموعهما ١٤ وناتج ضربهما ٤٨. يقترح الطلاب تخمينًا، ونتحقق في الجدول حتى نصل.',
+      content: (
+        <>
+          <SlideHead tag="نُجَرِّبُ مِثَالًا آخَرَ" kind="ex">أُخَمِّنُ وَأَتَحَقَّقُ</SlideHead>
+          <GuessTable sum={14} prod={48} />
+        </>
+      ),
+    },
+    {
       sec: 'explain', min: 3,
       notes: 'أنا أعمل: نقرأ المسألة ونحدد المعطيات والمطلوب ثم الخطة.',
       content: (
@@ -127,6 +137,15 @@ export default defineLesson({
         </>
       ),
     },
+    trapSlide(
+      [
+      { q: '٥ رِيَالَاتٍ كُلَّ يَوْمٍ: فِي ٣ أَيَّامٍ', a: '١٥' },
+      { q: '٥ رِيَالَاتٍ كُلَّ يَوْمٍ: فِي ٤ أَيَّامٍ', a: '٢٠' },
+      { q: '٥ رِيَالَاتٍ كُلَّ يَوْمٍ: فِي ٧ أَيَّامٍ', a: '٣٥' },
+      { q: '١٠ رِيَالَاتٍ كُلَّ يَوْمَيْنِ: فِي ٦ أَيَّامٍ', a: '٣٠', trap: true },
+      ],
+      'نرسم جدولًا بالأيام إن احتجنا. الأخير فخ: ١٠ كل يومين، فالأيام الستة ٣ مرات: ٣٠ لا ٦٠.', '←',
+    ),
     {
       sec: 'practice', min: 3,
       notes: 'كل صف: نضرب عدد المركبات في ١٢.',

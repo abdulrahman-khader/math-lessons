@@ -22,6 +22,12 @@ const env = { ...readEnv(path.join(root, '.env.local')), ...process.env };
 const KEY = env.ELEVENLABS_API_KEY;
 const VOICE = env.ELEVENLABS_VOICE_ID ?? env.VOICE_ID;
 const MODEL = env.ELEVENLABS_MODEL ?? 'eleven_multilingual_v2';
+// أصوات شخصيات المقطع الكرتوني (story.tsx): ولدان (سالم وخالد)؛ الراوي هو الصوت الأساسي
+const VOICES = {
+  narrator: VOICE,
+  boy: env.ELEVENLABS_VOICE_BOY ?? 'R6nda3uM038xEEKi7GFl',
+  boy2: env.ELEVENLABS_VOICE_BOY2 ?? 'G1HOkzin3NMwRHSq60UI',
+};
 const API = 'https://api.elevenlabs.io/v1';
 
 // يرفع الصوت إلى نحو −١١ LUFS: ضاغط يقرّب الهمس من الجهر، ثم تكبير ومحدِّد يمنع القصّ فلا يتشوّه
@@ -85,6 +91,11 @@ const speakable = (s) =>
 /** جمل captions من clip.tsx دون تشغيله: [[زمن، 'نص'], …] */
 function readCaptions(file) {
   const src = readFileSync(file, 'utf8');
+  // القصة (story.tsx): lines={[[زمن، 'متكلم'، 'نص'], …]}
+  if (src.includes('lines={[')) {
+    const block = src.slice(src.indexOf('lines={['));
+    return [...block.matchAll(/\[\s*([\d.]+)\s*,\s*'(n|boy|boy2)'\s*,\s*'((?:[^'\\]|\\.)*)'\s*\]/g)].map((m) => [Number(m[1]), m[3], m[2] === 'n' ? 'narrator' : m[2]]);
+  }
   const block = src.slice(src.indexOf('captions={['));
   return [...block.matchAll(/\[\s*([\d.]+)\s*,\s*'((?:[^'\\]|\\.)*)'\s*\]/g)].map((m) => [Number(m[1]), m[2]]);
 }
@@ -97,23 +108,20 @@ const lessons = wanted.length ? [...new Set(wanted.flatMap((a) => pickLessons(a)
 
 let made = 0;
 let reused = 0;
-for (const lesson of lessons) {
-  const dir = path.join(root, 'lessons', lesson);
-  const clip = path.join(dir, 'clip.tsx');
-  if (!existsSync(clip)) continue;
-  const caps = readCaptions(clip);
-  // نص القراءة المشكول (narration.json) إن وُجد، وإلا يُقرأ النص الظاهر نفسه
-  const narrFile = path.join(dir, 'narration.json');
-  const narr = existsSync(narrFile) ? JSON.parse(readFileSync(narrFile, 'utf8')) : null;
-  if (narr && narr.length !== caps.length) throw new Error(`${lesson}: narration.json فيه ${narr.length} جمل والمقطع فيه ${caps.length}`);
-  const out = path.join(dir, 'voice');
+
+/**
+ * يولّد ملف صوت لكل جملة في out، ويكتب out/index.ts.
+ * items: [{ say, who? }]؛ who يختار صوت الشخصية (الراوي إن لم يُذكر).
+ */
+async function generate(items, out, label) {
   mkdirSync(out, { recursive: true });
   const manPath = path.join(out, 'manifest.json');
   const manifest = existsSync(manPath) ? JSON.parse(readFileSync(manPath, 'utf8')) : {};
   const lines = [];
-  for (const [i, [, text]] of caps.entries()) {
-    const say = narr ? narr[i] : speakable(text);
-    const hash = createHash('sha1').update(`${VOICE}|${MODEL}|${say}`).digest('hex').slice(0, 12);
+  for (const [i, { say, who = 'narrator' }] of items.entries()) {
+    const voice = VOICES[who];
+    if (!voice) throw new Error(`${label}: صوت غير معروف «${who}»`);
+    const hash = createHash('sha1').update(`${voice}|${MODEL}|${say}`).digest('hex').slice(0, 12);
     const file = `${String(i).padStart(2, '0')}-${hash}.mp3`;
     if (manifest[file] && existsSync(path.join(out, file))) {
       if (!manifest[file].loud) {
@@ -124,7 +132,7 @@ for (const lesson of lessons) {
       reused++;
       continue;
     }
-    const res = await api(`/text-to-speech/${VOICE}/with-timestamps?output_format=mp3_44100_64`, {
+    const res = await api(`/text-to-speech/${voice}/with-timestamps?output_format=mp3_44100_64`, {
       method: 'POST',
       body: JSON.stringify({ text: say, model_id: MODEL, voice_settings: { stability: 0.55, similarity_boost: 0.8, speed: 0.92 } }),
     });
@@ -132,32 +140,66 @@ for (const lesson of lessons) {
     const d = Math.round((ends.at(-1) ?? 0) * 100) / 100 + 0.15;
     writeFileSync(path.join(out, file), Buffer.from(res.audio_base64, 'base64'));
     loud(path.join(out, file));
-    manifest[file] = { text: say, d, loud: true };
+    manifest[file] = { text: say, who, d, loud: true };
     lines.push({ file, d });
     made++;
-    console.log(`  ${lesson} [${i}] ${d.toFixed(1)}ث  ${say}`);
+    console.log(`  ${label} [${i}] ${who} ${d.toFixed(1)}ث  ${say}`);
   }
-  // احذف ملفات جمل لم تعد في المقطع
+  // احذف ملفات جمل لم تعد موجودة
   const keep = new Set(lines.map((l) => l.file));
   for (const f of readdirSync(out)) if (f.endsWith('.mp3') && !keep.has(f)) rmSync(path.join(out, f));
   for (const f of Object.keys(manifest)) if (!keep.has(f)) delete manifest[f];
   writeFileSync(manPath, JSON.stringify(manifest, null, 1) + '\n');
   writeFileSync(
     path.join(out, 'index.ts'),
-    `// يولّده scripts/voice.mjs؛ لا تعدّله يدويًا.\nimport type { VoiceLine } from '@engine';\n` +
+    `// يولّده scripts/voice.mjs؛ لا تعدّله يدويًا.\nimport type { VoiceLine } from '${out.includes('/src/engine/') ? '../../components/Clip' : '@engine'}';\n` +
       lines.map((l, i) => `import a${i} from './${l.file}';`).join('\n') +
       `\n\nconst voice: VoiceLine[] = [\n` +
       lines.map((l, i) => `  { src: a${i}, d: ${l.d} },`).join('\n') +
       `\n];\nexport default voice;\n`,
   );
-  // اربط الصوت بالمقطع أول مرة: import voice + voice={voice}
-  let cs = readFileSync(clip, 'utf8');
-  if (!cs.includes("from './voice'")) {
-    cs = cs.replace(/(import [^\n]+ from '@engine';\n)/, `$1import voice from './voice';\n`).replace('<Clip\n', '<Clip\n    voice={voice}\n');
-    writeFileSync(clip, cs);
+  return lines;
+}
+
+// كلمات العدّ بالعشرات لأداة الأصابع (Fingers): مرة واحدة للمحرك كله
+if (process.argv.includes('--words')) {
+  const TENS = ['كُلُّ إِصْبَعٍ يُسَاوِي عَشَرَةً', 'عَشَرَةٌ', 'عِشْرُونَ', 'ثَلَاثُونَ', 'أَرْبَعُونَ', 'خَمْسُونَ', 'سِتُّونَ', 'سَبْعُونَ', 'ثَمَانُونَ', 'تِسْعُونَ', 'مِئَةٌ'];
+  await generate(TENS.map((say) => ({ say })), path.join(root, 'src/engine/voice/tens'), 'العشرات');
+  console.log(`✓ كلمات العدّ · جديدة: ${made} · محفوظة: ${reused}`);
+  process.exit(0);
+}
+
+/** مقطعا الدرس: فكرة الدرس (clip.tsx) والقصة التي تفتحه (story.tsx) */
+const CLIPS = [
+  { file: 'clip.tsx', narr: 'narration.json', out: 'voice' },
+  { file: 'story.tsx', narr: 'story-narration.json', out: 'story-voice' },
+];
+
+for (const lesson of lessons) {
+  const dir = path.join(root, 'lessons', lesson);
+  for (const c of CLIPS) {
+    const clip = path.join(dir, c.file);
+    if (!existsSync(clip)) continue;
+    const caps = readCaptions(clip);
+    // نص القراءة المشكول إن وُجد (جملة لكل سطر، أو { who, say } في القصة)، وإلا يُقرأ النص الظاهر نفسه
+    const narrFile = path.join(dir, c.narr);
+    const narr = existsSync(narrFile) ? JSON.parse(readFileSync(narrFile, 'utf8')) : null;
+    if (narr && narr.length !== caps.length) throw new Error(`${lesson}: ${c.narr} فيه ${narr.length} جمل و${c.file} فيه ${caps.length}`);
+    // المتكلم من lines في القصة (أو من { who, say } في narration)، وإلا الراوي
+    const items = caps.map(([, text, who], i) => {
+      const n = narr?.[i];
+      return typeof n === 'string' ? { say: n, who } : n ? { say: n.say, who: n.who ?? who } : { say: speakable(text), who };
+    });
+    const lines = await generate(items, path.join(dir, c.out), `${lesson}/${c.file}`);
+    // اربط الصوت بالمقطع أول مرة: import voice + voice={voice}
+    let cs = readFileSync(clip, 'utf8');
+    if (!cs.includes(`from './${c.out}'`)) {
+      cs = cs.replace(/(import [^\n]+ from '@engine';\n)/, `$1import voice from './${c.out}';\n`).replace('<Clip\n', '<Clip\n    voice={voice}\n').replace('<Story\n', '<Story\n    voice={voice}\n');
+      writeFileSync(clip, cs);
+    }
+    // كم ستطول الجمل عن مكانها في المقطع (المقطع ينتظر انتهاء الجملة)
+    const over = caps.map(([st], i) => lines[i].d - ((caps[i + 1]?.[0] ?? Infinity) - st)).filter((x) => x > 0);
+    console.log(`✓ ${lesson}/${c.file}: ${lines.length} جمل${over.length ? ` · يطول المقطع نحو ${over.reduce((a, b) => a + b, 0).toFixed(0)} ث لينتهي الكلام` : ''}`);
   }
-  // كم ستطول الجمل عن مكانها في المقطع (المقطع ينتظر انتهاء الجملة)
-  const over = caps.map(([s], i) => lines[i].d - ((caps[i + 1]?.[0] ?? Infinity) - s)).filter((x) => x > 0);
-  console.log(`✓ ${lesson}: ${lines.length} جمل${over.length ? ` · يطول المقطع نحو ${over.reduce((a, b) => a + b, 0).toFixed(0)} ث لينتهي الكلام` : ''}`);
 }
 console.log(`جُمل جديدة: ${made} · محفوظة من قبل: ${reused}`);

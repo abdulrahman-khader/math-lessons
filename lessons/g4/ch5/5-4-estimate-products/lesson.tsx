@@ -1,8 +1,9 @@
 import {
   BookLabel, Card, Cols, Ctrls, Definition, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, RoundExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'تأكَّدْ، ص ١٤٨';
 const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٤٩';
@@ -86,6 +87,17 @@ export default defineLesson({
             <MCQ q="قرِّبِ ٣٢٠ إلى أقربِ مئةٍ" options={['٣٠٠', '٤٠٠', '٣٢٠']} answer="٣٠٠" award />
             <MCQ q="٥ × ٤٠ = ؟" options={['٢٠', '٢٠٠', '٢٠٠٠']} answer="٢٠٠" award />
           </Grid>
+        </>
+      ),
+    },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: هل نحتاج العدد بالضبط؟ إلى أي عدد نقرّب ٣٤؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: ٣٤ أقرب إلى ٣٠، فالمقاعد نحو ٣٠ × ٧ = ٢١٠. غيّر العدد واسأل: متى نقرّب إلى العشرة الأكبر؟',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نُقَرِّبُ ثُمَّ نَضْرِبُ</SlideHead>
+          <RoundExplorer start={34} times={7} />
         </>
       ),
     },

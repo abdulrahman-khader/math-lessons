@@ -23,6 +23,10 @@ export { RuleTable, FnTable, type RuleCell, RuleMachine, Flow, PencilTriangles, 
 export { Counters, TenTowers, type CounterGroup } from './components/Counters';
 export { LiveTally, TallyAnswer, pickRows, type LiveRow } from './components/LiveTally';
 export { Frac, Tally, DataGrid, HBars, Pie, Bag, chanceWord, type Cell, type Slice, type BagItem } from './components/DataViz';
+export { Kid, Bubble, StoryBackdrop, Table, Item, SBag, Crate, STag, Story, StoryStage, BoardRow, type Mood, type ItemKind, type Speaker, type StoryLine, type StoryTalk } from './components/Cartoon';
+export { speak, hush, type ClipTalk } from './components/Clip';
+export { Fingers, tensText } from './components/Fingers';
+export { CountOnChart, RoundExplorer, ArrayExplorer, ZerosExplorer, SplitArray } from './components/Explorers5';
 export { Clip, ClipCard, ClipTitle, Cube, Person, SvgEq, SvgFrac, CLIP_W, CLIP_H, tw, lerp, fade, ease, sector, type EqPart, type VoiceLine } from './components/Clip';
 export { useSlide } from './context';
 export { CubeChip, WordChoice, CircleRow, CompareQ, DrawTally, DrawCard, ColorPair, DrawExplorer, CUBE_COLORS, type ColorDef } from './components/ChanceBook';
@@ -32,5 +36,5 @@ export { Area4, VMul2, AreaModel, DotArray, DotArrays, MonthCal, PlaceRows, Time
 export { ColAdd, useCarryFly } from './components/Columns';
 export { LongDiv, DivWork, divPieces, divCount } from './components/Division';
 export { Alg, IneqCard, IneqLine, sgn, SvgSigned, type IneqMark } from './components/Inequality';
-export { TenOnes, TensCard, PlaceSum, PlaceCard, RegroupTable, PlaceMat, RegroupExplorer, RoundSum, RoundCard, SubMat, SubRegroupTable, CheckCard, CheckRow, EstAddCard, Blocks3, SvgBlocks, SvgVertical, clipSlide, askSlide, goalsSlide, mindSlide, exitSlide, endSlide } from './components/Place';
+export { TenOnes, TensCard, PlaceSum, PlaceCard, RegroupTable, PlaceMat, RegroupExplorer, RoundSum, RoundCard, SubMat, SubRegroupTable, CheckCard, CheckRow, EstAddCard, Blocks3, SvgBlocks, SvgVertical, clipSlide, storySlide, askSlide, goalsSlide, mindSlide, exitSlide, endSlide } from './components/Place';
 export { ValueCard, OnesTensCard, WriteBlocksCard, WordNumCard, JarCard, SeqCard, CompareCard, GrowCard, HundredChart, JarPair, SeqLine, TenFrames, ThreeCard, ValueQ, FormQ, OrderQ, NearQ, Thousands, PeriodTable } from './components/Numbers';

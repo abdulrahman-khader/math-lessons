@@ -1,8 +1,9 @@
 import {
   AreaModel, BookLabel, Card, Cols, Ctrls, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, RuleTable, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson,
+  QuestionGroup, QuestionSlide, RuleTable, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'تأكَّدْ، ص ١٦٥';
 const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٦٦';
@@ -85,6 +86,7 @@ export default defineLesson({
         </>
       ),
     },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: ماذا نعرف عن ضرب عدد من رقمين؟ وكيف نضيف المئات؟'),
     {
       sec: 'explore', min: 2,
       notes: 'نسأل: كيف نجد الناتج؟ ونترك الحل للمثال ١.',

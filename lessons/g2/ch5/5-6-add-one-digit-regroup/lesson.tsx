@@ -1,8 +1,9 @@
 import {
   BookLabel, Cols, Eq, PlaceCard, PlaceMat, PlaceSum, QCol, QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'أتأكَّدُ، ص ١٢٢';
 const PRACTICE = 'أتدرَّبُ، ص ١٢٣';
@@ -44,6 +45,17 @@ export default defineLesson({
       ['١٣ آحَادًا تُسَاوِي:', ['عَشَرَةً وَ٣ آحَادٍ', '٣ عَشَرَاتٍ', '١٣ عَشَرَةً'], 'عَشَرَةً وَ٣ آحَادٍ'],
       ['٢٦ + ٥ = ؟', ['٢١', '٣١', '٣٠'], '٣١'],
     ], 'ربط بالدرس ٥-٥.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند خطأ سالم واسأل: لماذا ٣١٣ خطأ؟ (أكثر من ٣٠٠ كتاب!) ولا تعطِ الطريقة بعد.'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: معنا ٣٦ ونضيف ٧. حين تصير الآحاد ١٣ اسأل: هل نكتب ١٣ بجانب ٣؟ ثم «نعيد التجميع» ونرى أين تذهب العشرة.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">أَيْنَ تَذْهَبُ الْعَشَرَةُ؟</SlideHead>
+          <RegroupExplorer start={36} addOnes={7} />
+        </>
+      ),
+    },
     {
       sec: 'explain', min: 5,
       notes: 'أنا أعمل: نكتب ١٢ كاملة في منزلة الآحاد، ونسأل: هل يتّسع المكان لرقمين؟ لا، فيصعد ١ إلى المربع فوق العشرات ثم يُجمع معها.',

@@ -1,8 +1,9 @@
 import {
   BlockGroups, Card, Cols, Ctrls, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, PlaceRows, QCard, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, SplitArray,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const THINK = 'فَكِّرْ، ص ١٥٦';
 const CHECK = 'تأكَّدْ، ص ١٥٦';
@@ -75,6 +76,17 @@ export default defineLesson({
             <MCQ q="١٢ آحادًا = ؟" options={['عشرة و٢ آحاد', '٢ عشرات', '١٢ عشرة']} answer="عشرة و٢ آحاد" award />
             <MCQ q="٣ عشرات و٤ آحاد = ؟" options={['٧', '٣٤', '٤٣']} answer="٣٤" award />
           </Grid>
+        </>
+      ),
+    },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: ماذا نفعل بالـ٢١ آحادًا؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: ٣ صفوف في كل صف ١٧. بعد «نجزّئ» اسأل: ٣ × ٧ = ٢١، كم عشرة فيها؟ ثم نجمع ٣٠ + ٢١.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نُجَزِّئُ وَنُعِيدُ التَّجْمِيعَ</SlideHead>
+          <SplitArray rows={3} n={17} />
         </>
       ),
     },

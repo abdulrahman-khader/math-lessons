@@ -1,8 +1,9 @@
 import {
   AreaModel, BlockGroups, BookLabel, BulletCard, Card, Cols, Ctrls, Definition, Eq, ExitTicket, GoHomeButton, Goals, Grid, HBars, IfTeams, Lines, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide, SplitArray,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'تأكَّدْ، ص ١٥٨';
 const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٥٩';
@@ -98,6 +99,17 @@ export default defineLesson({
             <MCQ q="٢٤ آحادًا = ؟" options={['٢ عشرات و٤ آحاد', '٤ عشرات و٢ آحاد', '٢٤ عشرة']} answer="٢ عشرات و٤ آحاد" award />
             <MCQ q="قدِّرْ ٤ × ٢٨" options={['٨٠', '١٢٠', '٣٢']} answer="١٢٠" award />
           </Grid>
+        </>
+      ),
+    },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: أين نكتب الـ٣٢؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: ٤ صفوف في كل صف ١٨. بعد «نجزّئ»: ٤ × ١٠ = ٤٠ و٤ × ٨ = ٣٢، ثم ٤٠ + ٣٢ = ٧٢.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نُجَزِّئُ الْعَدَدَ</SlideHead>
+          <SplitArray rows={4} n={18} />
         </>
       ),
     },

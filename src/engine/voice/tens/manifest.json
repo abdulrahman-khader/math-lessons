@@ -1,0 +1,68 @@
+{
+ "00-99ebcfc88ded.mp3": {
+  "text": "كُلُّ إِصْبَعٍ يُسَاوِي عَشَرَةً",
+  "who": "narrator",
+  "d": 2.4299999999999997,
+  "loud": true
+ },
+ "01-464636258f7a.mp3": {
+  "text": "عَشَرَةٌ",
+  "who": "narrator",
+  "d": 1.3099999999999998,
+  "loud": true
+ },
+ "02-baa0d5379b09.mp3": {
+  "text": "عِشْرُونَ",
+  "who": "narrator",
+  "d": 1.27,
+  "loud": true
+ },
+ "03-b2f9d968c699.mp3": {
+  "text": "ثَلَاثُونَ",
+  "who": "narrator",
+  "d": 1.5899999999999999,
+  "loud": true
+ },
+ "04-d00027429db5.mp3": {
+  "text": "أَرْبَعُونَ",
+  "who": "narrator",
+  "d": 1.27,
+  "loud": true
+ },
+ "05-2f7437889446.mp3": {
+  "text": "خَمْسُونَ",
+  "who": "narrator",
+  "d": 1.27,
+  "loud": true
+ },
+ "06-abb68a7c95f8.mp3": {
+  "text": "سِتُّونَ",
+  "who": "narrator",
+  "d": 1.17,
+  "loud": true
+ },
+ "07-f2593c5c1cff.mp3": {
+  "text": "سَبْعُونَ",
+  "who": "narrator",
+  "d": 1.27,
+  "loud": true
+ },
+ "08-f980d62d5b78.mp3": {
+  "text": "ثَمَانُونَ",
+  "who": "narrator",
+  "d": 1.22,
+  "loud": true
+ },
+ "09-379d6ab0ca98.mp3": {
+  "text": "تِسْعُونَ",
+  "who": "narrator",
+  "d": 1.27,
+  "loud": true
+ },
+ "10-9e3bf340285c.mp3": {
+  "text": "مِئَةٌ",
+  "who": "narrator",
+  "d": 1.22,
+  "loud": true
+ }
+}

@@ -1,8 +1,9 @@
 import {
   BookLabel, Card, Cols, Eq, MCQ, Mark, QCol, QText, QuestionSlide, SlideHead, Solution, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const TRY = 'أُحاوِلُ، ص ١١٥';
 const PRACTICE = 'أتدرَّبُ، ص ١١٥';
@@ -38,6 +39,7 @@ export default defineLesson({
       ['٣٠ + ٦ = ؟', ['٣٦', '٩٠', '٢٤'], '٣٦'],
       ['وَزَّعْتُ ٣ أَقْلَامٍ وَبَقِيَ ٤. كَمْ كَانَ مَعِي؟', ['١', '٧', '٤'], '٧'],
     ], 'السؤال الثالث يمهّد للدرس: لماذا جمعنا مع أن الأقلام نقصت؟'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: من أين نبدأ؟ دع الطلاب يقترحون الرجوع من ٢١ قبل الشرح.'),
     {
       sec: 'explain', min: 7,
       notes: 'أنا أعمل: الخطوات الأربع كما في الكتاب. نبدأ من النهاية (٤٤) ونعيد ما أعطاه.',

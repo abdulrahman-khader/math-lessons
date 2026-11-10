@@ -1,4 +1,4 @@
-// يلتقط صورًا لمقطع فكرة الدرس عند ثوانٍ محددة في shots/<الدرس>/clip-<ث>.png للمراجعة البصرية.
+// يلتقط صورًا لمقاطع الدرس (القصة story-… ومقطع الفكرة clip-…) عند ثوانٍ محددة في shots/<الدرس>/clip-<ث>.png للمراجعة البصرية.
 // الاستعمال: npm run clip-shots -- 3-5            ← كل ٥ ثوانٍ
 //            npm run clip-shots -- 3-5 6 24 34    ← ثوانٍ محددة
 import { chromium } from '@playwright/test';
@@ -17,24 +17,32 @@ for (const lesson of pickLessons(filter)) {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.evaluate(() => document.fonts.ready);
-  const idx = await page.locator('section.slide').evaluateAll((els) => els.findIndex((e) => e.querySelector('.clip')));
-  if (idx < 0) {
+  // كل مقاطع الدرس: القصة التي تفتحه (story-<ث>) ومقطع الفكرة (clip-<ث>)
+  const clips = await page.locator('section.slide').evaluateAll((els) =>
+    els.map((e, i) => (e.querySelector('.clip') ? { i, story: (e.textContent ?? '').includes('قصة قصيرة') } : null)).filter(Boolean),
+  );
+  if (!clips.length) {
     console.log(`– ${lesson}: لا مقطع`);
     await page.close();
     continue;
   }
-  for (let i = 0; i < idx; i++) await page.keyboard.press('PageDown');
-  const clip = page.locator('section.slide.active .clip');
-  const dur = Number(await clip.locator('.clip-track').getAttribute('aria-valuemax'));
-  const list = secs.length ? secs.map(Number) : Array.from({ length: Math.floor(dur / 5) + 1 }, (_, k) => k * 5);
-  const box = await clip.locator('.clip-track').boundingBox();
-  for (const s of list) {
-    // الشريط يمتلئ من اليمين
-    await page.mouse.click(box.x + box.width * (1 - Math.min(s, dur) / dur), box.y + box.height / 2);
-    await page.waitForTimeout(450);
-    await page.screenshot({ path: path.join(out, `clip-${String(s).padStart(2, '0')}.png`) });
+  let at = 0;
+  let count = 0;
+  for (const { i: idx, story } of clips) {
+    for (; at < idx; at++) await page.keyboard.press('PageDown');
+    const clip = page.locator('section.slide.active .clip');
+    const dur = Number(await clip.locator('.clip-track').getAttribute('aria-valuemax'));
+    const list = secs.length ? secs.map(Number) : Array.from({ length: Math.floor(dur / 5) + 1 }, (_, k) => k * 5);
+    const box = await clip.locator('.clip-track').boundingBox();
+    for (const s of list) {
+      // الشريط يمتلئ من اليمين
+      await page.mouse.click(box.x + box.width * (1 - Math.min(s, dur) / dur), box.y + box.height / 2);
+      await page.waitForTimeout(450);
+      await page.screenshot({ path: path.join(out, `${story ? 'story' : 'clip'}-${String(s).padStart(2, '0')}.png`) });
+      count++;
+    }
   }
   await page.close();
-  console.log(`✓ ${lesson}: ${list.length} صور في shots/${path.basename(out)}/`);
+  console.log(`✓ ${lesson}: ${count} صور في shots/${path.basename(out)}/`);
 }
 await browser.close();

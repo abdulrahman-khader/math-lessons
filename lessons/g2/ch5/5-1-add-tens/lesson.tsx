@@ -1,8 +1,9 @@
 import {
   BookLabel, Card, Cols, Eq, ExitTicket, Goals, Grid, Lines, MCQ, MindMap, QText, QuestionGroup, QuestionSlide, RegroupExplorer, Sentence, SentenceCard,
-  SlideHead, SumCard, TenOnes, TensCard, Blank, defineLesson, endSlide, clipSlide,
+  SlideHead, SumCard, TenOnes, TensCard, Blank, defineLesson, endSlide, clipSlide, storySlide, Fingers,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 /* ---------- خاص بهذا الدرس ---------- */
 
@@ -30,7 +31,7 @@ export default defineLesson({
   },
   sectionDesc: {
     engage: 'حقائق الجمع',
-    explore: 'أضيف عشرات',
+    explore: 'الأصابع، أضيف عشرات',
     explain: 'أستعد',
     elab: 'نعمل معًا',
     check: 'الأسئلة ١–٧',
@@ -68,13 +69,24 @@ export default defineLesson({
         </>
       ),
     },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال ودع الطلاب يقترحون: كيف نعرف بسرعة؟ لا تعطِ الجواب؛ الأصابع في الشريحة التالية.'),
     {
       sec: 'explore', min: 4,
-      notes: 'ادعُ طالبًا يضيف عشرة عشرة. اسأل بعد كل إضافة: كم عشرة صارت؟ وما العدد؟',
+      notes: 'نحل مسألة القصة بالأصابع: كل إصبع عشرة. اضغط «التالي» والفصل يعدّ مع الصوت. ثم غيّر العددين واسأل: كم صار؟',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نَعُدُّ بِالْعَشَرَاتِ</SlideHead>
+          <Fingers a={3} b={4} />
+        </>
+      ),
+    },
+    {
+      sec: 'explore', min: 4,
+      notes: 'اقرأ المهمة. ادعُ طالبًا يضغط «نُضِيفُ عَشَرَةً» مرة بعد مرة، والفصل يعدّ: ٢٠، ٣٠… حتى يضيفوا ٥ عشرات. اسأل: كم صار معنا؟',
       content: (
         <>
           <SlideHead tag="اكتشف بنفسك" kind="ex">أضيف عشرات</SlideHead>
-          <RegroupExplorer start={20} tensOnly />
+          <RegroupExplorer start={10} tensOnly add={5} />
         </>
       ),
     },

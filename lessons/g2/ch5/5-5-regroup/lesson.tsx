@@ -1,8 +1,9 @@
 import {
   BookLabel, Cols, Eq, Mark, PlaceMat, QCol, QText, QuestionSlide, RegroupExplorer, RegroupTable, BookSource, SlideHead, Solution, Step, Ctrls, NextButton, TimerButton,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'أتأكَّدُ، ص ١١٨';
 const PRACTICE = 'أتدرَّبُ، ص ١١٩';
@@ -48,6 +49,17 @@ export default defineLesson({
       ['٨ + ٤ = ؟', ['١٢', '١٣', '١٤'], '١٢'],
       ['كَمْ آحَادًا فِي الْعَشَرَةِ؟', ['١', '٥', '١٠'], '١٠'],
     ], 'نراجع حقائق الجمع التي ناتجها أكبر من ١٠.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: ماذا نفعل بالأقلام السائبة الكثيرة؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: معنا ١٨ ونضيف ٥. بعد كل ضغطة على «نضيف واحدًا» اسأل: هل صارت الآحاد ١٠؟ ثم «نعيد التجميع».',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نَرْبِطُ عَشَرَةً</SlideHead>
+          <RegroupExplorer start={18} addOnes={5} />
+        </>
+      ),
+    },
     {
       sec: 'explore', min: 5,
       notes: 'ادعُ طالبًا يضيف آحادًا. عندما تبلغ الآحاد ١٠ يضغط «أعيد التجميع». اسأل: هل تغيّر العدد؟',

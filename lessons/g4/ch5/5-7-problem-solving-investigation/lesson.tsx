@@ -1,8 +1,9 @@
 import {
   AreaModel, BookLabel, BulletCard, Card, Cols, Ctrls, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, NextButton, QCol, QText,
-  QuestionSlide, ShapeRow, SlideHead, Solution, Stack, Step, Winner, defineLesson,
+  QuestionSlide, ShapeRow, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const SOLVE = 'حُلَّ مسائلَ مُتنوِّعةً، ص ١٦٢';
 const PLANS = ['إنشاءُ جدولٍ', 'كتابةُ جملةٍ عدديَّةٍ', 'تمثيلُ المسألةِ', 'البحثُ عن نمطٍ'];
@@ -62,6 +63,7 @@ export default defineLesson({
         </>
       ),
     },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: أي خطة تناسب؟ ودع الطلاب يرسمون جدولًا بالأيام.'),
     {
       sec: 'explain', min: 3,
       notes: 'أنا أعمل: نقرأ المسألة ونحدد المعطيات والمطلوب ثم الخطة.',

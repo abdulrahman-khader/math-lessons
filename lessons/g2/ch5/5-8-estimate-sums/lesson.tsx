@@ -1,8 +1,9 @@
 import {
   BookLabel, Cols, DataTable, Eq, LineBox, Mark, NumberLine, QText, QuestionGroup, QuestionSlide, RoundCard, RoundSum, SlideHead, Solution, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RoundExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'أتأكَّدُ، ص ١٢٦';
 const PRACTICE = 'أتدرَّبُ، ص ١٢٧';
@@ -43,6 +44,17 @@ export default defineLesson({
       ['٣٢ أَقْرَبُ إِلَى:', ['٣٠', '٤٠', '٢٠'], '٣٠'],
       ['٣٠ + ٢٠ = ؟', ['٥', '٥٠', '٣٢'], '٥٠'],
     ], 'مراجعة من التهيئة ص ١٠٩.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: هل نحتاج الناتج بالضبط لنعرف؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: ٣٩ أقرب إلى ٤٠، ثم غيّر العدد إلى ٥٢ (أقرب إلى ٥٠). ٤٠ + ٥٠ = ٩٠، أقل من ١٠٠، فالمبلغ يكفي.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">أَقْرَبُ عَشَرَةٍ</SlideHead>
+          <RoundExplorer start={39} />
+        </>
+      ),
+    },
     {
       sec: 'explain', min: 6,
       notes: 'أنا أعمل: ١٤ أقرب إلى ١٠، و١٩ أقرب إلى ٢٠. الناتج تقريبي، وليس دقيقًا.',

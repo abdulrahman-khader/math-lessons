@@ -1,8 +1,9 @@
 import {
   BookLabel, Card, Cols, Ctrls, Definition, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, PlaceRows, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, type Token,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, type Token, storySlide, ZerosExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'تأكَّدْ، ص ١٤٤';
 const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٤٤';
@@ -78,6 +79,17 @@ export default defineLesson({
             <MCQ q="٤ × ٦ = ؟" options={['٢٤', '١٠', '٤٦']} answer="٢٤" award />
             <MCQ q="٧ × ٥ = ؟" options={['١٢', '٣٠', '٣٥']} answer="٣٥" award />
           </Grid>
+        </>
+      ),
+    },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: كيف تساعدنا ٦ × ٧ = ٤٢؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: ابدأ بـ٦ × ٧ ثم اضغط × ٧٠ و× ٧٠٠ و× ٧٠٠٠، واسأل قبل كل ضغطة: كم صفرًا سيكون في الناتج؟',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نَمَطُ الْأَصْفَارِ</SlideHead>
+          <ZerosExplorer a={6} b={7} />
         </>
       ),
     },

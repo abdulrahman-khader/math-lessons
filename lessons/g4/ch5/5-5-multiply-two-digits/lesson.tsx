@@ -1,8 +1,9 @@
 import {
   AreaModel, BookLabel, Card, Cols, Ctrls, Definition, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson,
+  QuestionGroup, QuestionSlide, SlideHead, Solution, Stack, Step, VMul, Winner, defineLesson, storySlide, SplitArray,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'تأكَّدْ، ص ١٥٣';
 const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٥٣';
@@ -77,6 +78,17 @@ export default defineLesson({
             <MCQ q="٤ × ٢٠ = ؟" options={['٢٤', '٨٠', '٨٠٠']} answer="٨٠" award />
             <MCQ q="٢٣ = ٢٠ + ؟" options={['٢', '٣', '٤']} answer="٣" award />
           </Grid>
+        </>
+      ),
+    },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: كيف يساعدنا تجزيء ٤٣ إلى ٤٠ و٣؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: صفان في كل صف ٤٣. اضغط «نجزّئ» فيظهر ٢ × ٤٠ و٢ × ٣ ثم المجموع. غيّر العددين وجرّب أمثلة أخرى.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نُجَزِّئُ الْعَدَدَ</SlideHead>
+          <SplitArray rows={2} n={43} />
         </>
       ),
     },

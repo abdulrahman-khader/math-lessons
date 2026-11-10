@@ -1,8 +1,9 @@
 import {
   BookLabel, Cols, Eq, QCol, QText, QuestionSlide, SlideHead, Solution, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const SRC = 'أَحُلُّ مَسَائِلَ مُتَنَوِّعَةً، ص ١٣١';
 const WAY = 'أَخْتَارُ خُطَّةً، ثُمَّ أَحُلُّ الْمَسْأَلَةَ:';
@@ -36,6 +37,7 @@ export default defineLesson({
       ['الْفَرْقُ بَيْنَ ٧ وَ٣ هُوَ:', ['٤', '١٠', '٣'], '٤'],
       ['٨ وَ٢: مَجْمُوعُهُمَا؟', ['٦', '١٠', '١٦'], '١٠'],
     ], 'نراجع معنى المجموع والفرق قبل المسألة.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: أي خطة تناسب؟ (التخمين والتحقق مثلًا) ودع الطلاب يجرّبون.'),
     {
       sec: 'explain', min: 7,
       notes: 'أنا أعمل: التخمين الأول قد لا يصلح. هذا طبيعي: نغيّره ونتحقق من جديد.',

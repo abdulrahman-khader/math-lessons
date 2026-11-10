@@ -136,7 +136,7 @@ export function Cube({ x, y, s = 44, color, op = 1, crossed = 0 }: { x: number; 
 }
 
 /** **كلمة** تُبرز في النص المرافق */
-const rich = (s: string) => s.split('**').map((p, i) => (i % 2 ? <b key={i}>{p}</b> : <Fragment key={i}>{p}</Fragment>));
+export const rich = (s: string) => s.split('**').map((p, i) => (i % 2 ? <b key={i}>{p}</b> : <Fragment key={i}>{p}</Fragment>));
 const plain = (s: string) => s.replace(/\*\*/g, '');
 const mmss = (s: number) => clock(Math.floor(s));
 
@@ -179,13 +179,45 @@ function voiceAudio() {
   return shared;
 }
 
+export interface ClipTalk {
+  line: number;
+  talking: boolean;
+  now: number;
+}
+
+/**
+ * يقرأ ملف صوت قصيرًا (كلمة عدّ مثلًا) بعنصر الصوت المشترك، وينتهي الوعد حين ينتهي.
+ * إن كان الصوت مكتومًا أو منعه المتصفح انتظر مدة الملف تقريبًا، فيبقى الإيقاع نفسه.
+ */
+export function speak(src: string, d = 0.8): Promise<void> {
+  if (typeof navigator !== 'undefined' && navigator.webdriver) return Promise.resolve();
+  const wait = () => new Promise<void>((r) => setTimeout(r, d * 1000));
+  if (isMuted()) return wait();
+  const a = voiceAudio();
+  return new Promise<void>((r) => {
+    let done = false;
+    const fin = () => {
+      if (done) return;
+      done = true;
+      a.removeEventListener('ended', fin);
+      r();
+    };
+    a.addEventListener('ended', fin);
+    setTimeout(fin, d * 1000 + 600);
+    a.src = src;
+    a.play().catch(() => wait().then(fin));
+  });
+}
+/** يوقف أي صوت قصير يُقرأ */
+export const hush = () => shared?.pause();
+
 export interface ClipProps {
   /** المدة بالثواني */
   duration: number;
   /** النص المرافق: [بداية بالثواني، نص]. **كلمة** تُبرز. */
   captions: [number, string][];
-  /** المشهد عند اللحظة t، بإحداثيات CLIP_W × CLIP_H */
-  scene: (t: number) => ReactNode;
+  /** المشهد عند اللحظة t، بإحداثيات CLIP_W × CLIP_H. talk: الجملة الحالية وهل صوتها يُقرأ الآن (لتحريك فم المتكلم)، وnow ساعة تتقدم ولو توقف t ينتظر الصوت */
+  scene: (t: number, talk: ClipTalk) => ReactNode;
   /** صوت كل جملة من captions بالترتيب (null = بلا صوت) */
   voice?: (VoiceLine | null)[];
 }
@@ -198,6 +230,8 @@ export function Clip({ duration, captions, scene, voice }: ClipProps) {
   const root = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
+  // يعيد الرسم كل إطار ولو توقف t ينتظر نهاية الجملة، فيبقى فم المتكلم يتحرك
+  const [, setTick] = useState(0);
   const playingRef = useRef(false);
   playingRef.current = playing;
   const tRef = useRef(0);
@@ -225,6 +259,7 @@ export function Clip({ duration, captions, scene, voice }: ClipProps) {
       if (speaking()) next = Math.min(next, (captions[spoken.current + 1]?.[0] ?? duration) - 0.001);
       last = now;
       setT(next);
+      setTick((k) => k + 1);
       if (next >= duration) setPlaying(false);
       else raf = requestAnimationFrame(frame);
     });
@@ -283,6 +318,13 @@ export function Clip({ duration, captions, scene, voice }: ClipProps) {
   };
 
   const cap = captions[ci]?.[1] ?? '';
+  const line = voice?.[ci];
+  const talk: ClipTalk = {
+    line: ci,
+    // بالصوت: ما دام يُقرأ. بلا صوت أو مكتومًا: أول ثانيتين من الجملة تقريبًا
+    talking: playing && (audio && line && !isMuted() ? speaking() : t - captions[ci][0] < (line?.d ?? 2)),
+    now: typeof performance !== 'undefined' ? performance.now() / 1000 : 0,
+  };
   const ended = t >= duration;
 
   useRemoteWidget(
@@ -303,7 +345,7 @@ export function Clip({ duration, captions, scene, voice }: ClipProps) {
     <div className="clip" ref={root}>
       <div className="clip-scene">
         <svg viewBox={`0 0 ${CLIP_W} ${CLIP_H}`} aria-hidden="true">
-          {scene(t)}
+          {scene(t, talk)}
         </svg>
         {!playing && t === 0 && (
           <button className="clip-big" aria-label="تشغيل المقطع" onClick={(e) => (e.currentTarget.blur(), toggle())}>

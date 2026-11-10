@@ -1,8 +1,9 @@
 import {
   BookLabel, Card, Cols, Eq, Goals, PlaceCard, PlaceMat, PlaceSum, QuestionGroup, QuestionSlide, Sentence, SlideHead, Stack,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'أتأكَّدُ، ص ١١٦';
 const PRACTICE = 'أتدرَّبُ، ص ١١٧';
@@ -41,6 +42,17 @@ export default defineLesson({
       ['فِي الْعَدَدِ ١٨، كَمْ آحَادًا؟', ['١', '٨', '٩'], '٨'],
       ['٥ عَشَرَاتٍ وَ٢ آحَادٍ =', ['٢٥', '٥٢', '٧'], '٥٢'],
     ], 'مراجعة المنازل من التهيئة ص ١٠٩.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: كيف نرتب التفاح لنعدّه بسهولة؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: معنا ٤٣ ونضيف ٣٥. اضغط «نضيف واحدًا» ٥ مرات و«نضيف عشرة» ٣ مرات، واسأل: هل احتجنا إعادة التجميع؟',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نَجْمَعُ الْآحَادَ وَالْعَشَرَاتِ</SlideHead>
+          <RegroupExplorer start={43} add={3} addOnes={5} />
+        </>
+      ),
+    },
     {
       sec: 'explain', min: 5,
       notes: 'أنا أعمل: نبدأ دائمًا من اليمين: الآحاد ثم العشرات. كل ضغطة خانة.',

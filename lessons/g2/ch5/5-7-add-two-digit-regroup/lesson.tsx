@@ -1,8 +1,9 @@
 import {
   BookLabel, Cols, DataTable, Eq, PlaceCard, PlaceMat, PlaceSum, QCol, QuestionGroup, QuestionSlide, SlideHead, Solution, Step, SumCard,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, RegroupExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'أتأكَّدُ، ص ١٢٤';
 const PRACTICE = 'أتدرَّبُ، ص ١٢٥';
@@ -45,6 +46,17 @@ export default defineLesson({
       ['٣١ + ٢٥ = ؟', ['٥٦', '٥٥', '٦٦'], '٥٦'],
       ['١ + ٢ + ٣ = ؟', ['٥', '٦', '٧'], '٦'],
     ], 'ربط بالدرسين ٥-٤ و٥-٦.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: ماذا نفعل بالكرات السائبة الـ١٥؟'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: معنا ٣٨ ونضيف ٢٧. نضيف الآحاد أولًا، ونعيد التجميع حين تصير ١٠ أو أكثر، ثم نضيف العشرتين.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نَجْمَعُ وَنُعِيدُ التَّجْمِيعَ</SlideHead>
+          <RegroupExplorer start={38} add={2} addOnes={7} />
+        </>
+      ),
+    },
     {
       sec: 'explain', min: 5,
       notes: 'أنا أعمل: نكتب ١٣ كاملة في منزلة الآحاد، ولأن المنزلة لا تتّسع لرقمين يصعد ١ إلى العشرات؛ في العشرات ثلاثة أرقام: المحمول والرقمان.',

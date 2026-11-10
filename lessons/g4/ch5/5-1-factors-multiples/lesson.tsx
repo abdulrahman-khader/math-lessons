@@ -1,8 +1,9 @@
 import {
   BookLabel, Card, Cols, Ctrls, Definition, DotArray, DotArrays, Eq, ExitTicket, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, NextButton, NumberRow, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, ShowLater, SlideHead, Solution, Stack, Step, StepRow, TimesTable, Winner, defineLesson,
+  QuestionGroup, QuestionSlide, ShowLater, SlideHead, Solution, Stack, Step, StepRow, TimesTable, Winner, defineLesson, storySlide, ArrayExplorer,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const READY = 'اسْتَعِدَّ، ص ١٣٩';
 const CHECK = 'تأكَّدْ، ص ١٤٠';
@@ -84,6 +85,17 @@ export default defineLesson({
     },
 
     /* ================= استعد ================= */
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: كم صفًّا نجرب؟ دع الطلاب يقترحون قبل الأداة.'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: غيّر عدد الصفوف من ١ إلى ١٢. كل ترتيب تتساوى فيه الصفوف يعطينا قاسمين لـ٢٨ يُسجَّلان تحت.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نُرَتِّبُ فِي صُفُوفٍ</SlideHead>
+          <ArrayExplorer n={28} />
+        </>
+      ),
+    },
     {
       sec: 'explore', min: 3,
       notes: 'دع الطلاب يقترحون ترتيبات: كم صفًّا؟ وكم طاولة في كل صف؟ لا تعطِ العدد قبل المثال.',

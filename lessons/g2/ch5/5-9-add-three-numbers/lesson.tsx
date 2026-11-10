@@ -1,8 +1,9 @@
 import {
   Card, Cols, Eq, PlaceCard, PlaceSum, QuestionGroup, QuestionSlide, SlideHead, Step,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'أتأكَّدُ، ص ١٢٨';
 const PRACTICE = 'أتدرَّبُ، ص ١٢٩';
@@ -42,6 +43,7 @@ export default defineLesson({
       ['٤ + ٤ = ؟', ['٦', '٨', '٩'], '٨'],
       ['٣ + ٧ + ٢ = ؟', ['١٠', '١٢', '١٣'], '١٢'],
     ], 'مراجعة: أسهل طريقة لجمع ثلاثة أعداد.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: أي رقمين في الآحاد يصنعان عشرة؟'),
     {
       sec: 'explain', min: 6,
       notes: 'أنا أعمل: الطريقتان تعطيان الناتج نفسه. دع الطلاب يقولون أيهما أسهل.',

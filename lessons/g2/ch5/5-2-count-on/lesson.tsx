@@ -1,8 +1,9 @@
 import {
   BookLabel, Card, Cols, Eq, QCard, QText, QuestionGroup, QuestionSlide, RegroupExplorer, Sentence, SentenceCard, SlideHead, Solution, Step, SumCard, TenOnes,
-  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide,
+  askSlide, clipSlide, defineLesson, endSlide, exitSlide, goalsSlide, mindSlide, storySlide, CountOnChart,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const CHECK = 'أتأكَّدُ، ص ١١٢';
 const PRACTICE = 'أتدرَّبُ، ص ١١٣';
@@ -51,6 +52,17 @@ export default defineLesson({
       ['٦٠ + ١٠ = ؟', ['٧٠', '٦١', '٥٠'], '٧٠'],
       ['مَا الْعَدَدُ بَعْدَ ٢٩؟', ['٢٨', '٣٠', '٣٩'], '٣٠'],
     ], 'ربط بالدرس ٥-١.'),
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: من أين نبدأ العدّ؟ لا تعطِ الجواب؛ لوحة المئة في الشريحة التالية.'),
+    {
+      sec: 'explore', min: 4,
+      notes: 'نحل مسألة القصة: نبدأ من ٣٤ (لا من ١). اضغط «نعدّ عشرة» مرتين، ثم «نعدّ واحدًا» ٣ مرات، والفصل يعدّ معك.',
+      content: (
+        <>
+          <SlideHead tag="نَحُلُّ مَسْأَلَةَ الْقِصَّةِ" kind="ex">نَعُدُّ تَصَاعُدِيًّا</SlideHead>
+          <CountOnChart start={34} tens={2} ones={3} />
+        </>
+      ),
+    },
     {
       sec: 'explore', min: 4,
       notes: 'ادعُ طالبًا: يضيف آحادًا مرة ثم عشرة مرة. اسأل: أيّ رقم يتغير في كل مرة؟',

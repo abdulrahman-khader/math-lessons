@@ -3,10 +3,11 @@ import { num } from '../digits';
 import { useSlide } from '../context';
 import type { SlideDef } from '../types';
 import { Blank, VSum } from './Cubes';
-import { Card, Cols, QCard, SlideHead, Stack, IfTeams, GoHomeButton, MindMap, Winner } from './Layout';
+import { Card, Cols, Eq, QCard, SlideHead, Stack, IfTeams, GoHomeButton, MindMap, Winner } from './Layout';
 import { ExitTicket, Goals, Grid } from './Blocks';
 import { MCQ } from './MCQ';
 import { Block } from './Multiply';
+import { tensText } from './Fingers';
 import { Sentence } from './Primary';
 import { Step } from './Steps';
 import { ColAdd } from './Columns';
@@ -326,29 +327,64 @@ export function PlaceMat({ a, b, big }: { a: number; b?: number; big?: boolean }
 }
 
 /** المستكشف: نضيف قطعًا إلى اللوحة، فإذا بلغت الآحاد عشرة أو أكثر نعيد التجميع */
-export function RegroupExplorer({ start = 17, tensOnly, open }: { start?: number; tensOnly?: boolean; open?: boolean }) {
+/**
+ * لوحة منازل نضيف إليها أو نطرح منها بأزرار.
+ * add (مع tensOnly): مهمة واضحة: «معنا start، نضيف add عشرات عشرةً عشرةً. كم يصير؟»، ويتوقف الزر عند الوصول، وتظهر الجملة.
+ */
+export function RegroupExplorer({ start = 17, tensOnly, open, add, addOnes }: { start?: number; tensOnly?: boolean; open?: boolean; add?: number; /** مهمة: نضيف هذا العدد من الآحاد (ومعه add عشرات إن وُجد)، ونعيد التجميع إن صارت ١٠ أو أكثر */ addOnes?: number }) {
   const [t, setT] = useState(Math.floor(start / 10));
   const [o, setO] = useState(start % 10);
-  const btn = (label: ReactNode, on: () => void, off?: boolean) => (
-    <button type="button" className="btn" disabled={off} onClick={on}>{label}</button>
+  // ما أضفناه يُحسب من العدد نفسه: العدد الآن − البداية (إعادة التجميع لا تغيّره)
+  const [onesIn, setOnesIn] = useState(0);
+  const [tensIn, setTensIn] = useState(0);
+  const added = t - Math.floor(start / 10);
+  const task = add !== undefined || addOnes !== undefined;
+  const goal = (add ?? 0) * 10 + (addOnes ?? 0);
+  const done = task && tensIn >= (add ?? 0) && onesIn >= (addOnes ?? 0) && o < 10;
+  const reset = () => { setT(Math.floor(start / 10)); setO(start % 10); setOnesIn(0); setTensIn(0); };
+  const btn = (label: ReactNode, on: () => void, off?: boolean, primary?: boolean) => (
+    <button type="button" className={'btn' + (primary ? ' primary' : '')} disabled={off} onClick={on}>{label}</button>
   );
   return (
-    <div className="pexplore">
-      <div className="pmat big">
-        <div className="pmh t">عَشَرَاتٌ</div>
-        <div className="pmh o">آحَادٌ</div>
-        <div className="pmc t">{Array.from({ length: t }, (_, k) => <Block key={k} kind="ten" />)}</div>
-        <div className="pmc o"><div className="pmring">{Array.from({ length: o }, (_, k) => <Block key={k} kind="one" />)}</div></div>
+    <div className="pexwrap">
+      {task && (
+        <div className="ptask">
+          {addOnes === undefined ? (
+            <>مَعَنَا <b>{num(start)}</b>، نُضِيفُ <b>{tensText(add ?? 0)}</b> عَشَرَةً بَعْدَ عَشَرَةٍ. كَمْ يَصِيرُ مَعَنَا؟</>
+          ) : (
+            <>مَعَنَا <b>{num(start)}</b>، نُضِيفُ <b>{num(goal)}</b>. كَمْ يَصِيرُ مَعَنَا؟</>
+          )}
+        </div>
+      )}
+      <div className="pexplore">
+        <div className="pmat big">
+          <div className="pmh t">عَشَرَاتٌ</div>
+          <div className="pmh o">آحَادٌ</div>
+          <div className="pmc t">{Array.from({ length: t }, (_, k) => <Block key={k} kind="ten" />)}</div>
+          <div className="pmc o"><div className="pmring">{Array.from({ length: o }, (_, k) => <Block key={k} kind="one" />)}</div></div>
+        </div>
+        <Stack>
+          {tensOnly ? (
+            <div className="pnow">{tensText(t)} = <b>{num(t * 10)}</b></div>
+          ) : (
+            <div className="pnow"><b>{num(t)}</b> عَشَرَاتٍ وَ<b>{num(o)}</b> {onesWord(o)}</div>
+          )}
+          {add !== undefined && addOnes === undefined && <div className="padded">أَضَفْنَا: {added ? tensText(added) : 'لَا شَيْءَ'}</div>}
+          {addOnes !== undefined && <div className="padded">أَضَفْنَا: {num(tensIn * 10 + onesIn)} مِنْ {num(goal)}</div>}
+          {addOnes !== undefined && o >= 10 && <div className="padded warn">{num(o)} آحَادٍ: نُعِيدُ التَّجْمِيعَ!</div>}
+          {open && btn('أَطْرَحُ آحَادًا', () => setO(o - 1), o <= 0)}
+          {open && btn('أَفُكُّ عَشَرَةً', () => { setT(t - 1); setO(o + 10); }, t <= 0 || o >= 10)}
+          {!tensOnly && !open && btn(task ? 'نُضِيفُ وَاحِدًا' : 'أُضِيفُ آحَادًا', () => { setO(o + 1); setOnesIn(onesIn + 1); }, o >= 18 || (addOnes !== undefined && onesIn >= addOnes), addOnes !== undefined)}
+          {!open && (!task || (add ?? 0) > 0) && btn(tensOnly || task ? 'نُضِيفُ عَشَرَةً' : 'أُضِيفُ عَشَرَةً', () => { setT(t + 1); setTensIn(tensIn + 1); }, t >= 9 || (task && tensIn >= (add ?? 0)), task)}
+          {!tensOnly && !open && btn(task ? 'نُعِيدُ التَّجْمِيعَ' : 'أُعِيدُ التَّجْمِيعَ', () => { setO(o - 10); setT(t + 1); }, o < 10 || t >= 9, task && o >= 10)}
+          {btn('أَبْدَأُ مِنْ جَدِيدٍ', reset)}
+          {done && (
+            <div className="pans">
+              <Eq>{num(start)} + {num(goal)} = {num(start + goal)}</Eq>
+            </div>
+          )}
+        </Stack>
       </div>
-      <Stack>
-        <div className="pnow"><b>{num(t)}</b> عَشَرَاتٍ وَ<b>{num(o)}</b> {onesWord(o)}</div>
-        {open && btn('أَطْرَحُ آحَادًا', () => setO(o - 1), o <= 0)}
-        {open && btn('أَفُكُّ عَشَرَةً', () => { setT(t - 1); setO(o + 10); }, t <= 0 || o >= 10)}
-        {!tensOnly && !open && btn('أُضِيفُ آحَادًا', () => setO(o + 1), o >= 18)}
-        {!open && btn('أُضِيفُ عَشَرَةً', () => setT(t + 1), t >= 8)}
-        {!tensOnly && !open && btn('أُعِيدُ التَّجْمِيعَ', () => { setO(o - 10); setT(t + 1); }, o < 10 || t >= 9)}
-        {btn('أَبْدَأُ مِنْ جَدِيدٍ', () => { setT(Math.floor(start / 10)); setO(start % 10); })}
-      </Stack>
     </div>
   );
 }
@@ -455,6 +491,17 @@ export const clipSlide = (clip: ReactNode, notes: string): SlideDef => ({
   content: (
     <>
       <SlideHead tag="مقطع قصير" kind="rule">الفكرة في دقيقة</SlideHead>
+      {clip}
+    </>
+  ),
+});
+
+/** المقطع الكرتوني الذي يفتح الدرس: قصة فيها مشكلة الدرس، يتوقف عند سؤال بلا جواب */
+export const storySlide = (clip: ReactNode, notes: string, title = 'ماذا حدثَ؟'): SlideDef => ({
+  sec: 'engage', min: 2, notes,
+  content: (
+    <>
+      <SlideHead tag="قصة قصيرة" kind="ex">{title}</SlideHead>
       {clip}
     </>
   ),

@@ -1,8 +1,9 @@
 import {
   BulletCard, Card, Cols, Ctrls, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, MCQ, MindMap, MonthCal, NextButton, QCol, QText,
-  QuestionSlide, SlideHead, Solution, Stack, Step, Winner, defineLesson,
+  QuestionSlide, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide,
 } from '@engine';
 import { IntroClip } from './clip';
+import { StoryClip } from './story';
 
 const SKILL = 'حلِّلِ المهارةَ، ص ١٤٦';
 const PRACTICE = 'تدرَّبْ على المهارةِ، ص ١٤٦';
@@ -66,6 +67,7 @@ export default defineLesson({
         </>
       ),
     },
+    storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: لو كان في الفصل ٣٠ طالبًا، كم دفترًا تقريبًا؟'),
     {
       sec: 'explore', min: 2,
       notes: 'اقرأ المسألة، واطلب توقّع الطلاب قبل الحساب.',

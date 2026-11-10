@@ -201,7 +201,10 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
     const a = (2 * Math.PI) / N.length;
     const pick = Math.floor(Math.random() * N.length);
     const target = POINTER - (pick * a + a / 2);
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    // الدوران هو العجلة نفسها، فيدور حتى لو كان «إيقاف الحركة» مفعّلًا في الجهاز
+    // (ويندوز يفعّله حين تُطفأ «تأثيرات الحركة»، فكانت العجلة لا تدور في أجهزة بعض المعلمين).
+    // الفحوص الآلية وحدها تتخطى الدوران.
+    const reduce = navigator.webdriver === true;
     const start = ang.current;
     const delta = (((target - start) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
     const total = delta + (reduce ? 0 : 2 * Math.PI * 5);

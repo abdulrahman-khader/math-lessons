@@ -69,15 +69,17 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
   /* مع الفرق والفصل كله: يخرج اسم من فريق فيغيب فريقه حتى تأخذ الفرق كلها دورها.
      فريق خرج كل طلابه والفرق الأخرى فيها من لم يخرج: يعود منه طالب عشوائي لتتساوى الفرص */
   const groupOf = (s: string) => (klass && s in klass.team && klass.team[s] < nTeams ? klass.team[s] : -1);
-  // فقط حين يكون كل طالب حاضر في فريق
-  const byTeam = klass && hasTeams && filter < 0 && remove && pool.every((s) => groupOf(s) >= 0);
-  const groups = byTeam ? [...new Set(pool.map(groupOf))] : [];
+  // يكفي أن يكون في العجلة طالب في فريق؛ من ليس في فريق يدخل وحده ويخرج حين يظهر اسمه
+  const byTeam = klass && hasTeams && filter < 0 && remove && pool.some((s) => groupOf(s) >= 0);
+  const groups = byTeam ? [...new Set(pool.map(groupOf).filter((g) => g >= 0))] : [];
   const fresh = (g: number) => pool.filter((s) => groupOf(s) === g && !picked.includes(s));
+  const loners = byTeam ? pool.filter((s) => groupOf(s) < 0 && !picked.includes(s)) : [];
   const list = byTeam
     ? // الجولة تكتمل دائمًا، ولا تبدأ جولة جديدة إلا وفيها من لم يخرج
-      round.length || groups.some((g) => fresh(g).length)
-      ? groups.filter((g) => !round.includes(g)).flatMap((g) => (fresh(g).length ? fresh(g) : pool.filter((s) => groupOf(s) === g)))
-      : []
+      (round.length || groups.some((g) => fresh(g).length)
+        ? groups.filter((g) => !round.includes(g)).flatMap((g) => (fresh(g).length ? fresh(g) : pool.filter((s) => groupOf(s) === g)))
+        : []
+      ).concat(loners)
     : klass
     ? pool.filter((s) => !picked.includes(s))
     : text
@@ -234,7 +236,7 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       onResult?.(N[pick]);
       sGood();
       if (remove) (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n')));
-      if (byTeam) {
+      if (byTeam && groupOf(N[pick]) >= 0) {
         const next = [...round, groupOf(N[pick])];
         onRound?.(groups.every((g) => next.includes(g)) ? [] : next);
       }

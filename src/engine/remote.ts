@@ -222,6 +222,8 @@ export interface RemoteState {
   wheelOut?: string[];
   wheelRemove?: boolean;
   wheelTeam?: number;
+  /** الفرق التي أخذت دورها في جولة العجلة الحالية */
+  wheelRound?: number[];
   /** الدرس بالتصميم الجديد (المؤقت ثابت في الرأس) */
   v2?: boolean;
   /** الفرق ظاهرة على الشاشة */

@@ -385,6 +385,28 @@ test('العجلة مع الفرق: يغيب فريق من خرج اسمه حت�
   expect(errors).toEqual([]);
 });
 
+test('العجلة مع الفرق وطالب بلا فريق: يغيب فريق من خرج اسمه، ومن بلا فريق يبقى حتى يخرج اسمه', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  await page.goto(pathToFileURL(path.join(dist, file)).href);
+  const team: Record<string, number> = { أ1: 0, أ2: 0, ب1: 1, ب2: 1 };
+  await page.evaluate((team) => {
+    localStorage.clear();
+    localStorage.setItem('classes', JSON.stringify({ grades: { g2: { last: 'k1', classes: [{ id: 'k1', name: 'ف', students: [...Object.keys(team), 'جديد'], team } ] } } }));
+  }, team);
+  await page.reload();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openTool(page, 'عجلة الأسماء');
+  const wheel = page.getByRole('dialog', { name: 'عجلة الأسماء' });
+  await expect(wheel).toHaveAttribute('data-left', '5');
+  await page.keyboard.press('Space');
+  await expect(wheel.locator('.wname.done')).toBeVisible();
+  const first = (await wheel.locator('.wname').textContent())!;
+  // خرج اسم من فريق: يغيب فريقه كله (اثنان)، وإلا يخرج «جديد» وحده
+  await expect(wheel).toHaveAttribute('data-left', first === 'جديد' ? '4' : '3');
+  expect(errors).toEqual([]);
+});
+
 test('الصوت: نقرات العجلة وفانفار النجمة تُعزف', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as Record<string, unknown>;

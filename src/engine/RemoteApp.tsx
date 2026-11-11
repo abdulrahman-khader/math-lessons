@@ -474,6 +474,11 @@ function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => voi
           onPick={(v) => send({ c: 'wheelTeam', t: Number(v) })}
         />
       )}
+      {!!st.wheelRound?.length && (st.wheelTeam ?? -1) < 0 && (
+        <p className="r2note">
+          أخذت دورها في هذه الجولة: {st.wheelRound.map((t) => st.teams[t]?.name).filter(Boolean).join('، ')}
+        </p>
+      )}
       {out.length > 0 && (
         <Fold
           className="r2out"

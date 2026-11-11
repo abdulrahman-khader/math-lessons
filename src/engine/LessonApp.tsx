@@ -429,6 +429,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         wheelOut: picked,
         wheelRemove,
         wheelTeam: teamFilter,
+        wheelRound: round,
         v2,
         teamsShown,
         teamStarsDone,
@@ -444,7 +445,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 40 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, plan, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown, teamStarsDone, teamPodium]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, plan, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, round, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown, teamStarsDone, teamPodium]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);

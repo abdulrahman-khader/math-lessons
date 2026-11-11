@@ -276,29 +276,13 @@ test('الجوال يوقف مقطع فكرة الدرس ويشغّله', async 
   expect(errors).toEqual([]);
 });
 
-test('الجوال: وقت كل شريحة من ٤٥ دقيقة، وزر الواجب يضيف الشريحة إلى قائمة الختام', async ({ browser }) => {
-  const { ipad, phone, errors } = await pair(browser);
-  // خطة الحصة ظاهرة في الجوال، ومجموعها مدة الحصة
+test('الجوال: بطاقة الوقت تبيّن وقت الشريحة من خطة ٤٥ دقيقة', async ({ browser }) => {
+  const { phone, errors } = await pair(browser);
   await phone.locator('.rnav .next').click();
-  await expect(phone.locator('.r2plan')).toContainText('من ٤٥ د');
-  // أول شريحة فيها سؤال من الكتاب
-  let found = false;
-  for (let k = 0; k < 40 && !found; k++) {
-    await phone.locator('.rnav .next').click();
-    await ipad.waitForTimeout(300);
-    found = (await ipad.locator('section.slide.active [data-qnum]').count()) > 0;
-  }
-  expect(found).toBe(true);
-  await expect(ipad.locator('.hwlist li')).toHaveCount(0);
-  await phone.locator('.r2hw .r2btn').click();
-  await expect(phone.locator('.r2hw .r2btn')).toContainText('في الواجب');
-  await expect(phone.locator('.r2plan')).toContainText('بِلَا وَقْتٍ');
-  // لا شيء يُكتب على الشريحة نفسها، والقائمة في شريحة الختام
-  await expect(ipad.locator('section.slide.active .hwlist')).toHaveCount(0);
-  await expect(ipad.locator('.hwlist li')).toHaveCount(1);
-  // ضغطة ثانية تلغيه
-  await phone.locator('.r2hw .r2btn').click();
-  await expect(ipad.locator('.hwlist li')).toHaveCount(0);
+  await expect(phone.locator('.r2clock')).toContainText('هذه الشريحة');
+  await expect(phone.locator('.r2clock')).toContainText('من ٤٥ د');
+  // بلا وقت انتهاء للحصة: إرشاد إلى تحديده بدل حساب التأخر
+  await expect(phone.locator('.r2clock .r2thint')).toBeVisible();
   expect(errors).toEqual([]);
 });
 

@@ -222,7 +222,11 @@ body.remote-body:has(.remote.r2) { background: #fff; }
 .r2panel .rtstars small { color: var(--ink2, #5b6475); font-size: 15px; }
 .r2panel .rtstars b { min-inline-size: 3.2rem; text-align: end; }
 .remote.r2 .rtpoint, .r2panel .rtpoint { background: var(--tc); color: #fff; }
-.r2hw { align-items: center; }
-.r2hw small { flex: none; color: var(--muted, #555); font-size: 15px; }
-.r2plan { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 14px 6px; border-radius: 12px; background: var(--tile); color: var(--ink); font-size: 16px; font-weight: 700; }
-.r2plan small { font-size: 14px; font-weight: 600; opacity: .75; }
+/* بطاقة الوقت: الخطة والفعلي والفرق بينهما */
+.r2clock { display: flex; flex-direction: column; gap: 6px; padding: 10px 14px 8px; border-radius: 12px; background: var(--tile); color: var(--ink); }
+.r2clock .r2trow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 16px; font-weight: 700; }
+.r2clock .r2trow small { font-size: 14px; font-weight: 600; opacity: .75; }
+.r2clock .r2tstate { padding: 6px 10px 4px; border-radius: 10px; font-size: 17px; font-weight: 800; text-align: center; background: var(--ans-t); color: var(--ans); }
+.r2clock.late .r2tstate { background: var(--late-t); color: var(--late); }
+.r2clock.early .r2tstate { background: #E6F1FB; color: #185FA5; }
+.r2clock .r2thint { font-size: 13px; font-weight: 600; opacity: .7; }

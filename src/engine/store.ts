@@ -11,8 +11,6 @@ export interface Saved {
   wheel: string;
   /** مكان المؤقت وحجمه */
   timerView: TimerView;
-  /** الشرائح التي اختارها المعلم واجبًا (من الجوال)، تظهر في شريحة الختام */
-  hw: number[];
 }
 
 export const DEFAULT_SAVED: Saved = {
@@ -23,7 +21,6 @@ export const DEFAULT_SAVED: Saved = {
   muted: false,
   wheel: '',
   timerView: TIMER_VIEW,
-  hw: [],
 };
 
 function load(key: string): Saved {

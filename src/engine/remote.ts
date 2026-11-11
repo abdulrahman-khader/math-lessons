@@ -45,12 +45,24 @@ const local = (k: string) => {
 };
 /** خادم ntfy الاحتياطي؛ تغيّره الاختبارات إلى خادم محلي */
 const RELAY = local('remote:relay') || 'https://ntfy.sh/';
+/**
+ * خوادم الربط: عدة خوادم STUN تساعد الجوال والآيباد على الاتصال مباشرة (أسرع من خادم وسيط)،
+ * ثم خوادم TURN من PeerJS احتياطًا إن منعت الشبكة الاتصال المباشر.
+ */
+const ICE: RTCConfiguration = {
+  iceServers: [
+    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
+    { urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478'], username: 'peerjs', credential: 'peerjsp' },
+  ],
+  iceCandidatePoolSize: 4,
+};
 /** خادم PeerJS: العام افتراضيًا، والاختبارات تشغّل خادمًا محليًا (JSON بخيارات PeerJS) */
 const PEER_OPTS: PeerOptions = (() => {
   try {
-    return JSON.parse(local('remote:peer') ?? '{}');
+    const o = JSON.parse(local('remote:peer') ?? '{}') as PeerOptions;
+    return o.config ? o : { ...o, config: ICE };
   } catch {
-    return {};
+    return { config: ICE };
   }
 })();
 /** سجل التشخيص: localStorage['remote:debug'] = '1' */
@@ -75,8 +87,6 @@ export type RemoteCmd =
   | { c: 'goto'; i: number }
   | { c: 'hint' }
   | { c: 'resetSlide' }
-  /** يجعل الشريحة واجبًا أو يلغيه (يظهر الواجب في شريحة الختام) */
-  | { c: 'hw'; i: number }
   | { c: 'score'; team: number; d: number }
   | { c: 'wheel'; open: boolean }
   | { c: 'spin' }
@@ -183,9 +193,6 @@ export interface RemoteState {
   title: string;
   notes: string;
   min: number;
-  /** الشريحة الحالية واجب؟ وعدد شرائح الواجب */
-  hw?: boolean;
-  hwCount?: number;
   steps: [shown: number, total: number];
   hasHint: boolean;
   teams: { name: string; score: number; color: string }[];
@@ -352,22 +359,22 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   let peer: Peer | null = null;
   let conn: DataConnection | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
-  /** آخر تغيّر في القناة المباشرة؛ بعد ١٥ ثانية بلا قناة يُستعمل ntfy */
+  /** آخر تغيّر في القناة المباشرة؛ بعد ٨ ثوانٍ بلا قناة يُستعمل ntfy، فلا تضيع الضغطات وقتًا طويلًا */
   let directSince = Date.now();
-  const relayMode = () => !status.direct && status.relay && !status.limited && Date.now() - directSince > 15000;
+  const relayMode = () => !status.direct && status.relay && !status.limited && Date.now() - directSince > 8000;
 
-  /* إعادة المحاولة: ٢ ثم ٤ ثم ٨ ثوانٍ… حتى ١٥ ثانية. لا رسائل على ntfy في هذا كله */
-  let backoff = 2000;
+  /* إعادة المحاولة سريعة: ١ ثم ٢ ثم ٤ ثوانٍ… حتى ٥ ثوانٍ (كانت حتى ١٥، فيتأخر الاتصال). لا رسائل على ntfy في هذا كله */
+  let backoff = 1000;
   const later = (fn: () => void) => {
     clearTimeout(timer);
     timer = setTimeout(() => !stopped && fn(), backoff);
-    backoff = Math.min(backoff * 2, 15000);
+    backoff = Math.min(backoff * 2, 5000);
   };
   const setDirect = (v: boolean) => {
     if (status.direct === v) return;
     status.direct = v;
     directSince = Date.now();
-    if (v) backoff = 2000;
+    if (v) backoff = 1000;
     else {
       status.rtt = null;
       status.via = null;
@@ -490,7 +497,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
         c.close();
         later(dial);
       }
-    }, 10000);
+    }, 6000);
   };
 
   const start = async () => {
@@ -522,7 +529,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
   /* ---------- العودة إلى الصفحة أو الشبكة: إعادة اتصال فورية بدل انتظار المهلة ---------- */
   const wake = () => {
     if (stopped || document.visibilityState !== 'visible') return;
-    backoff = 2000;
+    backoff = 1000;
     if (!peer || peer.destroyed) return void start().catch(() => {});
     if (peer.disconnected) peer.reconnect();
     if (role === 'phone') {
@@ -552,7 +559,7 @@ function makeLink(role: 'host' | 'phone', channel: string, onData: (e: Envelope)
       conn = null;
       c.close();
       setDirect(false);
-      backoff = 2000;
+      backoff = 1000;
       dial();
     } else raw({ ping: Date.now() });
   }, 3000);

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useEngine, useV2 } from '../context';
 import { num } from '../digits';
 
@@ -116,45 +116,10 @@ interface MindItem {
   text: ReactNode;
 }
 
-/**
- * الواجب الذي اختاره المعلم من الجوال: لكل شريحة صفحتها وأرقام أسئلتها (أو عنوانها).
- * يظهر في شريحة الختام (مع نتيجة الفرق)، ولا شيء إن لم يُختر واجب.
- */
-export function HomeworkList() {
-  const { hw } = useEngine();
-  const [items, setItems] = useState<string[]>([]);
-  const key = hw.join(',');
-  useLayoutEffect(() => {
-    setItems(
-      hw
-        .map((i) => {
-          const el = document.querySelector(`section.slide[data-index="${i}"]`);
-          if (!el) return '';
-          const page = (el.textContent ?? '').match(/ص\s?[٠-٩]+/)?.[0] ?? '';
-          const qs = [...new Set([...el.querySelectorAll<HTMLElement>('[data-qnum]')].map((e) => Number(e.dataset.qnum)))].filter((n) => n > 0);
-          if (qs.length) return `${page ? page + ': ' : ''}${qs.length > 1 ? 'الْأَسْئِلَةُ' : 'السُّؤَالُ'} ${qs.map((n) => num(n)).join('، ')}`;
-          return (el.querySelector('h2')?.textContent ?? '').trim();
-        })
-        .filter(Boolean),
-    );
-  }, [key]);
-  if (!items.length) return null;
-  return (
-    <Card kind="ex" cap="الْوَاجِبُ">
-      <ul className="hwlist">
-        {items.map((t, i) => (
-          <li key={i}>{t}</li>
-        ))}
-      </ul>
-    </Card>
-  );
-}
-
 /** بطاقة نتيجة الفرق: الفائز أو التعادل. لا تظهر إذا اختار المعلم «بدون» فرق. */
 export function Winner({ cap = 'نتيجة الفرق اليوم' }: { cap?: string }) {
   const { scores, teamNames, nTeams } = useEngine();
-  // الواجب الذي اختاره المعلم يظهر في كل شريحة ختام، قبل نتيجة الفرق
-  if (nTeams === 0) return <HomeworkList />;
+  if (nTeams === 0) return null;
   const sc = scores.slice(0, nTeams);
   const mx = Math.max(...sc);
   let text = 'لم تُسجَّل نقاط بعد';
@@ -163,14 +128,11 @@ export function Winner({ cap = 'نتيجة الفرق اليوم' }: { cap?: str
     text = (ws.length > 1 ? 'تعادل: ' : 'الفائز: ') + ws.join(' و') + ` (${num(mx)} ★)`;
   }
   return (
-    <>
-    <HomeworkList />
     <Card kind="rule" cap={cap}>
       <div id="winner" style={{ fontFamily: 'var(--display)', fontSize: '1.4em', fontWeight: 800 }}>
         {text}
       </div>
     </Card>
-    </>
   );
 }
 

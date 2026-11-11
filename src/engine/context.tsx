@@ -41,8 +41,6 @@ export interface EngineApi {
   registerSlide: (index: number, api: SlideApi | null) => void;
   /** تُستدعى عند تغيّر حالة شريحة (خطوة، تلميح) ليصل التحديث إلى جهاز التحكم */
   slideChanged: () => void;
-  /** أرقام الشرائح التي اختارها المعلم واجبًا */
-  hw: number[];
 }
 
 export const EngineCtx = createContext<EngineApi | null>(null);

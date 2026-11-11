@@ -130,26 +130,56 @@ function minutesAr(n: number) {
   return `${num(n)} دقيقة`;
 }
 
-/** خط الوقت: متأخر أم في الوقت، والباقي حتى نهاية الحصة. الدقائق المقترحة للشرائح تُوزَّع على الوقت المتاح */
-function Pacing({ timing, mins, cur }: { timing: Timing; mins: number[]; cur: number }) {
+/** «دقيقتان» في أول الجملة (مرفوعة)، وإلا كما في minutesAr */
+const minutesNom = (n: number) => (n === 2 ? 'دقيقتان' : minutesAr(n));
+
+/**
+ * بطاقة الوقت: وقت هذه الشريحة حسب الخطة، وكم مضى من الخطة، ثم (إن حُدد وقت انتهاء الحصة وضُغط «ابدأ الدرس»)
+ * الوقت الفعلي الذي مضى والباقي حتى نهاية الحصة، والفرق بين الخطة والفعلي: متأخر أو متقدم أو في الوقت.
+ * الخطة ٤٥ دقيقة تُوزَّع على الوقت المتاح فعلًا بين «ابدأ الدرس» ووقت الانتهاء.
+ */
+function TimeCard({ timing, mins, cur }: { timing: Timing | null; mins: number[]; cur: number }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 15000);
     return () => clearInterval(id);
   }, []);
-  const end = endMs(timing.end);
-  if (!end || end <= timing.start || !mins.length) return null;
-  const plan = mins.reduce((a, b) => a + b, 0) || 1;
-  const per = (end - timing.start) / plan;
-  const due = timing.start + per * mins.slice(0, cur + 1).reduce((a, b) => a + b, 0);
-  const late = Math.round((now - due) / 60000);
-  const left = Math.max(0, Math.round((end - now) / 60000));
+  const planTotal = mins.reduce((a, b) => a + b, 0) || 1;
+  const before = mins.slice(0, cur).reduce((a, b) => a + b, 0);
+  const end = timing?.end ? endMs(timing.end) : null;
+  const live = !!(timing?.start && end && end > timing.start);
+  // الدقائق المتاحة فعلًا، والخطة مقيسة عليها
+  const period = live ? (end! - timing!.start) / 60000 : planTotal;
+  const k = period / planTotal;
+  const slide = Math.max(1, Math.round(mins[cur] * k));
+  const planStart = before * k;
+  const planEnd = (before + mins[cur]) * k;
+  const actual = live ? (now - timing!.start) / 60000 : 0;
+  const left = live ? Math.max(0, Math.round((end! - now) / 60000)) : 0;
+  const late = live ? Math.round(actual - planEnd) : 0;
+  const early = live ? Math.round(planStart - actual) : 0;
+  const state = !live ? '' : late > 0 ? 'late' : early > 0 ? 'early' : 'ok';
   return (
-    <div className={'r2pace' + (late > 0 ? ' late' : '')}>
-      <span>{late > 0 ? `متأخر ${minutesAr(late)}` : 'في الوقت'}</span>
-      <small>
-        باقٍ {num(left)} د، ينتهي {clockAr(timing.end)}
-      </small>
+    <div className={'r2clock' + (state ? ' ' + state : '')}>
+      <div className="r2trow">
+        <span>هذه الشريحة: {minutesNom(slide)}</span>
+        <small>
+          حسب الخطة مضى {num(Math.round(planStart))} من {num(Math.round(period))} د
+        </small>
+      </div>
+      {live ? (
+        <>
+          <div className="r2trow">
+            <span>الوقت الفعلي: مضى {num(Math.round(actual))} د</span>
+            <small>
+              باقٍ {num(left)} د، تنتهي {clockAr(timing!.end)}
+            </small>
+          </div>
+          <div className="r2tstate">{state === 'late' ? `متأخر ${minutesAr(late)} عن الخطة` : state === 'early' ? `متقدم ${minutesAr(early)} على الخطة` : 'في الوقت حسب الخطة'}</div>
+        </>
+      ) : (
+        <small className="r2thint">لتعرف هل أنت متأخر: اختر وقت انتهاء الحصة واضغط «ابدأ الدرس» في صفحة الإعداد</small>
+      )}
     </div>
   );
 }
@@ -522,7 +552,7 @@ function GroupsSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => vo
   const list = st.stars?.list ?? [];
   const of = st.teamOf ?? [];
   const n = st.teams.length;
-  if (!st.klass || !list.length) return <p className="r2note">لا فصل مختار. أضف الفصل وأسماء طلابه من الآيباد، ثم اختره هنا.</p>;
+  if (!st.klass || !list.length) return <p className="r2note">لا فصل مختار. أضف الفصل وأسماء طلابه من جهاز العرض، ثم اختره هنا.</p>;
   if (!n) return <p className="r2note">اختر عدد الفرق أولًا.</p>;
   return (
     <>
@@ -724,18 +754,18 @@ export function RemoteApp({ channel }: { channel: string }) {
   const moreSteps = shown < total;
   // سرعة الاتصال وطريقه ظاهرة للمعلم، فيعرف إن كان البطء من الشبكة
   const speed = link.rtt !== null ? `، ${num(link.rtt)} م.ث` : '';
-  const route = link.via === 'turn' ? 'متصل عبر خادم وسيط' : 'متصل مباشرة بالآيباد';
+  const route = link.via === 'turn' ? 'متصل عبر خادم وسيط' : 'متصل مباشرة بجهاز العرض';
   const status = !online
     ? 'جارٍ الاتصال…'
     : !st
       ? waiting
-        ? 'افتح الدرس على الآيباد واضغط «الجوال» ثم «تشغيل»'
-        : 'جارٍ البحث عن الآيباد…'
+        ? 'افتح الدرس على جهاز العرض واضغط «الجوال» ثم «تشغيل»'
+        : 'جارٍ البحث عن جهاز العرض…'
       : link.direct
         ? route + speed + (link.pending ? '، يرسل…' : '')
         : link.relay
           ? 'متصل عبر الخادم الاحتياطي (أبطأ)' + (link.pending ? '، يرسل…' : '')
-          : 'يعيد الاتصال بالآيباد…' + (link.pending ? ' (الضغطات محفوظة)' : '');
+          : 'يعيد الاتصال بجهاز العرض…' + (link.pending ? ' (الضغطات محفوظة)' : '');
   const ok = online && !!st && !link.pending;
 
   const warnings = (
@@ -743,7 +773,7 @@ export function RemoteApp({ channel }: { channel: string }) {
       {link.limited && !link.direct && (
         <p className="rwarn">خادم الربط وصل حدّه اليومي على هذه الشبكة. جرّب أن يتصل الجوال بإنترنت الجوال (لا الواي فاي)، أو حاول غدًا.</p>
       )}
-      {ipadOld && <p className="rwarn">الدرس على الآيباد نسخة قديمة: أغلق صفحة الدرس على الآيباد وافتحها من جديد لتظهر كل الأزرار.</p>}
+      {ipadOld && <p className="rwarn">الدرس على جهاز العرض نسخة قديمة: أغلق صفحة الدرس على جهاز العرض وافتحها من جديد لتظهر كل الأزرار.</p>}
       {phoneOld && <p className="rwarn">هذه الصفحة نسخة قديمة: أغلقها وامسح الرمز من جديد.</p>}
     </>
   );
@@ -820,17 +850,7 @@ export function RemoteApp({ channel }: { channel: string }) {
         </div>
       )}
 
-      {timing?.start && timing.end ? <Pacing timing={timing} mins={st.mins ?? []} cur={st.cur} /> : null}
-
-      {/* خطة الحصة: وقت هذه الشريحة، وكم مضى من الدقائق الـ٤٥ حسب الخطة */}
-      {(st.mins?.length ?? 0) > 0 && (
-        <div className="r2plan">
-          <span>{st.hw ? 'وَاجِبٌ: بِلَا وَقْتٍ فِي الْحِصَّةِ' : `هذه الشريحة: ${(st.mins![st.cur] ?? st.min) === 2 ? 'دقيقتان' : minutesAr(st.mins![st.cur] ?? st.min)}`}</span>
-          <small>
-            حسب الخطة مضى {num((st.mins ?? []).slice(0, st.cur).reduce((x, y) => x + y, 0))} من {num((st.mins ?? []).reduce((x, y) => x + y, 0))} د
-          </small>
-        </div>
-      )}
+      {(st.mins?.length ?? 0) > 0 && <TimeCard timing={timing} mins={st.mins ?? []} cur={st.cur} />}
 
       {total > 0 && (
         <div className="r2steps" aria-label={`الخطوة ${num(shown)} من ${num(total)}`}>
@@ -847,16 +867,6 @@ export function RemoteApp({ channel }: { channel: string }) {
         <div className="r2next">
           <small>التالي على الشاشة</small>
           <p>{st.upNext}</p>
-        </div>
-      )}
-
-      {/* الواجب: المعلم يختار الشرائح التي يعطيها واجبًا، وتظهر قائمتها في شريحة الختام (لا شيء يُكتب على الشريحة نفسها) */}
-      {st.cur > 0 && (
-        <div className="r2row r2hw">
-          <button className={'r2btn' + (st.hw ? ' on' : '')} aria-pressed={!!st.hw} onClick={() => send({ c: 'hw', i: st.cur })}>
-            {st.hw ? '✓ هذه الشريحة في الواجب' : 'اجعلها واجبًا'}
-          </button>
-          {(st.hwCount ?? 0) > 0 && <small>في الواجب: {num(st.hwCount ?? 0)}</small>}
         </div>
       )}
 
@@ -973,7 +983,7 @@ export function RemoteApp({ channel }: { channel: string }) {
           <WheelSheet st={st} send={send} />
       </Sheet>
       <Sheet open={sheet === 'stars'} title="النجوم" onClose={() => setSheet(null)}>
-          {st.stars ? <StarsSheet stars={st.stars} send={send} /> : <p className="r2note">لا فصل مختار. أضف الفصل وأسماء طلابه من الآيباد، ثم اختره من صفحة الإعداد.</p>}
+          {st.stars ? <StarsSheet stars={st.stars} send={send} /> : <p className="r2note">لا فصل مختار. أضف الفصل وأسماء طلابه من جهاز العرض، ثم اختره من صفحة الإعداد.</p>}
       </Sheet>
       <Sheet open={sheet === 'timer'} title="المؤقت" onClose={() => setSheet(null)}>
           <TimerSheet t={st.timer} at={stAt} send={send} fixed={st.v2} />

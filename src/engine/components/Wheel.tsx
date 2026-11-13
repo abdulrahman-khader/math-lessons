@@ -43,6 +43,10 @@ interface Props {
   /** الفرق التي خرج منها اسم في هذه الجولة: لا تدخل العجلة حتى تأخذ كل الفرق دورها */
   round?: number[];
   onRound?: (teams: number[]) => void;
+  /** العجلة تدور على أسماء الفرق بدل الطلاب؛ يغيب الفريق حتى تخرج كل الفرق */
+  teamNames?: string[];
+  teamTurns?: number[];
+  onTeamTurns?: (t: number[]) => void;
 }
 
 /**
@@ -50,7 +54,7 @@ interface Props {
  * المعلم يديرها من الجوال، أو يلمس العجلة (أو المسافة)، ويغلقها بلمسة خارجها أو Esc.
  * النص على Canvas يحتاج ctx.direction = 'rtl' صراحةً؛ لا يرثه من الصفحة.
  */
-export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp, absent = [], autoClose, round = [], onRound }: Props) {
+export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResult, klass, nTeams = 0, teamFilter = -1, picked = [], onPick, onRestore, remove: removeProp, absent = [], autoClose, round = [], onRound, teamNames, teamTurns = [], onTeamTurns }: Props) {
   const cv = useRef<HTMLCanvasElement>(null);
   const ang = useRef(0);
   const [spinning, setSpinning] = useState(false);
@@ -74,7 +78,10 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
   const groups = byTeam ? [...new Set(pool.map(groupOf).filter((g) => g >= 0))] : [];
   const fresh = (g: number) => pool.filter((s) => groupOf(s) === g && !picked.includes(s));
   const loners = byTeam ? pool.filter((s) => groupOf(s) < 0 && !picked.includes(s)) : [];
-  const list = byTeam
+  const teamMode = !!teamNames && teamNames.length > 1;
+  const list = teamMode
+    ? teamNames.filter((_, i) => !teamTurns.includes(i))
+    : byTeam
     ? // الجولة تكتمل دائمًا، ولا تبدأ جولة جديدة إلا وفيها من لم يخرج
       (round.length || groups.some((g) => fresh(g).length)
         ? groups.filter((g) => !round.includes(g)).flatMap((g) => (fresh(g).length ? fresh(g) : pool.filter((s) => groupOf(s) === g)))
@@ -235,8 +242,11 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
       setLive(N[pick]);
       onResult?.(N[pick]);
       sGood();
-      if (remove) (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n')));
-      if (byTeam && groupOf(N[pick]) >= 0) {
+      if (teamMode) {
+        const next = [...teamTurns, teamNames.indexOf(N[pick])];
+        onTeamTurns?.(next.length >= teamNames.length ? [] : next);
+      } else if (remove) (klass ? onPick?.(N[pick]) : onNames(N.filter((_, i) => i !== pick).join('\n')));
+      if (!teamMode && byTeam && groupOf(N[pick]) >= 0) {
         const next = [...round, groupOf(N[pick])];
         onRound?.(groups.every((g) => next.includes(g)) ? [] : next);
       }
@@ -269,13 +279,13 @@ export function WheelModal({ open, onClose, names, onNames, spinReq = 0, onResul
   if (!open) return null;
   const done = !spinning && !!shown.current;
   return (
-    <div className="wheel2" role="dialog" aria-label="عجلة الأسماء" data-left={list.length} data-pool={klass ? pool.length : list.length} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="wheel2" role="dialog" aria-label="عجلة الأسماء" data-left={list.length} data-pool={teamMode ? teamNames.length : klass ? pool.length : list.length} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <canvas ref={cv} width={SIZE} height={SIZE} role="button" tabIndex={0} aria-label={list.length ? 'أدِر العجلة' : 'أرجع كل الأسماء'} onClick={spin} />
       <p className={'wname' + (done ? ' done' : spinning ? ' moving' : '')} aria-live="polite" onClick={(e) => e.target === e.currentTarget && onClose()}>
         <span key={done ? live : 'x'}>{live || '؟'}</span>
       </p>
       <span className="sr-only">
-        باقٍ {num(list.length)} من {num(klass ? pool.length : list.length)}
+        باقٍ {num(list.length)} من {num(teamMode ? teamNames.length : klass ? pool.length : list.length)}
       </span>
     </div>
   );

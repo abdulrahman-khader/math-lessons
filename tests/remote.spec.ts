@@ -418,7 +418,7 @@ test('الجوال يعطي نجمة وغلطة لطالب ويعرض لوحة �
   await closeSheet(phone);
   // بعد الدوران من الجوال: نجمة لمن خرج اسمه من تحت زر العجلة مباشرة
   await sheet(phone, 'العجلة');
-  const team0 = (await phone.locator('.r2seg').filter({ hasNotText: /الكل|الفصل/ }).first().textContent())!;
+  const team0 = (await phone.locator('.r2seg').filter({ hasNotText: /الكل|الفصل|الفريق كامل|أسماء الطلاب|بدون فرق/ }).first().textContent())!;
   await phone.locator('.r2seg', { hasText: team0 }).click();
   await phone.locator('.r2btn', { hasText: 'أدِر العجلة' }).click();
   // الشاشة: العجلة والاسم فقط، على طلاب الفريق المختار
@@ -502,6 +502,40 @@ test('جدول الإشارات الفارغ: الجوال يضيف الإشار
   await expect(ipad.locator('section.slide.active .ltally')).toContainText('عَدَدُ الْإِشَارَاتِ كُلِّهَا: ٣');
   await phone.locator('.rwidget .rbtn', { hasText: 'امسح الإشارات' }).click();
   await expect(ipad.locator('section.slide.active .ltally svg.tally')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('العجلة: الفريق كامل، أو بدون فرق', async ({ browser }) => {
+  const { ipad, phone, errors } = await pair(browser);
+  await ipad.evaluate(() => {
+    localStorage.setItem('classes', JSON.stringify({ grades: { g4: { classes: [{ id: 'k1', name: 'الفصل الأول', students: ['محمد', 'خالد', 'سعد'], team: { محمد: 0, خالد: 0, سعد: 1 } }] } } }));
+    window.dispatchEvent(new Event('classes-changed'));
+  });
+  await sheet(phone, 'العجلة');
+  await phone.locator('.r2seg', { hasText: 'الفصل الأول' }).click();
+  await phone.locator('.r2seg', { hasText: 'الفريق كامل' }).click();
+  await phone.locator('.r2btn', { hasText: 'أدِر العجلة' }).click();
+  const wheel = ipad.locator('.wheel2');
+  await expect(wheel).toHaveAttribute('data-pool', '2');
+  const who = phone.locator('.rpicked .wres');
+  await expect(who).not.toHaveText('…', { timeout: 15000 });
+  const first = (await who.textContent())!;
+  // الفريق الذي خرج يغيب، ويكسب نقطة من الجوال
+  await expect(wheel).toHaveAttribute('data-left', '1');
+  await expect(phone.locator('.r2note', { hasText: `خرجت في هذه الجولة: ${first}` })).toBeVisible();
+  await expect(phone.locator(`[aria-label="نقطة لفريق ${first}"]`)).toBeVisible();
+  await phone.locator('.r2btn', { hasText: 'أدِر العجلة' }).click();
+  await expect(who).not.toHaveText(first, { timeout: 15000 });
+  await expect(who).not.toHaveText('…', { timeout: 15000 });
+  // خرجت كل الفرق: تبدأ جولة جديدة بكل الفرق
+  await expect(wheel).toHaveAttribute('data-left', '2');
+  // بدون فرق: الطلاب كلهم، ومن خرج اسمه يخرج وحده ويأخذ نجمة لا نقطة
+  await phone.locator('.r2seg', { hasText: 'بدون فرق' }).click();
+  await phone.locator('.r2btn', { hasText: 'أدِر العجلة' }).click();
+  await expect(wheel).toHaveAttribute('data-pool', '3');
+  await expect(who).toHaveText(/محمد|خالد|سعد/, { timeout: 15000 });
+  await expect(wheel).toHaveAttribute('data-left', '2');
+  await expect(phone.locator('.r2btn', { hasText: '★ نجمة' })).toBeVisible();
   expect(errors).toEqual([]);
 });
 

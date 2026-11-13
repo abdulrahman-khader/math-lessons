@@ -76,6 +76,8 @@ export const PUBLIC_BASE = 'https://abdulrahman-khader.github.io/math-lessons/';
 export const BUILD = __BUILD__;
 
 /** أمر من الجوال إلى الآيباد */
+export type WheelMode = 'team' | 'students' | 'none';
+
 export type RemoteCmd =
   | { c: 'hello'; v?: string }
   | { c: 'next' } // يُظهر الخطوة التالية، وإن لم تبقَ خطوات ينتقل إلى الشريحة التالية
@@ -111,6 +113,8 @@ export type RemoteCmd =
   | { c: 'wheelRemove'; on: boolean }
   /** من يدخل العجلة: -١ الفصل كله، أو رقم فريق */
   | { c: 'wheelTeam'; t: number }
+  /** العجلة مع الفرق: الفريق كامل، أو أسماء الطلاب بالتناوب بين الفرق، أو بدون فرق */
+  | { c: 'wheelMode'; m: WheelMode }
   /** إعداد الحصة: عدد الفرق (٠ = بدون)، واسم فريق، وتوزيع الطلاب، ونقل طالب، وعرض الفرق على الشاشة */
   | { c: 'teamsN'; n: number }
   | { c: 'teamName'; i: number; name: string }
@@ -224,6 +228,9 @@ export interface RemoteState {
   wheelTeam?: number;
   /** الفرق التي أخذت دورها في جولة العجلة الحالية */
   wheelRound?: number[];
+  /** العجلة تختار فريقًا، والفرق التي خرجت في جولتها */
+  wheelMode?: WheelMode;
+  wheelTeamTurns?: number[];
   /** الدرس بالتصميم الجديد (المؤقت ثابت في الرأس) */
   v2?: boolean;
   /** الفرق ظاهرة على الشاشة */

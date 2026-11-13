@@ -9,7 +9,7 @@ import { SECTION_NAMES } from './sections';
 import { clock, duration, num } from './digits';
 import { PRESETS, SCALE_MAX, SCALE_MIN, SCALE_STEP } from './components/Timer';
 import { MAX_MISTAKES, rankRows, teamStarCounts, topRows } from './stars';
-import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState } from './remote';
+import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState, type WheelMode } from './remote';
 import { IconNextRtl, IconPrevRtl, IconReset, IconStar, IconTimer } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
 import { RemoteFamilyCard } from './components/RemoteFamilyCard';
@@ -461,12 +461,38 @@ function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => voi
   const out = st.wheelOut ?? [];
   const picked = st.stars?.list.find(([n]) => n === st.wheelResult);
   /* مع الفرق: من خرج اسمه يكسب نقطة لفريقه بدل نجمة له */
-  const ti = picked && st.stars ? (st.teamOf?.[st.stars.list.indexOf(picked)] ?? -1) : -1;
+  const mode = st.teams.length > 0 ? (st.wheelMode ?? 'students') : 'none';
+  const teamMode = mode === 'team' && st.teams.length > 1;
+  const ti = mode === 'none'
+    ? -1
+    : teamMode
+    ? st.teams.findIndex((t) => t.name === st.wheelResult)
+    : picked && st.stars
+    ? (st.teamOf?.[st.stars.list.indexOf(picked)] ?? -1)
+    : -1;
   const team = ti >= 0 ? st.teams[ti] : undefined;
+  const turns = st.wheelTeamTurns ?? [];
   return (
     <>
-      {!!st.klasses?.length && <KlassPicker st={st} send={send} />}
-      {!!st.klass && st.teams.length > 0 && (
+      {st.teams.length > 0 && (
+        <Segs
+          label="العجلة والفرق"
+          value={mode}
+          items={[
+            ...(st.teams.length > 1 ? [{ v: 'team', t: 'الفريق كامل' }] : []),
+            { v: 'students', t: 'أسماء الطلاب' },
+            { v: 'none', t: 'بدون فرق' },
+          ]}
+          onPick={(v) => send({ c: 'wheelMode', m: v as WheelMode })}
+        />
+      )}
+      {teamMode && turns.length > 0 && (
+        <p className="r2note">
+          خرجت في هذه الجولة: {turns.map((t) => st.teams[t]?.name).filter(Boolean).join('، ')}
+        </p>
+      )}
+      {!teamMode && !!st.klasses?.length && <KlassPicker st={st} send={send} />}
+      {mode === 'students' && !!st.klass && (
         <Segs
           label="من يدخل العجلة"
           value={String(st.wheelTeam ?? -1)}
@@ -474,12 +500,12 @@ function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => voi
           onPick={(v) => send({ c: 'wheelTeam', t: Number(v) })}
         />
       )}
-      {!!st.wheelRound?.length && (st.wheelTeam ?? -1) < 0 && (
+      {mode === 'students' && !!st.wheelRound?.length && (st.wheelTeam ?? -1) < 0 && (
         <p className="r2note">
           أخذت دورها في هذه الجولة: {st.wheelRound.map((t) => st.teams[t]?.name).filter(Boolean).join('، ')}
         </p>
       )}
-      {out.length > 0 && (
+      {!teamMode && out.length > 0 && (
         <Fold
           className="r2out"
           title={
@@ -500,7 +526,7 @@ function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => voi
           </button>
         </Fold>
       )}
-      {!!st.klass && (
+      {!teamMode && !!st.klass && (
         <label className="r2check">
           <Checkbox.Root className="r2box" checked={st.wheelRemove ?? true} onCheckedChange={(on) => send({ c: 'wheelRemove', on })}>
             <Checkbox.Indicator className="r2tick">
@@ -516,7 +542,7 @@ function WheelSheet({ st, send }: { st: RemoteState; send: (c: RemoteCmd) => voi
         <div className="rpicked">
           <small>خرج الآن</small>
           <p className="wres">{st.wheelResult}</p>
-          {picked && (
+          {!teamMode && picked && (
             <small>
               ★ {num(picked[1])}، ✕ {num(picked[2])}
             </small>

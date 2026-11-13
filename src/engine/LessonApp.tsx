@@ -12,7 +12,7 @@ import type { Lesson, SectionKey, SlideDef } from './types';
 import { Home } from './components/Home';
 import { Pen } from './components/Pen';
 import { RemotePanel } from './components/RemotePanel';
-import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState } from './remote';
+import { BUILD, deviceChannel, hostLink, remoteEnabled, remoteUrl, setRemoteEnabled, type RemoteCmd, type RemoteState, type WheelMode } from './remote';
 import { TIMER_OFF, TimerWidget, fixView, type TimerState } from './components/Timer';
 import { WheelModal } from './components/Wheel';
 import { StarCheer, StarsModal, TeamPodium, type Cheer } from './components/Stars';
@@ -49,6 +49,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
   const [picked, setPicked] = useState<string[]>([]);
   /** الفرق التي خرج منها اسم في جولة العجلة الحالية */
   const [round, setRound] = useState<number[]>([]);
+  /** العجلة تختار فريقًا، والفرق التي خرجت في جولتها */
+  const [wheelMode, setWheelMode] = useState<WheelMode>('students');
+  const [teamTurns, setTeamTurns] = useState<number[]>([]);
   /** وُزّعت نجوم الفرق في هذه الحصة */
   const [teamStarsDone, setTeamStarsDone] = useState(false);
   /** ترتيب الفرق ظاهر على الشاشة */
@@ -279,6 +282,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'wheelRestore':
         setPicked([]);
         setRound([]);
+        setTeamTurns([]);
         break;
       case 'stars':
         setStarsOpen(c.open);
@@ -311,11 +315,19 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       case 'wheelRemove':
         setWheelRemove(!!c.on);
         break;
+      case 'wheelMode':
+        if (c.m === 'team' || c.m === 'students' || c.m === 'none') setWheelMode(c.m);
+        setTeamFilter(-1);
+        setTeamTurns([]);
+        break;
       case 'wheelTeam':
         if (c.t >= -1 && c.t < st.nTeams) setTeamFilter(c.t);
         break;
       case 'teamsN':
-        if (c.n >= 0 && c.n <= 4) patch({ nTeams: Math.round(c.n) });
+        if (c.n >= 0 && c.n <= 4) {
+          patch({ nTeams: Math.round(c.n) });
+          setTeamTurns([]);
+        }
         break;
       case 'teamName':
         if (c.i >= 0 && c.i < 4 && typeof c.name === 'string') patch((x) => ({ names: x.names.map((n, i) => (i === c.i ? c.name.trim().slice(0, 24) || n : n)) }));
@@ -430,6 +442,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
         wheelRemove,
         wheelTeam: teamFilter,
         wheelRound: round,
+        wheelMode,
+        wheelTeamTurns: teamTurns,
         v2,
         teamsShown,
         teamStarsDone,
@@ -445,7 +459,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
       // عبر الخادم (بلا اتصال مباشر) تُجمَّع التحديثات أكثر حفاظًا على حصة الرسائل
     }, direct ? 40 : 1500);
     return () => clearTimeout(t);
-  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, plan, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, round, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown, teamStarsDone, teamPodium]);
+  }, [remoteOn, phoneSeen, direct, cur, slideTick, timer.show, timer.run, timer.gen, timer.left, st.scores, st.names, st.nTeams, st.timerView, plan, wheelOpen, wheelResult, slides, sections, lesson, classes, klass, picked, round, wheelMode, teamTurns, starsOpen, starEvents, wheelRemove, teamFilter, teamsShown, teamStarsDone, teamPodium]);
 
   const enableRemote = (on: boolean) => {
     setRemoteEnabled(on);
@@ -738,7 +752,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
           <WheelModal open={wheelOpen} onClose={() => setWheelOpen(false)} names={st.wheel} onNames={(w) => patch({ wheel: w })} spinReq={spinReq}
             onResult={setWheelResult}
             klass={klass}
-            nTeams={st.nTeams}
+            nTeams={wheelMode === 'none' ? 0 : st.nTeams}
             teamFilter={teamFilter}
             picked={picked}
             onPick={(n) => setPicked((p) => (p.includes(n) ? p : [...p, n]))}
@@ -748,6 +762,9 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             }}
             round={round}
             onRound={setRound}
+            teamNames={wheelMode === 'team' && st.nTeams > 1 ? st.names.slice(0, st.nTeams) : undefined}
+            teamTurns={teamTurns}
+            onTeamTurns={setTeamTurns}
             remove={wheelRemove}
             autoClose={2500}
             absent={klass ? klass.students.filter((n) => absentToday(starEvents, klass.id, n)) : []}

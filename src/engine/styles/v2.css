@@ -84,7 +84,9 @@
 
 /* خطوات العمل: سطر هادئ؛ الإجابة صندوق */
 #app[data-design="v2"] .sol { gap: 10px; }
-#app[data-design="v2"] .step.sstep { padding: 0; border: 0; background: none; color: var(--muted); font-size: 35px; font-weight: 600; line-height: 1.6; }
+#app[data-design="v2"] .step.sstep { padding: 0; border: 0; background: none; color: var(--muted); font-size: var(--sfs, 40px); font-weight: 600; line-height: 1.6; }
+/* قياس الشريحة وكل خطواتها ظاهرة لاختيار حجم الخط (LessonApp) */
+#app[data-design="v2"] .slide.fitprobe .step.sstep { display: block; }
 .aslotrow { display: flex; align-items: center; gap: 24px; }
 .alabel { flex: none; min-width: 230px; font-size: 30px; font-weight: 600; color: var(--ink); }
 #app[data-design="v2"] .step.aslot { display: flex; align-self: flex-start; align-items: center; min-width: 360px; min-height: 104px; padding: 4px 32px 0; border-radius: 18px; font-size: 72px; font-weight: 600; line-height: 1.2; }

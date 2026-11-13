@@ -129,7 +129,7 @@ A lesson file holds content only. **No `style={{…}}` and no `className` in `le
 
 - **Question number:** a small solid circle in the section colour. Book text keeps its exact wording and diacritics.
 - **Two kinds of step, two looks:**
-  - A **working step** is a quiet text line (35, muted, no box).
+  - A **working step** is a quiet text line (40, muted, no box), larger than body text so the back of the class can read it; on a slide where every step shown would not fit, the engine steps it down to no less than 35.
   - An **answer** is always a box: never an underline, never a check mark inside.
 - **The answer box:**
   - Before it is revealed, it shows a dashed border with a large «؟», at exactly the size of the answer that will fill it.

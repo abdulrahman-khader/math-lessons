@@ -169,10 +169,11 @@ if (process.argv.includes('--words')) {
   process.exit(0);
 }
 
-/** مقطعا الدرس: فكرة الدرس (clip.tsx) والقصة التي تفتحه (story.tsx) */
+/** مقاطع الدرس: فكرة الدرس (clip.tsx) والقصة التي تفتحه (story.tsx) ومقطع موقف من واقع الحياة إن وُجد (money.tsx) */
 const CLIPS = [
   { file: 'clip.tsx', narr: 'narration.json', out: 'voice' },
   { file: 'story.tsx', narr: 'story-narration.json', out: 'story-voice' },
+  { file: 'money.tsx', narr: 'money-narration.json', out: 'money-voice' },
 ];
 
 for (const lesson of lessons) {

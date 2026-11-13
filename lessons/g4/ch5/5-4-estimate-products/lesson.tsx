@@ -1,9 +1,10 @@
 import {
   BookLabel, Card, Cols, Ctrls, Definition, Eq, ExitTicket, FnTable, GoHomeButton, Goals, Grid, IfTeams, Lines, MCQ, MindMap, NextButton, QCard, QCol, QText,
-  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, RoundExplorer, trapSlide,
+  QuestionGroup, QuestionSlide, Sentence, SlideHead, Solution, Stack, Step, Winner, defineLesson, storySlide, trapSlide,
 } from '@engine';
 import { IntroClip } from './clip';
 import { StoryClip } from './story';
+import { MoneyClip, NoteGroups, RoundDir, RoundTags } from './money';
 
 const CHECK = 'تأكَّدْ، ص ١٤٨';
 const PRACTICE = 'تدرَّبْ وحُلَّ المسائلَ، ص ١٤٩';
@@ -97,16 +98,6 @@ export default defineLesson({
     },
     storySlide(<StoryClip />, 'شغّل القصة. توقف عند السؤال واسأل: هل نحتاج العدد بالضبط؟ إلى أي عدد نقرّب ٣٤؟'),
     {
-      sec: 'explore', min: 4,
-      notes: 'مثال جديد غير القصة: ٥٨ × ٤. ٥٨ أقرب إلى ٦٠، فالناتج نحو ٦٠ × ٤ = ٢٤٠. غيّر العدد واسأل: متى نقرّب إلى العشرة الأصغر؟',
-      content: (
-        <>
-          <SlideHead tag="نُجَرِّبُ مِثَالًا آخَرَ" kind="ex">نُقَرِّبُ ثُمَّ نَضْرِبُ</SlideHead>
-          <RoundExplorer start={58} times={4} />
-        </>
-      ),
-    },
-    {
       sec: 'explore', min: 2,
       notes: 'هل نحتاج العدد الدقيق؟ كلمة «التقريبي» هي المفتاح.',
       content: (
@@ -176,6 +167,37 @@ export default defineLesson({
       ),
     },
     {
+      sec: 'explain', min: 3,
+      notes: 'متى يكون التقدير أكبر أو أقل؟ ٢٩ قرّبناها إلى ٣٠ (زدنا) فالتقدير ١٢٠ أكبر من ١١٦. ٤١ قرّبناها إلى ٤٠ (نقصنا) فالتقدير ٢٤٠ أقل من ٢٤٦. اسأل قبل كشف الجواب: زدنا أم نقصنا؟',
+      content: (
+        <>
+          <SlideHead tag="مَتَى؟" kind="rule">التَّقْدِيرُ أَكْبَرُ أَمْ أَقَلُّ؟</SlideHead>
+          <Ctrls><NextButton /></Ctrls>
+          <Cols even>
+            <Card kind="ex" cap="٤ × ٢٩">
+              <Solution>
+                <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><RoundDir from={29} to={30} w={300} /><span>نُقَرِّبُ إِلَى أَكْبَرَ</span></div></Step>
+                <Step><Eq>٤ × ٣٠ = ١٢٠</Eq></Step>
+                <Step>النَّاتِجُ الْحَقِيقِيُّ ١١٦</Step>
+                <Step kind="ans" label="التَّقْدِيرُ">أَكْبَرُ</Step>
+              </Solution>
+            </Card>
+            <Card kind="ex" cap="٦ × ٤١">
+              <Solution>
+                <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><RoundDir from={41} to={40} w={300} /><span>نُقَرِّبُ إِلَى أَقَلَّ</span></div></Step>
+                <Step><Eq>٦ × ٤٠ = ٢٤٠</Eq></Step>
+                <Step>النَّاتِجُ الْحَقِيقِيُّ ٢٤٦</Step>
+                <Step kind="ans" label="التَّقْدِيرُ">أَقَلُّ</Step>
+              </Solution>
+            </Card>
+          </Cols>
+          <Solution>
+            <Step><Card kind="rule" cap="الْقَاعِدَةُ">نُقَرِّبُ إِلَى أَكْبَرَ ← التَّقْدِيرُ أَكْبَرُ، وَنُقَرِّبُ إِلَى أَقَلَّ ← التَّقْدِيرُ أَقَلُّ</Card></Step>
+          </Solution>
+        </>
+      ),
+    },
+    {
       sec: 'explain', min: 1,
       notes: 'المقطع: ٧ × ٣٨ (مثال غير أمثلة الكتاب).',
       content: (
@@ -196,6 +218,60 @@ export default defineLesson({
             <MCQ q="قدِّرْ ٣ × ٢١٠" options={['٦٠٠', '٩٠٠', '٦٣٠']} answer="٦٠٠" award />
             <MCQ q="قرَّبْنا ٦٨ إلى ٧٠. فالتقديرُ:" options={['أكبر', 'أقل']} answer="أكبر" award />
           </Grid>
+        </>
+      ),
+    },
+    {
+      sec: 'elab', min: 1,
+      notes: 'مقطع الموقف: شغّله وتوقف عند السؤال. اسأل: هل نحتاج الحساب الدقيق؟ كيف نعرف كم يحتاج تقريبًا؟',
+      content: (
+        <>
+          <SlideHead tag="من واقع الحياة" kind="ex">فِي الْمَكْتَبَةِ</SlideHead>
+          <MoneyClip />
+        </>
+      ),
+    },
+    {
+      sec: 'elab', min: 3,
+      notes: 'كل دفتر حسبناه بـ٢٠ وهو بـ١٨: زدنا على كل دفتر، فالتقدير ١٢٠ أكبر من السعر الحقيقي (١٠٨). اسأل: هل دفع سالم أكثر أم أقل من ١٢٠؟',
+      content: (
+        <>
+          <SlideHead tag="من واقع الحياة" kind="ex">نَتَسَوَّقُ بِالتَّقْدِيرِ</SlideHead>
+          <QText>يَشْتَرِي سَالِمٌ ٦ دَفَاتِرَ، الدَّفْتَرُ بِـ١٨ رِيَالًا. كَمْ رِيَالًا يَحْتَاجُ تَقْرِيبًا؟</QText>
+          <Ctrls><NextButton /></Ctrls>
+          <Cols even>
+            <Solution>
+              <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><RoundTags from={18} to={20} /><span>نُقَرِّبُ ١٨ إِلَى ٢٠</span></div></Step>
+              <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><NoteGroups groups={6} per={2} item="book" /><Eq>٦ × ٢٠ = ١٢٠</Eq></div></Step>
+              <Step kind="ans" label="يَحْتَاجُ تَقْرِيبًا">١٢٠ رِيَالًا</Step>
+            </Solution>
+            <Solution>
+              <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><RoundDir from={18} to={20} /><span>قَرَّبْنَا إِلَى أَكْبَرَ</span></div></Step>
+              <Step kind="ans" label="التَّقْدِيرُ">أَكْبَرُ مِنَ الْحَقِيقِيِّ</Step>
+            </Solution>
+          </Cols>
+        </>
+      ),
+    },
+    {
+      sec: 'elab', min: 3,
+      notes: 'كل علبة حسبناها بـ٢٠ وهي بـ٢٢: نقصنا من كل علبة، فالتقدير ١٠٠ أقل من السعر الحقيقي (١١٠). القاعدة: نقرّب إلى أكبر ← التقدير أكبر، إلى أقل ← التقدير أقل.',
+      content: (
+        <>
+          <SlideHead tag="من واقع الحياة" kind="ex">نَتَسَوَّقُ بِالتَّقْدِيرِ</SlideHead>
+          <QText>وَيَشْتَرِي ٥ عُلَبِ أَلْوَانٍ، الْعُلْبَةُ بِـ٢٢ رِيَالًا. كَمْ رِيَالًا يَحْتَاجُ تَقْرِيبًا؟</QText>
+          <Ctrls><NextButton /></Ctrls>
+          <Cols even>
+            <Solution>
+              <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><RoundTags from={22} to={20} /><span>نُقَرِّبُ ٢٢ إِلَى ٢٠</span></div></Step>
+              <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><NoteGroups groups={5} per={2} item="colors" /><Eq>٥ × ٢٠ = ١٠٠</Eq></div></Step>
+              <Step kind="ans" label="يَحْتَاجُ تَقْرِيبًا">١٠٠ رِيَالٍ</Step>
+            </Solution>
+            <Solution>
+              <Step><div style={{ display: 'flex', alignItems: 'center', gap: 24 }}><RoundDir from={22} to={20} /><span>قَرَّبْنَا إِلَى أَقَلَّ</span></div></Step>
+              <Step kind="ans" label="التَّقْدِيرُ">أَقَلُّ مِنَ الْحَقِيقِيِّ</Step>
+            </Solution>
+          </Cols>
         </>
       ),
     },

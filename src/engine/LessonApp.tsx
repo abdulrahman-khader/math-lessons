@@ -188,6 +188,19 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     return () => mo.disconnect();
   }, [cur, lesson.meta.id, layout.flow]);
 
+  /* التصميم الجديد: خطوات العمل بخط ٤٠، وتصغر حتى ٣٥ في الشريحة التي لا تتسع لها كل خطواتها ظاهرةً (فلا يتحرك شيء عند إظهارها) */
+  useLayoutEffect(() => {
+    if (!v2 || layout.flow) return;
+    const s = mainRef.current?.querySelector<HTMLElement>('.slide.active');
+    if (!s || !s.querySelector('.step.sstep')) return;
+    const over = () => s.scrollHeight > s.clientHeight + 1 || s.scrollWidth > s.clientWidth + 1;
+    s.classList.add('fitprobe');
+    let px = 40;
+    s.style.setProperty('--sfs', px + 'px');
+    while (over() && px > 35) s.style.setProperty('--sfs', --px + 'px');
+    s.classList.remove('fitprobe');
+  }, [cur, v2, layout.flow]);
+
   /* التحجيم: المسرح ثابت ١٦٠٠×٩٠٠ ويُكبَّر أو يُصغَّر ليملأ الشاشة */
   useLayoutEffect(() => {
     const fit = () => {

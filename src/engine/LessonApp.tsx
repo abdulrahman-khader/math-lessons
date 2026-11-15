@@ -4,7 +4,7 @@ import { TimerPill, V2Header, V2Progress } from './components/V2Chrome';
 import { num } from './digits';
 import { SECTION_NAMES, TEAM_COLORS, V2_TEAM_COLORS } from './sections';
 import { sBad, setMuted, sGood, sStar } from './sound';
-import { absentToday, teamStarCounts, useStars, tally, weekStart } from './stars';
+import { absentToday, setStarPlace, teamStarCounts, useStars, tally, weekStart } from './stars';
 import { useSaved } from './store';
 import { classesOf, gradeOf, setClass, setGrade, shuffleTeams, useRoster, type Klass } from './classes';
 import { ClassesModal, GroupsModal } from './components/Classes';
@@ -71,7 +71,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     updateRoster((r) => setGrade(r, grade, (g) => ({ ...g, last: id })));
   };
   /* نجم الأسبوع: مشترك بين كل الدروس، لطلاب الفصل المختار */
-  const { events: starEvents, add: addStarEvent, undo: undoStar, remove: removeStar, toggleAbsent } = useStars();
+  const { events: starEvents, picks: starPicks, add: addStarEvent, pick: logPick, drop: dropStar, undo: undoStar, remove: removeStar, toggleAbsent } = useStars();
+  useEffect(() => setStarPlace(`${lesson.meta.shortTitle} ${lesson.meta.code}`), [lesson.meta.code, lesson.meta.shortTitle]);
   const [starsOpen, setStarsOpen] = useState(false);
   const [starsReq, setStarsReq] = useState<{ n: number; a: 'podium' | 'next' }>({ n: 0, a: 'next' });
   const [cheer, setCheer] = useState<Cheer | null>(null);
@@ -83,7 +84,7 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
     for (const s of klass.students) {
       const t = klass.team[s];
       if (!(s in klass.team) || t >= st.nTeams || absentToday(starEvents, klass.id, s)) continue;
-      for (let i = 0; i < per[t]; i++) addStarEvent(klass.id, s, 1);
+      for (let i = 0; i < per[t]; i++) addStarEvent(klass.id, s, 1, 'team');
     }
     setTeamStarsDone(true);
     setTeamPodium(true);
@@ -763,7 +764,10 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
           )}
 
           <WheelModal open={wheelOpen} onClose={() => setWheelOpen(false)} names={st.wheel} onNames={(w) => patch({ wheel: w })} spinReq={spinReq}
-            onResult={setWheelResult}
+            onResult={(n) => {
+              setWheelResult(n);
+              if (klass?.students.includes(n)) logPick(klass.id, n);
+            }}
             klass={klass}
             nTeams={wheelMode === 'none' ? 0 : st.nTeams}
             teamFilter={teamFilter}
@@ -788,6 +792,8 @@ export function LessonApp({ lesson }: { lesson: Lesson }) {
             onClose={() => setStarsOpen(false)}
             klass={klass}
             events={starEvents}
+            picks={starPicks}
+            onDrop={dropStar}
             onStar={giveStar}
             onUndo={() => klass && undoStar(klass.id)}
             req={starsReq}

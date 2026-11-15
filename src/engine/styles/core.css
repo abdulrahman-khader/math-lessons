@@ -1051,6 +1051,30 @@ svg.pic20 { width: 100%; max-width: 20em; align-self: center; }
 /* سجل الأسابيع في لوحة النجوم */
 .shist { display: flex; flex-direction: column; gap: .5em; }
 .shist label.btn { cursor: pointer; }
+.slog { display: flex; flex-direction: column; gap: .5em; }
+.slcrumbs { flex-wrap: wrap; }
+.slcrumbs > span { color: var(--muted); }
+.sllist { display: flex; flex-direction: column; gap: .3em; max-height: 36em; overflow: auto; }
+.sllist button { display: grid; grid-template-columns: 12em 1fr auto; align-items: center; gap: .8em; padding: .55em .9em; border: 0; border-radius: .5em; background: #f5f6f8; font: inherit; text-align: start; cursor: pointer; }
+.sllist button:hover { background: #eceff4; }
+.sllist button > span { color: var(--muted); }
+.sllist button > small { font-weight: 700; }
+.slrows { max-height: 36em; overflow: auto; }
+.slrows table { width: 100%; border-collapse: collapse; }
+.slrows td { padding: .4em .5em; border-block-end: 1px solid #e6e9ef; vertical-align: middle; }
+.slrows .slwho { font-weight: 700; white-space: nowrap; width: 11em; }
+.slrows tr.absent .slwho bdi { color: var(--muted); }
+.slabs { margin-inline-start: .5em; padding: .05em .55em; border-radius: 1em; background: #fff0f0; color: var(--bad, #c92a2a); font-size: .85em; }
+.slacts { display: flex; flex-wrap: wrap; gap: .35em; }
+.slact { display: inline-flex; align-items: center; gap: .3em; padding: .2em .6em; border-radius: .45em; background: #f5f6f8; font-weight: 700; }
+.slact small { color: var(--muted); font-weight: 500; }
+.slact svg { width: 1em; height: 1em; color: #e8a400; }
+.slact.k-mistake { color: var(--bad, #c92a2a); background: #fff0f0; }
+.slact.k-pick { color: var(--muted); }
+.slact .btn { font-size: .8em; padding: .1em .55em; }
+.slact .btn.danger { background: var(--bad, #c92a2a); color: #fff; }
+.slnone { color: var(--muted); }
+body.flow .sllist button { grid-template-columns: 1fr; }
 .shcols { display: grid; grid-template-columns: minmax(0, 1fr) 16em; gap: .8em; align-items: start; }
 .sweeks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .35em; max-height: 34em; overflow: auto; }
 .sweeks button { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: .15em; padding: .45em .8em; border: 0; border-radius: .5em; background: #f5f6f8; font: inherit; text-align: start; cursor: pointer; }

@@ -15,6 +15,18 @@ export interface StarEvent {
   s: string;
   /** ١ نجمة، −١ غلطة، ٠ غياب (يوم واحد) */
   d: 1 | -1 | 0;
+  /** الدرس الذي سُجّلت فيه (للسجل فقط)؛ لا يوجد في الضغطات القديمة */
+  l?: string;
+  /** team: من «توزيع نجوم الفرق» آخر الحصة */
+  w?: 'team';
+}
+
+/** خروج اسم طالب في العجلة: يُحفظ منفصلًا عن النجوم فلا يدخل في المجاميع، ويظهر في سجل الطالب */
+export interface PickEvent {
+  t: number;
+  k: string;
+  s: string;
+  l?: string;
 }
 
 export interface StarRow {
@@ -33,6 +45,7 @@ export interface StarRow {
 
 const KEY = 'stars';
 const EVENT = 'stars-changed';
+const PICKS = 'stars-picks';
 /** عدد نجوم الأسبوع المعلنين كل خميس */
 export const TOP = 5;
 /** من أخذ هذا العدد من الأغلاط في أسبوع لا يدخل نجوم ذلك الأسبوع */
@@ -138,7 +151,7 @@ export function backup(): string {
       return null;
     }
   };
-  return JSON.stringify({ kind: 'math-lessons-stars', at: Date.now(), stars: get(KEY), classes: get('classes') });
+  return JSON.stringify({ kind: 'math-lessons-stars', at: Date.now(), stars: get(KEY), picks: get(PICKS), classes: get('classes') });
 }
 
 /**
@@ -146,7 +159,7 @@ export function backup(): string {
  * ويعيد الفصول إن لم يكن على هذا الجهاز فصول. يعيد عدد النجوم والأغلاط المضافة، أو null إن لم يكن الملف نسخة نجوم.
  */
 export function restore(text: string): number | null {
-  let data: { kind?: string; stars?: { events?: StarEvent[] }; classes?: unknown };
+  let data: { kind?: string; stars?: { events?: StarEvent[] }; picks?: { events?: PickEvent[] }; classes?: unknown };
   try {
     data = JSON.parse(text);
   } catch {
@@ -158,6 +171,12 @@ export function restore(text: string): number | null {
   const have = new Set(all.map(id));
   const add = data.stars.events.filter((e) => e && typeof e.t === 'number' && !have.has(id(e)));
   save([...all, ...add].sort((a, b) => a.t - b.t));
+  if (Array.isArray(data.picks?.events)) {
+    const pid = (e: PickEvent) => `${e.t}|${e.k}|${e.s}`;
+    const old = loadPicks();
+    const seen = new Set(old.map(pid));
+    savePicks([...old, ...data.picks.events.filter((e) => e && typeof e.t === 'number' && !seen.has(pid(e)))].sort((a, b) => a.t - b.t));
+  }
   try {
     if (data.classes && !localStorage.getItem('classes')) localStorage.setItem('classes', JSON.stringify(data.classes));
   } catch {
@@ -193,6 +212,31 @@ function save(events: StarEvent[]) {
   window.dispatchEvent(new Event(EVENT));
 }
 
+function loadPicks(): PickEvent[] {
+  try {
+    const r = JSON.parse(localStorage.getItem(PICKS) ?? 'null');
+    if (Array.isArray(r?.events)) return r.events as PickEvent[];
+  } catch {
+    /* تجاهل */
+  }
+  return [];
+}
+
+function savePicks(events: PickEvent[]) {
+  try {
+    localStorage.setItem(PICKS, JSON.stringify({ events }));
+  } catch {
+    /* تجاهل */
+  }
+  window.dispatchEvent(new Event(EVENT));
+}
+
+/** الدرس المفتوح الآن، يُكتب مع كل نجمة وكل خروج اسم في العجلة */
+let place = '';
+export const setStarPlace = (l: string) => {
+  place = l;
+};
+
 /** سجل النجوم، وإضافة نجمة أو غلطة، والتراجع عن آخر ضغطة في فصل */
 /** نجوم كل فريق من نقاطه: الأول بعدد الفرق، ثم أقل بنجمة لكل مرتبة، والمتعادلون يأخذون العدد نفسه */
 export function teamStarCounts(scores: number[]): number[] {
@@ -202,9 +246,13 @@ export function teamStarCounts(scores: number[]): number[] {
 
 export function useStars() {
   const [events, setEvents] = useState<StarEvent[]>(load);
+  const [picks, setPicks] = useState<PickEvent[]>(loadPicks);
   useEffect(() => {
-    const re = () => setEvents(load());
-    const onStorage = (e: StorageEvent) => e.key === KEY && re();
+    const re = () => {
+      setEvents(load());
+      setPicks(loadPicks());
+    };
+    const onStorage = (e: StorageEvent) => (e.key === KEY || e.key === PICKS) && re();
     window.addEventListener(EVENT, re);
     window.addEventListener('storage', onStorage);
     return () => {
@@ -212,9 +260,29 @@ export function useStars() {
       window.removeEventListener('storage', onStorage);
     };
   }, []);
-  const add = useCallback((k: string, s: string, d: 1 | -1 | 0) => {
+  const add = useCallback((k: string, s: string, d: 1 | -1 | 0, w?: 'team') => {
     // السجل كله يبقى: كل أسبوع ونجومه محفوظة، ولا يُحذف شيء مع الوقت
-    const next = [...load(), { t: Date.now(), k, s, d }];
+    const e: StarEvent = { t: Date.now(), k, s, d };
+    if (place) e.l = place;
+    if (w) e.w = w;
+    const next = [...load(), e];
+    setEvents(next);
+    save(next);
+  }, []);
+  /** خرج اسم الطالب في العجلة */
+  const pick = useCallback((k: string, s: string) => {
+    const e: PickEvent = { t: Date.now(), k, s };
+    if (place) e.l = place;
+    const next = [...loadPicks(), e];
+    setPicks(next);
+    savePicks(next);
+  }, []);
+  /** يحذف ضغطة واحدة بعينها من السجل (نجمة أُعطيت بالغلط) */
+  const drop = useCallback((e: StarEvent) => {
+    const all = load();
+    const i = all.findIndex((x) => x.t === e.t && x.k === e.k && x.s === e.s && x.d === e.d);
+    if (i < 0) return;
+    const next = all.filter((_, j) => j !== i);
     setEvents(next);
     save(next);
   }, []);
@@ -233,7 +301,7 @@ export function useStars() {
     const day = new Date();
     day.setHours(0, 0, 0, 0);
     const i = all.findIndex((e) => e.k === k && e.s === who && e.d === 0 && e.t >= day.getTime());
-    const next = i >= 0 ? all.filter((_, j) => j !== i) : [...all, { t: Date.now(), k, s: who, d: 0 as const }];
+    const next = i >= 0 ? all.filter((_, j) => j !== i) : [...all, { t: Date.now(), k, s: who, d: 0 as const, ...(place ? { l: place } : {}) }];
     setEvents(next);
     save(next);
   }, []);
@@ -248,7 +316,7 @@ export function useStars() {
     setEvents(next);
     save(next);
   }, []);
-  return { events, add, undo, remove, toggleAbsent };
+  return { events, picks, add, pick, drop, undo, remove, toggleAbsent };
 }
 
 /** هل سُجّل الطالب غائبًا اليوم؟ */

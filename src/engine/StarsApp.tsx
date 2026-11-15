@@ -5,7 +5,7 @@ import { IconFull, IconHome, IconStar, IconWheel } from './components/icons';
 import { StarCheer, StarsModal, type Cheer } from './components/Stars';
 import { WheelModal } from './components/Wheel';
 import { sBad, sStar } from './sound';
-import { absentToday, useStars } from './stars';
+import { absentToday, setStarPlace, useStars } from './stars';
 
 const GRADE_KEY = 'stars:grade';
 
@@ -29,7 +29,7 @@ export function StarsApp() {
   const classes = classesOf(roster, grade);
   const lastId = roster.grades[grade]?.last ?? '';
   const klass = classes.find((c) => c.id === lastId) ?? (classes.length === 1 ? classes[0] : undefined);
-  const { events, add, undo } = useStars();
+  const { events, picks, add, pick, drop, undo } = useStars();
   const [cheer, setCheer] = useState<Cheer | null>(null);
   const endCheer = useCallback(() => setCheer(null), []);
   const [starsOpen, setStarsOpen] = useState(true);
@@ -47,6 +47,7 @@ export function StarsApp() {
   }, []);
   useEffect(() => {
     document.title = 'نجم الأسبوع';
+    setStarPlace('صفحة النجوم');
   }, []);
 
   const chooseGrade = (g: string) => {
@@ -132,6 +133,8 @@ export function StarsApp() {
             onClose={() => setStarsOpen(false)}
             klass={klass}
             events={events}
+            picks={picks}
+            onDrop={drop}
             onStar={giveStar}
             onUndo={() => klass && undo(klass.id)}
             onManage={() => setClassesOpen(true)}
@@ -145,6 +148,7 @@ export function StarsApp() {
             klass={klass}
             picked={picked}
             onPick={(n) => setPicked((p) => [...p, n])}
+            onResult={(n) => klass?.students.includes(n) && pick(klass.id, n)}
             onRestore={() => setPicked([])}
             absent={klass ? klass.students.filter((n) => absentToday(events, klass.id, n)) : []}
           />

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { num } from '../digits';
-import type { Klass } from '../classes';
-import { backup, isThursday, MAX_MISTAKES, lastEvent, pastWeeks, rankRows, restore, starCounts, tally, topRows, weekLabel, weekRows, weekStart, type StarEvent, type StarRow } from '../stars';
+import { digits, num } from '../digits';
+import { gradeName, useRoster, type Klass } from '../classes';
+import { backup, isThursday, MAX_MISTAKES, lastEvent, pastWeeks, rankRows, restore, starCounts, tally, topRows, weekLabel, weekRows, weekStart, byName, type PickEvent, type StarEvent, type StarRow } from '../stars';
 import { sPlace } from '../sound';
 import { IconStar } from './icons';
 
@@ -10,6 +10,10 @@ interface Props {
   onClose: () => void;
   klass: Klass | undefined;
   events: StarEvent[];
+  /** خروج الأسماء في العجلة، لسجل الطالب */
+  picks?: PickEvent[];
+  /** حذف ضغطة بعينها من السجل */
+  onDrop?: (e: StarEvent) => void;
   onStar: (name: string, d: 1 | -1) => void;
   onUndo: () => void;
   onManage: () => void;
@@ -19,7 +23,7 @@ interface Props {
   req?: { n: number; a: 'podium' | 'next' };
 }
 
-type Tab = 'week' | 'now' | 'podium' | 'archive';
+type Tab = 'week' | 'now' | 'podium' | 'archive' | 'log';
 
 /** درجات المنصة من اليمين: الرابع، الثاني، الأول، الثالث، الخامس */
 
@@ -27,7 +31,7 @@ type Tab = 'week' | 'now' | 'podium' | 'archive';
  * نجم الأسبوع: بطاقة لكل طالب بنجومه وأغلاطه ومجموعه أمام الطلاب، وزرّا ⭐ و✖.
  * يوم الخميس تُفتح على منصة نجوم الأسبوع الذي انتهى أمس.
  */
-export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onManage, noKlass = 'اختر فصلًا في الصفحة الأولى من الدرس، فتظهر بطاقات طلابه هنا.', req }: Props) {
+export function StarsModal({ open, onClose, klass, events, picks = [], onDrop, onStar, onUndo, onManage, noKlass = 'اختر فصلًا في الصفحة الأولى من الدرس، فتظهر بطاقات طلابه هنا.', req }: Props) {
   const [tab, setTab] = useState<Tab>('week');
   /** آخر بطاقة تغيّرت، لوميضها: ذهبي للنجمة وأحمر للغلطة */
   const [flash, setFlash] = useState<{ name: string; d: 1 | -1; n: number } | null>(null);
@@ -90,6 +94,9 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
               </button>
               <button className={'btn' + (tab === 'archive' ? ' sel' : '')} onClick={() => setTab('archive')}>
                 سجل الأسابيع
+              </button>
+              <button className={'btn' + (tab === 'log' ? ' sel' : '')} onClick={() => setTab('log')}>
+                السجل اليومي
               </button>
               {tab === 'week' && (
                 <button className={'btn sshow' + (shown ? ' sel' : '')} aria-pressed={shown} onClick={() => setShown((x) => !x)}>
@@ -165,6 +172,8 @@ export function StarsModal({ open, onClose, klass, events, onStar, onUndo, onMan
           <Podium key={`now-${cur}`} rows={rows} label={weekLabel(cur)} next={nextReq} soFar />
         ) : tab === 'podium' ? (
           <Podium key={`last-${cur}`} rows={weekRows(events, klass.id, klass.students, weekStart(cur - 1))} label={weekLabel(weekStart(cur - 1))} next={nextReq} />
+        ) : tab === 'log' ? (
+          <StudentLog events={events} picks={picks} klass={klass} onDrop={onDrop} />
         ) : arch >= 0 && weeks[arch] != null ? (
           <>
             <div className="crow">
@@ -523,6 +532,195 @@ function History({ events, klass, weeks, onOpen }: { events: StarEvent[]; klass:
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const two = (n: number) => (n < 10 ? '0' : '') + n;
+const dayStart = (t: number) => {
+  const d = new Date(t);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+};
+/** «الأحد ١٥/١١» */
+const dayLabel = (t: number) => {
+  const d = new Date(t);
+  return `${DAYS[d.getDay()]} ${num(d.getDate())}/${num(d.getMonth() + 1)}`;
+};
+/** «٩:٠٥» */
+const clock = (t: number) => {
+  const d = new Date(t);
+  return `${num(d.getHours())}:${digits(two(d.getMinutes()))}`;
+};
+
+type LogRow = { t: number; k: string; s: string; l?: string; kind: 'pick' | 'star' | 'team' | 'mistake' | 'absent'; e?: StarEvent };
+const KIND: Record<LogRow['kind'], string> = {
+  pick: 'خرج اسمه في العجلة',
+  star: 'نجمة',
+  team: 'نجمة من توزيع الفرق',
+  mistake: 'غلطة',
+  absent: 'غائب',
+};
+/** «نجمة»، «نجمتان»، «٣ نجوم»، «١١ نجمة» وما يشبهها */
+const counted = (n: number, one: string, two: string, few: string) => (n === 1 ? one : n === 2 ? two : n <= 10 ? `${num(n)} ${few}` : `${num(n)} ${one}`);
+
+/**
+ * السجل اليومي: الأيام، ثم فصول اليوم، ثم طلاب الفصل وما حدث لكل واحد بوقته: خروج اسمه في العجلة،
+ * ونجومه (ومنها توزيع الفرق)، وأغلاطه، وغيابه. يكشف النجمة التي أُعطيت بالغلط فتُحذف وحدها،
+ * والطالب الذي خرج اسمه ولم يأخذ شيئًا.
+ */
+function StudentLog({ events, picks, onDrop }: { events: StarEvent[]; picks: PickEvent[]; klass: Klass; onDrop?: (e: StarEvent) => void }) {
+  const { roster } = useRoster();
+  const [day, setDay] = useState<number | null>(null);
+  const [kid, setKid] = useState<string | null>(null);
+  const [ask, setAsk] = useState<StarEvent | null>(null);
+  const classes = Object.entries(roster.grades).flatMap(([g, v]) => v.classes.map((c) => ({ ...c, grade: gradeName(g) })));
+  const rows: LogRow[] = [
+    ...events.map((e): LogRow => ({ t: e.t, k: e.k, s: e.s, l: e.l, e, kind: e.d === 0 ? 'absent' : e.d < 0 ? 'mistake' : e.w === 'team' ? 'team' : 'star' })),
+    ...picks.map((p): LogRow => ({ t: p.t, k: p.k, s: p.s, l: p.l, kind: 'pick' })),
+  ].sort((a, b) => a.t - b.t);
+  const days = [...new Set(rows.map((r) => dayStart(r.t)))].sort((a, b) => b - a);
+  const ofDay = day == null ? [] : rows.filter((r) => dayStart(r.t) === day);
+  const klassOf = (id: string) => classes.find((c) => c.id === id);
+  const kname = (id: string) => {
+    const c = klassOf(id);
+    return c ? `${c.name} — ${c.grade}` : 'فصل محذوف';
+  };
+  const sum = (list: LogRow[]) => {
+    const n = (k: LogRow['kind'][]) => list.filter((r) => k.includes(r.kind)).length;
+    const out: string[] = [];
+    const st = n(['star', 'team']);
+    if (st) out.push(counted(st, 'نجمة', 'نجمتان', 'نجوم'));
+    const mi = n(['mistake']);
+    if (mi) out.push(counted(mi, 'غلطة', 'غلطتان', 'أغلاط'));
+    const ab = n(['absent']);
+    if (ab) out.push(counted(ab, 'غائب', 'غائبان', 'غائبين'));
+    const pk = n(['pick']);
+    if (pk) out.push(`العجلة ${num(pk)}`);
+    return out.join('، ') || '—';
+  };
+
+  const crumbs = (
+    <div className="crow slcrumbs">
+      <button className={'btn' + (day == null ? ' sel' : '')} onClick={() => (setDay(null), setKid(null))}>
+        كل الأيام
+      </button>
+      {day != null && (
+        <>
+          <span>‹</span>
+          <button className={'btn' + (kid == null ? ' sel' : '')} onClick={() => setKid(null)}>
+            {dayLabel(day)}
+          </button>
+        </>
+      )}
+      {day != null && kid != null && (
+        <>
+          <span>‹</span>
+          <button className="btn sel">{kname(kid)}</button>
+        </>
+      )}
+    </div>
+  );
+
+  if (day == null)
+    return (
+      <div className="slog">
+        {crumbs}
+        {!days.length ? (
+          <p className="sempty">لا شيء في السجل بعد.</p>
+        ) : (
+          <div className="sllist">
+            {days.map((d) => {
+              const list = rows.filter((r) => dayStart(r.t) === d);
+              const ks = new Set(list.map((r) => r.k)).size;
+              return (
+                <button key={d} onClick={() => setDay(d)}>
+                  <b>{dayLabel(d)}</b>
+                  <span>{counted(ks, 'فصل', 'فصلان', 'فصول')}</span>
+                  <small>{sum(list)}</small>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+
+  if (kid == null) {
+    const ks = [...new Set(ofDay.map((r) => r.k))];
+    return (
+      <div className="slog">
+        {crumbs}
+        <div className="sllist">
+          {ks.map((k) => {
+            const list = ofDay.filter((r) => r.k === k);
+            const lessons = [...new Set(list.map((r) => r.l).filter(Boolean))];
+            return (
+              <button key={k} onClick={() => setKid(k)}>
+                <b>{kname(k)}</b>
+                <span>{lessons.join('، ') || '—'}</span>
+                <small>{sum(list)}</small>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  const list = ofDay.filter((r) => r.k === kid);
+  const names = [...new Set([...(klassOf(kid)?.students ?? []), ...list.map((r) => r.s)])].sort(byName);
+  const lessons = [...new Set(list.map((r) => r.l).filter(Boolean))];
+  return (
+    <div className="slog">
+      {crumbs}
+      {lessons.length > 0 && <p className="swk">الدرس: {lessons.join('، ')}</p>}
+      <div className="slrows">
+        <table>
+          <tbody>
+            {names.map((n) => {
+              const mine = list.filter((r) => r.s === n);
+              const absent = mine.some((r) => r.kind === 'absent');
+              const acts = mine.filter((r) => r.kind !== 'absent');
+              return (
+                <tr key={n} className={absent ? 'absent' : ''}>
+                  <td className="slwho">
+                    <bdi>{n}</bdi>
+                    {absent && <span className="slabs">غائب</span>}
+                  </td>
+                  <td className="slacts">
+                    {!acts.length ? (
+                      <span className="slnone">{absent ? '' : 'لا شيء'}</span>
+                    ) : (
+                      acts.map((r, i) => (
+                        <span key={i} className={'slact k-' + r.kind}>
+                          <small>{clock(r.t)}</small> {r.kind === 'star' || r.kind === 'team' ? <IconStar /> : r.kind === 'mistake' ? '✖' : '◎'} {KIND[r.kind]}
+                          {r.e && onDrop &&
+                            (ask === r.e ? (
+                              <>
+                                <button className="btn danger" onClick={() => (onDrop(r.e!), setAsk(null))}>
+                                  تأكيد الحذف
+                                </button>
+                                <button className="btn" onClick={() => setAsk(null)}>
+                                  إلغاء
+                                </button>
+                              </>
+                            ) : (
+                              <button className="btn sldel" aria-label="حذف" onClick={() => setAsk(r.e!)}>
+                                حذف
+                              </button>
+                            ))}
+                        </span>
+                      ))
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

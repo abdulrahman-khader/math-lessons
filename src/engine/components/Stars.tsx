@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { digits, num } from '../digits';
 import { gradeName, useRoster, type Klass } from '../classes';
-import { backup, isThursday, MAX_MISTAKES, lastEvent, pastWeeks, rankRows, restore, starCounts, tally, topRows, weekLabel, weekRows, weekStart, byName, type PickEvent, type StarEvent, type StarRow } from '../stars';
+import { backup, copyText, rankingText, isThursday, MAX_MISTAKES, lastEvent, pastWeeks, rankRows, restore, starCounts, tally, topRows, weekLabel, weekRows, weekStart, byName, type PickEvent, type StarEvent, type StarRow } from '../stars';
 import { sPlace } from '../sound';
 import { IconStar } from './icons';
 
@@ -39,6 +39,8 @@ export function StarsModal({ open, onClose, klass, events, picks = [], onDrop, o
   const [arch, setArch] = useState(-1);
   /** الأعداد مخفية عند كل فتح، ولا تظهر للطلاب إلا إذا أظهرها المعلم */
   const [shown, setShown] = useState(false);
+  /** «نُسخ» يظهر على زر النسخ لحظة */
+  const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (open) {
       setTab(isThursday() ? 'podium' : 'week');
@@ -72,6 +74,16 @@ export function StarsModal({ open, onClose, klass, events, picks = [], onDrop, o
   const rows = klass ? tally(events, klass.id, klass.students, cur) : [];
 
   const give = (name: string, d: 1 | -1) => onStar(name, d);
+  /** الأسبوع الذي تعرضه اللوحة الآن، لنسخ ترتيبه */
+  const copyWeek = !klass ? null : tab === 'week' || tab === 'now' ? cur : tab === 'podium' ? weekStart(cur - 1) : tab === 'archive' && arch >= 0 && weeks[arch] != null ? weeks[arch] : null;
+  const copyRanking = async () => {
+    if (!klass || copyWeek == null) return;
+    const rs = copyWeek === cur ? rows : weekRows(events, klass.id, klass.students, copyWeek);
+    if (await copyText(rankingText(rs, `نجوم الأسبوع — ${klass.name} — ${weekLabel(copyWeek)}`))) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="modal show" role="dialog" aria-label="نجم الأسبوع" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -104,6 +116,11 @@ export function StarsModal({ open, onClose, klass, events, picks = [], onDrop, o
                 </button>
               )}
             </>
+          )}
+          {copyWeek != null && (
+            <button className="btn" onClick={copyRanking}>
+              {copied ? 'نُسخ ✓' : 'نسخ الترتيب'}
+            </button>
           )}
           <button className="btn hide" onClick={onClose}>
             إغلاق

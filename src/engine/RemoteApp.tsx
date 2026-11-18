@@ -8,7 +8,7 @@ import { ToggleGroup } from '@base-ui/react/toggle-group';
 import { SECTION_NAMES } from './sections';
 import { clock, duration, num } from './digits';
 import { PRESETS, SCALE_MAX, SCALE_MIN, SCALE_STEP } from './components/Timer';
-import { MAX_MISTAKES, rankRows, teamStarCounts, topRows } from './stars';
+import { copyText, MAX_MISTAKES, rankingText, rankRows, teamStarCounts, topRows, weekLabel, weekStart } from './stars';
 import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState, type WheelMode } from './remote';
 import { IconNextRtl, IconPrevRtl, IconReset, IconStar, IconTimer } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
@@ -238,12 +238,23 @@ function Fold({ title, className, children }: { title: ReactNode; className?: st
 }
 
 /** ترتيب هذا الأسبوع حتى الآن: للمعلم على جواله فقط، لا يظهر على الشاشة */
-function RemoteRanking({ list }: { list: [string, number, number, number?, number?][] }) {
-  const top = topRows(rankRows(list.map(([name, stars, mistakes, absences]) => ({ name, stars, mistakes, absences }))));
+function RemoteRanking({ list, title }: { list: [string, number, number, number?, number?][]; title: string }) {
+  const rows = rankRows(list.map(([name, stars, mistakes, absences]) => ({ name, stars, mistakes, absences })));
+  const top = topRows(rows);
+  const [copied, setCopied] = useState(false);
   if (!top.length) return null;
+  const copy = async () => {
+    if (await copyText(rankingText(rows, title))) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
   return (
     <details className="rrank">
       <summary>الترتيب حتى الآن (لك وحدك)</summary>
+      <button className="r2btn" onClick={copy}>
+        {copied ? 'نُسخ ✓' : 'نسخ الترتيب بالأسماء'}
+      </button>
       <ol>
         {top.map((r) => (
           <li key={r.name}>
@@ -256,7 +267,7 @@ function RemoteRanking({ list }: { list: [string, number, number, number?, numbe
 }
 
 /** نجم الأسبوع: إظهار اللوحة على الشاشة، ونجمة أو غلطة لكل طالب؛ الضغط على الاسم يفتح حذف نجمة أو غلطة */
-function StarsSheet({ stars, send }: { stars: NonNullable<RemoteState['stars']>; send: (c: RemoteCmd) => void }) {
+function StarsSheet({ stars, klassName, send }: { stars: NonNullable<RemoteState['stars']>; klassName?: string; send: (c: RemoteCmd) => void }) {
   return (
     <>
       <div className="r2line">
@@ -275,7 +286,7 @@ function StarsSheet({ stars, send }: { stars: NonNullable<RemoteState['stars']>;
           </button>
         </div>
       </Fold>
-      <RemoteRanking list={stars.list} />
+      <RemoteRanking list={stars.list} title={['نجوم الأسبوع', klassName, weekLabel(weekStart(Date.now()))].filter(Boolean).join(' — ')} />
       {stars.list.map(([name, st, mi, ab = 0]) => (
         <Collapsible.Root key={name} className="rstar">
           <div className="r2srow">
@@ -1014,7 +1025,7 @@ export function RemoteApp({ channel }: { channel: string }) {
           <WheelSheet st={st} send={send} />
       </Sheet>
       <Sheet open={sheet === 'stars'} title="النجوم" onClose={() => setSheet(null)}>
-          {st.stars ? <StarsSheet stars={st.stars} send={send} /> : <p className="r2note">لا فصل مختار. أضف الفصل وأسماء طلابه من جهاز العرض، ثم اختره من صفحة الإعداد.</p>}
+          {st.stars ? <StarsSheet stars={st.stars} klassName={st.klasses?.find((k) => k.id === st.klass)?.name} send={send} /> : <p className="r2note">لا فصل مختار. أضف الفصل وأسماء طلابه من جهاز العرض، ثم اختره من صفحة الإعداد.</p>}
       </Sheet>
       <Sheet open={sheet === 'timer'} title="المؤقت" onClose={() => setSheet(null)}>
           <TimerSheet t={st.timer} at={stAt} send={send} fixed={st.v2} />

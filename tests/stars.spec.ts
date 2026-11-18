@@ -332,7 +332,7 @@ test('من أخذ ٣ أغلاط لا يدخل نجوم الأسبوع، والغ
   ]);
 });
 
-test('نسخ الترتيب: الأسماء بالترتيب ومجموع كل واحد، ومن لم يدخل في آخرها', async ({ page }) => {
+test('نسخ أسماء النجوم: اسم الفصل ثم نجوم الأسبوع بترتيبهم، بلا أرقام', async ({ page }) => {
   const errors: string[] = [];
   await openWithClass(page, errors);
   // الحافظة غير متاحة في صفحة الملف أثناء الفحص: نلتقط ما يُنسخ
@@ -345,13 +345,10 @@ test('نسخ الترتيب: الأسماء بالترتيب ومجموع كل �
   await box.getByRole('button', { name: 'هذا الأسبوع' }).click();
   for (let i = 0; i < 2; i++) await box.locator('[aria-label="نجمة لـخالد"]').click();
   await box.locator('[aria-label="نجمة لـمحمد"]').click();
-  await box.getByRole('button', { name: 'نسخ الترتيب' }).click();
+  await box.getByRole('button', { name: 'نسخ أسماء النجوم' }).click();
   await expect(box.getByRole('button', { name: 'نُسخ ✓' })).toBeVisible();
   const text = await page.evaluate(() => (window as unknown as { __copied: string }).__copied);
-  const lines = text.split('\n');
-  expect(lines[0]).toContain('نجوم الأسبوع — الفصل الأول');
-  expect(lines.slice(1, 3)).toEqual(['١. خالد — المجموع ٢', '٢. محمد — المجموع ١']);
-  expect(lines.slice(-2)).toEqual(['لم يدخلوا الترتيب:', '- أحمد']);
+  expect(text).toBe('الفصل الأول\nخالد\nمحمد');
   expect(errors).toEqual([]);
 });
 

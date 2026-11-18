@@ -79,7 +79,7 @@ export function StarsModal({ open, onClose, klass, events, picks = [], onDrop, o
   const copyRanking = async () => {
     if (!klass || copyWeek == null) return;
     const rs = copyWeek === cur ? rows : weekRows(events, klass.id, klass.students, copyWeek);
-    if (await copyText(rankingText(rs, `نجوم الأسبوع — ${klass.name} — ${weekLabel(copyWeek)}`))) {
+    if (await copyText(rankingText(rs, klass.name))) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -119,7 +119,7 @@ export function StarsModal({ open, onClose, klass, events, picks = [], onDrop, o
           )}
           {copyWeek != null && (
             <button className="btn" onClick={copyRanking}>
-              {copied ? 'نُسخ ✓' : 'نسخ الترتيب'}
+              {copied ? 'نُسخ ✓' : 'نسخ أسماء النجوم'}
             </button>
           )}
           <button className="btn hide" onClick={onClose}>

@@ -8,7 +8,7 @@ import { ToggleGroup } from '@base-ui/react/toggle-group';
 import { SECTION_NAMES } from './sections';
 import { clock, duration, num } from './digits';
 import { PRESETS, SCALE_MAX, SCALE_MIN, SCALE_STEP } from './components/Timer';
-import { copyText, MAX_MISTAKES, rankingText, rankRows, teamStarCounts, topRows, weekLabel, weekStart } from './stars';
+import { copyText, MAX_MISTAKES, rankingText, rankRows, teamStarCounts, topRows } from './stars';
 import { BUILD, remoteLink, type LinkStatus, type RemoteCmd, type RemoteState, type WheelMode } from './remote';
 import { IconNextRtl, IconPrevRtl, IconReset, IconStar, IconTimer } from './components/icons';
 import { RemoteChartCard } from './components/RemoteChartCard';
@@ -253,7 +253,7 @@ function RemoteRanking({ list, title }: { list: [string, number, number, number?
     <details className="rrank">
       <summary>الترتيب حتى الآن (لك وحدك)</summary>
       <button className="r2btn" onClick={copy}>
-        {copied ? 'نُسخ ✓' : 'نسخ الترتيب بالأسماء'}
+        {copied ? 'نُسخ ✓' : 'نسخ أسماء النجوم'}
       </button>
       <ol>
         {top.map((r) => (
@@ -286,7 +286,7 @@ function StarsSheet({ stars, klassName, send }: { stars: NonNullable<RemoteState
           </button>
         </div>
       </Fold>
-      <RemoteRanking list={stars.list} title={['نجوم الأسبوع', klassName, weekLabel(weekStart(Date.now()))].filter(Boolean).join(' — ')} />
+      <RemoteRanking list={stars.list} title={klassName ?? ''} />
       {stars.list.map(([name, st, mi, ab = 0]) => (
         <Collapsible.Root key={name} className="rstar">
           <div className="r2srow">

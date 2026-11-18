@@ -333,17 +333,9 @@ export function lastEvent(events: StarEvent[], k: string, now = Date.now()): Sta
   return undefined;
 }
 
-/**
- * ترتيب الأسبوع نصًّا للنسخ (للصقه في رسالة): من يدخل نجوم الأسبوع مرتّبين برتبهم،
- * ثم البقية بلا رتبة (مجموعهم صفر، أو أخذوا ٣ أغلاط).
- */
-export function rankingText(rows: StarRow[], title: string): string {
-  const ok = rankRows(rows.filter((r) => r.total > 0 && !r.barred)).sort((a, b) => a.rank - b.rank || byName(a.name, b.name));
-  const inOk = new Set(ok.map((r) => r.name));
-  const rest = rows.filter((r) => !inOk.has(r.name)).sort((a, b) => b.total - a.total || a.mistakes - b.mistakes || byName(a.name, b.name));
-  const lines = [title, ...ok.map((r) => `${digits(String(r.rank))}. ${r.name} — المجموع ${digits(String(r.total))}`)];
-  if (rest.length) lines.push('', 'لم يدخلوا الترتيب:', ...rest.map((r) => `- ${r.name}${r.barred ? ` (${digits(String(MAX_MISTAKES))} أغلاط)` : ''}`));
-  return lines.join('\n');
+/** نجوم الأسبوع نصًّا للنسخ (للصقه في رسالة): اسم الفصل، ثم أسماء نجوم الأسبوع بترتيبهم، بلا أرقام */
+export function rankingText(rows: StarRow[], klassName: string): string {
+  return [klassName, ...topRows(rows).map((r) => r.name)].join('\n');
 }
 
 /** ينسخ نصًّا إلى الحافظة؛ وإن لم تُتح الحافظة (صفحة من ملف مثلًا) يُنسخ بالطريقة القديمة */
